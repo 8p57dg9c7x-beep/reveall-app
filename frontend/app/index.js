@@ -1,120 +1,142 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
-import GradientBackground from '../components/GradientBackground';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, GLOW, SIZES } from '../constants/theme';
 
 export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <GradientBackground>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          {/* App Icon */}
-          <View style={styles.iconContainer}>
-            <Ionicons name="film" size={80} color="#FFFFFF" />
-          </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>CINESCAN</Text>
+        <Text style={styles.tagline}>AI-Powered Movie Recognition</Text>
+      </View>
 
-          {/* Title */}
-          <Text style={styles.title}>CINESCAN</Text>
-          
-          {/* Tagline */}
-          <Text style={styles.tagline}>
-            Identify Any Movie, Scene, or Anime Instantly
-          </Text>
+      {/* Main Content */}
+      <View style={styles.content}>
+        {/* Large Central SCAN Button */}
+        <TouchableOpacity 
+          style={styles.scanButtonContainer}
+          onPress={() => router.push('/scan')}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={[COLORS.neonBlue, COLORS.neonBlueDark]}
+            style={styles.scanButton}
+          >
+            <Ionicons name="scan" size={48} color={COLORS.textPrimary} />
+            <Text style={styles.scanButtonText}>SCAN</Text>
+          </LinearGradient>
+        </TouchableOpacity>
 
-          {/* Primary Button - Identify */}
+        {/* Recognition Options */}
+        <Text style={styles.optionsTitle}>Recognition Methods</Text>
+        <View style={styles.optionsContainer}>
           <TouchableOpacity 
-            style={styles.primaryButton}
+            style={styles.optionButton}
             onPress={() => router.push('/identify')}
           >
-            <Ionicons name="search" size={24} color="#667eea" style={styles.buttonIcon} />
-            <Text style={styles.primaryButtonText}>Identify</Text>
+            <Ionicons name="camera" size={28} color={COLORS.neonBlue} />
+            <Text style={styles.optionText}>Image</Text>
           </TouchableOpacity>
 
-          {/* Secondary Button - Watchlist */}
           <TouchableOpacity 
-            style={styles.secondaryButton}
-            onPress={() => router.push('/watchlist')}
+            style={styles.optionButton}
+            onPress={() => router.push('/identify')}
           >
-            <Ionicons name="star" size={24} color="#FFFFFF" style={styles.buttonIcon} />
-            <Text style={styles.secondaryButtonText}>My Watchlist</Text>
+            <Ionicons name="mic" size={28} color={COLORS.neonBlue} />
+            <Text style={styles.optionText}>Audio</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.optionButton}
+            onPress={() => router.push('/identify')}
+          >
+            <Ionicons name="videocam" size={28} color={COLORS.neonBlue} />
+            <Text style={styles.optionText}>Video</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </GradientBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    paddingTop: 60,
+    paddingHorizontal: SIZES.spacingLarge,
     alignItems: 'center',
-    paddingHorizontal: 24,
   },
-  content: {
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: 400,
-  },
-  iconContainer: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 42,
+  logo: {
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    letterSpacing: 2,
-    marginBottom: 16,
+    color: COLORS.textPrimary,
+    letterSpacing: 4,
+    marginBottom: 8,
   },
   tagline: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.95)',
-    textAlign: 'center',
-    marginBottom: 48,
-    lineHeight: 24,
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    letterSpacing: 1,
   },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  content: {
+    flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-    borderRadius: 14,
-    width: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    marginBottom: 16,
+    alignItems: 'center',
+    paddingHorizontal: SIZES.spacingLarge,
   },
-  primaryButtonText: {
-    color: '#667eea',
-    fontSize: 20,
+  scanButtonContainer: {
+    marginBottom: 60,
+  },
+  scanButton: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...GLOW.neonBlue,
+  },
+  scanButtonText: {
+    fontSize: 24,
     fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginTop: 12,
+    letterSpacing: 2,
   },
-  secondaryButton: {
+  optionsTitle: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    marginBottom: 20,
+    letterSpacing: 1,
+  },
+  optionsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 14,
+    justifyContent: 'space-around',
     width: '100%',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
-  secondaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
+  optionButton: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: 1,
+    borderColor: COLORS.metallicSilver + '30',
+    width: 100,
+  },
+  optionText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: COLORS.textPrimary,
     fontWeight: '600',
-  },
-  buttonIcon: {
-    marginRight: 8,
   },
 });
