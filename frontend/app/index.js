@@ -26,31 +26,40 @@ export default function HomeScreen() {
 
   const handleAudio = async () => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Microphone access needed');
-        return;
-      }
+      console.log('Audio button clicked!');
+      Alert.alert('Audio Recognition', 'Starting audio recognition...', [
+        {
+          text: 'Start',
+          onPress: async () => {
+            const { status } = await Audio.requestPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission Required', 'Microphone access needed');
+              return;
+            }
 
-      setIsListening(true);
-      setStatusText('Listening...');
+            setIsListening(true);
+            setStatusText('Listening...');
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
+            await Audio.setAudioModeAsync({
+              allowsRecordingIOS: true,
+              playsInSilentModeIOS: true,
+            });
 
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(newRecording);
+            const { recording: newRecording } = await Audio.Recording.createAsync(
+              Audio.RecordingOptionsPresets.HIGH_QUALITY
+            );
+            setRecording(newRecording);
 
-      // Auto stop after 10 seconds
-      setTimeout(async () => {
-        if (newRecording) {
-          await stopAndIdentifyAudio(newRecording);
-        }
-      }, 10000);
+            // Auto stop after 10 seconds
+            setTimeout(async () => {
+              if (newRecording) {
+                await stopAndIdentifyAudio(newRecording);
+              }
+            }, 10000);
+          }
+        },
+        { text: 'Cancel', style: 'cancel' }
+      ]);
     } catch (error) {
       console.error('Audio error:', error);
       Alert.alert('Error', 'Failed to start recording');
