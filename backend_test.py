@@ -28,15 +28,15 @@ def test_recognize_image():
     """Test POST /api/recognize-image endpoint"""
     print("\n🖼️ Testing image recognition endpoint...")
     
-    # Create a mock image file for testing
-    test_data = {
-        "image": "test_movie_poster_data"  # This would normally be base64 encoded image
+    # Create a mock image file for testing (based on error message, it expects 'file' field)
+    files = {
+        'file': ('test_poster.jpg', b'fake_image_data', 'image/jpeg')
     }
     
     try:
         response = requests.post(
             f"{BACKEND_URL}/api/recognize-image", 
-            json=test_data,
+            files=files,
             timeout=30
         )
         print(f"Status Code: {response.status_code}")
