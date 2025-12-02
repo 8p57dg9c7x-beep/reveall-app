@@ -1,21 +1,42 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "CINESCAN",
+    "slug": "cinescan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
+    "scheme": "cinescan",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cinescan.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "CINESCAN needs camera access to identify movies from posters and scenes",
+        "NSMicrophoneUsageDescription": "CINESCAN needs microphone access to record movie dialogue for identification",
+        "NSPhotoLibraryUsageDescription": "CINESCAN needs photo access to identify movies from your images"
+      }
     },
     "android": {
+      "package": "com.cinescan.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000"
+        "backgroundColor": "#667eea"
       },
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_AUDIO"
+      ],
       "edgeToEdgeEnabled": true
     },
     "web": {
@@ -31,7 +52,20 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000"
+          "backgroundColor": "#667eea"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CINESCAN needs photo access to identify movies from your images",
+          "cameraPermission": "CINESCAN needs camera access to identify movies from posters and scenes"
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "CINESCAN needs microphone access to record movie dialogue for identification"
         }
       ]
     ],
