@@ -230,13 +230,6 @@ export default function HomeScreen() {
           disabled={isListening || isScanning}
           activeOpacity={0.7}
         >
-          <View style={styles.iconContainer}>
-            <Ionicons 
-              name={isListening ? "radio-button-on" : "mic"} 
-              size={SIZES.iconSize} 
-              color={COLORS.gold} 
-            />
-          </View>
           <Text style={styles.buttonText}>AUDIO</Text>
         </TouchableOpacity>
 
@@ -246,13 +239,6 @@ export default function HomeScreen() {
           disabled={isListening || isScanning}
           activeOpacity={0.7}
         >
-          <View style={styles.iconContainer}>
-            <Ionicons 
-              name="videocam" 
-              size={SIZES.iconSize} 
-              color={COLORS.gold} 
-            />
-          </View>
           <Text style={styles.buttonText}>VIDEO</Text>
         </TouchableOpacity>
 
@@ -262,13 +248,6 @@ export default function HomeScreen() {
           disabled={isListening || isScanning}
           activeOpacity={0.7}
         >
-          <View style={styles.iconContainer}>
-            <Ionicons 
-              name="image" 
-              size={SIZES.iconSize} 
-              color={COLORS.gold} 
-            />
-          </View>
           <Text style={styles.buttonText}>IMAGE</Text>
         </TouchableOpacity>
       </View>
