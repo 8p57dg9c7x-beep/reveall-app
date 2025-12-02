@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SIZES } from '../constants/theme';
 
 export default function MovieCard({ movie, onPress, onRemove }) {
   const posterUrl = movie.poster_path
@@ -8,79 +9,98 @@ export default function MovieCard({ movie, onPress, onRemove }) {
     : null;
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      {posterUrl ? (
-        <Image source={{ uri: posterUrl }} style={styles.poster} />
-      ) : (
-        <View style={[styles.poster, styles.noPoster]}>
-          <Ionicons name="film-outline" size={40} color="#999" />
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+      <View style={styles.posterContainer}>
+        {posterUrl ? (
+          <Image source={{ uri: posterUrl }} style={styles.poster} />
+        ) : (
+          <View style={[styles.poster, styles.noPoster]}>
+            <Ionicons name="film-outline" size={40} color={COLORS.textSecondary} />
+          </View>
+        )}
+        {onRemove && (
+          <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
+            <Ionicons name="close" size={20} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+        )}
+      </View>
+      
+      <View style={styles.infoContainer}>
+        <Text style={styles.title} numberOfLines={2}>{movie.title}</Text>
+        
+        <View style={styles.metaRow}>
+          {movie.release_date && (
+            <Text style={styles.year}>{movie.release_date.substring(0, 4)}</Text>
+          )}
+          {movie.vote_average && (
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={12} color={COLORS.neonBlue} />
+              <Text style={styles.rating}> {movie.vote_average.toFixed(1)}</Text>
+            </View>
+          )}
         </View>
-      )}
-      <Text style={styles.title} numberOfLines={2}>{movie.title}</Text>
-      <Text style={styles.year}>
-        {movie.release_date?.substring(0, 4) || 'N/A'}
-      </Text>
-      {movie.vote_average ? (
-        <Text style={styles.rating}>⭐ {movie.vote_average.toFixed(1)}/10</Text>
-      ) : null}
-      {onRemove && (
-        <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
-          <Ionicons name="trash-outline" size={20} color="#ff4444" />
-        </TouchableOpacity>
-      )}
+      </View>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
-    margin: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 12,
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
+    marginBottom: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+  },
+  posterContainer: {
+    position: 'relative',
   },
   poster: {
     width: '100%',
     height: 200,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.background,
   },
   noPoster: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 8,
-    marginHorizontal: 8,
-  },
-  year: {
-    fontSize: 14,
-    color: '#666',
-    marginHorizontal: 8,
-    marginTop: 4,
-  },
-  rating: {
-    fontSize: 14,
-    color: '#667eea',
-    fontWeight: '600',
-    marginHorizontal: 8,
-    marginTop: 4,
-    marginBottom: 8,
-  },
   removeButton: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    padding: 6,
+    backgroundColor: COLORS.error,
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoContainer: {
+    padding: 12,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  year: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rating: {
+    fontSize: 13,
+    color: COLORS.textPrimary,
+    fontWeight: '600',
   },
 });

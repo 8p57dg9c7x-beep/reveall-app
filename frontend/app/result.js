@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, StatusBar } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import GradientBackground from '../components/GradientBackground';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, GLOW, SIZES } from '../constants/theme';
 import { addToWatchlist, isInWatchlist } from '../services/storage';
 
 export default function ResultScreen() {
@@ -38,11 +39,10 @@ export default function ResultScreen() {
 
   if (!movie) {
     return (
-      <GradientBackground>
-        <View style={styles.container}>
-          <Text style={styles.errorText}>No movie data available</Text>
-        </View>
-      </GradientBackground>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <Text style={styles.errorText}>No movie data available</Text>
+      </View>
     );
   }
 
@@ -50,46 +50,68 @@ export default function ResultScreen() {
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : null;
 
-  const backdropUrl = movie.backdrop_path
-    ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
-    : null;
+  const matchPercentage = movie.vote_average ? Math.round((movie.vote_average / 10) * 100) : null;
 
   return (
-    <GradientBackground>
-      <ScrollView style={styles.scrollView}>
-        {/* Back Button */}
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header with Back Button */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Match Found</Text>
+        </View>
 
-        {/* Backdrop Image */}
-        {backdropUrl && (
-          <Image source={{ uri: backdropUrl }} style={styles.backdrop} />
+        {/* Match Percentage Badge */}
+        {matchPercentage && (
+          <View style={styles.matchBadge}>
+            <LinearGradient
+              colors={[COLORS.neonBlue, COLORS.neonBlueDark]}
+              style={styles.matchBadgeGradient}
+            >
+              <Text style={styles.matchPercentage}>{matchPercentage}%</Text>
+              <Text style={styles.matchLabel}>MATCH</Text>
+            </LinearGradient>
+          </View>
         )}
 
-        {/* Content */}
-        <View style={styles.content}>
-          {/* Poster */}
-          {posterUrl && (
+        {/* Movie Poster */}
+        <View style={styles.posterContainer}>
+          {posterUrl ? (
             <Image source={{ uri: posterUrl }} style={styles.poster} />
+          ) : (
+            <View style={[styles.poster, styles.noPoster]}>
+              <Ionicons name="film-outline" size={80} color={COLORS.textSecondary} />
+            </View>
           )}
+        </View>
 
+        {/* Movie Info */}
+        <View style={styles.infoContainer}>
           {/* Title */}
           <Text style={styles.title}>{movie.title}</Text>
 
-          {/* Year & Rating */}
+          {/* Meta Info */}
           <View style={styles.metaContainer}>
             {movie.release_date && (
-              <Text style={styles.year}>{movie.release_date.substring(0, 4)}</Text>
+              <View style={styles.metaBadge}>
+                <Text style={styles.metaText}>{movie.release_date.substring(0, 4)}</Text>
+              </View>
             )}
             {movie.vote_average && (
-              <Text style={styles.rating}>⭐ {movie.vote_average.toFixed(1)}/10</Text>
+              <View style={styles.metaBadge}>
+                <Ionicons name="star" size={14} color={COLORS.neonBlue} />
+                <Text style={styles.metaText}> {movie.vote_average.toFixed(1)}/10</Text>
+              </View>
             )}
             {movie.runtime && (
-              <Text style={styles.runtime}>{movie.runtime} min</Text>
+              <View style={styles.metaBadge}>
+                <Ionicons name="time-outline" size={14} color={COLORS.textSecondary} />
+                <Text style={styles.metaText}> {movie.runtime} min</Text>
+              </View>
             )}
           </View>
 
@@ -107,24 +129,29 @@ export default function ResultScreen() {
           {/* Overview */}
           {movie.overview && (
             <View style={styles.overviewContainer}>
-              <Text style={styles.overviewTitle}>Overview</Text>
+              <Text style={styles.sectionTitle}>Overview</Text>
               <Text style={styles.overview}>{movie.overview}</Text>
             </View>
           )}
 
-          {/* Buttons */}
+          {/* Action Buttons */}
           <View style={styles.buttonsContainer}>
             {!inWatchlist ? (
               <TouchableOpacity 
                 style={styles.primaryButton}
                 onPress={handleAddToWatchlist}
               >
-                <Ionicons name="star" size={24} color="#667eea" style={styles.buttonIcon} />
-                <Text style={styles.primaryButtonText}>Add to Watchlist</Text>
+                <LinearGradient
+                  colors={[COLORS.neonBlue, COLORS.neonBlueDark]}
+                  style={styles.buttonGradient}
+                >
+                  <Ionicons name="bookmark" size={20} color={COLORS.textPrimary} />
+                  <Text style={styles.primaryButtonText}>Add to Watchlist</Text>
+                </LinearGradient>
               </TouchableOpacity>
             ) : (
               <View style={styles.inWatchlistContainer}>
-                <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />
                 <Text style={styles.inWatchlistText}>In Watchlist</Text>
               </View>
             )}
@@ -133,183 +160,203 @@ export default function ResultScreen() {
               style={styles.secondaryButton}
               onPress={() => router.push('/identify')}
             >
-              <Ionicons name="search" size={24} color="#FFFFFF" style={styles.buttonIcon} />
-              <Text style={styles.secondaryButtonText}>Search Again</Text>
+              <Ionicons name="scan" size={20} color={COLORS.textPrimary} />
+              <Text style={styles.secondaryButtonText}>Scan Again</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </GradientBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   scrollView: {
     flex: 1,
   },
-  container: {
-    flex: 1,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 50,
+    paddingHorizontal: SIZES.spacingLarge,
+    paddingBottom: 20,
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+  },
+  matchBadge: {
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  matchBadgeGradient: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  matchPercentage: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+  },
+  matchLabel: {
+    fontSize: 10,
+    color: COLORS.textPrimary,
+    letterSpacing: 2,
+  },
+  posterContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  poster: {
+    width: 250,
+    height: 375,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: 2,
+    borderColor: COLORS.metallicSilver + '50',
+    ...GLOW.metallicSilver,
+  },
+  noPoster: {
+    backgroundColor: COLORS.cardBackground,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 24,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  backdrop: {
-    width: '100%',
-    height: 250,
-    opacity: 0.4,
-  },
-  content: {
-    padding: 24,
-    alignItems: 'center',
-    marginTop: -50,
-  },
-  poster: {
-    width: 200,
-    height: 300,
-    borderRadius: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 10,
-    marginBottom: 24,
+  infoContainer: {
+    paddingHorizontal: SIZES.spacingLarge,
+    paddingBottom: 30,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: 16,
   },
   metaContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    alignItems: 'center',
+    marginBottom: 20,
     flexWrap: 'wrap',
   },
-  year: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginHorizontal: 8,
+  metaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginHorizontal: 4,
+    marginVertical: 4,
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
   },
-  rating: {
-    fontSize: 16,
-    color: '#FFFFFF',
+  metaText: {
+    fontSize: 13,
+    color: COLORS.textPrimary,
     fontWeight: '600',
-    marginHorizontal: 8,
-  },
-  runtime: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginHorizontal: 8,
   },
   genresContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 30,
   },
   genreTag: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    margin: 4,
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: COLORS.neonBlue + '50',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    margin: 4,
   },
   genreText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 12,
+    color: COLORS.neonBlue,
+    fontWeight: '600',
   },
   overviewContainer: {
-    marginBottom: 32,
+    marginBottom: 30,
   },
-  overviewTitle: {
-    fontSize: 20,
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     marginBottom: 12,
   },
   overview: {
-    fontSize: 16,
-    color: '#FFFFFF',
+    fontSize: 15,
+    color: COLORS.textSecondary,
     lineHeight: 24,
-    textAlign: 'justify',
   },
   buttonsContainer: {
-    width: '100%',
-    maxWidth: 400,
+    gap: 12,
   },
   primaryButton: {
+    borderRadius: SIZES.borderRadius,
+    overflow: 'hidden',
+    ...GLOW.neonBlue,
+  },
+  buttonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
     paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 14,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    paddingHorizontal: 24,
   },
   primaryButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#667eea',
+    color: COLORS.textPrimary,
+    marginLeft: 8,
   },
   secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: 1,
+    borderColor: COLORS.metallicSilver + '50',
     paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    paddingHorizontal: 24,
   },
   secondaryButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  buttonIcon: {
-    marginRight: 8,
+    color: COLORS.textPrimary,
+    marginLeft: 8,
   },
   inWatchlistContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(76, 175, 80, 0.2)',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 14,
-    marginBottom: 16,
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: SIZES.borderRadius,
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: COLORS.success,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   inWatchlistText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: COLORS.success,
     marginLeft: 8,
   },
   errorText: {
-    fontSize: 18,
-    color: '#FFFFFF',
+    fontSize: 16,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
   },
 });
