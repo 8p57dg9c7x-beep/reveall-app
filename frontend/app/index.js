@@ -310,18 +310,18 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.borderRadius,
     borderWidth: 2,
     borderColor: COLORS.gold,
+    backgroundColor: 'rgba(255, 215, 0, 0.05)',
   },
   buttonActive: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
     ...GLOW.gold,
   },
-  iconContainer: {
-    marginBottom: 12,
-  },
   buttonText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: 'bold',
     color: COLORS.gold,
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    textAlign: 'center',
   },
   statusContainer: {
     position: 'absolute',
