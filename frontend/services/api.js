@@ -50,24 +50,37 @@ export const recognizeImage = async (imageUri) => {
 
 export const recognizeAudio = async (audioUri) => {
   try {
+    console.log('Recognizing audio from URI:', audioUri);
+    
     // Read audio file as base64
     const base64 = await FileSystem.readAsStringAsync(audioUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
 
+    console.log('Audio base64 length:', base64.length);
+    console.log('API URL:', `${API_BASE_URL}/api/recognize-audio`);
+
     const response = await api.post('/api/recognize-audio', {
       audio_base64: `data:audio/m4a;base64,${base64}`,
     });
 
+    console.log('Audio recognition response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Audio recognition error:', error);
-    throw error;
+    console.error('Error response:', error.response?.data);
+    return {
+      success: false,
+      error: error.response?.data?.error || error.message || 'Failed to process audio'
+    };
   }
 };
 
 export const recognizeVideo = async (videoUri) => {
   try {
+    console.log('Recognizing video from URI:', videoUri);
+    console.log('API URL:', `${API_BASE_URL}/api/recognize-video`);
+    
     const formData = new FormData();
     formData.append('file', {
       uri: videoUri,
@@ -86,10 +99,15 @@ export const recognizeVideo = async (videoUri) => {
       }
     );
 
+    console.log('Video recognition response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Video recognition error:', error);
-    throw error;
+    console.error('Error response:', error.response?.data);
+    return {
+      success: false,
+      error: error.response?.data?.error || error.message || 'Failed to process video'
+    };
   }
 };
 
