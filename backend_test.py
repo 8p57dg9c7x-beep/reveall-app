@@ -76,9 +76,9 @@ def test_recognize_audio():
     """Test POST /api/recognize-audio endpoint"""
     print("\n🎵 Testing audio recognition endpoint...")
     
-    # Create mock audio data for testing
+    # Create mock audio data for testing (based on error message, it expects 'audio_base64' field)
     test_data = {
-        "audio": "test_audio_data"  # This would normally be base64 encoded audio
+        "audio_base64": "dGVzdF9hdWRpb19kYXRh"  # base64 encoded "test_audio_data"
     }
     
     try:
