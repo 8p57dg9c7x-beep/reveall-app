@@ -65,11 +65,14 @@ export default function HomeScreen() {
       setIsListening(false);
       setIsProcessing(true);
       
+      // Stop and get URI
       await recordingToStop.stopAndUnloadAsync();
       const uri = recordingToStop.getURI();
+      
+      // Clear recording state immediately to prevent double-unload
       setRecording(null);
 
-      console.log('Calling audio recognition API...');
+      console.log('Calling audio recognition API with URI:', uri);
       const response = await recognizeAudio(uri);
       console.log('Audio recognition response:', response);
       
@@ -87,6 +90,7 @@ export default function HomeScreen() {
       console.error('Recognition error:', error);
       setStatusText('Failed to identify movie');
       setTimeout(() => setStatusText(''), 3000);
+      setRecording(null); // Clear recording on error too
     } finally {
       setIsProcessing(false);
     }
