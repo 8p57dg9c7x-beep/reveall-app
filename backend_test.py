@@ -124,15 +124,15 @@ def test_recognize_video():
     """Test POST /api/recognize-video endpoint"""
     print("\n🎬 Testing video recognition endpoint...")
     
-    # Create mock video data for testing
-    test_data = {
-        "video": "test_video_data"  # This would normally be base64 encoded video
+    # Create mock video file for testing (based on error message, it expects 'file' field)
+    files = {
+        'file': ('test_video.mp4', b'fake_video_data', 'video/mp4')
     }
     
     try:
         response = requests.post(
             f"{BACKEND_URL}/api/recognize-video", 
-            json=test_data,
+            files=files,
             timeout=30
         )
         print(f"Status Code: {response.status_code}")
