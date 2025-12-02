@@ -1,7 +1,9 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://cinescan-app-1.preview.emergentagent.com';
+const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://cinescan-backend-1.onrender.com';
+
+console.log('API_BASE_URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -13,6 +15,9 @@ const api = axios.create({
 
 export const recognizeImage = async (imageUri) => {
   try {
+    console.log('Recognizing image from URI:', imageUri);
+    console.log('API URL:', `${API_BASE_URL}/api/recognize-image`);
+    
     const formData = new FormData();
     formData.append('file', {
       uri: imageUri,
@@ -31,10 +36,15 @@ export const recognizeImage = async (imageUri) => {
       }
     );
 
+    console.log('Image recognition response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Image recognition error:', error);
-    throw error;
+    console.error('Error response:', error.response?.data);
+    return {
+      success: false,
+      error: error.response?.data?.error || error.message || 'Failed to process image'
+    };
   }
 };
 
