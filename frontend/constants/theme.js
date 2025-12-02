@@ -1,8 +1,9 @@
-// CINESCAN - Gold & Black Theme
+// CINESCAN - Blue & Black Theme
 export const COLORS = {
   background: '#000000',
-  gold: '#FFD700',
-  goldDark: '#DAA520',
+  blue: '#1E90FF',
+  blueDark: '#0066CC',
+  blueLight: '#4169E1',
   textPrimary: '#FFFFFF',
   textSecondary: '#999999',
   cardBackground: '#1a1a1a',
@@ -11,8 +12,8 @@ export const COLORS = {
 };
 
 export const GLOW = {
-  gold: {
-    shadowColor: '#FFD700',
+  blue: {
+    shadowColor: '#1E90FF',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,

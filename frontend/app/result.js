@@ -14,6 +14,7 @@ export default function ResultScreen() {
   useEffect(() => {
     if (params.movieData) {
       const movieData = JSON.parse(params.movieData);
+      console.log('Movie data:', movieData);
       setMovie(movieData);
       checkWatchlist(movieData.id);
     }
@@ -40,6 +41,9 @@ export default function ResultScreen() {
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
         <Text style={styles.errorText}>No movie data available</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backButtonText}>Go Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -78,7 +82,7 @@ export default function ResultScreen() {
         {/* Rating */}
         {movie.vote_average && (
           <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={20} color={COLORS.gold} />
+            <Ionicons name="star" size={20} color={COLORS.blue} />
             <Text style={styles.rating}> {movie.vote_average.toFixed(1)}/10</Text>
           </View>
         )}
@@ -104,7 +108,7 @@ export default function ResultScreen() {
         {/* Action Buttons */}
         <View style={styles.buttonsContainer}>
           <TouchableOpacity 
-            style={styles.detailsButton}
+            style={[styles.detailsButton, inWatchlist && styles.detailsButtonDisabled]}
             onPress={handleAddToWatchlist}
             disabled={inWatchlist}
           >
@@ -122,6 +126,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeButton: {
     position: 'absolute',
@@ -150,7 +156,7 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: SIZES.borderRadius,
     borderWidth: 2,
-    borderColor: COLORS.gold,
+    borderColor: COLORS.blue,
   },
   noPoster: {
     backgroundColor: COLORS.cardBackground,
@@ -187,7 +193,7 @@ const styles = StyleSheet.create({
   },
   genreTag: {
     borderWidth: 1,
-    borderColor: COLORS.gold,
+    borderColor: COLORS.blue,
     borderRadius: 16,
     paddingVertical: 6,
     paddingHorizontal: 14,
@@ -195,7 +201,7 @@ const styles = StyleSheet.create({
   },
   genreText: {
     fontSize: 12,
-    color: COLORS.gold,
+    color: COLORS.blue,
     fontWeight: '600',
   },
   overviewContainer: {
@@ -211,20 +217,36 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   detailsButton: {
-    backgroundColor: COLORS.gold,
+    backgroundColor: COLORS.blue,
     paddingVertical: 16,
     borderRadius: SIZES.borderRadius,
     alignItems: 'center',
-    ...GLOW.gold,
+    ...GLOW.blue,
+  },
+  detailsButtonDisabled: {
+    backgroundColor: COLORS.textSecondary,
+    opacity: 0.5,
   },
   detailsButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: COLORS.background,
+    color: COLORS.textPrimary,
   },
   errorText: {
     fontSize: 16,
     color: COLORS.textPrimary,
     textAlign: 'center',
+    marginBottom: 20,
+  },
+  backButton: {
+    backgroundColor: COLORS.blue,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: SIZES.borderRadius,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
   },
 });

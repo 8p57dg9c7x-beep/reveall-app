@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av';
-import { Ionicons } from '@expo/vector-icons';
 import { COLORS, GLOW, SIZES } from '../constants/theme';
 import { recognizeImage, recognizeAudio, recognizeVideo } from '../services/api';
 
@@ -12,9 +11,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const [recording, setRecording] = useState(null);
   const [isListening, setIsListening] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
-  const [identifiedMovie, setIdentifiedMovie] = useState(null);
 
   useEffect(() => {
     return () => {
@@ -26,189 +24,150 @@ export default function HomeScreen() {
 
   const handleAudio = async () => {
     try {
-      console.log('Audio button clicked!');
-      Alert.alert('Audio Recognition', 'Starting audio recognition...', [
-        {
-          text: 'Start',
-          onPress: async () => {
-            const { status } = await Audio.requestPermissionsAsync();
-            if (status !== 'granted') {
-              Alert.alert('Permission Required', 'Microphone access needed');
-              return;
-            }
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please enable microphone access');
+        return;
+      }
 
-            setIsListening(true);
-            setStatusText('Listening...');
+      setIsListening(true);
+      setStatusText('Listening...');
 
-            await Audio.setAudioModeAsync({
-              allowsRecordingIOS: true,
-              playsInSilentModeIOS: true,
-            });
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
 
-            const { recording: newRecording } = await Audio.Recording.createAsync(
-              Audio.RecordingOptionsPresets.HIGH_QUALITY
-            );
-            setRecording(newRecording);
+      const { recording: newRecording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(newRecording);
 
-            // Auto stop after 10 seconds
-            setTimeout(async () => {
-              if (newRecording) {
-                await stopAndIdentifyAudio(newRecording);
-              }
-            }, 10000);
-          }
-        },
-        { text: 'Cancel', style: 'cancel' }
-      ]);
+      // Auto stop after 10 seconds
+      setTimeout(async () => {
+        if (newRecording) {
+          await stopAndIdentifyAudio(newRecording);
+        }
+      }, 10000);
     } catch (error) {
       console.error('Audio error:', error);
-      Alert.alert('Error', 'Failed to start recording');
+      setStatusText('Failed to start recording');
       setIsListening(false);
-      setStatusText('');
+      setTimeout(() => setStatusText(''), 2000);
     }
   };
 
   const stopAndIdentifyAudio = async (recordingToStop) => {
     try {
       setStatusText('Processing audio...');
+      setIsListening(false);
+      setIsProcessing(true);
+      
       await recordingToStop.stopAndUnloadAsync();
       const uri = recordingToStop.getURI();
       setRecording(null);
 
+      console.log('Calling audio recognition API...');
       const response = await recognizeAudio(uri);
+      console.log('Audio recognition response:', response);
       
       if (response.success && response.movie) {
-        setIdentifiedMovie(response.movie);
         setStatusText('');
         router.push({
           pathname: '/result',
           params: { movieData: JSON.stringify(response.movie) }
         });
       } else {
-        Alert.alert('No Match', 'Could not identify the movie from audio');
+        setStatusText(response.error || 'No movie found');
+        setTimeout(() => setStatusText(''), 3000);
       }
     } catch (error) {
       console.error('Recognition error:', error);
-      Alert.alert('Error', 'Failed to identify movie');
+      setStatusText('Failed to identify movie');
+      setTimeout(() => setStatusText(''), 3000);
     } finally {
-      setIsListening(false);
-      setStatusText('');
+      setIsProcessing(false);
     }
   };
 
   const handleVideo = async () => {
     try {
-      setIsScanning(true);
       setStatusText('Select video...');
-
       const result = await DocumentPicker.getDocumentAsync({
         type: 'video/*',
       });
 
       if (!result.canceled) {
+        setIsProcessing(true);
         setStatusText('Scanning video...');
+        
+        console.log('Calling video recognition API...');
         const response = await recognizeVideo(result.assets[0].uri);
+        console.log('Video recognition response:', response);
         
         if (response.success && response.movie) {
+          setStatusText('');
           router.push({
             pathname: '/result',
             params: { movieData: JSON.stringify(response.movie) }
           });
         } else {
-          Alert.alert('No Match', 'Could not identify the movie from video');
+          setStatusText(response.error || 'No movie found');
+          setTimeout(() => setStatusText(''), 3000);
         }
+      } else {
+        setStatusText('');
       }
     } catch (error) {
       console.error('Video error:', error);
-      Alert.alert('Error', 'Failed to process video');
+      setStatusText('Failed to process video');
+      setTimeout(() => setStatusText(''), 3000);
     } finally {
-      setIsScanning(false);
-      setStatusText('');
+      setIsProcessing(false);
     }
   };
 
   const handleImage = async () => {
     try {
-      setIsScanning(true);
-      setStatusText('Choose option...');
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please enable photo access');
+        return;
+      }
 
-      Alert.alert(
-        'Select Image Source',
-        'Choose how to provide the image',
-        [
-          {
-            text: 'Camera',
-            onPress: async () => {
-              const { status } = await ImagePicker.requestCameraPermissionsAsync();
-              if (status === 'granted') {
-                const result = await ImagePicker.launchCameraAsync({
-                  quality: 0.8,
-                });
-                if (!result.canceled) {
-                  await processImage(result.assets[0].uri);
-                }
-              } else {
-                Alert.alert('Permission denied', 'Camera access needed');
-              }
-              setIsScanning(false);
-              setStatusText('');
-            },
-          },
-          {
-            text: 'Library',
-            onPress: async () => {
-              const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-              if (status === 'granted') {
-                const result = await ImagePicker.launchImageLibraryAsync({
-                  mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                  quality: 0.8,
-                });
-                if (!result.canceled) {
-                  await processImage(result.assets[0].uri);
-                }
-              } else {
-                Alert.alert('Permission denied', 'Photo library access needed');
-              }
-              setIsScanning(false);
-              setStatusText('');
-            },
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              setIsScanning(false);
-              setStatusText('');
-            },
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Image error:', error);
-      Alert.alert('Error', 'Failed to process image');
-      setIsScanning(false);
-      setStatusText('');
-    }
-  };
+      setStatusText('Choose image...');
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+      });
 
-  const processImage = async (uri) => {
-    try {
-      setStatusText('Scanning image...');
-      const response = await recognizeImage(uri);
-      
-      if (response.success && response.movie) {
-        router.push({
-          pathname: '/result',
-          params: { movieData: JSON.stringify(response.movie) }
-        });
+      if (!result.canceled) {
+        setIsProcessing(true);
+        setStatusText('Scanning image...');
+        
+        console.log('Calling image recognition API...');
+        const response = await recognizeImage(result.assets[0].uri);
+        console.log('Image recognition response:', response);
+        
+        if (response.success && response.movie) {
+          setStatusText('');
+          router.push({
+            pathname: '/result',
+            params: { movieData: JSON.stringify(response.movie) }
+          });
+        } else {
+          setStatusText(response.error || 'No movie found');
+          setTimeout(() => setStatusText(''), 3000);
+        }
       } else {
-        Alert.alert('No Match', 'Could not identify the movie from image');
+        setStatusText('');
       }
     } catch (error) {
-      console.error('Recognition error:', error);
-      Alert.alert('Error', 'Failed to identify movie');
+      console.error('Image error:', error);
+      setStatusText('Failed to process image');
+      setTimeout(() => setStatusText(''), 3000);
     } finally {
-      setStatusText('');
+      setIsProcessing(false);
     }
   };
 
@@ -227,25 +186,25 @@ export default function HomeScreen() {
         <TouchableOpacity 
           style={[styles.button, isListening && styles.buttonActive]}
           onPress={handleAudio}
-          disabled={isListening || isScanning}
+          disabled={isListening || isProcessing}
           activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>AUDIO</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.button, isScanning && styles.buttonActive]}
+          style={[styles.button, isProcessing && styles.buttonActive]}
           onPress={handleVideo}
-          disabled={isListening || isScanning}
+          disabled={isListening || isProcessing}
           activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>VIDEO</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.button, isScanning && styles.buttonActive]}
+          style={[styles.button, isProcessing && styles.buttonActive]}
           onPress={handleImage}
-          disabled={isListening || isScanning}
+          disabled={isListening || isProcessing}
           activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>IMAGE</Text>
@@ -287,7 +246,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.gold,
+    color: COLORS.blue,
     letterSpacing: 3,
     marginBottom: 8,
   },
@@ -309,17 +268,17 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: SIZES.borderRadius,
     borderWidth: 2,
-    borderColor: COLORS.gold,
-    backgroundColor: 'rgba(255, 215, 0, 0.05)',
+    borderColor: COLORS.blue,
+    backgroundColor: 'rgba(30, 144, 255, 0.05)',
   },
   buttonActive: {
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-    ...GLOW.gold,
+    backgroundColor: 'rgba(30, 144, 255, 0.15)',
+    ...GLOW.blue,
   },
   buttonText: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: COLORS.gold,
+    color: COLORS.blue,
     letterSpacing: 1.5,
     textAlign: 'center',
   },
@@ -335,7 +294,7 @@ const styles = StyleSheet.create({
   stopButton: {
     position: 'absolute',
     bottom: 60,
-    backgroundColor: COLORS.gold,
+    backgroundColor: COLORS.blue,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: SIZES.borderRadius,
@@ -343,6 +302,6 @@ const styles = StyleSheet.create({
   stopButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: COLORS.background,
+    color: COLORS.textPrimary,
   },
 });
