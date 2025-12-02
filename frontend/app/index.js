@@ -16,8 +16,10 @@ export default function HomeScreen() {
 
   useEffect(() => {
     return () => {
-      if (recording) {
-        recording.stopAndUnloadAsync();
+      if (recording && recording._canRecord) {
+        recording.stopAndUnloadAsync().catch(err => {
+          console.log('Cleanup error:', err);
+        });
       }
     };
   }, [recording]);
