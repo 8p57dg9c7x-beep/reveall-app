@@ -248,7 +248,17 @@ async def recognize_image(file: UploadFile = File(...)):
                     searched_queries.add(query.lower())
                     movie = search_tmdb_movie(query)
                     if movie:
-                        score = movie.get('popularity', 0) * 1.5  # Bonus for 2-word matches
+                        score = movie.get('popularity', 0) * 2  # Strong bonus for 2-word matches
+                        
+                        # Check for title match with 2-word query
+                        movie_title_lower = movie.get('title', '').lower()
+                        query_lower = query.lower()
+                        
+                        if query_lower == movie_title_lower:
+                            score *= 10  # Exact match
+                        elif len(query_lower) > 8 and query_lower in movie_title_lower:
+                            score *= 5  # Long query in title
+                        
                         all_results.append({'movie': movie, 'query': query, 'score': score})
                         logger.info(f"Found '{movie.get('title')}' with query '{query}', score: {score}")
         
