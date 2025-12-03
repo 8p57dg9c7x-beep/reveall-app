@@ -146,13 +146,16 @@ class CinescanTester:
             time.sleep(0.5)
     
     def test_tv_series_suite(self):
-        """Test TV series recognition"""
-        print("\n📺 TESTING TV SERIES RECOGNITION...")
+        """Test TV series recognition as requested"""
+        print("\n📺 TEST 3: TV SERIES")
         
         series_list = [
+            ("Friends", "Friends"),
             ("Breaking Bad", "Breaking Bad"),
             ("Game of Thrones", "Game of Thrones"),
-            ("Stranger Things", "Stranger Things")
+            ("The Office", "Office"),
+            ("Stranger Things", "Stranger Things"),
+            ("The Sopranos", "Sopranos")
         ]
         
         for query, expected in series_list:
