@@ -188,7 +188,7 @@ async def root():
 
 @api_router.post("/recognize-image")
 async def recognize_image(file: UploadFile = File(...)):
-    """Recognize movie from an image"""
+    """Recognize movie from an image using web detection"""
     try:
         logger.info(f"Received image: {file.filename}, content_type: {file.content_type}")
         
@@ -196,7 +196,10 @@ async def recognize_image(file: UploadFile = File(...)):
         image_content = await file.read()
         logger.info(f"Image content size: {len(image_content)} bytes")
         
-        detected_texts = recognize_image_with_google_vision(image_content)
+        vision_result = recognize_image_with_google_vision(image_content)
+        web_entities = vision_result.get('web_entities', [])
+        best_guess = vision_result.get('best_guess', [])
+        detected_texts = vision_result.get('text', [])
         
         if not detected_texts:
             return {
