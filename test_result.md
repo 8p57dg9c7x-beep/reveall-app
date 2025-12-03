@@ -265,11 +265,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "CRITICAL: Algorithm scoring system overhaul needed"
-    - "Prioritize movie titles over actor/director names in web entities"
-    - "Implement keyword filtering or weighted scoring based on entity type"
-  stuck_tasks:
-    - "API endpoints setup"
+    - "COMPLETED: Algorithm scoring system successfully implemented"
+    - "COMPLETED: Movie titles now prioritized over actor/director names"
+    - "COMPLETED: Match score threshold (>=4000) working perfectly"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
