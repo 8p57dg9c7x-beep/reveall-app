@@ -15,7 +15,9 @@ export default function HomeScreen() {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
+  const [showOptions, setShowOptions] = useState(false);
   const [pulseAnim] = useState(new Animated.Value(1));
+  const [optionsAnim] = useState(new Animated.Value(0));
 
   useEffect(() => {
     return () => {
@@ -30,13 +32,13 @@ export default function HomeScreen() {
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.2,
-            duration: 800,
+            toValue: 1.15,
+            duration: 1000,
             useNativeDriver: true,
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
-            duration: 800,
+            duration: 1000,
             useNativeDriver: true,
           }),
         ])
@@ -46,7 +48,31 @@ export default function HomeScreen() {
     }
   }, [isListening]);
 
+  useEffect(() => {
+    if (showOptions) {
+      Animated.spring(optionsAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 50,
+        friction: 7,
+      }).start();
+    } else {
+      Animated.timing(optionsAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showOptions]);
+
+  const handleMainButton = () => {
+    if (!isListening && !isProcessing) {
+      setShowOptions(!showOptions);
+    }
+  };
+
   const handleAudio = async () => {
+    setShowOptions(false);
     try {
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
@@ -113,6 +139,7 @@ export default function HomeScreen() {
   };
 
   const handleVideo = async () => {
+    setShowOptions(false);
     try {
       setStatusText('Select video...');
       const result = await DocumentPicker.getDocumentAsync({
@@ -121,7 +148,7 @@ export default function HomeScreen() {
 
       if (!result.canceled) {
         setIsProcessing(true);
-        setStatusText('Scanning video...');
+        setStatusText('Scanning...');
         
         const response = await recognizeVideo(result.assets[0].uri);
         
@@ -148,6 +175,7 @@ export default function HomeScreen() {
   };
 
   const handleImage = async () => {
+    setShowOptions(false);
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
@@ -163,7 +191,7 @@ export default function HomeScreen() {
 
       if (!result.canceled) {
         setIsProcessing(true);
-        setStatusText('Scanning image...');
+        setStatusText('Scanning...');
         
         const response = await recognizeImage(result.assets[0].uri);
         
@@ -190,189 +218,160 @@ export default function HomeScreen() {
   };
 
   return (
-    <LinearGradient colors={['#0A0E27', '#1A1F3D']} style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.primaryLight]}
-            style={styles.logoGradient}
-          >
-            <Ionicons name="film" size={32} color={COLORS.textPrimary} />
-          </LinearGradient>
-        </View>
         <Text style={styles.logo}>CINESCAN</Text>
-        <Text style={styles.tagline}>Identify movies, shows & anime instantly</Text>
+        <Text style={styles.tagline}>Identify any movie instantly</Text>
       </View>
 
-      {/* Main Buttons */}
-      <View style={styles.buttonsContainer}>
+      {/* Main Content Area */}
+      <View style={styles.mainContent}>
+        {/* Option Buttons (appear above main button) */}
+        {showOptions && (
+          <Animated.View 
+            style={[
+              styles.optionsContainer,
+              {
+                opacity: optionsAnim,
+                transform: [
+                  {
+                    translateY: optionsAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [50, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <TouchableOpacity style={styles.optionButton} onPress={handleAudio}>
+              <Ionicons name="mic" size={28} color={COLORS.textPrimary} />
+              <Text style={styles.optionText}>Audio</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.optionButton} onPress={handleVideo}>
+              <Ionicons name="videocam" size={28} color={COLORS.textPrimary} />
+              <Text style={styles.optionText}>Video</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.optionButton} onPress={handleImage}>
+              <Ionicons name="image" size={28} color={COLORS.textPrimary} />
+              <Text style={styles.optionText}>Image</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {/* Main Circle Button */}
         <TouchableOpacity 
-          style={styles.buttonWrapper}
-          onPress={handleAudio}
+          style={styles.mainButtonContainer}
+          onPress={handleMainButton}
           disabled={isListening || isProcessing}
           activeOpacity={0.8}
         >
-          <LinearGradient
-            colors={isListening ? [COLORS.accent, COLORS.primary] : [COLORS.primary, COLORS.primaryDark]}
-            style={[styles.button, isListening && SHADOWS.glow]}
-          >
-            <Animated.View style={{ transform: [{ scale: isListening ? pulseAnim : 1 }] }}>
+          <Animated.View style={{ transform: [{ scale: isListening ? pulseAnim : 1 }] }}>
+            <LinearGradient
+              colors={isListening ? ['#E22134', '#C41C2B'] : [COLORS.primary, COLORS.primaryDark]}
+              style={[styles.mainButton, SHADOWS.button]}
+            >
               <Ionicons 
-                name={isListening ? "radio-button-on" : "mic"} 
-                size={SIZES.iconSizeLarge} 
+                name={isListening ? "radio-button-on" : showOptions ? "close" : "scan"} 
+                size={80} 
                 color={COLORS.textPrimary} 
               />
-            </Animated.View>
-            <Text style={styles.buttonText}>AUDIO</Text>
-            <Text style={styles.buttonSubtext}>Record & identify</Text>
-          </LinearGradient>
+            </LinearGradient>
+          </Animated.View>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.buttonWrapper}
-          onPress={handleVideo}
-          disabled={isListening || isProcessing}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.primaryDark]}
-            style={styles.button}
-          >
-            <Ionicons 
-              name="videocam" 
-              size={SIZES.iconSizeLarge} 
-              color={COLORS.textPrimary} 
-            />
-            <Text style={styles.buttonText}>VIDEO</Text>
-            <Text style={styles.buttonSubtext}>Upload clip</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        {/* Status Text */}
+        {statusText ? (
+          <View style={styles.statusContainer}>
+            <Text style={styles.statusText}>{statusText}</Text>
+          </View>
+        ) : null}
 
-        <TouchableOpacity 
-          style={styles.buttonWrapper}
-          onPress={handleImage}
-          disabled={isListening || isProcessing}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.primaryDark]}
-            style={styles.button}
+        {/* Stop button */}
+        {isListening && recording && (
+          <TouchableOpacity 
+            style={styles.stopButton}
+            onPress={() => stopAndIdentifyAudio(recording)}
           >
-            <Ionicons 
-              name="image" 
-              size={SIZES.iconSizeLarge} 
-              color={COLORS.textPrimary} 
-            />
-            <Text style={styles.buttonText}>IMAGE</Text>
-            <Text style={styles.buttonSubtext}>Scan poster</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+            <LinearGradient
+              colors={['#E22134', '#C41C2B']}
+              style={styles.stopButtonGradient}
+            >
+              <Ionicons name="stop-circle" size={24} color={COLORS.textPrimary} />
+              <Text style={styles.stopButtonText}>Stop</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
       </View>
-
-      {/* Status Text */}
-      {statusText ? (
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusText}>{statusText}</Text>
-        </View>
-      ) : null}
-
-      {/* Stop button */}
-      {isListening && recording && (
-        <TouchableOpacity 
-          style={styles.stopButton}
-          onPress={() => stopAndIdentifyAudio(recording)}
-        >
-          <LinearGradient
-            colors={[COLORS.error, '#CC0000']}
-            style={styles.stopButtonGradient}
-          >
-            <Ionicons name="stop-circle" size={24} color={COLORS.textPrimary} />
-            <Text style={styles.stopButtonText}>Stop & Identify</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>⚡ Powered by AI • Faster than Shazam</Text>
-      </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
   header: {
-    paddingTop: 60,
+    paddingTop: 70,
     alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoContainer: {
-    marginBottom: 16,
-  },
-  logoGradient: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...SHADOWS.glow,
+    marginBottom: 20,
   },
   logo: {
-    fontSize: 36,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '700',
     color: COLORS.textPrimary,
-    letterSpacing: 4,
+    letterSpacing: 2,
     marginBottom: 8,
   },
   tagline: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    letterSpacing: 0.5,
+    fontWeight: '400',
   },
-  buttonsContainer: {
+  mainContent: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainButtonContainer: {
+    marginBottom: 100,
+  },
+  mainButton: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionsContainer: {
     flexDirection: 'row',
+    gap: 20,
+    marginBottom: 60,
+  },
+  optionButton: {
+    backgroundColor: COLORS.card,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
-    paddingHorizontal: 20,
-  },
-  buttonWrapper: {
-    flex: 1,
-    maxWidth: 120,
-  },
-  button: {
-    aspectRatio: 1,
-    borderRadius: SIZES.borderRadiusLarge,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
     ...SHADOWS.card,
   },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  optionText: {
+    fontSize: 12,
     color: COLORS.textPrimary,
-    marginTop: 12,
-    letterSpacing: 1,
-  },
-  buttonSubtext: {
-    fontSize: 10,
-    color: COLORS.textSecondary,
-    marginTop: 4,
+    marginTop: 6,
+    fontWeight: '600',
   },
   statusContainer: {
     position: 'absolute',
-    bottom: 140,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
+    bottom: 80,
   },
   statusText: {
     fontSize: 16,
@@ -381,31 +380,20 @@ const styles = StyleSheet.create({
   },
   stopButton: {
     position: 'absolute',
-    bottom: 80,
-    left: 20,
-    right: 20,
-    borderRadius: SIZES.borderRadius,
+    bottom: 40,
+    borderRadius: 25,
     overflow: 'hidden',
   },
   stopButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
   },
   stopButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: COLORS.textPrimary,
     marginLeft: 8,
-  },
-  footer: {
-    paddingBottom: 30,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
   },
 });

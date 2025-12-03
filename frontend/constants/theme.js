@@ -1,48 +1,40 @@
-// CINESCAN Premium Theme
+// CINESCAN Professional Theme
 export const COLORS = {
-  // Modern dark theme
-  background: '#0A0E27',
-  backgroundCard: '#131835',
+  background: '#000000',
+  backgroundGradient: '#0D0D0D',
   
-  // Vibrant blue gradients
-  primary: '#2E5BFF',
-  primaryDark: '#1E3FCC',
-  primaryLight: '#4B7DFF',
+  primary: '#1DB954', // Spotify-like green
+  primaryDark: '#169948',
+  primaryLight: '#1ED760',
   
-  // Accent colors
-  accent: '#00D9FF',
-  success: '#00E676',
-  warning: '#FFAB00',
-  error: '#FF5252',
+  card: '#181818',
+  cardHover: '#282828',
   
-  // Text
   textPrimary: '#FFFFFF',
-  textSecondary: '#A0AEC0',
-  textMuted: '#64748B',
+  textSecondary: '#B3B3B3',
+  
+  success: '#1DB954',
+  error: '#E22134',
 };
 
 export const SHADOWS = {
-  glow: {
-    shadowColor: '#2E5BFF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 24,
-    elevation: 12,
+  button: {
+    shadowColor: '#1DB954',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 25,
+    elevation: 15,
   },
   card: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.5,
     shadowRadius: 12,
     elevation: 8,
   },
 };
 
 export const SIZES = {
-  borderRadius: 16,
-  borderRadiusLarge: 24,
-  spacing: 16,
-  spacingLarge: 24,
-  iconSize: 32,
-  iconSizeLarge: 48,
+  borderRadius: 100,
+  spacing: 20,
 };
