@@ -45,10 +45,20 @@ class SearchRequest(BaseModel):
 def search_tmdb_movie(query: str):
     """Search for a movie in TMDB database"""
     try:
+        # Clean up the query - remove newlines and limit length
+        clean_query = query.replace('\n', ' ').strip()
+        
+        # Limit query length to avoid TMDB API errors
+        if len(clean_query) > 100:
+            # Try to extract key words/title
+            words = clean_query.split()
+            # Look for common movie title patterns or just use first few words
+            clean_query = ' '.join(words[:10])
+        
         url = f"https://api.themoviedb.org/3/search/movie"
         params = {
             'api_key': TMDB_API_KEY,
-            'query': query,
+            'query': clean_query,
             'language': 'en-US'
         }
         response = requests.get(url, params=params, timeout=10)
