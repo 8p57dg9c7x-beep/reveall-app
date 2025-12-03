@@ -901,12 +901,13 @@ Detection method: {result['detection_method']}
             self.log_result("Average Speed Performance", False, 0, "No successful tests")
     
     def run_comprehensive_test(self):
-        """Run comprehensive image recognition testing as specifically requested by user"""
-        print("🎬 CINESCAN COMPREHENSIVE IMAGE RECOGNITION TESTING")
+        """Run image recognition retest with NEW web detection algorithm"""
+        print("🎬 CINESCAN IMAGE RECOGNITION RETEST - NEW WEB DETECTION ALGORITHM")
         print("=" * 80)
-        print("🎯 USER PRIORITY REQUEST: Test image recognition with 10 different movie posters")
+        print("🎯 CRITICAL MISSION: Re-test the SAME 10 movie posters with NEW improved algorithm")
         print(f"🌐 Backend URL: {BASE_URL}")
-        print("🎪 SUCCESS CRITERIA: 7+ correct identifications, <5s response time")
+        print("🎪 SUCCESS CRITERIA: 7+ correct identifications (70%+), <5s average response time")
+        print("🔄 MUST BE FASTER and MORE ACCURATE than previous test")
         print("=" * 80)
         
         # Test API health first
@@ -914,26 +915,12 @@ Detection method: {result['detection_method']}
             print("❌ API is not responding. Stopping tests.")
             return
         
-        # PHASE 1: COMPREHENSIVE IMAGE RECOGNITION TESTING - USER PRIORITY
-        print("\n📸 PHASE 1: COMPREHENSIVE IMAGE RECOGNITION TESTING (USER PRIORITY)")
-        print("🎯 USER REQUEST: Test with 10 different movie posters/screenshots")
-        self.test_comprehensive_image_recognition()      # CRITICAL: User's main request
+        # MAIN TEST: IMAGE RECOGNITION RETEST WITH NEW ALGORITHM
+        print("\n🎯 MAIN TEST: IMAGE RECOGNITION RETEST WITH NEW WEB DETECTION ALGORITHM")
+        self.test_comprehensive_image_recognition()      # CRITICAL: User's retest request
         
-        # PHASE 2: BASIC ENDPOINT VERIFICATION
-        print("\n🔧 PHASE 2: BASIC ENDPOINT VERIFICATION")
-        self.test_image_recognition_endpoint()
-        self.test_video_recognition_endpoint()
-        
-        # PHASE 3: API KEY VERIFICATION
-        print("\n🔑 PHASE 3: API KEY VERIFICATION")
-        self.test_api_key_verification()
-        
-        # PHASE 4: ERROR HANDLING
-        print("\n🚨 PHASE 4: ERROR HANDLING")
-        self.test_error_handling()
-        
-        # Print comprehensive summary
-        self.print_summary()
+        # Print focused summary
+        self.print_retest_summary()
     
     def print_summary(self):
         """Print test summary"""
