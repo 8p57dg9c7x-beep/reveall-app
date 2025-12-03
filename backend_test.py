@@ -127,14 +127,17 @@ class CinescanTester:
             time.sleep(0.5)  # Small delay between requests
     
     def test_anime_recognition_suite(self):
-        """Test anime recognition"""
-        print("\n🎌 TESTING ANIME RECOGNITION...")
+        """Test anime recognition as requested"""
+        print("\n🎌 TEST 2: ANIME")
         
         anime_list = [
             "Naruto",
+            "Dragon Ball Z",
             "Attack on Titan", 
+            "My Hero Academia",
+            "Death Note",
             "One Piece",
-            "Demon Slayer"
+            "Spirited Away"
         ]
         
         for anime in anime_list:
