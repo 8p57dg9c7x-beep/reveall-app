@@ -94,26 +94,34 @@ export const recognizeVideo = async (videoUri) => {
     console.log('Recognizing video from URI:', videoUri);
     console.log('API URL:', `${API_BASE_URL}/api/recognize-video`);
     
-    // Read video file as base64
-    const base64 = await FileSystem.readAsStringAsync(videoUri, {
-      encoding: 'base64',
+    // Use fetch with FormData for video files
+    const formData = new FormData();
+    
+    const uriParts = videoUri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
+    
+    formData.append('file', {
+      uri: videoUri,
+      name: `video.${fileType}`,
+      type: `video/${fileType}`,
     });
 
-    console.log('Video base64 length:', base64.length);
-
-    // Send as base64 instead of FormData
-    const response = await api.post('/api/recognize-video', {
-      video_base64: `data:video/mp4;base64,${base64}`,
+    const response = await fetch(`${API_BASE_URL}/api/recognize-video`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    console.log('Video recognition response:', response.data);
-    return response.data;
+    const data = await response.json();
+    console.log('Video recognition response:', data);
+    return data;
   } catch (error) {
     console.error('Video recognition error:', error);
-    console.error('Error response:', error.response?.data);
     return {
       success: false,
-      error: error.response?.data?.error || error.message || 'Failed to process video'
+      error: error.message || 'Failed to process video'
     };
   }
 };
