@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-CINESCAN Backend Testing - IMAGE RECOGNITION RETEST WITH NEW WEB DETECTION ALGORITHM
-CRITICAL MISSION: Re-test the SAME 10 movie posters with the NEW improved algorithm
-SUCCESS CRITERIA: 7+ correct identifications (70%+), Average response time < 5 seconds
+CINESCAN AUDIO RECOGNITION TESTING - COMPREHENSIVE MOVIE SOUNDTRACK TESTING
+CRITICAL MISSION: Test audio recognition with 10 REAL movie soundtrack clips
+SUCCESS CRITERIA: 8/10 minimum accuracy, <5s response time average
+Backend URL: https://moviedetect.preview.emergentagent.com
 """
 
 import requests
