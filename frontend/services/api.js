@@ -21,7 +21,7 @@ export const recognizeImage = async (imageUri) => {
     
     // Read image file as base64
     const base64 = await FileSystem.readAsStringAsync(imageUri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: 'base64',
     });
 
     console.log('Image base64 length:', base64.length);
