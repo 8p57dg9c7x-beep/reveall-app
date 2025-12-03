@@ -1016,6 +1016,77 @@ Detection method: {result['detection_method']}
         else:
             print("🐌 SPEED ISSUES - Performance below Shazam-level target")
 
-if __name__ == "__main__":
+def run_final_image_test():
+    """
+    FINAL IMAGE RECOGNITION TEST - MUST GET 8/10 OR BETTER
+    Testing the SAME 10 movie posters with NEW ALGORITHM
+    Backend URL: https://moviedetect.preview.emergentagent.com
+    """
+    print("🎬 FINAL IMAGE RECOGNITION TEST - MUST GET 8/10 OR BETTER")
+    print("=" * 60)
+    print("**USER REQUIREMENT**: 8/10 minimum accuracy. No excuses. User wants to deploy.")
+    print("**Backend URL**: https://moviedetect.preview.emergentagent.com")
+    print("**Test the SAME 10 movie posters:**")
+    
+    # Test movies - SAME 10 as previous tests
+    test_movies = [
+        "Inception",
+        "The Matrix", 
+        "Titanic",
+        "The Dark Knight",
+        "Forrest Gump",
+        "Pulp Fiction",
+        "Fight Club",
+        "Goodfellas",
+        "The Shawshank Redemption",
+        "The Godfather"
+    ]
+    
+    for i, movie in enumerate(test_movies, 1):
+        print(f"{i}. {movie}")
+    
+    print("\n**NEW ALGORITHM**: ")
+    print("- Matches entity name against movie title")
+    print("- If entity=\"Inception\" and TMDB returns \"Inception\" → PERFECT MATCH (score 10000)")
+    print("- If entity=\"Tom Hanks\" and TMDB returns \"Tom Hanks documentary\" → WEAK MATCH (score 1)")
+    print("- Only returns results with match_score >= 4000")
+    print("\n**CRITICAL SUCCESS CRITERIA:**")
+    print("- ✅ PASS: 8/10 or 9/10 or 10/10 correct")
+    print("- ❌ FAIL: 7/10 or less")
+    print("=" * 60)
+    
     tester = CinescanTester()
-    tester.run_comprehensive_test()
+    
+    # Test API health first
+    if not tester.test_api_health():
+        print("❌ API is not responding. Cannot proceed with testing.")
+        return False, 0, 10
+    
+    # Run the comprehensive image recognition test
+    result = tester.test_comprehensive_image_recognition()
+    
+    # Extract results
+    correct = result.get('correct', 0)
+    total = result.get('total_tested', 10)
+    
+    # Final determination
+    print("\n" + "=" * 60)
+    print("FINAL DETERMINATION")
+    print("=" * 60)
+    
+    if correct >= 8:
+        print(f"✅ PASS: {correct}/10 correct (≥8 required)")
+        print("🎉 READY FOR DEPLOYMENT!")
+        success = True
+    else:
+        print(f"❌ FAIL: {correct}/10 correct (<8 required)")
+        print("⚠️  NOT READY FOR DEPLOYMENT")
+        success = False
+    
+    print("=" * 60)
+    print("BE BRUTALLY HONEST. User needs the truth to deploy.")
+    
+    return success, correct, total
+
+if __name__ == "__main__":
+    run_final_image_test()
