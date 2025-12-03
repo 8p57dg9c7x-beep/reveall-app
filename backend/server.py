@@ -56,7 +56,7 @@ def search_tmdb_movie(query: str):
             # Look for common movie title patterns or just use first few words
             clean_query = ' '.join(words[:10])
         
-        url = f"https://api.themoviedb.org/3/search/movie"
+        url = "https://api.themoviedb.org/3/search/movie"
         params = {
             'api_key': TMDB_API_KEY,
             'query': clean_query,
