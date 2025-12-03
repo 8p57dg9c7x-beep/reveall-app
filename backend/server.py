@@ -90,7 +90,7 @@ def get_movie_details(movie_id: int):
         return None
 
 def recognize_image_with_google_vision(image_content: bytes):
-    """Use Google Vision API to detect text in images"""
+    """Use Google Vision API with WEB DETECTION for movie recognition"""
     try:
         url = f"https://vision.googleapis.com/v1/images:annotate?key={GOOGLE_VISION_API_KEY}"
         image_base64 = base64.b64encode(image_content).decode('utf-8')
@@ -99,8 +99,8 @@ def recognize_image_with_google_vision(image_content: bytes):
             "requests": [{
                 "image": {"content": image_base64},
                 "features": [
-                    {"type": "TEXT_DETECTION", "maxResults": 10},
-                    {"type": "WEB_DETECTION", "maxResults": 10}
+                    {"type": "WEB_DETECTION", "maxResults": 20},
+                    {"type": "TEXT_DETECTION", "maxResults": 10}
                 ]
             }]
         }
@@ -109,24 +109,46 @@ def recognize_image_with_google_vision(image_content: bytes):
         response.raise_for_status()
         result = response.json()
         
+        web_entities = []
         detected_texts = []
+        best_guess_labels = []
+        
         if 'responses' in result and len(result['responses']) > 0:
             response_data = result['responses'][0]
             
+            # PRIORITY 1: Web entities (most accurate for movie posters)
+            if 'webDetection' in response_data:
+                web_data = response_data['webDetection']
+                
+                # Get best guess labels first
+                if 'bestGuessLabels' in web_data:
+                    for label in web_data['bestGuessLabels']:
+                        if 'label' in label:
+                            best_guess_labels.append(label['label'])
+                
+                # Get web entities
+                if 'webEntities' in web_data:
+                    for entity in web_data['webEntities']:
+                        if 'description' in entity:
+                            score = entity.get('score', 0)
+                            web_entities.append({
+                                'text': entity['description'],
+                                'score': score
+                            })
+            
+            # PRIORITY 2: Text detection (fallback)
             if 'textAnnotations' in response_data:
                 for annotation in response_data['textAnnotations']:
                     detected_texts.append(annotation.get('description', ''))
-            
-            if 'webDetection' in response_data:
-                web_entities = response_data['webDetection'].get('webEntities', [])
-                for entity in web_entities:
-                    if 'description' in entity:
-                        detected_texts.append(entity['description'])
         
-        return detected_texts
+        return {
+            'web_entities': web_entities,
+            'best_guess': best_guess_labels,
+            'text': detected_texts
+        }
     except Exception as e:
         logger.error(f"Google Vision error: {e}")
-        return []
+        return {'web_entities': [], 'best_guess': [], 'text': []}
 
 def recognize_audio_with_audd(audio_base64: str):
     """Use AudD API to recognize audio"""
