@@ -922,6 +922,48 @@ Detection method: {result['detection_method']}
         # Print focused summary
         self.print_retest_summary()
     
+    def print_retest_summary(self):
+        """Print focused summary for the retest"""
+        print("\n" + "=" * 60)
+        print("🎯 IMAGE RECOGNITION RETEST SUMMARY")
+        print("=" * 60)
+        
+        print(f"Total Tests: {self.total_tests}")
+        print(f"✅ Passed: {self.passed_tests}")
+        print(f"❌ Failed: {self.failed_tests}")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
+        
+        # Speed analysis
+        speed_compliant = sum(1 for r in self.results if r.get("speed_ok", False))
+        print(f"⚡ Speed Compliant (<5s): {speed_compliant}/{self.total_tests}")
+        
+        print("\n📊 DETAILED RESULTS:")
+        print("-" * 60)
+        for result in self.results:
+            speed_indicator = "⚡" if result.get("speed_ok", False) else "🐌"
+            print(f"{result['status']} {speed_indicator} | {result['test']} | {result['duration']} | {result['details']}")
+        
+        print("\n🔍 CRITICAL ANALYSIS:")
+        print("-" * 60)
+        
+        # Analyze failures
+        failures = [r for r in self.results if "FAIL" in r["status"]]
+        if failures:
+            print("❌ FAILED TESTS:")
+            for failure in failures:
+                print(f"  • {failure['test']}: {failure['details']}")
+        
+        # Overall assessment for retest
+        print(f"\n🎯 RETEST ASSESSMENT:")
+        if "NEW Web Detection Algorithm Test" in [r['test'] for r in self.results]:
+            retest_result = next((r for r in self.results if r['test'] == "NEW Web Detection Algorithm Test"), None)
+            if retest_result and "PASS" in retest_result['status']:
+                print("✅ RETEST PASSED - New algorithm meets user criteria!")
+            else:
+                print("❌ RETEST FAILED - Algorithm still needs improvement")
+        
+        print("\n🔄 BE CRITICAL: The user needs 100% honest results!")
+        
     def print_summary(self):
         """Print test summary"""
         print("\n" + "=" * 60)
