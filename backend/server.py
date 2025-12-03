@@ -201,106 +201,79 @@ async def recognize_image(file: UploadFile = File(...)):
         best_guess = vision_result.get('best_guess', [])
         detected_texts = vision_result.get('text', [])
         
-        if not detected_texts:
-            return {
-                "success": False,
-                "error": "Could not detect any text in the image",
-                "movie": None
-            }
+        logger.info(f"Web entities: {web_entities[:5]}")
+        logger.info(f"Best guess: {best_guess}")
         
-        logger.info(f"Detected texts: {detected_texts[:10]}")
+        # STRATEGY 1: Try best guess labels first (most accurate for posters)
+        if best_guess:
+            for guess in best_guess[:3]:
+                logger.info(f"Trying best guess: '{guess}'")
+                movie = search_tmdb_movie(guess)
+                if movie:
+                    logger.info(f"✅ FOUND via best guess: '{movie.get('title')}'")
+                    return {
+                        "success": True,
+                        "source": "Google Web Detection (Best Guess)",
+                        "movie": movie
+                    }
         
-        # Extract individual words from all detected texts
-        all_words = []
-        for text in detected_texts[:20]:
-            words = text.replace('\n', ' ').split()
-            all_words.extend(words)
+        # STRATEGY 2: Try web entities sorted by score
+        if web_entities:
+            # Sort web entities by score descending
+            sorted_entities = sorted(web_entities, key=lambda x: x['score'], reverse=True)
+            
+            for entity in sorted_entities[:15]:
+                query = entity['text']
+                logger.info(f"Trying web entity: '{query}' (score: {entity['score']})")
+                movie = search_tmdb_movie(query)
+                if movie:
+                    logger.info(f"✅ FOUND via web entity: '{movie.get('title')}'")
+                    return {
+                        "success": True,
+                        "source": "Google Web Detection",
+                        "movie": movie
+                    }
         
-        # Remove duplicates while preserving order
-        unique_words = []
-        seen = set()
-        for word in all_words:
-            word_lower = word.lower()
-            if word_lower not in seen and len(word) > 2:
-                seen.add(word_lower)
-                unique_words.append(word)
-        
-        logger.info(f"Extracted unique words: {unique_words[:30]}")
-        
-        # Common actor/director/studio names to deprioritize
-        skip_names = {'leonardo', 'dicaprio', 'chris', 'robert', 'scarlett', 'tom', 'mark', 'jeremy', 'samuel', 'jackson', 'keanu', 'reeves', 'laurence', 'fishburne', 'carrie-anne', 'moss', 'marion', 'cotillard', 'ellen', 'page', 'hardy', 'cillian', 'murphy', 'nolan', 'christopher', 'watanabe', 'gordon-levitt', 'berenger', 'hemsworth', 'downey', 'evans', 'ruffalo', 'johansson', 'renner', 'hiddleston', 'starring', 'presents', 'pictures', 'warner', 'bros', 'studios', 'production', 'directed'}
-        
-        # Search ALL words and collect results with their scores
-        all_results = []
-        searched_queries = set()
-        
-        # Try individual words first (up to 40)
-        for word in unique_words[:40]:
-            if word.lower() not in skip_names and len(word) > 3:
-                query = word
-                if query.lower() not in searched_queries:
-                    searched_queries.add(query.lower())
+        # STRATEGY 3: Fall back to text detection (old method)
+        if detected_texts and len(detected_texts) > 0:
+            logger.info("Falling back to text detection")
+            
+            # Get all text, extract words
+            all_text = detected_texts[0] if detected_texts else ""
+            words = all_text.replace('\n', ' ').split()
+            
+            # Skip common non-movie words
+            skip_words = {'the', 'a', 'and', 'of', 'in', 'to', 'for', 'starring', 'presents', 'from', 'directed', 'by', 'pictures', 'films', 'entertainment', 'studios', 'production'}
+            
+            # Try 2-3 word combinations
+            for i in range(min(20, len(words) - 1)):
+                if words[i].lower() not in skip_words:
+                    # Try 2-word combo
+                    query = f"{words[i]} {words[i+1]}"
                     movie = search_tmdb_movie(query)
                     if movie:
-                        # Score based on popularity and word characteristics
-                        score = movie.get('popularity', 0)
-                        
-                        # MAJOR boost if the query matches the movie title exactly or closely
-                        movie_title_lower = movie.get('title', '').lower()
-                        query_lower = query.lower()
-                        
-                        # Only boost if it's a meaningful match (not just a single word in a long title)
-                        if query_lower == movie_title_lower:
-                            score *= 10  # Exact full title match gets huge bonus
-                        elif len(query_lower) > 6 and query_lower in movie_title_lower:
-                            score *= 5   # Long query appearing in title gets good bonus
-                        elif movie_title_lower in query_lower and len(movie_title_lower) > 6:
-                            score *= 5   # Long title appearing in query gets good bonus
-                        
-                        # Boost score if word is all caps and longer (likely a title)
-                        if word.isupper() and len(word) > 5:
-                            score *= 2
-                            
-                        all_results.append({'movie': movie, 'query': query, 'score': score})
-                        logger.info(f"Found '{movie.get('title')}' with query '{query}', score: {score}")
-        
-        # Try 2-word combinations (up to 20)
-        for i in range(min(20, len(unique_words) - 1)):
-            word1, word2 = unique_words[i], unique_words[i+1]
-            if word1.lower() not in skip_names or word2.lower() not in skip_names:
-                query = f"{word1} {word2}"
-                if query.lower() not in searched_queries:
-                    searched_queries.add(query.lower())
-                    movie = search_tmdb_movie(query)
-                    if movie:
-                        score = movie.get('popularity', 0) * 2  # Strong bonus for 2-word matches
-                        
-                        # Check for title match with 2-word query
-                        movie_title_lower = movie.get('title', '').lower()
-                        query_lower = query.lower()
-                        
-                        if query_lower == movie_title_lower:
-                            score *= 10  # Exact match
-                        elif len(query_lower) > 8 and query_lower in movie_title_lower:
-                            score *= 5  # Long query in title
-                        
-                        all_results.append({'movie': movie, 'query': query, 'score': score})
-                        logger.info(f"Found '{movie.get('title')}' with query '{query}', score: {score}")
-        
-        # Sort by score descending and return the best match
-        if all_results:
-            all_results.sort(key=lambda x: x['score'], reverse=True)
-            best_result = all_results[0]
-            logger.info(f"BEST MATCH: '{best_result['movie'].get('title')}' (query: '{best_result['query']}', score: {best_result['score']})")
-            return {
-                "success": True,
-                "source": "Vision API + TMDB",
-                "movie": best_result['movie']
-            }
+                        logger.info(f"✅ FOUND via text: '{movie.get('title')}'")
+                        return {
+                            "success": True,
+                            "source": "Text Detection",
+                            "movie": movie
+                        }
+                    
+                    # Try 3-word combo
+                    if i < len(words) - 2:
+                        query = f"{words[i]} {words[i+1]} {words[i+2]}"
+                        movie = search_tmdb_movie(query)
+                        if movie:
+                            logger.info(f"✅ FOUND via text: '{movie.get('title')}'")
+                            return {
+                                "success": True,
+                                "source": "Text Detection",
+                                "movie": movie
+                            }
         
         return {
             "success": False,
-            "error": f"Could not find movie from detected text. Try a clearer image with the movie title visible.",
+            "error": "Could not identify movie. Try a clearer poster image.",
             "movie": None
         }
         
