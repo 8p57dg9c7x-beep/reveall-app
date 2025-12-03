@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Alert, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { recognizeImage, recognizeAudio, recognizeVideo } from '../services/api';
 
 export default function HomeScreen() {
@@ -29,7 +28,6 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (isListening) {
-      // Pulse animation
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
@@ -45,7 +43,6 @@ export default function HomeScreen() {
         ])
       ).start();
       
-      // Rotation animation
       Animated.loop(
         Animated.timing(rotateAnim, {
           toValue: 1,
@@ -239,27 +236,14 @@ export default function HomeScreen() {
       
       {/* Logo Section */}
       <View style={styles.logoSection}>
-        {/* Film Reel with Flowing Strip */}
-        <View style={styles.filmReelWithFlow}>
-          {/* Circular Film Reel */}
-          <View style={styles.filmReelCircle}>
-            <View style={styles.reelHole} style={{ top: 8, left: 8 }} />
-            <View style={styles.reelHole} style={{ top: 8, right: 8 }} />
-            <View style={styles.reelHole} style={{ bottom: 8, left: 8 }} />
-            <View style={styles.reelHole} style={{ bottom: 8, right: 8 }} />
-            <View style={styles.reelCenterHole} />
-          </View>
-          {/* Flowing Film Strip */}
-          <View style={styles.flowingStrip} />
-        </View>
-        
+        <MaterialCommunityIcons name="filmstrip" size={60} color="#FFFFFF" />
         <Text style={styles.logo}>CINESCAN</Text>
         <Text style={styles.tagline}>Identify any movie instantly</Text>
       </View>
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        {/* Options (appear above main button) */}
+        {/* Options */}
         {showOptions && (
           <Animated.View 
             style={[
@@ -278,17 +262,17 @@ export default function HomeScreen() {
             ]}
           >
             <TouchableOpacity style={styles.optionButton} onPress={handleAudio}>
-              <Ionicons name="mic" size={32} color="#FFFFFF" />
+              <MaterialCommunityIcons name="microphone" size={32} color="#FFFFFF" />
               <Text style={styles.optionText}>Audio</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.optionButton} onPress={handleVideo}>
-              <Ionicons name="videocam" size={32} color="#FFFFFF" />
+              <MaterialCommunityIcons name="video" size={32} color="#FFFFFF" />
               <Text style={styles.optionText}>Video</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.optionButton} onPress={handleImage}>
-              <Ionicons name="image" size={32} color="#FFFFFF" />
+              <MaterialCommunityIcons name="image" size={32} color="#FFFFFF" />
               <Text style={styles.optionText}>Image</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -303,7 +287,7 @@ export default function HomeScreen() {
         >
           <Animated.View 
             style={[
-              styles.filmStripBorder,
+              styles.mainButton,
               { 
                 transform: [
                   { scale: isListening ? pulseAnim : 1 },
@@ -312,16 +296,11 @@ export default function HomeScreen() {
               }
             ]}
           >
-            <View style={styles.innerCircle}>
-              {/* Film Reel inside button */}
-              <View style={styles.buttonFilmReel}>
-                <View style={styles.buttonReelHole} style={{ top: 20, left: 20 }} />
-                <View style={styles.buttonReelHole} style={{ top: 20, right: 20 }} />
-                <View style={styles.buttonReelHole} style={{ bottom: 20, left: 20 }} />
-                <View style={styles.buttonReelHole} style={{ bottom: 20, right: 20 }} />
-                <View style={styles.buttonReelCenter} />
-              </View>
-            </View>
+            <MaterialCommunityIcons 
+              name="filmstrip" 
+              size={100} 
+              color="#FFFFFF" 
+            />
           </Animated.View>
         </TouchableOpacity>
 
@@ -339,7 +318,7 @@ export default function HomeScreen() {
             onPress={() => stopAndIdentifyAudio(recording)}
           >
             <View style={styles.stopButtonContent}>
-              <Ionicons name="stop-circle" size={24} color="#FFFFFF" />
+              <MaterialCommunityIcons name="stop-circle" size={24} color="#FFFFFF" />
               <Text style={styles.stopButtonText}>Stop</Text>
             </View>
           </TouchableOpacity>
@@ -362,52 +341,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
-  filmReelWithFlow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  filmReelCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FFFFFF',
-    position: 'relative',
-    marginRight: -5,
-    zIndex: 2,
-  },
-  reelHole: {
-    position: 'absolute',
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#000000',
-  },
-  reelCenterHole: {
-    position: 'absolute',
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#000000',
-    top: 23,
-    left: 23,
-  },
-  flowingStrip: {
-    width: 100,
-    height: 40,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 3,
-    borderBottomWidth: 3,
-    borderColor: '#000000',
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
-    zIndex: 1,
-  },
   logo: {
     fontSize: 40,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 4,
+    marginTop: 16,
     marginBottom: 8,
   },
   tagline: {
@@ -424,49 +363,15 @@ const styles = StyleSheet.create({
   mainButtonContainer: {
     marginBottom: 80,
   },
-  filmStripBorder: {
+  mainButton: {
     width: 240,
     height: 240,
     borderRadius: 120,
-    borderWidth: 8,
+    backgroundColor: '#000000',
+    borderWidth: 4,
     borderColor: '#FFFFFF',
-    borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000',
-  },
-  innerCircle: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-  },
-  buttonFilmReel: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#FFFFFF',
-    position: 'relative',
-  },
-  buttonReelHole: {
-    position: 'absolute',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#000000',
-  },
-  buttonReelCenter: {
-    position: 'absolute',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#000000',
-    top: 48,
-    left: 48,
   },
   optionsContainer: {
     flexDirection: 'row',
