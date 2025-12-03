@@ -200,49 +200,54 @@ async def recognize_image(file: UploadFile = File(...)):
                 seen.add(word_lower)
                 unique_words.append(word)
         
-        logger.info(f"Extracted unique words: {unique_words[:20]}")
+        logger.info(f"Extracted unique words: {unique_words[:30]}")
         
-        # Common actor/director names to skip (lowercased)
-        skip_names = {'leonardo', 'dicaprio', 'chris', 'robert', 'scarlett', 'tom', 'chris', 'mark', 'jeremy', 'samuel', 'jackson', 'keanu', 'reeves', 'lawrence', 'fishburne', 'carrie-anne', 'moss', 'marion', 'cotillard', 'ellen', 'page', 'hardy', 'cillian', 'murphy', 'nolan', 'christopher'}
+        # Common actor/director/studio names to deprioritize
+        skip_names = {'leonardo', 'dicaprio', 'chris', 'robert', 'scarlett', 'tom', 'mark', 'jeremy', 'samuel', 'jackson', 'keanu', 'reeves', 'laurence', 'fishburne', 'carrie-anne', 'moss', 'marion', 'cotillard', 'ellen', 'page', 'hardy', 'cillian', 'murphy', 'nolan', 'christopher', 'watanabe', 'gordon-levitt', 'berenger', 'hemsworth', 'downey', 'evans', 'ruffalo', 'johansson', 'renner', 'hiddleston', 'starring', 'presents', 'pictures', 'warner', 'bros', 'studios', 'production', 'directed'}
         
-        # Prioritize words that are all uppercase or longer (more likely to be titles)
-        priority_words = []
-        normal_words = []
+        # Search ALL words and collect results with their scores
+        all_results = []
+        searched_queries = set()
         
-        for word in unique_words[:30]:
-            if word.lower() not in skip_names:
-                if word.isupper() and len(word) > 4:
-                    priority_words.append(word)
-                else:
-                    normal_words.append(word)
+        # Try individual words first (up to 40)
+        for word in unique_words[:40]:
+            if word.lower() not in skip_names and len(word) > 3:
+                query = word
+                if query.lower() not in searched_queries:
+                    searched_queries.add(query.lower())
+                    movie = search_tmdb_movie(query)
+                    if movie:
+                        # Score based on popularity and word characteristics
+                        score = movie.get('popularity', 0)
+                        # Boost score if word is all caps and longer (likely a title)
+                        if word.isupper() and len(word) > 5:
+                            score *= 2
+                        all_results.append({'movie': movie, 'query': query, 'score': score})
+                        logger.info(f"Found '{movie.get('title')}' with query '{query}', score: {score}")
         
-        # Combine: priority words first, then normal words
-        ordered_words = priority_words + normal_words
+        # Try 2-word combinations (up to 20)
+        for i in range(min(20, len(unique_words) - 1)):
+            word1, word2 = unique_words[i], unique_words[i+1]
+            if word1.lower() not in skip_names or word2.lower() not in skip_names:
+                query = f"{word1} {word2}"
+                if query.lower() not in searched_queries:
+                    searched_queries.add(query.lower())
+                    movie = search_tmdb_movie(query)
+                    if movie:
+                        score = movie.get('popularity', 0) * 1.5  # Bonus for 2-word matches
+                        all_results.append({'movie': movie, 'query': query, 'score': score})
+                        logger.info(f"Found '{movie.get('title')}' with query '{query}', score: {score}")
         
-        logger.info(f"Priority words: {priority_words[:10]}")
-        logger.info(f"Ordered search words: {ordered_words[:20]}")
-        
-        # Try individual words and combinations
-        search_queries = []
-        
-        # Add prioritized individual words
-        search_queries.extend(ordered_words[:20])
-        
-        # Add 2-word combinations from ordered words
-        for i in range(min(15, len(ordered_words) - 1)):
-            search_queries.append(f"{ordered_words[i]} {ordered_words[i+1]}")
-        
-        logger.info(f"Final search queries: {search_queries[:15]}")
-        
-        for query in search_queries[:25]:
-            movie = search_tmdb_movie(query)
-            if movie:
-                logger.info(f"Found movie with query '{query}': {movie.get('title')}")
-                return {
-                    "success": True,
-                    "source": "Vision API + TMDB",
-                    "movie": movie
-                }
+        # Sort by score descending and return the best match
+        if all_results:
+            all_results.sort(key=lambda x: x['score'], reverse=True)
+            best_result = all_results[0]
+            logger.info(f"BEST MATCH: '{best_result['movie'].get('title')}' (query: '{best_result['query']}', score: {best_result['score']})")
+            return {
+                "success": True,
+                "source": "Vision API + TMDB",
+                "movie": best_result['movie']
+            }
         
         return {
             "success": False,
