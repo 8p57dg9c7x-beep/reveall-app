@@ -179,17 +179,76 @@ class CinescanTester:
             self.test_movie_search(query, expected)
             time.sleep(0.5)
     
+    def test_image_recognition_with_real_posters(self):
+        """Test image recognition with REAL movie posters as requested by user"""
+        print("\n📸 TESTING IMAGE RECOGNITION WITH REAL MOVIE POSTERS...")
+        
+        # Real movie poster URLs for testing
+        poster_tests = [
+            {
+                "name": "Inception Poster",
+                "url": "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
+                "expected": "Inception"
+            },
+            {
+                "name": "Avengers Poster", 
+                "url": "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+                "expected": "Avengers"
+            },
+            {
+                "name": "Matrix Poster",
+                "url": "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
+                "expected": "Matrix"
+            }
+        ]
+        
+        for poster in poster_tests:
+            start_time = time.time()
+            try:
+                # Download the real poster image
+                img_response = requests.get(poster["url"], timeout=15)
+                if img_response.status_code == 200:
+                    # Convert to base64 as expected by the API
+                    img_base64 = base64.b64encode(img_response.content).decode('utf-8')
+                    payload = {"image_base64": f"data:image/jpeg;base64,{img_base64}"}
+                    
+                    # Send to recognition endpoint
+                    response = requests.post(f"{API_BASE}/recognize-image", json=payload, timeout=60)
+                    duration = time.time() - start_time
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if data.get("success") and data.get("movie"):
+                            movie_title = data["movie"].get("title", "Unknown")
+                            details = f"✅ Recognized: {movie_title} | Source: {data.get('source', 'Unknown')}"
+                            success = poster["expected"].lower() in movie_title.lower()
+                            self.log_result(f"Real Poster: {poster['name']}", success, duration, details)
+                        else:
+                            error_msg = data.get("error", "Unknown error")
+                            self.log_result(f"Real Poster: {poster['name']}", False, duration, f"❌ Not recognized: {error_msg}")
+                    else:
+                        self.log_result(f"Real Poster: {poster['name']}", False, duration, f"❌ HTTP {response.status_code}")
+                else:
+                    self.log_result(f"Real Poster: {poster['name']}", False, 0, f"❌ Failed to download poster: HTTP {img_response.status_code}")
+                    
+            except Exception as e:
+                duration = time.time() - start_time
+                self.log_result(f"Real Poster: {poster['name']}", False, duration, f"❌ Error: {str(e)}")
+            
+            time.sleep(1)  # Small delay between tests
+    
     def test_image_recognition_endpoint(self):
-        """Test image recognition endpoint structure"""
-        print("\n📸 TESTING IMAGE RECOGNITION ENDPOINT...")
+        """Test image recognition endpoint structure with simple test"""
+        print("\n📸 TESTING IMAGE RECOGNITION ENDPOINT STRUCTURE...")
         start_time = time.time()
         
         try:
-            # Create a dummy image file for testing endpoint
+            # Create a simple base64 test image
             dummy_image_data = b"dummy image data for testing"
-            files = {"file": ("test.jpg", dummy_image_data, "image/jpeg")}
+            img_base64 = base64.b64encode(dummy_image_data).decode('utf-8')
+            payload = {"image_base64": f"data:image/jpeg;base64,{img_base64}"}
             
-            response = requests.post(f"{API_BASE}/recognize-image", files=files, timeout=30)
+            response = requests.post(f"{API_BASE}/recognize-image", json=payload, timeout=30)
             duration = time.time() - start_time
             
             if response.status_code == 200:
@@ -202,15 +261,15 @@ class CinescanTester:
                 structure_ok = has_success and has_error and has_movie
                 details = f"Structure OK: {structure_ok}, Success: {data.get('success', False)}"
                 
-                self.log_result("Image Recognition Endpoint", structure_ok, duration, details)
+                self.log_result("Image Recognition Structure", structure_ok, duration, details)
                 return structure_ok
             else:
-                self.log_result("Image Recognition Endpoint", False, duration, f"HTTP {response.status_code}")
+                self.log_result("Image Recognition Structure", False, duration, f"HTTP {response.status_code}")
                 return False
                 
         except Exception as e:
             duration = time.time() - start_time
-            self.log_result("Image Recognition Endpoint", False, duration, f"Error: {str(e)}")
+            self.log_result("Image Recognition Structure", False, duration, f"Error: {str(e)}")
             return False
     
     def test_audio_recognition_endpoint(self):
