@@ -217,11 +217,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   detailsButton: {
-    backgroundColor: COLORS.blue,
+    backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: SIZES.borderRadius,
     alignItems: 'center',
-    ...GLOW.blue,
+    ...SHADOWS.glow,
   },
   detailsButtonDisabled: {
     backgroundColor: COLORS.textSecondary,
