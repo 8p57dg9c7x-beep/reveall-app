@@ -12,8 +12,8 @@ import base64
 from typing import Dict, List, Tuple
 import os
 
-# Backend URL
-BASE_URL = "http://localhost:8001"
+# Backend URL - Updated to use production URL from user request
+BASE_URL = "https://moviedetect.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 class CinescanTester:
