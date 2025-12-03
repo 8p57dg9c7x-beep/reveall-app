@@ -239,9 +239,18 @@ export default function HomeScreen() {
       
       {/* Logo Section */}
       <View style={styles.logoSection}>
-        {/* Simple Film Reel Icon */}
-        <View style={styles.filmReelIcon}>
-          <MaterialCommunityIcons name="filmstrip" size={50} color="#FFFFFF" />
+        {/* Film Reel with Flowing Strip */}
+        <View style={styles.filmReelWithFlow}>
+          {/* Circular Film Reel */}
+          <View style={styles.filmReelCircle}>
+            <View style={styles.reelHole} style={{ top: 8, left: 8 }} />
+            <View style={styles.reelHole} style={{ top: 8, right: 8 }} />
+            <View style={styles.reelHole} style={{ bottom: 8, left: 8 }} />
+            <View style={styles.reelHole} style={{ bottom: 8, right: 8 }} />
+            <View style={styles.reelCenterHole} />
+          </View>
+          {/* Flowing Film Strip */}
+          <View style={styles.flowingStrip} />
         </View>
         
         <Text style={styles.logo}>CINESCAN</Text>
