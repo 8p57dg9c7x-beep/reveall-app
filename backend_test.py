@@ -679,11 +679,11 @@ class CinescanTester:
             print("❌ API is not responding. Stopping tests.")
             return
         
-        # USER REQUESTED TESTS - Real movie content testing
-        print("\n🎬 PHASE 1: REAL MOVIE CONTENT TESTING (User Priority)")
-        self.test_image_recognition_with_real_posters()  # NEW: Real movie posters
-        self.test_audio_recognition_with_real_audio()    # NEW: Real audio testing
-        self.test_video_recognition_endpoint()           # Updated: Coming soon message
+        # CRITICAL AUDIO RECOGNITION TESTING - User Priority
+        print("\n🎵 PHASE 1: CRITICAL AUDIO RECOGNITION TESTING (User Priority)")
+        print("🎯 USER REQUEST: Test audio recognition with REAL movie audio clips/soundtracks")
+        self.test_audio_recognition_with_real_audio()    # CRITICAL: Real audio testing
+        self.test_audd_api_integration_detailed()        # CRITICAL: AudD API verification
         
         # API KEY VERIFICATION (User requested)
         print("\n🔑 PHASE 2: API KEY VERIFICATION (User Priority)")
