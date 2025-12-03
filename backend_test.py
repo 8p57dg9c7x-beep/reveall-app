@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
-CINESCAN AUDIO RECOGNITION TESTING - COMPREHENSIVE MOVIE SOUNDTRACK TESTING
-CRITICAL MISSION: Test audio recognition with 10 REAL movie soundtrack clips
-SUCCESS CRITERIA: 8/10 minimum accuracy, <5s response time average
+COMPREHENSIVE VIDEO SCENE RECOGNITION TESTING
+CRITICAL MISSION: Test video recognition with 10 famous movie scenes
+SUCCESS CRITERIA: 8/10 minimum accuracy for deployment
 Backend URL: https://moviedetect.preview.emergentagent.com
+
+USER EXPECTATION: Identify movies from video clips/scenes (visual recognition, not audio)
+Since we cannot use actual copyrighted movie clips, we'll simulate video frame 
+extraction by using movie scene screenshots/posters to test the recognition system.
 """
 
 import requests
