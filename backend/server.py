@@ -222,12 +222,18 @@ async def recognize_image(file: UploadFile = File(...)):
         if web_entities:
             movie_candidates = []
             
+            # Filter out generic terms that shouldn't be searched
+            generic_terms = ['video', 'film', 'movie', 'scene', 'poster', 'film poster', 'movie poster', 
+                            'illustration', 'artwork', 'cinema', 'hollywood', 'actor', 'actress',
+                            'director', 'crime film', 'drama', 'thriller', 'action film', 'comedy']
+            
             for entity in web_entities[:25]:
                 query = entity['text']
                 entity_lower = query.lower().strip()
                 
-                # Skip generic words
-                if entity_lower in ['poster', 'film', 'movie', 'film poster']:
+                # Skip generic movie-related terms
+                if entity_lower in generic_terms:
+                    logger.info(f"Skipping generic term: '{query}'")
                     continue
                 
                 logger.info(f"Checking: '{query}'")
