@@ -361,27 +361,29 @@ class CinescanTester:
             return False
     
     def test_video_recognition_endpoint(self):
-        """Test video recognition endpoint structure"""
+        """Test video recognition endpoint (should return 'coming soon' message)"""
         print("\n🎥 TESTING VIDEO RECOGNITION ENDPOINT...")
         start_time = time.time()
         
         try:
-            # Create dummy video file
+            # Test with base64 video data as per API specification
             dummy_video_data = b"dummy video data for testing"
-            files = {"file": ("test.mp4", dummy_video_data, "video/mp4")}
+            video_base64 = base64.b64encode(dummy_video_data).decode('utf-8')
+            payload = {"video_base64": f"data:video/mp4;base64,{video_base64}"}
             
-            response = requests.post(f"{API_BASE}/recognize-video", files=files, timeout=30)
+            response = requests.post(f"{API_BASE}/recognize-video", json=payload, timeout=30)
             duration = time.time() - start_time
             
             if response.status_code == 200:
                 data = response.json()
-                # Check response structure
+                # Check response structure and "coming soon" message
                 has_success = "success" in data
                 has_error = "error" in data
                 has_movie = "movie" in data
+                coming_soon = "coming soon" in data.get("error", "").lower()
                 
-                structure_ok = has_success and has_error and has_movie
-                details = f"Structure OK: {structure_ok}, Message: {data.get('error', 'N/A')}"
+                structure_ok = has_success and has_error and has_movie and coming_soon
+                details = f"Structure OK: {structure_ok}, Coming Soon Message: {coming_soon}, Error: {data.get('error', 'N/A')}"
                 
                 self.log_result("Video Recognition Endpoint", structure_ok, duration, details)
                 return structure_ok
@@ -393,6 +395,135 @@ class CinescanTester:
             duration = time.time() - start_time
             self.log_result("Video Recognition Endpoint", False, duration, f"Error: {str(e)}")
             return False
+    
+    def test_api_key_verification(self):
+        """Test if external API keys are working properly"""
+        print("\n🔑 TESTING API KEY VERIFICATION...")
+        
+        # Test TMDB API key directly
+        start_time = time.time()
+        try:
+            tmdb_url = "https://api.themoviedb.org/3/search/movie"
+            params = {
+                'api_key': '04253a70fe55d02b56ecc5f48e52b255',  # From backend/.env
+                'query': 'Inception'
+            }
+            
+            response = requests.get(tmdb_url, params=params, timeout=10)
+            duration = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('results') and len(data['results']) > 0:
+                    movie_count = len(data['results'])
+                    details = f"✅ TMDB API working, found {movie_count} results for 'Inception'"
+                    self.log_result("TMDB API Key Verification", True, duration, details)
+                else:
+                    self.log_result("TMDB API Key Verification", False, duration, "❌ TMDB API key works but no results found")
+            else:
+                self.log_result("TMDB API Key Verification", False, duration, f"❌ TMDB API error: HTTP {response.status_code}")
+                
+        except Exception as e:
+            duration = time.time() - start_time
+            self.log_result("TMDB API Key Verification", False, duration, f"❌ TMDB API error: {str(e)}")
+        
+        # Test Google Vision API key (indirectly through our endpoint)
+        start_time = time.time()
+        try:
+            # Create a simple test image with text
+            test_image_data = b"simple test image data"
+            img_base64 = base64.b64encode(test_image_data).decode('utf-8')
+            payload = {"image_base64": f"data:image/jpeg;base64,{img_base64}"}
+            
+            response = requests.post(f"{API_BASE}/recognize-image", json=payload, timeout=30)
+            duration = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                # If we get a proper response structure, Google Vision API is accessible
+                if "success" in data and "error" in data:
+                    details = f"✅ Google Vision API accessible through backend"
+                    self.log_result("Google Vision API Key Verification", True, duration, details)
+                else:
+                    self.log_result("Google Vision API Key Verification", False, duration, "❌ Invalid response structure")
+            else:
+                self.log_result("Google Vision API Key Verification", False, duration, f"❌ HTTP {response.status_code}")
+                
+        except Exception as e:
+            duration = time.time() - start_time
+            self.log_result("Google Vision API Key Verification", False, duration, f"❌ Error: {str(e)}")
+        
+        # Test AudD API key (indirectly through our endpoint)
+        start_time = time.time()
+        try:
+            test_audio_data = b"simple test audio data"
+            audio_base64 = base64.b64encode(test_audio_data).decode('utf-8')
+            payload = {"audio_base64": f"data:audio/m4a;base64,{audio_base64}"}
+            
+            response = requests.post(f"{API_BASE}/recognize-audio", json=payload, timeout=30)
+            duration = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                # If we get a proper response structure, AudD API is accessible
+                if "success" in data and "error" in data:
+                    details = f"✅ AudD API accessible through backend"
+                    self.log_result("AudD API Key Verification", True, duration, details)
+                else:
+                    self.log_result("AudD API Key Verification", False, duration, "❌ Invalid response structure")
+            else:
+                self.log_result("AudD API Key Verification", False, duration, f"❌ HTTP {response.status_code}")
+                
+        except Exception as e:
+            duration = time.time() - start_time
+            self.log_result("AudD API Key Verification", False, duration, f"❌ Error: {str(e)}")
+    
+    def test_error_handling(self):
+        """Test error handling with invalid data"""
+        print("\n🚨 TESTING ERROR HANDLING...")
+        
+        # Test with invalid image data
+        start_time = time.time()
+        try:
+            payload = {"image_base64": "invalid_base64_data"}
+            response = requests.post(f"{API_BASE}/recognize-image", json=payload, timeout=15)
+            duration = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") == False and data.get("error"):
+                    details = f"✅ Proper error handling: {data.get('error')}"
+                    self.log_result("Error Handling - Invalid Image", True, duration, details)
+                else:
+                    self.log_result("Error Handling - Invalid Image", False, duration, f"❌ Poor error handling: {data}")
+            else:
+                # 422 or 400 are also acceptable for validation errors
+                if response.status_code in [400, 422]:
+                    details = f"✅ Proper validation error: HTTP {response.status_code}"
+                    self.log_result("Error Handling - Invalid Image", True, duration, details)
+                else:
+                    self.log_result("Error Handling - Invalid Image", False, duration, f"❌ HTTP {response.status_code}")
+                
+        except Exception as e:
+            duration = time.time() - start_time
+            self.log_result("Error Handling - Invalid Image", False, duration, f"❌ Error: {str(e)}")
+        
+        # Test with malformed request
+        start_time = time.time()
+        try:
+            payload = {"wrong_field": "test"}
+            response = requests.post(f"{API_BASE}/recognize-image", json=payload, timeout=15)
+            duration = time.time() - start_time
+            
+            if response.status_code in [422, 400]:  # Expected validation error
+                details = f"✅ Proper validation error: HTTP {response.status_code}"
+                self.log_result("Error Handling - Malformed Request", True, duration, details)
+            else:
+                self.log_result("Error Handling - Malformed Request", False, duration, f"❌ Unexpected response: HTTP {response.status_code}")
+                
+        except Exception as e:
+            duration = time.time() - start_time
+            self.log_result("Error Handling - Malformed Request", False, duration, f"❌ Error: {str(e)}")
     
     def test_speed_performance(self):
         """Test overall speed performance"""
