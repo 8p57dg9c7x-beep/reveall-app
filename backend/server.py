@@ -202,26 +202,42 @@ async def recognize_image(file: UploadFile = File(...)):
         
         logger.info(f"Extracted unique words: {unique_words[:20]}")
         
-        # Try combinations of 1-3 consecutive words
+        # Common actor/director names to skip (lowercased)
+        skip_names = {'leonardo', 'dicaprio', 'chris', 'robert', 'scarlett', 'tom', 'chris', 'mark', 'jeremy', 'samuel', 'jackson', 'keanu', 'reeves', 'lawrence', 'fishburne', 'carrie-anne', 'moss', 'marion', 'cotillard', 'ellen', 'page', 'hardy', 'cillian', 'murphy', 'nolan', 'christopher'}
+        
+        # Prioritize words that are all uppercase or longer (more likely to be titles)
+        priority_words = []
+        normal_words = []
+        
+        for word in unique_words[:30]:
+            if word.lower() not in skip_names:
+                if word.isupper() and len(word) > 4:
+                    priority_words.append(word)
+                else:
+                    normal_words.append(word)
+        
+        # Combine: priority words first, then normal words
+        ordered_words = priority_words + normal_words
+        
+        logger.info(f"Priority words: {priority_words[:10]}")
+        logger.info(f"Ordered search words: {ordered_words[:20]}")
+        
+        # Try individual words and combinations
         search_queries = []
         
-        # Add individual words (try up to 25 words)
-        search_queries.extend(unique_words[:25])
+        # Add prioritized individual words
+        search_queries.extend(ordered_words[:20])
         
-        # Add 2-word combinations
-        for i in range(min(15, len(unique_words) - 1)):
-            search_queries.append(f"{unique_words[i]} {unique_words[i+1]}")
+        # Add 2-word combinations from ordered words
+        for i in range(min(15, len(ordered_words) - 1)):
+            search_queries.append(f"{ordered_words[i]} {ordered_words[i+1]}")
         
-        # Add 3-word combinations
-        for i in range(min(10, len(unique_words) - 2)):
-            search_queries.append(f"{unique_words[i]} {unique_words[i+1]} {unique_words[i+2]}")
+        logger.info(f"Final search queries: {search_queries[:15]}")
         
-        logger.info(f"Search queries: {search_queries[:20]}")
-        
-        for query in search_queries[:30]:
+        for query in search_queries[:25]:
             movie = search_tmdb_movie(query)
             if movie:
-                logger.info(f"Found movie: {movie.get('title')}")
+                logger.info(f"Found movie with query '{query}': {movie.get('title')}")
                 return {
                     "success": True,
                     "source": "Vision API + TMDB",
