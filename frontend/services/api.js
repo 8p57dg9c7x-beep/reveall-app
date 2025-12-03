@@ -102,12 +102,10 @@ export const recognizeVideo = async (videoUri) => {
       type: `video/${fileType}`,
     });
 
+    // Don't set Content-Type header - let fetch set it with proper boundary
     const response = await fetch(`${API_BASE_URL}/api/recognize-video`, {
       method: 'POST',
       body: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
     });
 
     const data = await response.json();
