@@ -354,27 +354,72 @@ async def recognize_audio(file: UploadFile = File(...)):
         logger.info("🎵 Trying soundtrack recognition with AudD...")
         search_query = recognize_audio_with_audd(audio_base64)
         
-        if not search_query:
-            return {
-                "success": False,
-                "error": "Could not recognize audio",
-                "movie": None
-            }
+        if search_query:
+            logger.info(f"AudD found: {search_query}")
+            movie = search_tmdb_movie(search_query)
+            if movie:
+                logger.info(f"✅ Found movie from soundtrack: {movie.get('title')}")
+                return {
+                    "success": True,
+                    "source": "Audio Recognition (Soundtrack)",
+                    "movie": movie
+                }
         
-        logger.info(f"Detected audio query: {search_query}")
-        movie = search_tmdb_movie(search_query)
-        
-        if movie:
-            logger.info(f"Found movie: {movie.get('title')}")
-            return {
-                "success": True,
-                "source": "AudD + TMDB",
-                "movie": movie
-            }
+        # METHOD 2: Try dialogue recognition with OpenAI Whisper
+        logger.info("🎭 Trying dialogue recognition with Whisper...")
+        try:
+            # Save audio temporarily
+            temp_audio_path = f"/tmp/temp_audio_{int(time.time())}.mp3"
+            with open(temp_audio_path, 'wb') as f:
+                f.write(base64.b64decode(audio_base64))
+            
+            # Use OpenAI Whisper to transcribe
+            if OPENAI_API_KEY:
+                with open(temp_audio_path, 'rb') as f:
+                    whisper_response = requests.post(
+                        'https://api.openai.com/v1/audio/transcriptions',
+                        headers={'Authorization': f'Bearer {OPENAI_API_KEY}'},
+                        files={'file': f},
+                        data={'model': 'whisper-1'},
+                        timeout=30
+                    )
+                
+                if whisper_response.status_code == 200:
+                    transcription = whisper_response.json().get('text', '')
+                    logger.info(f"Transcribed: {transcription[:100]}...")
+                    
+                    if transcription and len(transcription) > 10:
+                        # Try searching TMDB with the dialogue/transcription
+                        # Look for famous quotes or movie titles in the text
+                        words = transcription.split()
+                        
+                        # Try different combinations
+                        for i in range(min(len(words), 10)):
+                            for length in [5, 4, 3, 2]:
+                                if i + length <= len(words):
+                                    query = ' '.join(words[i:i+length])
+                                    movie = search_tmdb_movie(query)
+                                    if movie:
+                                        logger.info(f"✅ Found movie from dialogue: {movie.get('title')}")
+                                        import os
+                                        os.remove(temp_audio_path)
+                                        return {
+                                            "success": True,
+                                            "source": "Audio Recognition (Dialogue)",
+                                            "movie": movie,
+                                            "note": "Dialogue recognition is experimental and may not be accurate"
+                                        }
+            
+            import os
+            if os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
+                
+        except Exception as e:
+            logger.error(f"Dialogue recognition error: {e}")
         
         return {
             "success": False,
-            "error": f"Could not find movie from audio",
+            "error": "Could not recognize audio (tried both soundtrack and dialogue)",
             "movie": None
         }
         
