@@ -386,7 +386,7 @@ async def recognize_audio(file: UploadFile = File(...)):
 
 @api_router.post("/recognize-video")
 async def recognize_video(file: UploadFile = File(...)):
-    """Recognize movie from video frames using visual recognition"""
+    """Recognize movie from video using BOTH visual AND audio recognition"""
     import subprocess
     try:
         logger.info(f"Received video: {file.filename}, content_type: {file.content_type}")
@@ -398,119 +398,102 @@ async def recognize_video(file: UploadFile = File(...)):
         # Save video temporarily
         temp_video_path = f"/tmp/temp_video_{int(time.time())}.mp4"
         temp_frame_path = f"/tmp/temp_frame_{int(time.time())}.jpg"
+        temp_audio_path = f"/tmp/temp_audio_{int(time.time())}.mp3"
         
         try:
             with open(temp_video_path, 'wb') as f:
                 f.write(video_content)
             
-            # Extract middle frame from video using ffmpeg
+            # METHOD 1: Extract frame for visual recognition
+            logger.info("🎬 Attempting visual recognition from video frame...")
             result = subprocess.run([
-                'ffmpeg', '-i', temp_video_path,
-                '-vf', 'select=eq(n\\,0)',
-                '-vframes', '1',
+                'ffmpeg', '-ss', '00:00:01', '-i', temp_video_path,
+                '-frames:v', '1',
                 temp_frame_path, '-y'
             ], capture_output=True, timeout=30)
             
-            if result.returncode != 0:
-                # Try extracting frame at 1 second
-                result = subprocess.run([
-                    'ffmpeg', '-ss', '00:00:01', '-i', temp_video_path,
-                    '-frames:v', '1',
-                    temp_frame_path, '-y'
-                ], capture_output=True, timeout=30)
+            visual_movie = None
+            if result.returncode == 0:
+                with open(temp_frame_path, 'rb') as f:
+                    frame_content = f.read()
                 
-                if result.returncode != 0:
-                    logger.error(f"FFmpeg error: {result.stderr.decode()}")
-                    return {
-                        "success": False,
-                        "error": "Could not extract frame from video",
-                        "movie": None
-                    }
+                logger.info(f"Extracted frame size: {len(frame_content)} bytes")
+                vision_result = recognize_image_with_google_vision(frame_content)
+                web_entities = vision_result.get('web_entities', [])
+                best_guess = vision_result.get('best_guess', [])
+                
+                logger.info(f"Video frame best guess: {best_guess}")
+                
+                # Try best guess
+                if best_guess:
+                    for guess in best_guess[:3]:
+                        movie = search_tmdb_movie(guess)
+                        if movie:
+                            logger.info(f"✅ VISUAL: Found '{movie.get('title')}' from frame")
+                            visual_movie = movie
+                            break
+                
+                # Try web entities if no best guess match
+                if not visual_movie and web_entities:
+                    for entity in web_entities[:15]:
+                        query = entity['text']
+                        entity_lower = query.lower().strip()
+                        
+                        if entity_lower in ['video', 'film', 'movie', 'scene']:
+                            continue
+                        
+                        movie = search_tmdb_movie(query)
+                        if movie:
+                            movie_title = movie.get('title', '').lower().strip()
+                            entity_clean = entity_lower.replace('the ', '').replace('a ', '').strip()
+                            title_clean = movie_title.replace('the ', '').replace('a ', '').strip()
+                            
+                            if entity_clean == title_clean or entity_clean in title_clean:
+                                logger.info(f"✅ VISUAL: Found '{movie.get('title')}' from entity")
+                                visual_movie = movie
+                                break
             
-            # Read extracted frame
-            with open(temp_frame_path, 'rb') as f:
-                frame_content = f.read()
+            # METHOD 2: Extract audio for soundtrack recognition
+            logger.info("🎵 Attempting audio recognition from video soundtrack...")
+            result = subprocess.run([
+                'ffmpeg', '-i', temp_video_path,
+                '-vn', '-acodec', 'mp3', '-ar', '44100', '-ac', '2',
+                '-b:a', '128k', temp_audio_path, '-y'
+            ], capture_output=True, timeout=30)
             
-            logger.info(f"Extracted frame size: {len(frame_content)} bytes")
-            
-            # Use Google Vision to recognize the frame
-            vision_result = recognize_image_with_google_vision(frame_content)
-            web_entities = vision_result.get('web_entities', [])
-            best_guess = vision_result.get('best_guess', [])
-            
-            logger.info(f"Video frame web entities: {web_entities[:5]}")
-            logger.info(f"Video frame best guess: {best_guess}")
-            
-            # Try best guess first
-            if best_guess:
-                for guess in best_guess[:3]:
-                    logger.info(f"Trying video best guess: '{guess}'")
-                    movie = search_tmdb_movie(guess)
+            audio_movie = None
+            if result.returncode == 0:
+                with open(temp_audio_path, 'rb') as f:
+                    audio_content = f.read()
+                
+                audio_base64 = base64.b64encode(audio_content).decode('utf-8')
+                search_query = recognize_audio_with_audd(audio_base64)
+                
+                if search_query:
+                    movie = search_tmdb_movie(search_query)
                     if movie:
-                        logger.info(f"✅ FOUND from video via best guess: '{movie.get('title')}'")
-                        return {
-                            "success": True,
-                            "source": "Video Frame Recognition",
-                            "movie": movie
-                        }
+                        logger.info(f"✅ AUDIO: Found '{movie.get('title')}' from soundtrack")
+                        audio_movie = movie
             
-            # Try web entities with smart matching
-            if web_entities:
-                movie_candidates = []
-                
-                for entity in web_entities[:25]:
-                    query = entity['text']
-                    entity_lower = query.lower().strip()
-                    
-                    if entity_lower in ['video', 'film', 'movie', 'scene']:
-                        continue
-                    
-                    logger.info(f"Checking video entity: '{query}'")
-                    movie = search_tmdb_movie(query)
-                    
-                    if movie:
-                        movie_title = movie.get('title', '').lower().strip()
-                        entity_clean = entity_lower.replace('the ', '').replace('a ', '').strip()
-                        title_clean = movie_title.replace('the ', '').replace('a ', '').strip()
-                        
-                        match_score = 0
-                        
-                        if entity_clean == title_clean or entity_lower == movie_title:
-                            match_score = 10000
-                            logger.info(f"  ✅ PERFECT: '{query}' = '{movie.get('title')}'")
-                        elif entity_clean in title_clean and len(entity_clean) > 5:
-                            match_score = 5000
-                            logger.info(f"  ✅ STRONG: '{query}' in '{movie.get('title')}'")
-                        elif title_clean in entity_clean and len(title_clean) > 5:
-                            match_score = 4000
-                            logger.info(f"  ✅ STRONG: '{movie.get('title')}' in '{query}'")
-                        else:
-                            match_score = 1
-                            logger.info(f"  ❌ WEAK: '{query}' → '{movie.get('title')}'")
-                        
-                        movie_candidates.append({
-                            'movie': movie,
-                            'query': query,
-                            'match_score': match_score
-                        })
-                
-                if movie_candidates:
-                    movie_candidates.sort(key=lambda x: x['match_score'], reverse=True)
-                    best = movie_candidates[0]
-                    
-                    if best['match_score'] >= 4000:
-                        logger.info(f"🎯 SELECTED from video: '{best['movie'].get('title')}'")
-                        return {
-                            "success": True,
-                            "source": "Video Frame Recognition",
-                            "movie": best['movie']
-                        }
-            
-            return {
-                "success": False,
-                "error": "Could not identify movie from video. Try a clearer scene with visible text or logos.",
-                "movie": None
-            }
+            # Return best result (prioritize visual over audio)
+            if visual_movie:
+                return {
+                    "success": True,
+                    "source": "Video Visual Recognition",
+                    "movie": visual_movie
+                }
+            elif audio_movie:
+                return {
+                    "success": True,
+                    "source": "Video Audio Recognition (Soundtrack)",
+                    "movie": audio_movie
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": "Could not identify movie from video (tried both visual and audio)",
+                    "movie": None
+                }
             
         finally:
             # Cleanup temp files
@@ -519,6 +502,8 @@ async def recognize_video(file: UploadFile = File(...)):
                 os.remove(temp_video_path)
             if os.path.exists(temp_frame_path):
                 os.remove(temp_frame_path)
+            if os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
         
     except Exception as e:
         logger.error(f"Video recognition error: {e}")
