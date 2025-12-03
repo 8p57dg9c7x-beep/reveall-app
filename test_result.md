@@ -252,11 +252,13 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.1"
-  test_sequence: 2
+  version: "1.2"
+  test_sequence: 3
   run_ui: false
   last_tested_by: "testing_agent"
-  backend_url_tested: "https://cinescan-backend-1.onrender.com"
+  backend_url_tested: "https://moviedetect.preview.emergentagent.com"
+  last_retest_date: "2025-12-03"
+  retest_algorithm: "NEW Web Detection Algorithm"
 
 test_plan:
   current_focus:
