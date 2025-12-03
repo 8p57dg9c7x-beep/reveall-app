@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-CINESCAN Backend Comprehensive Testing Suite
-Tests speed, accuracy, and functionality of movie recognition system
-Target: Shazam-level performance (under 3 seconds)
+CINESCAN Backend Testing - COMPREHENSIVE IMAGE RECOGNITION TESTING
+USER REQUEST: Test image recognition with MULTIPLE real movie posters and screenshots
+SUCCESS CRITERIA: 7+ out of 10 images must identify correctly, <5s response time
 """
 
 import requests
@@ -11,8 +11,10 @@ import json
 import base64
 from typing import Dict, List, Tuple
 import os
+import urllib.request
+from urllib.parse import urlparse
 
-# Backend URL - Updated to use production URL from user request
+# Backend URL from user request
 BASE_URL = "https://moviedetect.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
