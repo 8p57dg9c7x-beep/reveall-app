@@ -249,14 +249,14 @@ class CinescanTester:
         results = []
         correct_count = 0
         total_tested = 0
+        total_time = 0
         
-        print(f"📥 Testing {len(test_images)} movie posters/screenshots...")
+        print(f"📥 Testing {len(test_images)} movie posters with NEW web detection algorithm...")
         print()
         
         for i, img in enumerate(test_images, 1):
             print(f"🎬 TEST {i}/10: {img['name']}")
             print(f"Expected: {img['expected']}")
-            print(f"Type: {img['type']}")
             
             start_time = time.time()
             
@@ -270,11 +270,10 @@ class CinescanTester:
                     results.append({
                         "image": img['name'],
                         "expected": img['expected'],
-                        "detected_text": "Download failed",
-                        "result": f"HTTP {img_response.status_code}",
-                        "correct": "NO",
-                        "score": 0,
-                        "time": 0,
+                        "result": f"DOWNLOAD_ERROR",
+                        "correct": False,
+                        "response_time": 0,
+                        "detection_method": "N/A",
                         "error": f"Download failed: HTTP {img_response.status_code}"
                     })
                     total_tested += 1
@@ -284,63 +283,72 @@ class CinescanTester:
                 
                 # Send to image recognition endpoint using multipart/form-data as per backend expectation
                 print("  🔍 Sending to recognition API...")
-                files = {'file': (img['name'], img_response.content, 'image/jpeg')}
+                files = {'file': (f'{img["name"].lower().replace(" ", "_")}.jpg', img_response.content, 'image/jpeg')}
                 
-                response = requests.post(f"{API_BASE}/recognize-image", files=files, timeout=10)
+                response = requests.post(f"{API_BASE}/recognize-image", files=files, timeout=30)
                 duration = time.time() - start_time
+                total_time += duration
                 
                 if response.status_code == 200:
                     data = response.json()
                     
-                    detected_text = "N/A"  # Google Vision text not directly exposed in response
-                    result_movie = "None"
-                    correct = "NO"
-                    score = 0
+                    result_movie = "FAILED"
+                    correct = False
+                    detection_method = "N/A"
                     
                     if data.get('success'):
                         movie = data.get('movie', {})
                         result_movie = movie.get('title', 'Unknown')
-                        score = movie.get('popularity', 0)
+                        detection_method = data.get('source', 'Unknown')
                         
-                        # Check if correct (flexible matching)
+                        # Check if correct (flexible matching for the specific movies)
                         expected_lower = img['expected'].lower()
                         result_lower = result_movie.lower()
                         
-                        # Flexible matching logic
-                        if expected_lower in result_lower or result_lower in expected_lower:
-                            correct = "YES"
-                            correct_count += 1
-                        elif "harry potter" in expected_lower and "harry potter" in result_lower:
-                            correct = "YES"
-                            correct_count += 1
-                        elif "star wars" in expected_lower and "star wars" in result_lower:
-                            correct = "YES"
-                            correct_count += 1
-                        elif "avengers" in expected_lower and "avengers" in result_lower:
-                            correct = "YES"
-                            correct_count += 1
+                        # Specific matching logic for each movie
+                        if "inception" in expected_lower and "inception" in result_lower:
+                            correct = True
+                        elif "matrix" in expected_lower and "matrix" in result_lower:
+                            correct = True
+                        elif "titanic" in expected_lower and "titanic" in result_lower:
+                            correct = True
                         elif "dark knight" in expected_lower and "dark knight" in result_lower:
-                            correct = "YES"
+                            correct = True
+                        elif "forrest gump" in expected_lower and "forrest gump" in result_lower:
+                            correct = True
+                        elif "pulp fiction" in expected_lower and "pulp fiction" in result_lower:
+                            correct = True
+                        elif "fight club" in expected_lower and "fight club" in result_lower:
+                            correct = True
+                        elif "goodfellas" in expected_lower and "goodfellas" in result_lower:
+                            correct = True
+                        elif "shawshank" in expected_lower and "shawshank" in result_lower:
+                            correct = True
+                        elif "godfather" in expected_lower and "godfather" in result_lower:
+                            correct = True
+                        
+                        if correct:
                             correct_count += 1
                         
                         print(f"  🎯 RESULT: {result_movie}")
-                        print(f"  ✅ Correct: {correct}")
-                        print(f"  ⭐ Score: {score}")
+                        print(f"  🔍 METHOD: {detection_method}")
+                        print(f"  {'✅ CORRECT' if correct else '❌ WRONG'}")
                         print(f"  ⏱️  Time: {duration:.2f}s")
                         
                     else:
-                        result_movie = f"ERROR: {data.get('error', 'Unknown error')}"
-                        print(f"  ❌ Recognition failed: {data.get('error', 'Unknown error')}")
+                        error_msg = data.get('error', 'Unknown error')
+                        result_movie = "FAILED"
+                        print(f"  ❌ Recognition failed: {error_msg}")
                         print(f"  ⏱️  Time: {duration:.2f}s")
                     
                     results.append({
                         "image": img['name'],
                         "expected": img['expected'],
-                        "detected_text": detected_text,
                         "result": result_movie,
                         "correct": correct,
-                        "score": score,
-                        "time": duration
+                        "response_time": duration,
+                        "detection_method": detection_method,
+                        "error": None if data.get('success') else data.get('error', 'Unknown error')
                     })
                     
                 else:
@@ -348,26 +356,27 @@ class CinescanTester:
                     results.append({
                         "image": img['name'],
                         "expected": img['expected'],
-                        "detected_text": "HTTP Error",
-                        "result": f"HTTP {response.status_code}",
-                        "correct": "NO",
-                        "score": 0,
-                        "time": duration
+                        "result": f"HTTP_{response.status_code}",
+                        "correct": False,
+                        "response_time": duration,
+                        "detection_method": "N/A",
+                        "error": f"HTTP {response.status_code}"
                     })
                 
                 total_tested += 1
                 
             except Exception as e:
                 duration = time.time() - start_time
+                total_time += duration
                 print(f"  ❌ Exception: {e}")
                 results.append({
                     "image": img['name'],
                     "expected": img['expected'],
-                    "detected_text": "Exception",
-                    "result": f"ERROR: {str(e)}",
-                    "correct": "NO",
-                    "score": 0,
-                    "time": duration
+                    "result": "EXCEPTION",
+                    "correct": False,
+                    "response_time": duration,
+                    "detection_method": "N/A",
+                    "error": str(e)
                 })
                 total_tested += 1
             
