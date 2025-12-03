@@ -313,11 +313,14 @@ export default function HomeScreen() {
             ]}
           >
             <View style={styles.innerCircle}>
-              <MaterialCommunityIcons 
-                name="filmstrip" 
-                size={100} 
-                color="#FFFFFF" 
-              />
+              {/* Film Reel inside button */}
+              <View style={styles.buttonFilmReel}>
+                <View style={styles.buttonReelHole} style={{ top: 20, left: 20 }} />
+                <View style={styles.buttonReelHole} style={{ top: 20, right: 20 }} />
+                <View style={styles.buttonReelHole} style={{ bottom: 20, left: 20 }} />
+                <View style={styles.buttonReelHole} style={{ bottom: 20, right: 20 }} />
+                <View style={styles.buttonReelCenter} />
+              </View>
             </View>
           </Animated.View>
         </TouchableOpacity>
