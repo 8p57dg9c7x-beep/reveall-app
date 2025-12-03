@@ -1,8 +1,8 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 
-// Use local backend for testing (it has the new movie recognition code)
-const API_BASE_URL = 'http://localhost:8001';
+// Use Render backend (accessible from mobile devices)
+const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://cinescan-backend-1.onrender.com';
 
 console.log('API_BASE_URL:', API_BASE_URL);
 
