@@ -383,66 +383,92 @@ class CinescanTester:
             print()  # Add spacing between tests
             time.sleep(1)  # Brief pause between tests
         
-        # Generate comprehensive summary as requested
+        # Generate final report in user's requested format
         print("=" * 80)
-        print("📊 COMPREHENSIVE IMAGE RECOGNITION TEST RESULTS")
+        print("📊 DETAILED RESULTS - NEW WEB DETECTION ALGORITHM")
         print("=" * 80)
         
-        # Detailed results for each image as requested
-        print("\nDETAILED RESULTS:")
+        # For Each Image Log as requested
         for result in results:
             print(f"""
-Image: {result['image']}
-Expected: {result['expected']}
-Detected Text: {result['detected_text']}
-Result: {result['result']}
-Correct: {result['correct']}
-Score: {result['score']}
-Time: {result['time']:.2f}s
+Image name: {result['image']}
+Expected movie: {result['expected']}
+Result movie: {result['result']}
+Correct: {'YES' if result['correct'] else 'NO'}
+Response time: {result['response_time']:.2f}s
+Detection method: {result['detection_method']}
 """)
         
-        # Final summary as requested
-        wrong_count = sum(1 for r in results if r['correct'] == 'NO' and 'ERROR' not in r['result'])
-        error_count = sum(1 for r in results if 'ERROR' in r['result'] or 'HTTP' in r['result'])
+        # Calculate statistics
+        wrong_count = sum(1 for r in results if not r['correct'] and 'ERROR' not in str(r['result']))
+        avg_time = total_time / total_tested if total_tested > 0 else 0
         pass_rate = (correct_count / total_tested * 100) if total_tested > 0 else 0
         
-        print("FINAL SUMMARY:")
-        print(f"Total Tested: {total_tested}")
+        # Final Report in user's exact format
+        print("=" * 80)
+        print("🎯 FINAL REPORT")
+        print("=" * 80)
+        print(f"Total: {total_tested}")
         print(f"Correct: {correct_count}")
         print(f"Wrong: {wrong_count}")
-        print(f"Errors: {error_count}")
         print(f"Pass Rate: {pass_rate:.1f}%")
+        print(f"Average Time: {avg_time:.2f}s")
+        print()
         
-        # Determine PASS/FAIL based on user criteria (7+ correct out of 10)
-        if correct_count >= 7:
-            status = "PASS"
-            print(f"Status: ✅ {status}")
+        # Determine PASS/FAIL based on user criteria
+        meets_accuracy = correct_count >= 7
+        meets_speed = avg_time < 5.0
+        
+        if meets_accuracy and meets_speed:
+            status = "✅ PASS (7+/10, <5s)"
         else:
-            status = "FAIL"
-            print(f"Status: ❌ {status}")
+            status = "❌ FAIL"
+            if not meets_accuracy:
+                status += f" (Only {correct_count}/10 correct, need 7+)"
+            if not meets_speed:
+                status += f" (Avg {avg_time:.2f}s, need <5s)"
         
-        # Performance analysis
-        successful_times = [r['time'] for r in results if 'ERROR' not in r['result']]
-        if successful_times:
-            avg_time = sum(successful_times) / len(successful_times)
-            print(f"Average Response Time: {avg_time:.2f}s")
-            if avg_time < 5.0:
-                print("✅ Speed requirement met (< 5 seconds)")
-            else:
-                print("⚠️ Speed requirement not met (>= 5 seconds)")
+        print(f"Status: {status}")
+        
+        # Comparison to previous test (from test_result.md)
+        previous_correct = 6
+        previous_time = 9.72
+        
+        accuracy_better = correct_count > previous_correct
+        speed_better = avg_time < previous_time
+        
+        if accuracy_better and speed_better:
+            comparison = "✅ Better (Both accuracy and speed improved)"
+        elif accuracy_better:
+            comparison = "🔄 Mixed (Accuracy improved, speed similar)"
+        elif speed_better:
+            comparison = "🔄 Mixed (Speed improved, accuracy similar)"
+        else:
+            comparison = "❌ Worse (No improvement)"
+        
+        print(f"Comparison to previous: {comparison}")
+        print(f"Previous: {previous_correct}/10 correct (60%), {previous_time}s avg")
+        print(f"Current:  {correct_count}/10 correct ({pass_rate:.1f}%), {avg_time:.2f}s avg")
+        
+        # Show failed cases for analysis
+        failed_cases = [r for r in results if not r['correct']]
+        if failed_cases:
+            print(f"\n❌ FAILED CASES ({len(failed_cases)}):")
+            for case in failed_cases:
+                print(f"  • {case['image']}: Expected '{case['expected']}', Got '{case['result']}' ({case['detection_method']})")
         
         # Log results for main testing framework
-        self.log_result("Comprehensive Image Recognition", correct_count >= 7, 
-                       sum(successful_times)/len(successful_times) if successful_times else 0,
-                       f"✅ {correct_count}/10 correct, {pass_rate:.1f}% pass rate, Status: {status}")
+        self.log_result("NEW Web Detection Algorithm Test", meets_accuracy and meets_speed, 
+                       avg_time, f"{correct_count}/10 correct ({pass_rate:.1f}%), {avg_time:.2f}s avg - {status}")
         
         return {
             "total_tested": total_tested,
             "correct": correct_count,
             "wrong": wrong_count,
-            "errors": error_count,
             "pass_rate": pass_rate,
+            "avg_time": avg_time,
             "status": status,
+            "meets_criteria": meets_accuracy and meets_speed,
             "results": results
         }
     
