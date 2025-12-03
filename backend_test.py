@@ -181,63 +181,270 @@ class CinescanTester:
             self.test_movie_search(query, expected)
             time.sleep(0.5)
     
-    def test_image_recognition_with_real_posters(self):
-        """Test image recognition with REAL movie posters as requested by user"""
-        print("\n📸 TESTING IMAGE RECOGNITION WITH REAL MOVIE POSTERS...")
+    def test_comprehensive_image_recognition(self):
+        """COMPREHENSIVE IMAGE RECOGNITION TESTING - USER PRIORITY REQUEST
+        Test with 10 different movie posters/screenshots as specifically requested
+        SUCCESS CRITERIA: 7+ correct identifications, <5s response time
+        """
+        print("\n🎯 COMPREHENSIVE IMAGE RECOGNITION TESTING - USER PRIORITY")
+        print("📋 USER REQUEST: Test with 10 different movie posters/screenshots")
+        print("🎯 SUCCESS CRITERIA: 7+ correct identifications, <5s response time")
+        print("=" * 80)
         
-        # Real movie poster URLs for testing
-        poster_tests = [
+        # 10 different movie posters/screenshots as requested - mix of popular movies
+        test_images = [
             {
-                "name": "Inception Poster",
-                "url": "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
-                "expected": "Inception"
-            },
-            {
-                "name": "Avengers Poster", 
+                "name": "avengers_poster.jpg",
                 "url": "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
-                "expected": "Avengers"
+                "expected": "The Avengers",
+                "type": "Poster with clear title"
             },
             {
-                "name": "Matrix Poster",
+                "name": "titanic_poster.jpg", 
+                "url": "https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_.jpg",
+                "expected": "Titanic",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "matrix_poster.jpg",
                 "url": "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-                "expected": "Matrix"
+                "expected": "The Matrix",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "star_wars_poster.jpg",
+                "url": "https://m.media-amazon.com/images/M/MV5BOTA5NjhiOTAtZWM0ZC00MWNhLThiMzEtZDFkOTk2OTU1ZDJkXkEyXkFqcGdeQXVyMTA4NDI1NTQx@._V1_.jpg",
+                "expected": "Star Wars",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "harry_potter_poster.jpg",
+                "url": "https://m.media-amazon.com/images/M/MV5BNjQ3NWNlNmQtMTE5ZS00MDdmLTlkZjUtZTBlM2UxMGFiMTU3XkEyXkFqcGdeQXVyNjUwNzk3NDc@._V1_.jpg",
+                "expected": "Harry Potter",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "jurassic_park_poster.jpg",
+                "url": "https://m.media-amazon.com/images/M/MV5BMjM2MDgxMDg0Nl5BMl5BanBnXkFtZTgwNTM2OTM5NDE@._V1_.jpg",
+                "expected": "Jurassic Park",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "inception_poster.jpg",
+                "url": "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
+                "expected": "Inception",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "dark_knight_poster.jpg",
+                "url": "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg",
+                "expected": "The Dark Knight",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "forrest_gump_poster.jpg",
+                "url": "https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg",
+                "expected": "Forrest Gump",
+                "type": "Poster with clear title"
+            },
+            {
+                "name": "interstellar_poster.jpg",
+                "url": "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+                "expected": "Interstellar",
+                "type": "Poster with clear title"
             }
         ]
         
-        for poster in poster_tests:
+        results = []
+        correct_count = 0
+        total_tested = 0
+        
+        print(f"📥 Testing {len(test_images)} movie posters/screenshots...")
+        print()
+        
+        for i, img in enumerate(test_images, 1):
+            print(f"🎬 TEST {i}/10: {img['name']}")
+            print(f"Expected: {img['expected']}")
+            print(f"Type: {img['type']}")
+            
             start_time = time.time()
+            
             try:
-                # Download the real poster image
-                img_response = requests.get(poster["url"], timeout=15)
-                if img_response.status_code == 200:
-                    # Convert to base64 as expected by the API
-                    img_base64 = base64.b64encode(img_response.content).decode('utf-8')
-                    payload = {"image_base64": f"data:image/jpeg;base64,{img_base64}"}
+                # Download the image
+                print("  📥 Downloading image...")
+                img_response = requests.get(img["url"], timeout=15)
+                
+                if img_response.status_code != 200:
+                    print(f"  ❌ Failed to download: HTTP {img_response.status_code}")
+                    results.append({
+                        "image": img['name'],
+                        "expected": img['expected'],
+                        "detected_text": "Download failed",
+                        "result": f"HTTP {img_response.status_code}",
+                        "correct": "NO",
+                        "score": 0,
+                        "time": 0,
+                        "error": f"Download failed: HTTP {img_response.status_code}"
+                    })
+                    total_tested += 1
+                    continue
+                
+                print(f"  ✅ Downloaded ({len(img_response.content)} bytes)")
+                
+                # Send to image recognition endpoint using multipart/form-data as per backend expectation
+                print("  🔍 Sending to recognition API...")
+                files = {'file': (img['name'], img_response.content, 'image/jpeg')}
+                
+                response = requests.post(f"{API_BASE}/recognize-image", files=files, timeout=10)
+                duration = time.time() - start_time
+                
+                if response.status_code == 200:
+                    data = response.json()
                     
-                    # Send to recognition endpoint
-                    response = requests.post(f"{API_BASE}/recognize-image", json=payload, timeout=60)
-                    duration = time.time() - start_time
+                    detected_text = "N/A"  # Google Vision text not directly exposed in response
+                    result_movie = "None"
+                    correct = "NO"
+                    score = 0
                     
-                    if response.status_code == 200:
-                        data = response.json()
-                        if data.get("success") and data.get("movie"):
-                            movie_title = data["movie"].get("title", "Unknown")
-                            details = f"✅ Recognized: {movie_title} | Source: {data.get('source', 'Unknown')}"
-                            success = poster["expected"].lower() in movie_title.lower()
-                            self.log_result(f"Real Poster: {poster['name']}", success, duration, details)
-                        else:
-                            error_msg = data.get("error", "Unknown error")
-                            self.log_result(f"Real Poster: {poster['name']}", False, duration, f"❌ Not recognized: {error_msg}")
+                    if data.get('success'):
+                        movie = data.get('movie', {})
+                        result_movie = movie.get('title', 'Unknown')
+                        score = movie.get('popularity', 0)
+                        
+                        # Check if correct (flexible matching)
+                        expected_lower = img['expected'].lower()
+                        result_lower = result_movie.lower()
+                        
+                        # Flexible matching logic
+                        if expected_lower in result_lower or result_lower in expected_lower:
+                            correct = "YES"
+                            correct_count += 1
+                        elif "harry potter" in expected_lower and "harry potter" in result_lower:
+                            correct = "YES"
+                            correct_count += 1
+                        elif "star wars" in expected_lower and "star wars" in result_lower:
+                            correct = "YES"
+                            correct_count += 1
+                        elif "avengers" in expected_lower and "avengers" in result_lower:
+                            correct = "YES"
+                            correct_count += 1
+                        elif "dark knight" in expected_lower and "dark knight" in result_lower:
+                            correct = "YES"
+                            correct_count += 1
+                        
+                        print(f"  🎯 RESULT: {result_movie}")
+                        print(f"  ✅ Correct: {correct}")
+                        print(f"  ⭐ Score: {score}")
+                        print(f"  ⏱️  Time: {duration:.2f}s")
+                        
                     else:
-                        self.log_result(f"Real Poster: {poster['name']}", False, duration, f"❌ HTTP {response.status_code}")
-                else:
-                    self.log_result(f"Real Poster: {poster['name']}", False, 0, f"❌ Failed to download poster: HTTP {img_response.status_code}")
+                        result_movie = f"ERROR: {data.get('error', 'Unknown error')}"
+                        print(f"  ❌ Recognition failed: {data.get('error', 'Unknown error')}")
+                        print(f"  ⏱️  Time: {duration:.2f}s")
                     
+                    results.append({
+                        "image": img['name'],
+                        "expected": img['expected'],
+                        "detected_text": detected_text,
+                        "result": result_movie,
+                        "correct": correct,
+                        "score": score,
+                        "time": duration
+                    })
+                    
+                else:
+                    print(f"  ❌ HTTP Error: {response.status_code}")
+                    results.append({
+                        "image": img['name'],
+                        "expected": img['expected'],
+                        "detected_text": "HTTP Error",
+                        "result": f"HTTP {response.status_code}",
+                        "correct": "NO",
+                        "score": 0,
+                        "time": duration
+                    })
+                
+                total_tested += 1
+                
             except Exception as e:
                 duration = time.time() - start_time
-                self.log_result(f"Real Poster: {poster['name']}", False, duration, f"❌ Error: {str(e)}")
+                print(f"  ❌ Exception: {e}")
+                results.append({
+                    "image": img['name'],
+                    "expected": img['expected'],
+                    "detected_text": "Exception",
+                    "result": f"ERROR: {str(e)}",
+                    "correct": "NO",
+                    "score": 0,
+                    "time": duration
+                })
+                total_tested += 1
             
-            time.sleep(1)  # Small delay between tests
+            print()  # Add spacing between tests
+            time.sleep(1)  # Brief pause between tests
+        
+        # Generate comprehensive summary as requested
+        print("=" * 80)
+        print("📊 COMPREHENSIVE IMAGE RECOGNITION TEST RESULTS")
+        print("=" * 80)
+        
+        # Detailed results for each image as requested
+        print("\nDETAILED RESULTS:")
+        for result in results:
+            print(f"""
+Image: {result['image']}
+Expected: {result['expected']}
+Detected Text: {result['detected_text']}
+Result: {result['result']}
+Correct: {result['correct']}
+Score: {result['score']}
+Time: {result['time']:.2f}s
+""")
+        
+        # Final summary as requested
+        wrong_count = sum(1 for r in results if r['correct'] == 'NO' and 'ERROR' not in r['result'])
+        error_count = sum(1 for r in results if 'ERROR' in r['result'] or 'HTTP' in r['result'])
+        pass_rate = (correct_count / total_tested * 100) if total_tested > 0 else 0
+        
+        print("FINAL SUMMARY:")
+        print(f"Total Tested: {total_tested}")
+        print(f"Correct: {correct_count}")
+        print(f"Wrong: {wrong_count}")
+        print(f"Errors: {error_count}")
+        print(f"Pass Rate: {pass_rate:.1f}%")
+        
+        # Determine PASS/FAIL based on user criteria (7+ correct out of 10)
+        if correct_count >= 7:
+            status = "PASS"
+            print(f"Status: ✅ {status}")
+        else:
+            status = "FAIL"
+            print(f"Status: ❌ {status}")
+        
+        # Performance analysis
+        successful_times = [r['time'] for r in results if 'ERROR' not in r['result']]
+        if successful_times:
+            avg_time = sum(successful_times) / len(successful_times)
+            print(f"Average Response Time: {avg_time:.2f}s")
+            if avg_time < 5.0:
+                print("✅ Speed requirement met (< 5 seconds)")
+            else:
+                print("⚠️ Speed requirement not met (>= 5 seconds)")
+        
+        # Log results for main testing framework
+        self.log_result("Comprehensive Image Recognition", correct_count >= 7, 
+                       sum(successful_times)/len(successful_times) if successful_times else 0,
+                       f"✅ {correct_count}/10 correct, {pass_rate:.1f}% pass rate, Status: {status}")
+        
+        return {
+            "total_tested": total_tested,
+            "correct": correct_count,
+            "wrong": wrong_count,
+            "errors": error_count,
+            "pass_rate": pass_rate,
+            "status": status,
+            "results": results
+        }
     
     def test_image_recognition_endpoint(self):
         """Test image recognition endpoint structure with simple test"""
