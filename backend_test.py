@@ -317,11 +317,11 @@ class CinescanTester:
             print("❌ API is not responding. Stopping tests.")
             return
         
-        # Run all test suites
-        self.test_movie_recognition_suite()
+        # Run all test suites as requested
+        self.test_old_movies_suite()
         self.test_anime_recognition_suite() 
         self.test_tv_series_suite()
-        self.test_accuracy_suite()
+        self.test_edge_cases_suite()
         self.test_image_recognition_endpoint()
         self.test_audio_recognition_endpoint()
         self.test_video_recognition_endpoint()
