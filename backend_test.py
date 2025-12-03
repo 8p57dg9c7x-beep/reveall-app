@@ -267,13 +267,11 @@ def main():
     # Test basic connectivity
     results['connectivity'] = test_basic_connectivity()
     
-    # Test existing endpoints
-    test_existing_endpoints()
-    
     # Test movie recognition endpoints
     results['recognize_image'] = test_recognize_image()
     results['recognize_audio'] = test_recognize_audio()
     results['recognize_video'] = test_recognize_video()
+    results['manual_search'] = test_manual_search()
     
     # Summary
     print("\n" + "=" * 60)
