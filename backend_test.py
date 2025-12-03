@@ -108,16 +108,18 @@ class CinescanTester:
             self.log_result(f"Search: {query}", False, duration, f"Error: {str(e)}")
             return False, duration, {}
     
-    def test_movie_recognition_suite(self):
-        """Test movie recognition with various queries"""
-        print("\n🎬 TESTING MOVIE RECOGNITION...")
+    def test_old_movies_suite(self):
+        """Test old/classic movies as requested"""
+        print("\n📽️  TEST 1: OLD MOVIES (Classic Films)")
         
-        # Classic movies
+        # Old movies as specifically requested
         movies = [
-            ("Fight Club", "Fight Club"),
-            ("Inception", "Inception"), 
-            ("The Matrix", "Matrix"),
-            ("Interstellar", "Interstellar")
+            ("The Godfather", "Godfather"),
+            ("Casablanca", "Casablanca"), 
+            ("Gone with the Wind", "Gone with the Wind"),
+            ("Citizen Kane", "Citizen Kane"),
+            ("Psycho", "Psycho"),
+            ("Jaws", "Jaws")
         ]
         
         for query, expected in movies:
