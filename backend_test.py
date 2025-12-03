@@ -196,32 +196,63 @@ def test_recognize_video():
         print(f"❌ Video recognition test failed: {e}")
         return False
 
-def test_existing_endpoints():
-    """Test the existing endpoints in the current backend"""
-    print("\n🔧 Testing existing backend endpoints...")
+def test_manual_search():
+    """Test POST /api/search endpoint with TMDB integration"""
+    print("\n🔍 Testing manual search endpoint...")
     
-    # Test GET /api/status
-    try:
-        response = requests.get(f"{BACKEND_URL}/api/status", timeout=10)
-        print(f"GET /api/status - Status Code: {response.status_code}")
-        if response.status_code == 200:
-            print(f"✅ GET /api/status working: {response.json()}")
-        else:
-            print(f"❌ GET /api/status failed: {response.text}")
-    except Exception as e:
-        print(f"❌ GET /api/status error: {e}")
+    # Test with "Inception" as specifically requested
+    test_data = {
+        "query": "Inception"
+    }
     
-    # Test POST /api/status
     try:
-        test_data = {"client_name": "test_client"}
-        response = requests.post(f"{BACKEND_URL}/api/status", json=test_data, timeout=10)
-        print(f"POST /api/status - Status Code: {response.status_code}")
-        if response.status_code == 200:
-            print(f"✅ POST /api/status working: {response.json()}")
+        response = requests.post(
+            f"{BACKEND_URL}/api/search", 
+            json=test_data,
+            timeout=30
+        )
+        print(f"Status Code: {response.status_code}")
+        
+        if response.status_code == 404:
+            print("❌ Endpoint not found - /api/search not implemented")
+            return False
+        elif response.status_code == 200:
+            result = response.json()
+            print(f"✅ Response: {json.dumps(result, indent=2)}")
+            
+            # Check expected response format
+            if "success" in result:
+                print("✅ Response has 'success' field")
+                if result["success"] == True and result["movie"] is not None:
+                    movie = result["movie"]
+                    required_fields = ["id", "title", "poster_path", "overview"]
+                    missing_fields = [field for field in required_fields if field not in movie]
+                    
+                    if missing_fields:
+                        print(f"⚠️ Missing fields in movie object: {missing_fields}")
+                        return False
+                    else:
+                        print("✅ TMDB API integration working - Movie found!")
+                        print(f"Found movie: {movie.get('title', 'Unknown')}")
+                        return True
+                elif result["success"] == False:
+                    print("⚠️ Search endpoint exists but TMDB search failed")
+                    print(f"Error: {result.get('error', 'Unknown error')}")
+                    return False
+                else:
+                    print("✅ Endpoint working - Response format is correct")
+                    return True
+            else:
+                print("❌ Response format doesn't match expected structure")
+                return False
         else:
-            print(f"❌ POST /api/status failed: {response.text}")
+            print(f"❌ Unexpected status code: {response.status_code}")
+            print(f"Response: {response.text}")
+            return False
+            
     except Exception as e:
-        print(f"❌ POST /api/status error: {e}")
+        print(f"❌ Manual search test failed: {e}")
+        return False
 
 def main():
     """Run all backend tests"""
