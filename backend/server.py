@@ -217,41 +217,52 @@ async def recognize_image(file: UploadFile = File(...)):
                         "movie": movie
                     }
         
-        # STRATEGY 2: Try web entities with SMART filtering
+        # STRATEGY 2: SMART entity matching - key insight: entity name should match movie title
         if web_entities:
-            # Collect all potential movie matches with scoring
             movie_candidates = []
             
-            for entity in web_entities[:20]:
+            for entity in web_entities[:25]:
                 query = entity['text']
-                logger.info(f"Checking web entity: '{query}' (score: {entity['score']})")
+                entity_lower = query.lower().strip()
+                
+                # Skip generic words
+                if entity_lower in ['poster', 'film', 'movie', 'film poster']:
+                    continue
+                
+                logger.info(f"Checking: '{query}'")
                 movie = search_tmdb_movie(query)
                 
                 if movie:
-                    movie_title = movie.get('title', '')
-                    query_lower = query.lower()
-                    title_lower = movie_title.lower()
+                    movie_title = movie.get('title', '').lower().strip()
                     
-                    # Calculate match score
+                    # CRITICAL: Check if entity name matches the movie title
+                    # If entity="Inception" and movie="Inception" → REAL MATCH
+                    # If entity="Leonardo DiCaprio" and movie="Leonardo" → ACTOR, NOT THE MOVIE
+                    
+                    # Remove common words for matching
+                    entity_clean = entity_lower.replace('the ', '').replace('a ', '').strip()
+                    title_clean = movie_title.replace('the ', '').replace('a ', '').strip()
+                    
                     match_score = 0
                     
-                    # EXACT title match gets highest score
-                    if query_lower == title_lower:
-                        match_score = 1000
-                        logger.info(f"  → EXACT match: '{movie_title}'")
-                    # Query contains full title
-                    elif title_lower in query_lower:
-                        match_score = 500
-                        logger.info(f"  → Query contains title: '{movie_title}'")
-                    # Title contains full query
-                    elif query_lower in title_lower:
-                        match_score = 400
-                        logger.info(f"  → Title contains query: '{movie_title}'")
-                    # Partial match
+                    # Perfect match: entity and title are the same
+                    if entity_clean == title_clean or entity_lower == movie_title:
+                        match_score = 10000  # HIGHEST PRIORITY
+                        logger.info(f"  ✅ PERFECT: '{query}' = '{movie.get('title')}'")
+                    
+                    # Very close match: one contains the other fully
+                    elif entity_clean in title_clean and len(entity_clean) > 5:
+                        match_score = 5000
+                        logger.info(f"  ✅ STRONG: '{query}' in '{movie.get('title')}'")
+                    
+                    elif title_clean in entity_clean and len(title_clean) > 5:
+                        match_score = 4000
+                        logger.info(f"  ✅ STRONG: '{movie.get('title')}' in '{query}'")
+                    
+                    # Weak match - likely actor/director
                     else:
-                        # Likely an actor/director name, give low score
-                        match_score = entity['score']
-                        logger.info(f"  → Weak match (likely actor): '{movie_title}'")
+                        match_score = 1  # Very low score
+                        logger.info(f"  ❌ WEAK: '{query}' → '{movie.get('title')}' (probably actor)")
                     
                     movie_candidates.append({
                         'movie': movie,
@@ -260,18 +271,22 @@ async def recognize_image(file: UploadFile = File(...)):
                         'entity_score': entity['score']
                     })
             
-            # Sort by match_score (prioritizes exact matches), then by entity_score
+            # Sort by match_score first (perfect matches win), then entity_score
             if movie_candidates:
-                movie_candidates.sort(key=lambda x: (x['match_score'], x['entity_score']), reverse=True)
-                best_match = movie_candidates[0]
+                movie_candidates.sort(key=lambda x: x['match_score'], reverse=True)
+                best = movie_candidates[0]
                 
-                logger.info(f"✅ BEST MATCH: '{best_match['movie'].get('title')}' (match_score: {best_match['match_score']}, entity_score: {best_match['entity_score']})")
-                
-                return {
-                    "success": True,
-                    "source": "Google Web Detection",
-                    "movie": best_match['movie']
-                }
+                # Only return if match_score is high enough (avoid actor names)
+                if best['match_score'] >= 4000:
+                    logger.info(f"🎯 SELECTED: '{best['movie'].get('title')}' (match_score: {best['match_score']})")
+                    return {
+                        "success": True,
+                        "source": "Web Detection",
+                        "movie": best['movie']
+                    }
+                else:
+                    logger.info(f"⚠️  Best match score too low: {best['match_score']} for '{best['query']}'")
+
         
         # STRATEGY 3: Fall back to text detection (old method)
         if detected_texts and len(detected_texts) > 0:
