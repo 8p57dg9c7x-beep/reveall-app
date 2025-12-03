@@ -205,20 +205,20 @@ async def recognize_image(file: UploadFile = File(...)):
         # Try combinations of 1-3 consecutive words
         search_queries = []
         
-        # Add individual words first
-        search_queries.extend(unique_words[:15])
+        # Add individual words (try up to 25 words)
+        search_queries.extend(unique_words[:25])
         
         # Add 2-word combinations
-        for i in range(min(10, len(unique_words) - 1)):
+        for i in range(min(15, len(unique_words) - 1)):
             search_queries.append(f"{unique_words[i]} {unique_words[i+1]}")
         
         # Add 3-word combinations
-        for i in range(min(8, len(unique_words) - 2)):
+        for i in range(min(10, len(unique_words) - 2)):
             search_queries.append(f"{unique_words[i]} {unique_words[i+1]} {unique_words[i+2]}")
         
-        logger.info(f"Search queries: {search_queries[:15]}")
+        logger.info(f"Search queries: {search_queries[:20]}")
         
-        for query in search_queries[:20]:
+        for query in search_queries[:30]:
             movie = search_tmdb_movie(query)
             if movie:
                 logger.info(f"Found movie: {movie.get('title')}")
