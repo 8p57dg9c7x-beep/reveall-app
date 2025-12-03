@@ -219,9 +219,20 @@ async def recognize_image(file: UploadFile = File(...)):
                     if movie:
                         # Score based on popularity and word characteristics
                         score = movie.get('popularity', 0)
+                        
+                        # MAJOR boost if the query matches the movie title exactly or closely
+                        movie_title_lower = movie.get('title', '').lower()
+                        query_lower = query.lower()
+                        if query_lower in movie_title_lower or movie_title_lower in query_lower:
+                            if query_lower == movie_title_lower:
+                                score *= 10  # Exact match gets huge bonus
+                            else:
+                                score *= 5   # Partial match gets good bonus
+                        
                         # Boost score if word is all caps and longer (likely a title)
                         if word.isupper() and len(word) > 5:
                             score *= 2
+                            
                         all_results.append({'movie': movie, 'query': query, 'score': score})
                         logger.info(f"Found '{movie.get('title')}' with query '{query}', score: {score}")
         
