@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-CINESCAN Backend Testing - COMPREHENSIVE IMAGE RECOGNITION TESTING
-USER REQUEST: Test image recognition with MULTIPLE real movie posters and screenshots
-SUCCESS CRITERIA: 7+ out of 10 images must identify correctly, <5s response time
+CINESCAN Backend Testing - IMAGE RECOGNITION RETEST WITH NEW WEB DETECTION ALGORITHM
+CRITICAL MISSION: Re-test the SAME 10 movie posters with the NEW improved algorithm
+SUCCESS CRITERIA: 7+ correct identifications (70%+), Average response time < 5 seconds
 """
 
 import requests
