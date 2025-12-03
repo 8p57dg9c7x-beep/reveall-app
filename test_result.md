@@ -260,9 +260,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Image recognition accuracy improvement needed"
-    - "Speed optimization for image processing required"
-    - "Algorithm tuning to prioritize movie titles over actor names"
+    - "CRITICAL: Algorithm scoring system overhaul needed"
+    - "Prioritize movie titles over actor/director names in web entities"
+    - "Implement keyword filtering or weighted scoring based on entity type"
   stuck_tasks:
     - "API endpoints setup"
   test_all: false
