@@ -78,7 +78,7 @@ export const recognizeVideo = async (videoUri) => {
     
     // Read video file as base64
     const base64 = await FileSystem.readAsStringAsync(videoUri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: 'base64',
     });
 
     console.log('Video base64 length:', base64.length);
