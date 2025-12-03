@@ -162,19 +162,20 @@ class CinescanTester:
             self.test_movie_search(query, expected)
             time.sleep(0.5)
     
-    def test_accuracy_suite(self):
-        """Test accuracy with misspellings and partial names"""
-        print("\n🎯 TESTING ACCURACY WITH VARIATIONS...")
+    def test_edge_cases_suite(self):
+        """Test edge cases as requested"""
+        print("\n🔍 TEST 4: EDGE CASES")
         
-        variations = [
-            ("Inceptoin", "Inception"),  # Misspelling
-            ("Fight Clbu", "Fight Club"),  # Misspelling
-            ("Dark Knight", "Dark Knight"),  # Partial name
-            ("Avengers", "Avengers"),  # Common name
-            ("Star Wars", "Star Wars")  # Franchise name
+        edge_cases = [
+            ("Godfather", "Godfather"),  # Misspelling/Partial
+            ("Breakng Bad", "Breaking Bad"),  # Misspelling
+            ("Harry Potter", "Harry Potter"),  # Partial name
+            ("Lord of Rings", "Lord of the Rings"),  # Partial name
+            ("Parasite", "Parasite"),  # Foreign film
+            ("Amélie", "Amélie")  # Foreign film with accent
         ]
         
-        for query, expected in variations:
+        for query, expected in edge_cases:
             self.test_movie_search(query, expected)
             time.sleep(0.5)
     
