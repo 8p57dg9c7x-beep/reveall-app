@@ -245,10 +245,10 @@ async def recognize_audio(request: AudioRecognitionRequest):
         }
 
 @api_router.post("/recognize-video")
-async def recognize_video(file: UploadFile = File(...)):
+async def recognize_video(request: VideoRecognitionRequest):
     """Recognize movie from video"""
     try:
-        logger.info(f"Received video: {file.filename}")
+        logger.info("Received video recognition request")
         
         return {
             "success": False,
