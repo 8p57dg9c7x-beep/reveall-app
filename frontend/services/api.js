@@ -19,7 +19,7 @@ export const recognizeImage = async (imageUri) => {
     console.log('Recognizing image from URI:', imageUri);
     console.log('API URL:', `${API_BASE_URL}/api/recognize-image`);
     
-    // Use fetch instead of axios for better FormData support
+    // Use fetch with FormData for file uploads
     const formData = new FormData();
     
     // Create a file object with proper structure for React Native
@@ -32,12 +32,10 @@ export const recognizeImage = async (imageUri) => {
       type: `image/${fileType}`,
     });
 
+    // Don't set Content-Type header - let fetch set it with proper boundary
     const response = await fetch(`${API_BASE_URL}/api/recognize-image`, {
       method: 'POST',
       body: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
     });
 
     const data = await response.json();
