@@ -239,9 +239,30 @@ export default function HomeScreen() {
       
       {/* Logo Section */}
       <View style={styles.logoSection}>
-        <View style={styles.filmReelContainer}>
-          <MaterialCommunityIcons name="filmstrip" size={60} color="#FFFFFF" />
+        <View style={styles.filmReelWithStrip}>
+          {/* Film Reel */}
+          <View style={styles.filmReel}>
+            <View style={styles.reelOuter}>
+              <View style={styles.reelInner}>
+                <View style={styles.reelHole1} />
+                <View style={styles.reelHole2} />
+                <View style={styles.reelHole3} />
+                <View style={styles.reelHole4} />
+                <View style={styles.reelCenter} />
+              </View>
+            </View>
+          </View>
+          
+          {/* Flowing Film Strip */}
+          <View style={styles.filmStripFlow}>
+            <View style={styles.filmStripSegment}>
+              <View style={styles.perforation} />
+              <View style={styles.perforation} />
+              <View style={styles.perforation} />
+            </View>
+          </View>
         </View>
+        
         <Text style={styles.logo}>CINESCAN</Text>
         <Text style={styles.tagline}>Identify any movie instantly</Text>
       </View>
