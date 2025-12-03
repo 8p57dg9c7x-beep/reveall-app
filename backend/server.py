@@ -342,7 +342,7 @@ async def recognize_image(file: UploadFile = File(...)):
 
 @api_router.post("/recognize-audio")
 async def recognize_audio(file: UploadFile = File(...)):
-    """Recognize movie from audio"""
+    """Recognize movie from audio - tries soundtrack AND dialogue recognition"""
     try:
         logger.info(f"Received audio: {file.filename}, content_type: {file.content_type}")
         
@@ -350,6 +350,8 @@ async def recognize_audio(file: UploadFile = File(...)):
         audio_content = await file.read()
         audio_base64 = base64.b64encode(audio_content).decode('utf-8')
         
+        # METHOD 1: Try AudD for soundtrack/music recognition
+        logger.info("🎵 Trying soundtrack recognition with AudD...")
         search_query = recognize_audio_with_audd(audio_base64)
         
         if not search_query:
