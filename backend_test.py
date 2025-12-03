@@ -875,12 +875,12 @@ Time: {result['time']:.2f}s
             self.log_result("Average Speed Performance", False, 0, "No successful tests")
     
     def run_comprehensive_test(self):
-        """Run all tests as requested by user"""
-        print("🎬 CINESCAN COMPREHENSIVE BACKEND TESTING")
+        """Run comprehensive image recognition testing as specifically requested by user"""
+        print("🎬 CINESCAN COMPREHENSIVE IMAGE RECOGNITION TESTING")
         print("=" * 80)
-        print("🎯 USER REQUEST: Test EVERYTHING with REAL movie content")
+        print("🎯 USER PRIORITY REQUEST: Test image recognition with 10 different movie posters")
         print(f"🌐 Backend URL: {BASE_URL}")
-        print("🎪 Target: Shazam-level speed and accuracy (<3 seconds)")
+        print("🎪 SUCCESS CRITERIA: 7+ correct identifications, <5s response time")
         print("=" * 80)
         
         # Test API health first
@@ -888,35 +888,23 @@ Time: {result['time']:.2f}s
             print("❌ API is not responding. Stopping tests.")
             return
         
-        # CRITICAL AUDIO RECOGNITION TESTING - User Priority
-        print("\n🎵 PHASE 1: CRITICAL AUDIO RECOGNITION TESTING (User Priority)")
-        print("🎯 USER REQUEST: Test audio recognition with REAL movie audio clips/soundtracks")
-        self.test_audio_recognition_with_real_audio()    # CRITICAL: Real audio testing
-        self.test_audd_api_integration_detailed()        # CRITICAL: AudD API verification
+        # PHASE 1: COMPREHENSIVE IMAGE RECOGNITION TESTING - USER PRIORITY
+        print("\n📸 PHASE 1: COMPREHENSIVE IMAGE RECOGNITION TESTING (USER PRIORITY)")
+        print("🎯 USER REQUEST: Test with 10 different movie posters/screenshots")
+        self.test_comprehensive_image_recognition()      # CRITICAL: User's main request
         
-        # API KEY VERIFICATION (User requested)
-        print("\n🔑 PHASE 2: API KEY VERIFICATION (User Priority)")
-        self.test_api_key_verification()                 # NEW: Verify all API keys
-        
-        # ERROR HANDLING (User requested)
-        print("\n🚨 PHASE 3: ERROR HANDLING (User Priority)")
-        self.test_error_handling()                       # Updated: Comprehensive error tests
-        
-        # ENDPOINT STRUCTURE TESTS
-        print("\n🔧 PHASE 4: ENDPOINT STRUCTURE VERIFICATION")
+        # PHASE 2: BASIC ENDPOINT VERIFICATION
+        print("\n🔧 PHASE 2: BASIC ENDPOINT VERIFICATION")
         self.test_image_recognition_endpoint()
-        self.test_audio_recognition_endpoint()
+        self.test_video_recognition_endpoint()
         
-        # MOVIE SEARCH FUNCTIONALITY
-        print("\n🔍 PHASE 5: MOVIE SEARCH FUNCTIONALITY")
-        self.test_old_movies_suite()
-        self.test_anime_recognition_suite() 
-        self.test_tv_series_suite()
-        self.test_edge_cases_suite()
+        # PHASE 3: API KEY VERIFICATION
+        print("\n🔑 PHASE 3: API KEY VERIFICATION")
+        self.test_api_key_verification()
         
-        # PERFORMANCE TESTING
-        print("\n⚡ PHASE 6: PERFORMANCE TESTING")
-        self.test_speed_performance()
+        # PHASE 4: ERROR HANDLING
+        print("\n🚨 PHASE 4: ERROR HANDLING")
+        self.test_error_handling()
         
         # Print comprehensive summary
         self.print_summary()
