@@ -178,9 +178,18 @@ async def recognize_image(request: ImageRecognitionRequest):
                 "movie": None
             }
         
-        logger.info(f"Detected texts: {detected_texts[:5]}")
+        logger.info(f"Detected texts: {detected_texts[:10]}")
         
-        for text in detected_texts[:5]:
+        # Try searching with longer text combinations first (more likely to be titles)
+        # Sort by length descending - longer text more likely to be movie titles
+        sorted_texts = sorted(detected_texts[:15], key=len, reverse=True)
+        
+        # Filter out very short text (likely just actor names or single words)
+        filtered_texts = [text for text in sorted_texts if len(text.strip()) > 2]
+        
+        logger.info(f"Filtered and sorted texts: {filtered_texts[:10]}")
+        
+        for text in filtered_texts[:10]:
             movie = search_tmdb_movie(text)
             if movie:
                 logger.info(f"Found movie: {movie.get('title')}")
@@ -192,7 +201,7 @@ async def recognize_image(request: ImageRecognitionRequest):
         
         return {
             "success": False,
-            "error": f"Could not find movie from detected text",
+            "error": f"Could not find movie from detected text. Try a clearer image with the movie title visible.",
             "movie": None
         }
         
