@@ -488,11 +488,17 @@ async def recognize_video(file: UploadFile = File(...)):
                 
                 # Try web entities if no best guess match
                 if not visual_movie and web_entities:
+                    # Filter out generic terms
+                    generic_terms = ['video', 'film', 'movie', 'scene', 'poster', 'film poster', 'movie poster',
+                                    'illustration', 'artwork', 'cinema', 'hollywood', 'actor', 'actress',
+                                    'director', 'crime film', 'drama', 'thriller', 'action film', 'comedy']
+                    
                     for entity in web_entities[:15]:
                         query = entity['text']
                         entity_lower = query.lower().strip()
                         
-                        if entity_lower in ['video', 'film', 'movie', 'scene']:
+                        if entity_lower in generic_terms:
+                            logger.info(f"Skipping generic term in video: '{query}'")
                             continue
                         
                         movie = search_tmdb_movie(query)
