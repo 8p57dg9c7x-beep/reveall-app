@@ -488,27 +488,48 @@ async def recognize_video(file: UploadFile = File(...)):
                 
                 # Try web entities if no best guess match
                 if not visual_movie and web_entities:
+                    # Common actor names that might appear in movie scenes
+                    actor_keywords = ['will smith', 'tom hanks', 'leonardo dicaprio', 'brad pitt', 
+                                     'morgan freeman', 'samuel jackson', 'denzel washington',
+                                     'robert downey', 'chris evans', 'scarlett johansson']
+                    
                     # Filter out generic terms
                     generic_terms = ['video', 'film', 'movie', 'scene', 'poster', 'film poster', 'movie poster',
                                     'illustration', 'artwork', 'cinema', 'hollywood', 'actor', 'actress',
                                     'director', 'crime film', 'drama', 'thriller', 'action film', 'comedy']
                     
-                    for entity in web_entities[:15]:
+                    # Try entities that look like movie titles first
+                    for entity in web_entities[:20]:
                         query = entity['text']
                         entity_lower = query.lower().strip()
                         
                         if entity_lower in generic_terms:
-                            logger.info(f"Skipping generic term in video: '{query}'")
                             continue
                         
-                        movie = search_tmdb_movie(query)
+                        # If it's an actor name, search for their recent movies
+                        is_actor = any(actor in entity_lower for actor in actor_keywords)
+                        
+                        if is_actor:
+                            # For actor names, search TMDB for their movies and pick most popular
+                            logger.info(f"Detected actor: '{query}' - searching their movies")
+                            movie = search_tmdb_movie(query + " movie")
+                        else:
+                            movie = search_tmdb_movie(query)
+                        
                         if movie:
                             movie_title = movie.get('title', '').lower().strip()
                             entity_clean = entity_lower.replace('the ', '').replace('a ', '').strip()
                             title_clean = movie_title.replace('the ', '').replace('a ', '').strip()
                             
-                            if entity_clean == title_clean or entity_clean in title_clean:
-                                logger.info(f"✅ VISUAL: Found '{movie.get('title')}' from entity")
+                            # For non-actor entities, require better match
+                            if not is_actor:
+                                if entity_clean == title_clean or entity_clean in title_clean:
+                                    logger.info(f"✅ VISUAL: Found '{movie.get('title')}' from entity")
+                                    visual_movie = movie
+                                    break
+                            else:
+                                # For actor searches, take the result
+                                logger.info(f"✅ VISUAL: Found '{movie.get('title')}' from actor")
                                 visual_movie = movie
                                 break
             
