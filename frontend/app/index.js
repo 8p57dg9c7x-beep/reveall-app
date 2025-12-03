@@ -5,8 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SHADOWS, SIZES } from '../constants/theme';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { recognizeImage, recognizeAudio, recognizeVideo } from '../services/api';
 
 export default function HomeScreen() {
@@ -17,6 +16,7 @@ export default function HomeScreen() {
   const [statusText, setStatusText] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const [pulseAnim] = useState(new Animated.Value(1));
+  const [rotateAnim] = useState(new Animated.Value(0));
   const [optionsAnim] = useState(new Animated.Value(0));
 
   useEffect(() => {
@@ -29,10 +29,11 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (isListening) {
+      // Pulse animation
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.15,
+            toValue: 1.1,
             duration: 1000,
             useNativeDriver: true,
           }),
@@ -43,8 +44,18 @@ export default function HomeScreen() {
           }),
         ])
       ).start();
+      
+      // Rotation animation
+      Animated.loop(
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 3000,
+          useNativeDriver: true,
+        })
+      ).start();
     } else {
       pulseAnim.setValue(1);
+      rotateAnim.setValue(0);
     }
   }, [isListening]);
 
@@ -217,19 +228,27 @@ export default function HomeScreen() {
     }
   };
 
+  const rotate = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Logo Section */}
+      <View style={styles.logoSection}>
+        <View style={styles.filmReelContainer}>
+          <MaterialCommunityIcons name="filmstrip" size={60} color="#FFFFFF" />
+        </View>
         <Text style={styles.logo}>CINESCAN</Text>
         <Text style={styles.tagline}>Identify any movie instantly</Text>
       </View>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <View style={styles.mainContent}>
-        {/* Option Buttons (appear above main button) */}
+        {/* Options (appear above main button) */}
         {showOptions && (
           <Animated.View 
             style={[
@@ -248,17 +267,17 @@ export default function HomeScreen() {
             ]}
           >
             <TouchableOpacity style={styles.optionButton} onPress={handleAudio}>
-              <Ionicons name="mic" size={28} color={COLORS.textPrimary} />
+              <Ionicons name="mic" size={32} color="#FFFFFF" />
               <Text style={styles.optionText}>Audio</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.optionButton} onPress={handleVideo}>
-              <Ionicons name="videocam" size={28} color={COLORS.textPrimary} />
+              <Ionicons name="videocam" size={32} color="#FFFFFF" />
               <Text style={styles.optionText}>Video</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.optionButton} onPress={handleImage}>
-              <Ionicons name="image" size={28} color={COLORS.textPrimary} />
+              <Ionicons name="image" size={32} color="#FFFFFF" />
               <Text style={styles.optionText}>Image</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -271,17 +290,24 @@ export default function HomeScreen() {
           disabled={isListening || isProcessing}
           activeOpacity={0.8}
         >
-          <Animated.View style={{ transform: [{ scale: isListening ? pulseAnim : 1 }] }}>
-            <LinearGradient
-              colors={isListening ? ['#E22134', '#C41C2B'] : [COLORS.primary, COLORS.primaryDark]}
-              style={[styles.mainButton, SHADOWS.button]}
-            >
-              <Ionicons 
-                name={isListening ? "radio-button-on" : showOptions ? "close" : "scan"} 
-                size={80} 
-                color={COLORS.textPrimary} 
+          <Animated.View 
+            style={[
+              styles.filmStripBorder,
+              { 
+                transform: [
+                  { scale: isListening ? pulseAnim : 1 },
+                  { rotate: isListening ? rotate : '0deg' }
+                ] 
+              }
+            ]}
+          >
+            <View style={styles.innerCircle}>
+              <MaterialCommunityIcons 
+                name="filmstrip" 
+                size={100} 
+                color="#FFFFFF" 
               />
-            </LinearGradient>
+            </View>
           </Animated.View>
         </TouchableOpacity>
 
@@ -298,16 +324,16 @@ export default function HomeScreen() {
             style={styles.stopButton}
             onPress={() => stopAndIdentifyAudio(recording)}
           >
-            <LinearGradient
-              colors={['#E22134', '#C41C2B']}
-              style={styles.stopButtonGradient}
-            >
-              <Ionicons name="stop-circle" size={24} color={COLORS.textPrimary} />
+            <View style={styles.stopButtonContent}>
+              <Ionicons name="stop-circle" size={24} color="#FFFFFF" />
               <Text style={styles.stopButtonText}>Stop</Text>
-            </LinearGradient>
+            </View>
           </TouchableOpacity>
         )}
       </View>
+
+      {/* Bottom Indicator */}
+      <View style={styles.bottomIndicator} />
     </View>
   );
 }
@@ -315,24 +341,28 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#000000',
   },
-  header: {
-    paddingTop: 70,
+  logoSection: {
+    paddingTop: 80,
     alignItems: 'center',
+    marginBottom: 40,
+  },
+  filmReelContainer: {
     marginBottom: 20,
   },
   logo: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    letterSpacing: 2,
+    fontSize: 40,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 4,
     marginBottom: 8,
   },
   tagline: {
     fontSize: 14,
-    color: COLORS.textSecondary,
-    fontWeight: '400',
+    color: '#FFFFFF',
+    fontWeight: '300',
+    letterSpacing: 1,
   },
   mainContent: {
     flex: 1,
@@ -340,60 +370,84 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainButtonContainer: {
-    marginBottom: 100,
+    marginBottom: 80,
   },
-  mainButton: {
+  filmStripBorder: {
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    borderWidth: 8,
+    borderColor: '#FFFFFF',
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+  },
+  innerCircle: {
     width: 200,
     height: 200,
     borderRadius: 100,
+    backgroundColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
   },
   optionsContainer: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 24,
     marginBottom: 60,
   },
   optionButton: {
-    backgroundColor: COLORS.card,
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#1A1A1A',
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOWS.card,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   optionText: {
-    fontSize: 12,
-    color: COLORS.textPrimary,
-    marginTop: 6,
+    fontSize: 11,
+    color: '#FFFFFF',
+    marginTop: 4,
     fontWeight: '600',
   },
   statusContainer: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 60,
   },
   statusText: {
     fontSize: 16,
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   stopButton: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 20,
+    backgroundColor: '#E22134',
     borderRadius: 25,
-    overflow: 'hidden',
-  },
-  stopButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 24,
+  },
+  stopButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   stopButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
     marginLeft: 8,
+  },
+  bottomIndicator: {
+    position: 'absolute',
+    bottom: 30,
+    left: '25%',
+    right: '25%',
+    height: 4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 2,
   },
 });
