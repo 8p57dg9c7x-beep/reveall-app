@@ -185,17 +185,41 @@ async def recognize_image(file: UploadFile = File(...)):
         
         logger.info(f"Detected texts: {detected_texts[:10]}")
         
-        # Try searching with longer text combinations first (more likely to be titles)
-        # Sort by length descending - longer text more likely to be movie titles
-        sorted_texts = sorted(detected_texts[:15], key=len, reverse=True)
+        # Extract individual words from all detected texts
+        all_words = []
+        for text in detected_texts[:20]:
+            words = text.replace('\n', ' ').split()
+            all_words.extend(words)
         
-        # Filter out very short text (likely just actor names or single words)
-        filtered_texts = [text for text in sorted_texts if len(text.strip()) > 2]
+        # Remove duplicates while preserving order
+        unique_words = []
+        seen = set()
+        for word in all_words:
+            word_lower = word.lower()
+            if word_lower not in seen and len(word) > 2:
+                seen.add(word_lower)
+                unique_words.append(word)
         
-        logger.info(f"Filtered and sorted texts: {filtered_texts[:10]}")
+        logger.info(f"Extracted unique words: {unique_words[:20]}")
         
-        for text in filtered_texts[:10]:
-            movie = search_tmdb_movie(text)
+        # Try combinations of 1-3 consecutive words
+        search_queries = []
+        
+        # Add individual words first
+        search_queries.extend(unique_words[:15])
+        
+        # Add 2-word combinations
+        for i in range(min(10, len(unique_words) - 1)):
+            search_queries.append(f"{unique_words[i]} {unique_words[i+1]}")
+        
+        # Add 3-word combinations
+        for i in range(min(8, len(unique_words) - 2)):
+            search_queries.append(f"{unique_words[i]} {unique_words[i+1]} {unique_words[i+2]}")
+        
+        logger.info(f"Search queries: {search_queries[:15]}")
+        
+        for query in search_queries[:20]:
+            movie = search_tmdb_movie(query)
             if movie:
                 logger.info(f"Found movie: {movie.get('title')}")
                 return {
