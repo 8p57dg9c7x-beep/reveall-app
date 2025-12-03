@@ -9,8 +9,8 @@ import json
 import os
 from pathlib import Path
 
-# Backend URL from frontend .env file
-BACKEND_URL = "https://cinescan-backend-1.onrender.com"
+# Backend URL for local testing
+BACKEND_URL = "http://localhost:8001"
 
 def test_basic_connectivity():
     """Test basic connectivity to the backend"""
