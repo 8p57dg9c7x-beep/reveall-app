@@ -67,12 +67,10 @@ export const recognizeAudio = async (audioUri) => {
       type: `audio/${fileType}`,
     });
 
+    // Don't set Content-Type header - let fetch set it with proper boundary
     const response = await fetch(`${API_BASE_URL}/api/recognize-audio`, {
       method: 'POST',
       body: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
     });
 
     const data = await response.json();
