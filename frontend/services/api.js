@@ -49,7 +49,7 @@ export const recognizeAudio = async (audioUri) => {
     
     // Read audio file as base64
     const base64 = await FileSystem.readAsStringAsync(audioUri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: 'base64',
     });
 
     console.log('Audio base64 length:', base64.length);
