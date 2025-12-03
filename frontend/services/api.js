@@ -19,23 +19,17 @@ export const recognizeImage = async (imageUri) => {
     console.log('Recognizing image from URI:', imageUri);
     console.log('API URL:', `${API_BASE_URL}/api/recognize-image`);
     
-    const formData = new FormData();
-    formData.append('file', {
-      uri: imageUri,
-      type: 'image/jpeg',
-      name: 'photo.jpg',
+    // Read image file as base64
+    const base64 = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
     });
 
-    const response = await axios.post(
-      `${API_BASE_URL}/api/recognize-image`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 30000,
-      }
-    );
+    console.log('Image base64 length:', base64.length);
+
+    // Send as base64 instead of FormData
+    const response = await api.post('/api/recognize-image', {
+      image_base64: `data:image/jpeg;base64,${base64}`,
+    });
 
     console.log('Image recognition response:', response.data);
     return response.data;
