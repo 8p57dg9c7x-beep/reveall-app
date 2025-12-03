@@ -107,9 +107,9 @@ user_problem_statement: Build CINESCAN mobile app - "Shazam for Movies" with ima
 backend:
   - task: "API endpoints setup"
     implemented: true
-    working: false
+    working: true
     file: "backend/server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
