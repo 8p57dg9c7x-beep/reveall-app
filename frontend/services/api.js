@@ -55,27 +55,36 @@ export const recognizeImage = async (imageUri) => {
 export const recognizeAudio = async (audioUri) => {
   try {
     console.log('Recognizing audio from URI:', audioUri);
-    
-    // Read audio file as base64
-    const base64 = await FileSystem.readAsStringAsync(audioUri, {
-      encoding: 'base64',
-    });
-
-    console.log('Audio base64 length:', base64.length);
     console.log('API URL:', `${API_BASE_URL}/api/recognize-audio`);
-
-    const response = await api.post('/api/recognize-audio', {
-      audio_base64: `data:audio/m4a;base64,${base64}`,
+    
+    // Use fetch with FormData for audio files
+    const formData = new FormData();
+    
+    const uriParts = audioUri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
+    
+    formData.append('file', {
+      uri: audioUri,
+      name: `audio.${fileType}`,
+      type: `audio/${fileType}`,
     });
 
-    console.log('Audio recognition response:', response.data);
-    return response.data;
+    const response = await fetch(`${API_BASE_URL}/api/recognize-audio`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    const data = await response.json();
+    console.log('Audio recognition response:', data);
+    return data;
   } catch (error) {
     console.error('Audio recognition error:', error);
-    console.error('Error response:', error.response?.data);
     return {
       success: false,
-      error: error.response?.data?.error || error.message || 'Failed to process audio'
+      error: error.message || 'Failed to process audio'
     };
   }
 };
