@@ -32,6 +32,12 @@ logger = logging.getLogger(__name__)
 class AudioRecognitionRequest(BaseModel):
     audio_base64: str
 
+class ImageRecognitionRequest(BaseModel):
+    image_base64: str
+
+class VideoRecognitionRequest(BaseModel):
+    video_base64: str
+
 class SearchRequest(BaseModel):
     query: str
 
