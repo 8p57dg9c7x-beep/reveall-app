@@ -76,23 +76,17 @@ export const recognizeVideo = async (videoUri) => {
     console.log('Recognizing video from URI:', videoUri);
     console.log('API URL:', `${API_BASE_URL}/api/recognize-video`);
     
-    const formData = new FormData();
-    formData.append('file', {
-      uri: videoUri,
-      type: 'video/mp4',
-      name: 'video.mp4',
+    // Read video file as base64
+    const base64 = await FileSystem.readAsStringAsync(videoUri, {
+      encoding: FileSystem.EncodingType.Base64,
     });
 
-    const response = await axios.post(
-      `${API_BASE_URL}/api/recognize-video`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 30000,
-      }
-    );
+    console.log('Video base64 length:', base64.length);
+
+    // Send as base64 instead of FormData
+    const response = await api.post('/api/recognize-video', {
+      video_base64: `data:video/mp4;base64,${base64}`,
+    });
 
     console.log('Video recognition response:', response.data);
     return response.data;
