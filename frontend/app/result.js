@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, StatusBar } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, GLOW, SIZES } from '../constants/theme';
+import { COLORS, SHADOWS, SIZES } from '../constants/theme';
 import { addToWatchlist, isInWatchlist } from '../services/storage';
 
 export default function ResultScreen() {
