@@ -385,15 +385,78 @@ async def recognize_audio(file: UploadFile = File(...)):
 
 @api_router.post("/recognize-video")
 async def recognize_video(file: UploadFile = File(...)):
-    """Recognize movie from video"""
+    """Recognize movie from video by extracting audio"""
     try:
         logger.info(f"Received video: {file.filename}, content_type: {file.content_type}")
         
-        return {
-            "success": False,
-            "error": "Video recognition coming soon. Use image or audio instead.",
-            "movie": None
-        }
+        # Read video file
+        video_content = await file.read()
+        logger.info(f"Video content size: {len(video_content)} bytes")
+        
+        # Save video temporarily
+        temp_video_path = f"/tmp/temp_video_{int(time.time())}.mp4"
+        temp_audio_path = f"/tmp/temp_audio_{int(time.time())}.mp3"
+        
+        try:
+            with open(temp_video_path, 'wb') as f:
+                f.write(video_content)
+            
+            # Extract audio from video using ffmpeg
+            import subprocess
+            result = subprocess.run([
+                'ffmpeg', '-i', temp_video_path,
+                '-vn', '-acodec', 'mp3', '-ar', '44100', '-ac', '2',
+                '-b:a', '128k', temp_audio_path, '-y'
+            ], capture_output=True, timeout=30)
+            
+            if result.returncode != 0:
+                logger.error(f"FFmpeg error: {result.stderr.decode()}")
+                return {
+                    "success": False,
+                    "error": "Could not extract audio from video",
+                    "movie": None
+                }
+            
+            # Read extracted audio and convert to base64
+            with open(temp_audio_path, 'rb') as f:
+                audio_content = f.read()
+            
+            audio_base64 = base64.b64encode(audio_content).decode('utf-8')
+            
+            # Use audio recognition
+            search_query = recognize_audio_with_audd(audio_base64)
+            
+            if not search_query:
+                return {
+                    "success": False,
+                    "error": "Could not recognize audio from video",
+                    "movie": None
+                }
+            
+            # Search TMDB for the movie
+            movie = search_tmdb_movie(search_query)
+            
+            if movie:
+                logger.info(f"Found movie from video: {movie.get('title')}")
+                return {
+                    "success": True,
+                    "source": "Video Audio Recognition (AudD + TMDB)",
+                    "movie": movie
+                }
+            
+            return {
+                "success": False,
+                "error": f"Could not find movie from video audio",
+                "movie": None
+            }
+            
+        finally:
+            # Cleanup temp files
+            import os
+            if os.path.exists(temp_video_path):
+                os.remove(temp_video_path)
+            if os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
         
     except Exception as e:
         logger.error(f"Video recognition error: {e}")
