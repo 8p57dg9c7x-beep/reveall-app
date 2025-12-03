@@ -19,26 +19,35 @@ export const recognizeImage = async (imageUri) => {
     console.log('Recognizing image from URI:', imageUri);
     console.log('API URL:', `${API_BASE_URL}/api/recognize-image`);
     
-    // Read image file as base64
-    const base64 = await FileSystem.readAsStringAsync(imageUri, {
-      encoding: 'base64',
+    // Use fetch instead of axios for better FormData support
+    const formData = new FormData();
+    
+    // Create a file object with proper structure for React Native
+    const uriParts = imageUri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
+    
+    formData.append('file', {
+      uri: imageUri,
+      name: `photo.${fileType}`,
+      type: `image/${fileType}`,
     });
 
-    console.log('Image base64 length:', base64.length);
-
-    // Send as base64 instead of FormData
-    const response = await api.post('/api/recognize-image', {
-      image_base64: `data:image/jpeg;base64,${base64}`,
+    const response = await fetch(`${API_BASE_URL}/api/recognize-image`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    console.log('Image recognition response:', response.data);
-    return response.data;
+    const data = await response.json();
+    console.log('Image recognition response:', data);
+    return data;
   } catch (error) {
     console.error('Image recognition error:', error);
-    console.error('Error response:', error.response?.data);
     return {
       success: false,
-      error: error.response?.data?.error || error.message || 'Failed to process image'
+      error: error.message || 'Failed to process image'
     };
   }
 };
