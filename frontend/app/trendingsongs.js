@@ -173,13 +173,16 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
   },
   headerContent: {
     alignItems: 'center',
