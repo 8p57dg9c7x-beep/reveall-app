@@ -137,9 +137,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   scrollContent: {
     paddingTop: 20,
-    paddingBottom: 120,
+    paddingBottom: 140,
   },
   loadingContainer: {
     flex: 1,
@@ -153,8 +165,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 28,
+    paddingHorizontal: 24,
+    paddingBottom: 32,
     alignItems: 'center',
   },
   headerTitle: {
@@ -170,41 +182,47 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   moviesContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   movieCard: {
     flexDirection: 'row',
     backgroundColor: COLORS.card,
     borderRadius: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 4,
+    minHeight: 180,
   },
   poster: {
-    width: 110,
-    height: 165,
+    width: 120,
+    height: 180,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   cardContent: {
     flex: 1,
-    padding: 16,
+    padding: 18,
     justifyContent: 'space-between',
   },
+  cardHeader: {
+    marginBottom: 12,
+  },
   title: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 8,
-    lineHeight: 22,
+    lineHeight: 24,
+  },
+  metadataSection: {
+    marginBottom: 10,
   },
   metadata: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   date: {
     fontSize: 13,
@@ -215,7 +233,6 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   rating: {
     fontSize: 13,
@@ -226,10 +243,10 @@ const styles = StyleSheet.create({
   overview: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    lineHeight: 19,
+    lineHeight: 20,
   },
   chevronContainer: {
     justifyContent: 'center',
-    paddingRight: 12,
+    paddingRight: 16,
   },
 });
