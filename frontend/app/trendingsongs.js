@@ -53,23 +53,63 @@ export default function TrendingSongsScreen() {
     }
   };
 
-  const handleSongTap = (song) => {
-    // Format song data to match the result screen format
-    const songData = {
-      title: song.title,
-      artist: song.artist,
-      album: song.album || song.title,
-      album_art: song.image,
-      // Add streaming links (YouTube always available via search)
-      spotify: null, // Will show if available in future
-      apple_music: null, // Will show if available in future
-      lyrics: null, // Will show "No lyrics found" message
-    };
+  const [searchingIndex, setSearchingIndex] = useState(null);
 
-    router.push({
-      pathname: '/result',
-      params: { songData: JSON.stringify(songData) }
-    });
+  const handleSongTap = async (song, index) => {
+    try {
+      setSearchingIndex(index);
+      
+      // Call AudD search API to get full song details
+      const response = await searchMusic(song.title, song.artist);
+      
+      setSearchingIndex(null);
+      
+      if (response.success && response.song) {
+        // Use full data from AudD (with lyrics and streaming links)
+        router.push({
+          pathname: '/result',
+          params: { songData: JSON.stringify(response.song) }
+        });
+      } else {
+        // Fallback to basic data if search fails
+        const songData = {
+          title: song.title,
+          artist: song.artist,
+          album: song.album || song.title,
+          album_art: song.image,
+          spotify: null,
+          apple_music: null,
+          lyrics: null,
+        };
+        
+        router.push({
+          pathname: '/result',
+          params: { songData: JSON.stringify(songData) }
+        });
+        
+        // Optional: Show a brief message
+        Alert.alert('Note', 'Full song details not available, showing basic info.');
+      }
+    } catch (error) {
+      setSearchingIndex(null);
+      console.error('Error searching song:', error);
+      
+      // Fallback to basic data on error
+      const songData = {
+        title: song.title,
+        artist: song.artist,
+        album: song.album || song.title,
+        album_art: song.image,
+        spotify: null,
+        apple_music: null,
+        lyrics: null,
+      };
+      
+      router.push({
+        pathname: '/result',
+        params: { songData: JSON.stringify(songData) }
+      });
+    }
   };
 
   const renderSongCard = (song, index) => (
