@@ -824,10 +824,18 @@ async def get_similar_movies(movie_id: int):
 async def get_outfits(category: str):
     """Get outfits by category"""
     try:
-        # For now, return empty array - outfits will be added manually later
-        # In future, this can be connected to MongoDB
         logger.info(f"Fetching outfits for category: {category}")
-        return {"outfits": [], "category": category}
+        
+        # Fetch from MongoDB
+        outfits = list(outfits_collection.find({"category": category}))
+        
+        # Convert ObjectId to string for JSON serialization
+        for outfit in outfits:
+            outfit['id'] = str(outfit['_id'])
+            del outfit['_id']
+        
+        logger.info(f"Found {len(outfits)} outfits for category: {category}")
+        return {"outfits": outfits, "category": category}
     except Exception as e:
         logger.error(f"Outfits error: {e}")
         return {"outfits": [], "category": category}
