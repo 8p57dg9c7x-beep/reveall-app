@@ -91,10 +91,10 @@ export default function HomeScreen() {
       );
       setRecording(newRecording);
 
-      // Auto-stop after 10 seconds
+      // Auto-stop after 6 seconds (optimal for speed + accuracy)
       const timeout = setTimeout(async () => {
         await processRecording(newRecording);
-      }, 10000);
+      }, 6000);
       setTimerId(timeout);
     } catch (error) {
       setIsListening(false);
