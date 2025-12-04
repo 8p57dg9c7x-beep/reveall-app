@@ -19,6 +19,7 @@ const CATEGORIES = [
   { id: 'minimal', name: 'Minimal', icon: 'circle-outline' },
   { id: 'sport', name: 'Sport', icon: 'run' },
   { id: 'elegant', name: 'Elegant', icon: 'tie' },
+  { id: 'affordable', name: 'Affordable Fits', icon: 'tag-multiple' },
   { id: 'celebrity', name: 'Celebrity', icon: 'star' },
 ];
 
