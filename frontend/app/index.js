@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { recognizeImage, recognizeAudio, recognizeVideo } from '../services/api';
+import { recognizeImage, recognizeAudio, recognizeVideo, recognizeMusic } from '../services/api';
 
 export default function HomeScreen() {
   const router = useRouter();
