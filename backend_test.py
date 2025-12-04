@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
-COMPREHENSIVE VIDEO SCENE RECOGNITION TESTING
-CRITICAL MISSION: Test video recognition with 10 famous movie scenes
-SUCCESS CRITERIA: 8/10 minimum accuracy for deployment
+CINESCAN Backend Testing - Music Identification Focus
+CRITICAL PRIORITY: Test /api/recognize-music-base64 endpoint for 9/10 accuracy
 Backend URL: https://cinescan-app-2.preview.emergentagent.com
 
-USER EXPECTATION: Identify movies from video clips/scenes (visual recognition, not audio)
-Since we cannot use actual copyrighted movie clips, we'll simulate video frame 
-extraction by using movie scene screenshots/posters to test the recognition system.
+USER EXPECTATION: Identify any music in the world with 9/10 accuracy using AudD API
+Testing the new base64 audio approach to fix previous 422 FormData errors.
 """
 
 import requests
