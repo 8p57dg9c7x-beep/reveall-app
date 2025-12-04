@@ -116,7 +116,8 @@ export default function TrendingSongsScreen() {
     <TouchableOpacity 
       key={song.id} 
       style={styles.songCard}
-      onPress={() => handleSongTap(song)}
+      onPress={() => handleSongTap(song, index)}
+      disabled={searchingIndex !== null}
     >
       <View style={styles.rankContainer}>
         <Text style={styles.rankNumber}>{index + 1}</Text>
@@ -127,8 +128,14 @@ export default function TrendingSongsScreen() {
         <Text style={styles.artistName} numberOfLines={1}>{song.artist}</Text>
       </View>
       <View style={styles.songMeta}>
-        <Text style={styles.duration}>{song.duration}</Text>
-        <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+        {searchingIndex === index ? (
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        ) : (
+          <>
+            <Text style={styles.duration}>{song.duration}</Text>
+            <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+          </>
+        )}
       </View>
     </TouchableOpacity>
   );
