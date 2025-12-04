@@ -5,28 +5,24 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  ScrollView,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
-import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
-import { recognizeMusic, recognizeImage } from '../services/api';
+import { recognizeMusic } from '../services/api';
 
 export default function HomeScreen() {
   const [pulseAnim] = useState(new Animated.Value(1));
-  const [showOptions, setShowOptions] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [recording, setRecording] = useState(null);
 
   useEffect(() => {
-    // Continuous pulse animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.05,
+          toValue: 1.1,
           duration: 1500,
           useNativeDriver: true,
         }),
@@ -39,89 +35,64 @@ export default function HomeScreen() {
     ).start();
   }, []);
 
-  const handleIdentifyTap = () => {
-    setShowOptions(!showOptions);
-  };
-
-  const handleMusic = async () => {
-    setShowOptions(false);
+  const startListening = async () => {
     try {
       const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please enable microphone access');
-        return;
-      }
+      if (status !== 'granted') return;
 
-      setIsProcessing(true);
+      setIsListening(true);
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
+      const { recording: newRecording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
+      setRecording(newRecording);
 
       setTimeout(async () => {
-        try {
-          await recording.stopAndUnloadAsync();
-          const uri = recording.getURI();
-          const response = await recognizeMusic(uri);
+        if (newRecording) {
+          try {
+            await newRecording.stopAndUnloadAsync();
+            const uri = newRecording.getURI();
+            setIsListening(false);
+            const response = await recognizeMusic(uri);
 
-          if (response.success && response.song) {
-            router.push({
-              pathname: '/result',
-              params: { songData: JSON.stringify(response.song) }
-            });
-          } else {
-            Alert.alert('Not Found', 'Song not recognized. Try again.');
+            if (response.success && response.song) {
+              router.push({
+                pathname: '/result',
+                params: { songData: JSON.stringify(response.song) }
+              });
+            }
+          } catch (error) {
+            setIsListening(false);
           }
-        } catch (error) {
-          Alert.alert('Error', 'Failed to identify music');
-        } finally {
-          setIsProcessing(false);
         }
       }, 10000);
     } catch (error) {
-      setIsProcessing(false);
-      Alert.alert('Error', 'Failed to start recording');
+      setIsListening(false);
     }
   };
 
-  const handlePoster = async () => {
-    setShowOptions(false);
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please enable photo library access');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setIsProcessing(true);
-        const response = await recognizeImage(result.assets[0].uri);
-
-        if (response.success && response.movie) {
-          router.push({
-            pathname: '/result',
-            params: { movieData: JSON.stringify(response.movie) }
-          });
-        } else {
-          Alert.alert('Not Found', 'Movie not recognized from poster.');
-        }
-        setIsProcessing(false);
-      }
-    } catch (error) {
-      setIsProcessing(false);
-      Alert.alert('Error', 'Failed to identify poster');
-    }
-  };
+  if (isListening) {
+    return (
+      <LinearGradient
+        colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
+        style={styles.container}
+      >
+        <View style={styles.listeningContent}>
+          <Animated.View style={[styles.pulseOuter, { transform: [{ scale: pulseAnim }] }]}>
+            <View style={styles.pulseMiddle}>
+              <View style={styles.pulseInner}>
+                <MaterialCommunityIcons name="music-note" size={100} color={COLORS.textPrimary} />
+              </View>
+            </View>
+          </Animated.View>
+        </View>
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient
@@ -134,35 +105,16 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.centerContent}>
-        <View style={styles.buttonsRow}>
+        <Text style={styles.tapText}>Tap to Identify</Text>
+        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleMusic}
+            style={styles.mainButton}
+            onPress={startListening}
             activeOpacity={0.8}
-            disabled={isProcessing}
           >
-            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-              <MaterialCommunityIcons name="music" size={80} color={COLORS.textPrimary} />
-            </Animated.View>
-            <Text style={styles.buttonLabel}>Identify Music</Text>
+            <MaterialCommunityIcons name="music" size={100} color={COLORS.textPrimary} />
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handlePoster}
-            activeOpacity={0.8}
-            disabled={isProcessing}
-          >
-            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-              <MaterialCommunityIcons name="image-multiple" size={80} color={COLORS.textPrimary} />
-            </Animated.View>
-            <Text style={styles.buttonLabel}>Identify Poster</Text>
-          </TouchableOpacity>
-        </View>
-
-        {isProcessing && (
-          <Text style={styles.processingText}>Processing...</Text>
-        )}
+        </Animated.View>
       </View>
     </LinearGradient>
   );
@@ -190,34 +142,50 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
   },
-  buttonsRow: {
-    flexDirection: 'row',
-    gap: 30,
+  tapText: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginBottom: 60,
   },
-  actionButton: {
-    width: 160,
-    height: 180,
-    borderRadius: 20,
-    borderWidth: 4,
+  mainButton: {
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    borderWidth: 5,
     borderColor: COLORS.border,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
-  buttonLabel: {
-    color: COLORS.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    marginTop: 16,
-    textAlign: 'center',
+  listeningContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  processingText: {
-    color: COLORS.accent,
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 24,
+  pulseOuter: {
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    backgroundColor: 'rgba(159, 91, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pulseMiddle: {
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(159, 91, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pulseInner: {
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: 'rgba(159, 91, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
