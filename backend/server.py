@@ -359,13 +359,13 @@ async def recognize_music_base64(request: dict):
         
         logger.info(f"Received base64 audio, length: {len(audio_base64)}")
         
-        # Use AudD to identify the song
+        # Use AudD to identify the song (including lyrics)
         try:
             audd_url = "https://api.audd.io/"
             audd_data = {
                 'api_token': AUDD_API_KEY,
                 'audio': audio_base64,
-                'return': 'apple_music,spotify'
+                'return': 'apple_music,spotify,lyrics'
             }
             
             response = requests.post(audd_url, data=audd_data, timeout=30)
