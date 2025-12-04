@@ -122,6 +122,23 @@ export default function ResultScreen() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Lyrics Section */}
+          <View style={styles.lyricsSection}>
+            <Text style={styles.sectionTitle}>Lyrics</Text>
+            {song.lyrics ? (
+              <View style={styles.lyricsContainer}>
+                <ScrollView style={styles.lyricsScroll} nestedScrollEnabled>
+                  <Text style={styles.lyricsText}>{song.lyrics.lyrics}</Text>
+                </ScrollView>
+              </View>
+            ) : (
+              <View style={styles.noLyricsContainer}>
+                <MaterialCommunityIcons name="music-note-off" size={40} color={COLORS.textSecondary} />
+                <Text style={styles.noLyricsText}>No lyrics found for this song yet.</Text>
+              </View>
+            )}
+          </View>
         </ScrollView>
       </LinearGradient>
     );
