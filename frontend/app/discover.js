@@ -305,15 +305,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   section: {
-    marginBottom: 32,
-    paddingBottom: 8,
+    marginBottom: 40,
+    paddingBottom: 12,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 22,
