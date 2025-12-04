@@ -35,7 +35,7 @@ export default function OutfitDetailScreen() {
       style={styles.container}
     >
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push(returnPath)}>
           <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
