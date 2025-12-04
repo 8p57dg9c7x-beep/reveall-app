@@ -201,6 +201,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  outfitsContainer: {
+    paddingHorizontal: 12,
+  },
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
