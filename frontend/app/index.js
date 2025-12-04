@@ -178,6 +178,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  listeningTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  listeningSubtitle: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    marginBottom: 60,
+  },
   pulseOuter: {
     width: 350,
     height: 350,
