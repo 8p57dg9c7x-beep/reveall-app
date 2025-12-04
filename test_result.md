@@ -280,14 +280,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Music Identification - Base64 audio recognition"
-    - "Test /api/recognize-music-base64 endpoint with real audio samples"
-    - "Verify AudD API integration and response format"
-    - "Confirm 9/10 accuracy target for music identification"
-  stuck_tasks:
-    - "Music Identification - Base64 audio recognition (stuck_count: 3)"
+    - "Image Recognition - Camera capture and gallery selection"
+    - "Video Recognition - Upload functionality"
+    - "Result Screen - Movie details display"
+    - "API Integration - All backend endpoints"
+  stuck_tasks: []
   test_all: false
-  test_priority: "critical_first"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
