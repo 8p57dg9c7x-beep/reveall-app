@@ -163,9 +163,11 @@ export default function HomeScreen() {
 
         <TouchableOpacity style={styles.identifyButton} onPress={handleIdentify} activeOpacity={0.8}>
           <View style={styles.logoCircle}>
-            <MaterialCommunityIcons name="music-note" size={80} color={COLORS.textPrimary} />
+            <MaterialCommunityIcons name="radar" size={80} color={COLORS.textPrimary} />
           </View>
         </TouchableOpacity>
+        
+        <Text style={styles.identifyHint}>Music, Movies & More</Text>
 
         {recentlyFound.length > 0 && (
           <View style={styles.recentlyFoundSection}>
