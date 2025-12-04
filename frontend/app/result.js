@@ -407,4 +407,38 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontWeight: '600',
   },
+  lyricsSection: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  lyricsContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    maxHeight: 400,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+  },
+  lyricsScroll: {
+    maxHeight: 368,
+  },
+  lyricsText: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    lineHeight: 24,
+    fontFamily: 'System',
+  },
+  noLyricsContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noLyricsText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    marginTop: 12,
+    textAlign: 'center',
+  },
 });
