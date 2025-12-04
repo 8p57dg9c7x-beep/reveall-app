@@ -832,6 +832,18 @@ async def create_outfit(outfit: dict):
         logger.error(f"Create outfit error: {e}")
         return {"success": False, "error": str(e)}
 
+@api_router.get("/outfits/trending")
+async def get_trending_outfits():
+    """Get trending outfits across all categories"""
+    try:
+        # For now, return empty array - trending outfits will be added manually later
+        # In future, this can be connected to MongoDB with trending logic
+        logger.info("Fetching trending outfits")
+        return {"outfits": []}
+    except Exception as e:
+        logger.error(f"Trending outfits error: {e}")
+        return {"outfits": []}
+
 # Include router
 app.include_router(api_router)
 
