@@ -808,6 +808,30 @@ async def get_similar_movies(movie_id: int):
         logger.error(f"Similar movies error: {e}")
         return {"results": []}
 
+@api_router.get("/outfits/{category}")
+async def get_outfits(category: str):
+    """Get outfits by category"""
+    try:
+        # For now, return empty array - outfits will be added manually later
+        # In future, this can be connected to MongoDB
+        logger.info(f"Fetching outfits for category: {category}")
+        return {"outfits": [], "category": category}
+    except Exception as e:
+        logger.error(f"Outfits error: {e}")
+        return {"outfits": [], "category": category}
+
+@api_router.post("/outfits")
+async def create_outfit(outfit: dict):
+    """Create a new outfit (for admin use)"""
+    try:
+        # This endpoint will be used to add outfits to the database
+        # For now, just return success
+        logger.info(f"Creating outfit: {outfit.get('title', 'Unnamed')}")
+        return {"success": True, "message": "Outfit endpoint ready for data"}
+    except Exception as e:
+        logger.error(f"Create outfit error: {e}")
+        return {"success": False, "error": str(e)}
+
 # Include router
 app.include_router(api_router)
 
