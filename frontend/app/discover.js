@@ -186,24 +186,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingTop: 60,
     paddingBottom: 100,
   },
   header: {
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
     alignItems: 'center',
-    marginBottom: 32,
   },
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 12,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.textSecondary,
+    marginTop: 4,
     textAlign: 'center',
   },
   section: {
@@ -213,25 +213,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
     marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: COLORS.textPrimary,
   },
   seeAll: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.primary,
     fontWeight: '600',
   },
   horizontalScroll: {
-    marginLeft: -20,
     paddingLeft: 20,
   },
   trendingCard: {
-    width: 140,
     marginRight: 16,
+    width: 140,
   },
   trendingImage: {
     width: 140,
@@ -242,22 +242,22 @@ const styles = StyleSheet.create({
   trendingTitle: {
     color: COLORS.textPrimary,
     fontSize: 14,
-    fontWeight: '600',
     marginTop: 8,
-    lineHeight: 18,
+    fontWeight: '600',
   },
   trendingSubtitle: {
     color: COLORS.textSecondary,
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 2,
   },
   exploreCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.card,
-    padding: 16,
-    borderRadius: 12,
+    marginHorizontal: 20,
     marginBottom: 12,
+    padding: 20,
+    borderRadius: 12,
   },
   exploreTitle: {
     flex: 1,
@@ -268,13 +268,13 @@ const styles = StyleSheet.create({
   },
   emptySection: {
     alignItems: 'center',
-    padding: 32,
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
+    justifyContent: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
   },
   emptyText: {
     color: COLORS.textSecondary,
-    fontSize: 16,
+    fontSize: 14,
     marginTop: 12,
   },
 });
