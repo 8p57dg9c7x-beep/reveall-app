@@ -76,22 +76,60 @@ export default function DiscoverScreen() {
     </TouchableOpacity>
   );
 
-  const handleSongTap = (song) => {
-    // Format song data to match the result screen format
-    const songData = {
-      title: song.title,
-      artist: song.artist,
-      album: song.title,
-      album_art: song.image,
-      spotify: null,
-      apple_music: null,
-      lyrics: null,
-    };
+  const [loadingSongId, setLoadingSongId] = useState(null);
 
-    router.push({
-      pathname: '/result',
-      params: { songData: JSON.stringify(songData) }
-    });
+  const handleSongTap = async (song) => {
+    try {
+      setLoadingSongId(song.id);
+      
+      // Call AudD search API
+      const response = await searchMusic(song.title, song.artist);
+      
+      setLoadingSongId(null);
+      
+      if (response.success && response.song) {
+        // Use full data from AudD
+        router.push({
+          pathname: '/result',
+          params: { songData: JSON.stringify(response.song) }
+        });
+      } else {
+        // Fallback to basic data
+        const songData = {
+          title: song.title,
+          artist: song.artist,
+          album: song.title,
+          album_art: song.image,
+          spotify: null,
+          apple_music: null,
+          lyrics: null,
+        };
+        
+        router.push({
+          pathname: '/result',
+          params: { songData: JSON.stringify(songData) }
+        });
+      }
+    } catch (error) {
+      setLoadingSongId(null);
+      console.error('Error searching song:', error);
+      
+      // Fallback on error
+      const songData = {
+        title: song.title,
+        artist: song.artist,
+        album: song.title,
+        album_art: song.image,
+        spotify: null,
+        apple_music: null,
+        lyrics: null,
+      };
+      
+      router.push({
+        pathname: '/result',
+        params: { songData: JSON.stringify(songData) }
+      });
+    }
   };
 
   const renderSongCard = (song) => (
