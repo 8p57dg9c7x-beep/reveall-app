@@ -433,7 +433,7 @@ async def recognize_music(file: UploadFile = File(...)):
             audd_data = {
                 'api_token': AUDD_API_KEY,
                 'audio': audio_base64,
-                'return': 'apple_music,spotify'
+                'return': 'apple_music,spotify,lyrics'
             }
             
             response = requests.post(audd_url, data=audd_data, timeout=30)
