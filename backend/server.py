@@ -75,13 +75,13 @@ def search_tmdb_movie(query: str):
         return None
 
 def get_movie_details(movie_id: int):
-    """Get detailed movie information from TMDB"""
+    """Get detailed movie information from TMDB including watch providers"""
     try:
         url = f"https://api.themoviedb.org/3/movie/{movie_id}"
         params = {
             'api_key': TMDB_API_KEY,
             'language': 'en-US',
-            'append_to_response': 'credits'
+            'append_to_response': 'credits,watch/providers'
         }
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
