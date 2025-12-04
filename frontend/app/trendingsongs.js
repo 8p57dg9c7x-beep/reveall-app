@@ -50,8 +50,31 @@ export default function TrendingSongsScreen() {
     }
   };
 
+  const handleSongTap = (song) => {
+    // Format song data to match the result screen format
+    const songData = {
+      title: song.title,
+      artist: song.artist,
+      album: song.album || song.title,
+      album_art: song.image,
+      // Add streaming links (YouTube always available via search)
+      spotify: null, // Will show if available in future
+      apple_music: null, // Will show if available in future
+      lyrics: null, // Will show "No lyrics found" message
+    };
+
+    router.push({
+      pathname: '/result',
+      params: { songData: JSON.stringify(songData) }
+    });
+  };
+
   const renderSongCard = (song, index) => (
-    <TouchableOpacity key={song.id} style={styles.songCard}>
+    <TouchableOpacity 
+      key={song.id} 
+      style={styles.songCard}
+      onPress={() => handleSongTap(song)}
+    >
       <View style={styles.rankContainer}>
         <Text style={styles.rankNumber}>{index + 1}</Text>
       </View>
@@ -62,7 +85,7 @@ export default function TrendingSongsScreen() {
       </View>
       <View style={styles.songMeta}>
         <Text style={styles.duration}>{song.duration}</Text>
-        <MaterialCommunityIcons name="play-circle" size={28} color={COLORS.primary} />
+        <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
       </View>
     </TouchableOpacity>
   );
