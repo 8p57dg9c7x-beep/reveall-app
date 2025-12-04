@@ -17,14 +17,28 @@ import { COLORS } from '../constants/theme';
 export default function ResultScreen() {
   const params = useLocalSearchParams();
   const [inWatchlist, setInWatchlist] = useState(false);
+  const [similarMovies, setSimilarMovies] = useState([]);
   const movie = params.movieData ? JSON.parse(params.movieData) : null;
   const song = params.songData ? JSON.parse(params.songData) : null;
 
   useEffect(() => {
     if (movie) {
       checkWatchlist();
+      loadSimilarMovies();
     }
   }, [movie]);
+
+  const loadSimilarMovies = async () => {
+    if (!movie?.id) return;
+    try {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan-app-2.preview.emergentagent.com';
+      const response = await fetch(`${API_URL}/api/movie/${movie.id}/similar`);
+      const data = await response.json();
+      setSimilarMovies(data.results?.slice(0, 10) || []);
+    } catch (error) {
+      console.error('Error loading similar movies:', error);
+    }
+  };
 
   const checkWatchlist = async () => {
     try {
