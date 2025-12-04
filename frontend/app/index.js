@@ -82,7 +82,6 @@ export default function HomeScreen() {
       if (status !== 'granted') return;
 
       setIsListening(true);
-      setCountdown(7);
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
@@ -93,22 +92,11 @@ export default function HomeScreen() {
       );
       setRecording(newRecording);
 
-      // Countdown timer
-      let count = 7;
-      const interval = setInterval(() => {
-        count--;
-        setCountdown(count);
-        if (count <= 0) {
-          clearInterval(interval);
-        }
-      }, 1000);
-      setTimerId(interval);
-
-      // Auto-stop after 7 seconds
-      setTimeout(async () => {
-        clearInterval(interval);
+      // Auto-stop after 10 seconds
+      const timeout = setTimeout(async () => {
         await processRecording(newRecording);
-      }, 7000);
+      }, 10000);
+      setTimerId(timeout);
     } catch (error) {
       setIsListening(false);
     }
