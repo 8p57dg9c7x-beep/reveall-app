@@ -190,31 +190,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
-  identifyButton: {
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    borderWidth: 5,
-    borderColor: COLORS.border,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  optionsContainer: {
+  buttonsRow: {
     flexDirection: 'row',
-    marginTop: 40,
     gap: 30,
   },
-  optionButton: {
+  actionButton: {
+    width: 160,
+    height: 180,
+    borderRadius: 20,
+    borderWidth: 4,
+    borderColor: COLORS.border,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
   },
-  optionText: {
+  buttonLabel: {
     color: COLORS.textPrimary,
     fontSize: 16,
-    fontWeight: '600',
-    marginTop: 8,
+    fontWeight: '700',
+    marginTop: 16,
+    textAlign: 'center',
   },
   processingText: {
     color: COLORS.accent,
