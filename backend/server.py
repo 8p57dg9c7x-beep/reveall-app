@@ -39,6 +39,14 @@ api_router = APIRouter(prefix="/api")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# MongoDB connection
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
+mongo_client = MongoClient(MONGO_URL)
+db = mongo_client['cinescan']
+outfits_collection = db['outfits']
+
+logger.info(f"MongoDB connected: {MONGO_URL}")
+
 # Pydantic Models
 class AudioRecognitionRequest(BaseModel):
     audio_base64: str
