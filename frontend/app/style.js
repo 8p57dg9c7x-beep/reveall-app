@@ -105,77 +105,94 @@ export default function StyleScreen() {
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
-        <Text style={styles.headerTitle}>Style Discovery</Text>
-        <Text style={styles.headerSubtitle}>Curated outfit inspiration</Text>
-      </View>
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.header}>
+          <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
+          <Text style={styles.headerTitle}>Style Discovery</Text>
+          <Text style={styles.headerSubtitle}>Curated outfit inspiration</Text>
+        </View>
 
-      {/* Dress Like Your Icon Section */}
-      {celebrityOutfits.length > 0 && (
-        <View style={styles.celebritySection}>
-          <View style={styles.celebritySectionHeader}>
-            <MaterialCommunityIcons name="star" size={28} color={COLORS.accent} />
-            <Text style={styles.celebritySectionTitle}>Dress Like Your Icon</Text>
+        {/* Dress Like Your Icon Section */}
+        {celebrityOutfits.length > 0 && (
+          <View style={styles.celebritySection}>
+            <View style={styles.celebritySectionHeader}>
+              <MaterialCommunityIcons name="star" size={24} color={COLORS.accent} />
+              <Text style={styles.celebritySectionTitle}>Dress Like Your Icon</Text>
+            </View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={styles.celebrityScroll}
+              nestedScrollEnabled
+            >
+              {celebrityOutfits.map((outfit) => (
+                <TouchableOpacity
+                  key={outfit.id}
+                  style={styles.celebrityCard}
+                  onPress={() => router.push({
+                    pathname: '/outfitdetail',
+                    params: { outfitData: JSON.stringify(outfit) }
+                  })}
+                >
+                  <Image source={{ uri: outfit.image }} style={styles.celebrityImage} />
+                  <View style={styles.celebrityInfo}>
+                    <Text style={styles.celebrityName}>{outfit.celebrity}</Text>
+                    <Text style={styles.celebrityTitle} numberOfLines={1}>{outfit.title}</Text>
+                    {outfit.priceRange && (
+                      <Text style={styles.celebrityPrice}>{outfit.priceRange}</Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.celebrityScroll}>
-            {celebrityOutfits.map((outfit) => (
-              <TouchableOpacity
-                key={outfit.id}
-                style={styles.celebrityCard}
-                onPress={() => router.push({
-                  pathname: '/outfitdetail',
-                  params: { outfitData: JSON.stringify(outfit) }
-                })}
-              >
-                <Image source={{ uri: outfit.image }} style={styles.celebrityImage} />
-                <View style={styles.celebrityInfo}>
-                  <Text style={styles.celebrityName}>{outfit.celebrity}</Text>
-                  <Text style={styles.celebrityTitle} numberOfLines={1}>{outfit.title}</Text>
-                  {outfit.priceRange && (
-                    <Text style={styles.celebrityPrice}>{outfit.priceRange}</Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+        )}
 
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={CATEGORIES}
-        renderItem={renderCategoryButton}
-        keyExtractor={(item) => item.id}
-        style={styles.categoriesContainer}
-        contentContainerStyle={styles.categoriesContent}
-      />
+        {/* Category Filters */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoriesContainer}
+          contentContainerStyle={styles.categoriesContent}
+          nestedScrollEnabled
+        >
+          {CATEGORIES.map((item) => renderCategoryButton({ item }))}
+        </ScrollView>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <MaterialCommunityIcons name="loading" size={48} color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading outfits...</Text>
-        </View>
-      ) : outfits.length > 0 ? (
-        <FlatList
-          data={outfits}
-          renderItem={renderOutfitCard}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.outfitsGrid}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-        <View style={styles.emptyState}>
-          <MaterialCommunityIcons name="hanger" size={80} color={COLORS.textSecondary} />
-          <Text style={styles.emptyTitle}>No Outfits Yet</Text>
-          <Text style={styles.emptySubtitle}>
-            {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} outfits will appear here once added.
-          </Text>
-        </View>
-      )}
+        {/* Outfits Grid */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <MaterialCommunityIcons name="loading" size={48} color={COLORS.primary} />
+            <Text style={styles.loadingText}>Loading outfits...</Text>
+          </View>
+        ) : outfits.length > 0 ? (
+          <View style={styles.outfitsContainer}>
+            {outfits.map((item, index) => {
+              if (index % 2 === 0) {
+                return (
+                  <View key={index} style={styles.row}>
+                    {renderOutfitCard({ item: outfits[index] })}
+                    {outfits[index + 1] && renderOutfitCard({ item: outfits[index + 1] })}
+                  </View>
+                );
+              }
+              return null;
+            })}
+          </View>
+        ) : (
+          <View style={styles.emptyState}>
+            <MaterialCommunityIcons name="hanger" size={80} color={COLORS.textSecondary} />
+            <Text style={styles.emptyTitle}>No Outfits Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} outfits will appear here once added.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     </LinearGradient>
   );
 }
