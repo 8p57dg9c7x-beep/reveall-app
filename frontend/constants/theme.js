@@ -1,28 +1,31 @@
-// CINESCAN - Shazam-inspired Clean Theme
+// CINESCAN - Purple Cinema Theme
 export const COLORS = {
-  background: '#0A1E2F',  // Dark teal/blue like Shazam
-  backgroundLight: '#132B3D',  // Slightly lighter
+  background: '#0A001A',  // Deep dark purple
+  backgroundGradientStart: '#0A001A',  // Gradient start
+  backgroundGradientEnd: '#1D003C',  // Gradient end
   
-  primary: '#3B82F6',  // Bright blue
-  primaryDark: '#2563EB',  // Darker blue
-  primaryLight: '#60A5FA',  // Light blue
+  primary: '#2A004F',  // Deep Purple
+  primaryDark: '#1A0030',  // Darker purple
+  primaryLight: '#3D0066',  // Light purple
   
-  accent: '#A855F7',  // Purple accent
-  accentLight: '#C084FC',  // Light purple
+  accent: '#9F5BFF',  // Electric Purple
+  accentLight: '#B87DFF',  // Light electric purple
   
-  card: '#1A2F42',  // Dark card background
-  cardHover: '#243B52',  // Hover state
+  secondary: '#061424',  // Midnight Blue
   
-  textPrimary: '#FFFFFF',
-  textSecondary: '#94A3B8',  // Gray text
-  textTertiary: '#64748B',  // Light gray
+  card: '#1D003C',  // Dark purple card
+  cardHover: '#2A004F',  // Hover state
+  
+  textPrimary: '#FFFFFF',  // Pure white
+  textSecondary: '#B3A5C6',  // Light purple gray
+  textTertiary: '#8B7FA3',  // Muted purple
   
   success: '#10B981',  // Green
   error: '#EF4444',  // Red
   warning: '#F59E0B',  // Orange
   
-  border: '#1E3A52',  // Subtle border
-  tabBarBackground: '#0F1B2A',  // Bottom tab bar
+  border: '#FFFFFF',  // White border for button
+  tabBarBackground: '#0A001A',  // Bottom tab bar
 };
 
 export const SHADOWS = {
