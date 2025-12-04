@@ -63,6 +63,15 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="style"
+          options={{
+            title: 'Style',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="hanger" size={26} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="comingsoon"
           options={{
             title: 'Coming Soon',
