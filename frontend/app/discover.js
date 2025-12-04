@@ -182,40 +182,99 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     padding: 20,
     paddingTop: 60,
+    paddingBottom: 100,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
   },
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
-    marginBottom: 24,
+    marginTop: 8,
+    marginBottom: 8,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginTop: 20,
-    marginBottom: 12,
+  headerSubtitle: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
   },
-  row: {
+  section: {
+    marginBottom: 32,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
-  movieCard: {
-    width: 120,
-    marginRight: 12,
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
-  poster: {
-    width: 120,
-    height: 180,
-    borderRadius: 8,
+  seeAll: {
+    fontSize: 16,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  horizontalScroll: {
+    marginLeft: -20,
+    paddingLeft: 20,
+  },
+  trendingCard: {
+    width: 140,
+    marginRight: 16,
+  },
+  trendingImage: {
+    width: 140,
+    height: 140,
+    borderRadius: 12,
     backgroundColor: COLORS.card,
   },
-  movieTitle: {
+  trendingTitle: {
     color: COLORS.textPrimary,
-    fontSize: 12,
-    marginTop: 8,
+    fontSize: 14,
     fontWeight: '600',
+    marginTop: 8,
+    lineHeight: 18,
+  },
+  trendingSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  exploreCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  exploreTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginLeft: 16,
+  },
+  emptySection: {
+    alignItems: 'center',
+    padding: 32,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+  },
+  emptyText: {
+    color: COLORS.textSecondary,
+    fontSize: 16,
+    marginTop: 12,
   },
 });
