@@ -126,7 +126,7 @@ export default function DiscoverScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Trending Movies</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/comingsoon')}>
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
