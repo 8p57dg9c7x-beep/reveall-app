@@ -844,6 +844,65 @@ async def get_trending_outfits():
         logger.error(f"Trending outfits error: {e}")
         return {"outfits": []}
 
+@api_router.post("/music/search")
+async def search_music(request: dict):
+    """Search for a song by title and artist using AudD API"""
+    try:
+        title = request.get('title', '')
+        artist = request.get('artist', '')
+        
+        if not title or not artist:
+            return {
+                "success": False,
+                "error": "Title and artist are required"
+            }
+        
+        logger.info(f"Searching for song: {title} by {artist}")
+        
+        # Use AudD search endpoint
+        audd_url = "https://api.audd.io/findLyrics/"
+        params = {
+            'api_token': AUDD_API_KEY,
+            'q': f"{artist} {title}",
+            'return': 'apple_music,spotify,lyrics'
+        }
+        
+        response = requests.get(audd_url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        if data.get('status') == 'success' and data.get('result'):
+            song_data = data['result']
+            logger.info(f"✅ Found song: {song_data.get('title')} by {song_data.get('artist')}")
+            
+            return {
+                "success": True,
+                "source": "audd_search",
+                "song": song_data
+            }
+        else:
+            logger.warning(f"Song not found: {title} by {artist}")
+            return {
+                "success": False,
+                "error": "Song not found in database",
+                "song": None
+            }
+            
+    except requests.exceptions.Timeout:
+        logger.error("AudD search timeout")
+        return {
+            "success": False,
+            "error": "Search request timed out",
+            "song": None
+        }
+    except Exception as e:
+        logger.error(f"Music search error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "song": None
+        }
+
 # Include router
 app.include_router(api_router)
 
