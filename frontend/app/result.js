@@ -1,184 +1,211 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, StatusBar } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SHADOWS, SIZES } from '../constants/theme';
-import { addToWatchlist, isInWatchlist } from '../services/storage';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { COLORS } from '../constants/theme';
 
 export default function ResultScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams();
-  const [movie, setMovie] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(false);
+  const movie = params.movieData ? JSON.parse(params.movieData) : null;
+  const song = params.songData ? JSON.parse(params.songData) : null;
 
   useEffect(() => {
-    if (params.movieData) {
-      const movieData = JSON.parse(params.movieData);
-      console.log('Movie data:', movieData);
-      setMovie(movieData);
-      checkWatchlist(movieData.id);
+    if (movie) {
+      checkWatchlist();
     }
-  }, [params.movieData]);
+  }, [movie]);
 
-  const checkWatchlist = async (movieId) => {
-    const exists = await isInWatchlist(movieId);
-    setInWatchlist(exists);
-  };
-
-  const handleAddToWatchlist = async () => {
-    if (!movie) return;
-    const result = await addToWatchlist(movie);
-    if (result.success) {
-      setInWatchlist(true);
-      Alert.alert('Success', result.message);
-    } else {
-      Alert.alert('Info', result.message);
+  const checkWatchlist = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('watchlist');
+      if (stored) {
+        const watchlist = JSON.parse(stored);
+        setInWatchlist(watchlist.some(m => m.id === movie.id));
+      }
+    } catch (error) {
+      console.error('Error checking watchlist:', error);
     }
   };
 
-  if (!movie) {
+  const toggleWatchlist = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('watchlist');
+      let watchlist = stored ? JSON.parse(stored) : [];
+
+      if (inWatchlist) {
+        watchlist = watchlist.filter(m => m.id !== movie.id);
+      } else {
+        watchlist.unshift(movie);
+      }
+
+      await AsyncStorage.setItem('watchlist', JSON.stringify(watchlist));
+      setInWatchlist(!inWatchlist);
+    } catch (error) {
+      console.error('Error updating watchlist:', error);
+    }
+  };
+
+  if (song) {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <Text style={styles.errorText}>No movie data available</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
+      <LinearGradient
+        colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
+        style={styles.container}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+
+          <View style={styles.musicIcon}>
+            <MaterialCommunityIcons name="music-circle" size={120} color={COLORS.accent} />
+          </View>
+
+          <Text style={styles.title}>{song.title}</Text>
+          <Text style={styles.artist}>{song.artist}</Text>
+          {song.album && <Text style={styles.album}>{song.album}</Text>}
+
+          <View style={styles.listenSection}>
+            <Text style={styles.sectionTitle}>Listen On:</Text>
+            <View style={styles.platformButtons}>
+              {song.spotify?.external_urls?.spotify && (
+                <TouchableOpacity
+                  style={styles.platformButton}
+                  onPress={() => Linking.openURL(song.spotify.external_urls.spotify)}
+                >
+                  <MaterialCommunityIcons name="spotify" size={40} color="#1DB954" />
+                  <Text style={styles.platformText}>Spotify</Text>
+                </TouchableOpacity>
+              )}
+              {song.apple_music?.url && (
+                <TouchableOpacity
+                  style={styles.platformButton}
+                  onPress={() => Linking.openURL(song.apple_music.url)}
+                >
+                  <MaterialCommunityIcons name="apple" size={40} color="#FC3C44" />
+                  <Text style={styles.platformText}>Apple Music</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </LinearGradient>
     );
   }
 
-  const posterUrl = movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : null;
+  if (movie) {
+    return (
+      <LinearGradient
+        colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
+        style={styles.container}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
+          </TouchableOpacity>
 
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      
-      {/* Close Button */}
-      <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-        <Ionicons name="close" size={28} color={COLORS.textPrimary} />
-      </TouchableOpacity>
-
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        {/* Movie Poster */}
-        <View style={styles.posterContainer}>
-          {posterUrl ? (
-            <Image source={{ uri: posterUrl }} style={styles.poster} />
-          ) : (
-            <View style={[styles.poster, styles.noPoster]}>
-              <Ionicons name="film-outline" size={80} color={COLORS.textSecondary} />
-            </View>
+          {movie.poster_path && (
+            <Image
+              source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
+              style={styles.poster}
+            />
           )}
-        </View>
 
-        {/* Movie Title & Year */}
-        <Text style={styles.title}>{movie.title}</Text>
-        {movie.release_date && (
-          <Text style={styles.year}>{movie.release_date.substring(0, 4)}</Text>
-        )}
+          <Text style={styles.title}>{movie.title}</Text>
+          
+          {movie.vote_average && (
+            <Text style={styles.rating}>⭐ {movie.vote_average.toFixed(1)}/10</Text>
+          )}
 
-        {/* Rating */}
-        {movie.vote_average && (
-          <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={20} color={COLORS.blue} />
-            <Text style={styles.rating}> {movie.vote_average.toFixed(1)}/10</Text>
-          </View>
-        )}
-
-        {/* Genres */}
-        {movie.genres && movie.genres.length > 0 && (
-          <View style={styles.genresContainer}>
-            {movie.genres.map((genre) => (
-              <View key={genre.id} style={styles.genreTag}>
-                <Text style={styles.genreText}>{genre.name}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Where to Watch */}
-        {movie['watch/providers']?.results?.US?.flatrate && (
-          <View style={styles.providersContainer}>
-            <Text style={styles.providersTitle}>Available On:</Text>
-            <View style={styles.providersLogos}>
-              {movie['watch/providers'].results.US.flatrate.slice(0, 5).map((provider) => (
-                <View key={provider.provider_id} style={styles.providerLogo}>
-                  <Image 
-                    source={{ uri: `https://image.tmdb.org/t/p/original${provider.logo_path}` }} 
-                    style={styles.providerImage}
-                  />
+          {movie.genres && (
+            <View style={styles.genres}>
+              {movie.genres.slice(0, 3).map((genre) => (
+                <View key={genre.id} style={styles.genreTag}>
+                  <Text style={styles.genreText}>{genre.name}</Text>
                 </View>
               ))}
             </View>
-          </View>
-        )}
+          )}
 
-        {/* Overview */}
-        {movie.overview && (
-          <View style={styles.overviewContainer}>
-            <Text style={styles.overview}>{movie.overview}</Text>
-          </View>
-        )}
+          {movie.overview && (
+            <View style={styles.overviewSection}>
+              <Text style={styles.sectionTitle}>Overview</Text>
+              <Text style={styles.overview}>{movie.overview}</Text>
+            </View>
+          )}
 
-        {/* Action Buttons */}
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity 
-            style={[styles.detailsButton, inWatchlist && styles.detailsButtonDisabled]}
-            onPress={handleAddToWatchlist}
-            disabled={inWatchlist}
+          {movie['watch/providers']?.results?.US && (
+            <View style={styles.watchSection}>
+              <Text style={styles.sectionTitle}>Where to Watch</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {movie['watch/providers'].results.US.flatrate?.map(provider => (
+                  <View key={provider.provider_id} style={styles.providerCard}>
+                    <Image
+                      source={{ uri: `https://image.tmdb.org/t/p/original${provider.logo_path}` }}
+                      style={styles.providerLogo}
+                    />
+                    <Text style={styles.providerName}>{provider.provider_name}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.watchlistButton, inWatchlist && styles.watchlistButtonActive]}
+            onPress={toggleWatchlist}
           >
-            <Text style={styles.detailsButtonText}>
-              {inWatchlist ? '✓ In Watchlist' : 'Add to Watchlist'}
+            <MaterialCommunityIcons
+              name={inWatchlist ? "bookmark" : "bookmark-outline"}
+              size={24}
+              color={COLORS.textPrimary}
+            />
+            <Text style={styles.watchlistText}>
+              {inWatchlist ? "In Watchlist" : "Add to Watchlist"}
             </Text>
           </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </View>
-  );
+        </ScrollView>
+      </LinearGradient>
+    );
+  }
+
+  return null;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    justifyContent: 'center',
+  },
+  scrollContent: {
+    padding: 20,
+    paddingTop: 60,
     alignItems: 'center',
   },
-  closeButton: {
+  backButton: {
     position: 'absolute',
     top: 50,
     left: 20,
     zIndex: 10,
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
   },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    paddingTop: 100,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    alignItems: 'center',
-  },
-  posterContainer: {
-    marginBottom: 24,
+  musicIcon: {
+    marginVertical: 40,
   },
   poster: {
-    width: 200,
-    height: 300,
-    borderRadius: SIZES.borderRadius,
-    borderWidth: 2,
-    borderColor: COLORS.blue,
-  },
-  noPoster: {
-    backgroundColor: COLORS.cardBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 300,
+    height: 450,
+    borderRadius: 16,
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
@@ -187,111 +214,112 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
-  year: {
+  artist: {
+    fontSize: 20,
+    color: COLORS.accent,
+    marginBottom: 8,
+  },
+  album: {
     fontSize: 16,
     color: COLORS.textSecondary,
-    marginBottom: 16,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   rating: {
     fontSize: 18,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
+    color: COLORS.accent,
+    marginBottom: 16,
   },
-  genresContainer: {
+  genres: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginBottom: 24,
   },
   genreTag: {
-    borderWidth: 1,
-    borderColor: COLORS.blue,
-    borderRadius: 16,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    backgroundColor: COLORS.card,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
     margin: 4,
   },
   genreText: {
-    fontSize: 12,
-    color: COLORS.blue,
+    color: COLORS.textPrimary,
+    fontSize: 14,
     fontWeight: '600',
   },
-  providersContainer: {
-    marginTop: 16,
+  overviewSection: {
+    width: '100%',
     marginBottom: 24,
-    alignItems: 'center',
   },
-  providersTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
     color: COLORS.textPrimary,
     marginBottom: 12,
-  },
-  providersLogos: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  },
-  providerLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    overflow: 'hidden',
-    margin: 6,
-    backgroundColor: COLORS.card,
-  },
-  providerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  overviewContainer: {
-    marginBottom: 32,
   },
   overview: {
     fontSize: 15,
     color: COLORS.textSecondary,
     lineHeight: 24,
-    textAlign: 'center',
   },
-  buttonsContainer: {
+  listenSection: {
     width: '100%',
+    marginTop: 24,
   },
-  detailsButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 16,
-    borderRadius: SIZES.borderRadius,
+  platformButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 20,
+  },
+  platformButton: {
     alignItems: 'center',
-    ...SHADOWS.glow,
+    padding: 16,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    width: 140,
   },
-  detailsButtonDisabled: {
-    backgroundColor: COLORS.textSecondary,
-    opacity: 0.5,
-  },
-  detailsButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  platformText: {
     color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
   },
-  errorText: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
+  watchSection: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  providerCard: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  providerLogo: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+  },
+  providerName: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 8,
     textAlign: 'center',
-    marginBottom: 20,
   },
-  backButton: {
-    backgroundColor: COLORS.blue,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: SIZES.borderRadius,
+  watchlistButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginTop: 24,
+    gap: 8,
   },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  watchlistButtonActive: {
+    backgroundColor: COLORS.accent,
+  },
+  watchlistText: {
     color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
