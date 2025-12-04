@@ -331,8 +331,13 @@ export default function HomeScreen() {
             ]}
           >
             <TouchableOpacity style={styles.optionButton} onPress={handleAudio}>
-              <MaterialCommunityIcons name="microphone" size={32} color="#FFFFFF" />
-              <Text style={styles.optionText}>Audio</Text>
+              <MaterialCommunityIcons name="movie-open" size={32} color="#FFFFFF" />
+              <Text style={styles.optionText}>Movie Audio</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.optionButton} onPress={handleMusic}>
+              <MaterialCommunityIcons name="music" size={32} color="#FFFFFF" />
+              <Text style={styles.optionText}>Identify Song</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.optionButton} onPress={handleVideo}>
