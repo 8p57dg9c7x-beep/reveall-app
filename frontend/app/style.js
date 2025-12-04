@@ -26,10 +26,12 @@ const CATEGORIES = [
 export default function StyleScreen() {
   const [selectedCategory, setSelectedCategory] = useState('streetwear');
   const [outfits, setOutfits] = useState([]);
+  const [celebrityOutfits, setCelebrityOutfits] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadOutfits();
+    loadCelebrityOutfits();
   }, [selectedCategory]);
 
   const loadOutfits = async () => {
@@ -44,6 +46,17 @@ export default function StyleScreen() {
       setOutfits([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCelebrityOutfits = async () => {
+    try {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan-app-2.preview.emergentagent.com';
+      const response = await fetch(`${API_URL}/api/outfits/celebrity`);
+      const data = await response.json();
+      setCelebrityOutfits(data.outfits || []);
+    } catch (error) {
+      console.error('Error loading celebrity outfits:', error);
     }
   };
 
