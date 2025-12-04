@@ -134,33 +134,31 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.centerContent}>
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+        <View style={styles.buttonsRow}>
           <TouchableOpacity
-            style={styles.identifyButton}
-            onPress={handleIdentifyTap}
+            style={styles.actionButton}
+            onPress={handleMusic}
             activeOpacity={0.8}
             disabled={isProcessing}
           >
-            <MaterialCommunityIcons
-              name="filmstrip-box"
-              size={100}
-              color={COLORS.textPrimary}
-            />
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <MaterialCommunityIcons name="music" size={80} color={COLORS.textPrimary} />
+            </Animated.View>
+            <Text style={styles.buttonLabel}>Identify Music</Text>
           </TouchableOpacity>
-        </Animated.View>
 
-        {showOptions && (
-          <View style={styles.optionsContainer}>
-            <TouchableOpacity style={styles.optionButton} onPress={handleMusic}>
-              <MaterialCommunityIcons name="music" size={36} color={COLORS.textPrimary} />
-              <Text style={styles.optionText}>Music</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.optionButton} onPress={handlePoster}>
-              <MaterialCommunityIcons name="image" size={36} color={COLORS.textPrimary} />
-              <Text style={styles.optionText}>Poster</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handlePoster}
+            activeOpacity={0.8}
+            disabled={isProcessing}
+          >
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <MaterialCommunityIcons name="image-multiple" size={80} color={COLORS.textPrimary} />
+            </Animated.View>
+            <Text style={styles.buttonLabel}>Identify Poster</Text>
+          </TouchableOpacity>
+        </View>
 
         {isProcessing && (
           <Text style={styles.processingText}>Processing...</Text>
