@@ -73,8 +73,30 @@ export default function DiscoverScreen() {
     </TouchableOpacity>
   );
 
+  const handleSongTap = (song) => {
+    // Format song data to match the result screen format
+    const songData = {
+      title: song.title,
+      artist: song.artist,
+      album: song.title,
+      album_art: song.image,
+      spotify: null,
+      apple_music: null,
+      lyrics: null,
+    };
+
+    router.push({
+      pathname: '/result',
+      params: { songData: JSON.stringify(songData) }
+    });
+  };
+
   const renderSongCard = (song) => (
-    <TouchableOpacity key={song.id} style={styles.trendingCard}>
+    <TouchableOpacity 
+      key={song.id} 
+      style={styles.trendingCard}
+      onPress={() => handleSongTap(song)}
+    >
       <Image source={{ uri: song.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{song.title}</Text>
       <Text style={styles.trendingSubtitle} numberOfLines={1}>{song.artist}</Text>
