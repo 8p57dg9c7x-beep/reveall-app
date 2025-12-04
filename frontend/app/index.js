@@ -60,6 +60,16 @@ export default function HomeScreen() {
             const response = await recognizeMusic(uri);
 
             if (response.success && response.song) {
+              // Save to playlist
+              try {
+                const stored = await AsyncStorage.getItem('playlist');
+                let playlist = stored ? JSON.parse(stored) : [];
+                playlist.unshift(response.song);
+                await AsyncStorage.setItem('playlist', JSON.stringify(playlist.slice(0, 50)));
+              } catch (e) {
+                console.error('Error saving to playlist:', e);
+              }
+              
               router.push({
                 pathname: '/result',
                 params: { songData: JSON.stringify(response.song) }
