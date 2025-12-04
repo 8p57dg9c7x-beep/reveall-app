@@ -56,9 +56,9 @@ export default function RootLayout() {
         <Tabs.Screen
           name="search"
           options={{
-            title: 'Search',
+            title: 'Upload Poster',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="magnify" size={26} color={color} />
+              <MaterialCommunityIcons name="image-plus" size={26} color={color} />
             ),
           }}
         />
