@@ -53,25 +53,38 @@ export const recognizeImage = async (imageUri) => {
 export const recognizeMusic = async (audioUri) => {
   try {
     console.log('Recognizing music from URI:', audioUri);
-    console.log('API URL:', `${API_BASE_URL}/api/recognize-music`);
+    console.log('API URL:', `${API_BASE_URL}/api/recognize-music-base64`);
     
-    const formData = new FormData();
+    // Read audio file as base64 using fetch (works on all platforms)
+    const response = await fetch(audioUri);
+    const blob = await response.blob();
     
-    const uriParts = audioUri.split('.');
-    const fileType = uriParts[uriParts.length - 1];
-    
-    formData.append('file', {
-      uri: audioUri,
-      name: `audio.${fileType}`,
-      type: `audio/${fileType}`,
+    // Convert blob to base64
+    const reader = new FileReader();
+    const base64Promise = new Promise((resolve, reject) => {
+      reader.onloadend = () => {
+        const base64data = reader.result.split(',')[1];
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
+    
+    const base64Audio = await base64Promise;
+    console.log('Audio converted to base64, length:', base64Audio.length);
 
-    const response = await fetch(`${API_BASE_URL}/api/recognize-music`, {
+    // Send as JSON with base64 audio
+    const apiResponse = await fetch(`${API_BASE_URL}/api/recognize-music-base64`, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        audio_base64: base64Audio
+      }),
     });
 
-    const data = await response.json();
+    const data = await apiResponse.json();
     console.log('Music recognition response:', data);
     return data;
   } catch (error) {
