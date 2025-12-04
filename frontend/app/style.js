@@ -111,6 +111,37 @@ export default function StyleScreen() {
         <Text style={styles.headerSubtitle}>Curated outfit inspiration</Text>
       </View>
 
+      {/* Dress Like Your Icon Section */}
+      {celebrityOutfits.length > 0 && (
+        <View style={styles.celebritySection}>
+          <View style={styles.celebritySectionHeader}>
+            <MaterialCommunityIcons name="star" size={28} color={COLORS.accent} />
+            <Text style={styles.celebritySectionTitle}>Dress Like Your Icon</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.celebrityScroll}>
+            {celebrityOutfits.map((outfit) => (
+              <TouchableOpacity
+                key={outfit.id}
+                style={styles.celebrityCard}
+                onPress={() => router.push({
+                  pathname: '/outfitdetail',
+                  params: { outfitData: JSON.stringify(outfit) }
+                })}
+              >
+                <Image source={{ uri: outfit.image }} style={styles.celebrityImage} />
+                <View style={styles.celebrityInfo}>
+                  <Text style={styles.celebrityName}>{outfit.celebrity}</Text>
+                  <Text style={styles.celebrityTitle} numberOfLines={1}>{outfit.title}</Text>
+                  {outfit.priceRange && (
+                    <Text style={styles.celebrityPrice}>{outfit.priceRange}</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
