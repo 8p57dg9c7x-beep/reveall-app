@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 40,
   },
   sectionHeader: {
     flexDirection: 'row',
