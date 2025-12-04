@@ -98,6 +98,23 @@ export default function ResultScreen() {
           </View>
         )}
 
+        {/* Where to Watch */}
+        {movie['watch/providers']?.results?.US?.flatrate && (
+          <View style={styles.providersContainer}>
+            <Text style={styles.providersTitle}>Available On:</Text>
+            <View style={styles.providersLogos}>
+              {movie['watch/providers'].results.US.flatrate.slice(0, 5).map((provider) => (
+                <View key={provider.provider_id} style={styles.providerLogo}>
+                  <Image 
+                    source={{ uri: `https://image.tmdb.org/t/p/original${provider.logo_path}` }} 
+                    style={styles.providerImage}
+                  />
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Overview */}
         {movie.overview && (
           <View style={styles.overviewContainer}>
