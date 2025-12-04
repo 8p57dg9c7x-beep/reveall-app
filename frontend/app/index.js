@@ -131,6 +131,13 @@ export default function HomeScreen() {
               </View>
             </View>
           </Animated.View>
+          
+          <Text style={styles.countdownText}>{countdown}s</Text>
+          
+          <TouchableOpacity style={styles.stopButton} onPress={stopListening}>
+            <MaterialCommunityIcons name="stop-circle" size={60} color={COLORS.textPrimary} />
+            <Text style={styles.stopButtonText}>Stop & Identify</Text>
+          </TouchableOpacity>
         </View>
       </LinearGradient>
     );
