@@ -170,24 +170,29 @@ export default function DiscoverScreen() {
     </TouchableOpacity>
   );
 
+  const handleExplorePress = (categoryId) => {
+    console.log('Explore card pressed:', categoryId);
+    try {
+      if (categoryId === 'styles') {
+        router.push('/style');
+      } else if (categoryId === 'brands') {
+        router.push('/style');
+      } else if (categoryId === 'music') {
+        router.push('/trendingsongs');
+      } else if (categoryId === 'genres') {
+        router.push('/comingsoon');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
+
   const renderExploreCard = (category) => (
     <TouchableOpacity
       key={category.id}
       style={styles.exploreCard}
-      onPress={() => {
-        if (category.id === 'styles') {
-          router.push('/style');
-        } else if (category.id === 'brands') {
-          // Navigate to Style tab with Luxury category (brand-focused)
-          router.push('/style');
-        } else if (category.id === 'music') {
-          // Navigate to Trending Songs
-          router.push('/trendingsongs');
-        } else if (category.id === 'genres') {
-          // Navigate to Coming Soon (movie content)
-          router.push('/comingsoon');
-        }
-      }}
+      onPress={() => handleExplorePress(category.id)}
+      activeOpacity={0.7}
     >
       <MaterialCommunityIcons name={category.icon} size={32} color={category.color} />
       <Text style={styles.exploreTitle}>{category.title}</Text>
