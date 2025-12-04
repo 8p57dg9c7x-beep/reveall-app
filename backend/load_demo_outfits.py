@@ -22,7 +22,7 @@ demo_outfits = [
     {
         "title": "Urban Streetwear Essential",
         "category": "streetwear",
-        "image": "https://i.pinimg.com/736x/8f/14/48/8f1448c7e8b1f9e1e0a8f9e1e0a8f9e1.jpg",
+        "image": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=600&fit=crop",
         "priceRange": "$250 - $400",
         "description": "Classic oversized street style perfect for everyday wear",
         "items": [
