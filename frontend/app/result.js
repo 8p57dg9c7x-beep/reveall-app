@@ -262,7 +262,12 @@ const styles = StyleSheet.create({
     top: 50,
     left: 20,
     zIndex: 10,
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   musicIcon: {
     marginVertical: 40,
