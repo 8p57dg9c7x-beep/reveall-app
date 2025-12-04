@@ -1,20 +1,25 @@
-// CINESCAN Professional Theme
+// CINESCAN Purple/Pink Gradient Theme
 export const COLORS = {
-  background: '#000000',
-  backgroundGradient: '#0D0D0D',
+  background: '#1a0033',  // Deep purple
+  backgroundGradient: '#2d1b4e',  // Purple gradient
   
-  primary: '#1DB954', // Spotify-like green
-  primaryDark: '#169948',
-  primaryLight: '#1ED760',
+  primary: '#9D4EDD',  // Vibrant purple
+  primaryDark: '#7209B7',  // Darker purple
+  primaryLight: '#C77DFF',  // Light purple
   
-  card: '#181818',
-  cardHover: '#282828',
+  accent: '#F72585',  // Hot pink accent
+  accentLight: '#FF006E',  // Bright pink
+  
+  card: '#240046',  // Dark purple card
+  cardHover: '#3c096c',  // Lighter purple hover
   
   textPrimary: '#FFFFFF',
-  textSecondary: '#B3B3B3',
+  textSecondary: '#C77DFF',  // Purple tinted text
   
-  success: '#1DB954',
-  error: '#E22134',
+  success: '#06FFA5',  // Neon green
+  error: '#FF006E',  // Pink error
+  
+  blue: '#00F5FF',  // Neon blue for ratings
 };
 
 export const SHADOWS = {
