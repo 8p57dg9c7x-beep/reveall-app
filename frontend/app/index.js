@@ -38,12 +38,51 @@ export default function HomeScreen() {
     ).start();
   }, []);
 
+  const processRecording = async (rec) => {
+    try {
+      if (rec) {
+        await rec.stopAndUnloadAsync();
+        const uri = rec.getURI();
+        const response = await recognizeMusic(uri);
+
+        if (response.success && response.song) {
+          // Save to playlist
+          try {
+            const stored = await AsyncStorage.getItem('playlist');
+            let playlist = stored ? JSON.parse(stored) : [];
+            playlist.unshift(response.song);
+            await AsyncStorage.setItem('playlist', JSON.stringify(playlist.slice(0, 50)));
+          } catch (e) {
+            console.error('Error saving to playlist:', e);
+          }
+          
+          router.push({
+            pathname: '/result',
+            params: { songData: JSON.stringify(response.song) }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Processing error:', error);
+    } finally {
+      setIsListening(false);
+      setCountdown(7);
+      if (timerId) clearInterval(timerId);
+    }
+  };
+
+  const stopListening = async () => {
+    if (timerId) clearInterval(timerId);
+    await processRecording(recording);
+  };
+
   const startListening = async () => {
     try {
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') return;
 
       setIsListening(true);
+      setCountdown(7);
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
@@ -54,35 +93,22 @@ export default function HomeScreen() {
       );
       setRecording(newRecording);
 
-      setTimeout(async () => {
-        if (newRecording) {
-          try {
-            await newRecording.stopAndUnloadAsync();
-            const uri = newRecording.getURI();
-            setIsListening(false);
-            const response = await recognizeMusic(uri);
-
-            if (response.success && response.song) {
-              // Save to playlist
-              try {
-                const stored = await AsyncStorage.getItem('playlist');
-                let playlist = stored ? JSON.parse(stored) : [];
-                playlist.unshift(response.song);
-                await AsyncStorage.setItem('playlist', JSON.stringify(playlist.slice(0, 50)));
-              } catch (e) {
-                console.error('Error saving to playlist:', e);
-              }
-              
-              router.push({
-                pathname: '/result',
-                params: { songData: JSON.stringify(response.song) }
-              });
-            }
-          } catch (error) {
-            setIsListening(false);
-          }
+      // Countdown timer
+      let count = 7;
+      const interval = setInterval(() => {
+        count--;
+        setCountdown(count);
+        if (count <= 0) {
+          clearInterval(interval);
         }
-      }, 10000);
+      }, 1000);
+      setTimerId(interval);
+
+      // Auto-stop after 7 seconds
+      setTimeout(async () => {
+        clearInterval(interval);
+        await processRecording(newRecording);
+      }, 7000);
     } catch (error) {
       setIsListening(false);
     }
