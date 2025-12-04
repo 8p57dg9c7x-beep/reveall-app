@@ -856,12 +856,43 @@ async def create_outfit(outfit: dict):
 async def get_trending_outfits():
     """Get trending outfits across all categories"""
     try:
-        # For now, return empty array - trending outfits will be added manually later
-        # In future, this can be connected to MongoDB with trending logic
         logger.info("Fetching trending outfits")
-        return {"outfits": []}
+        
+        # Get random outfits from all categories
+        outfits = list(outfits_collection.aggregate([
+            {"$match": {"isCelebrity": False}},
+            {"$sample": {"size": 10}}
+        ]))
+        
+        # Convert ObjectId to string
+        for outfit in outfits:
+            outfit['id'] = str(outfit['_id'])
+            del outfit['_id']
+        
+        logger.info(f"Found {len(outfits)} trending outfits")
+        return {"outfits": outfits}
     except Exception as e:
         logger.error(f"Trending outfits error: {e}")
+        return {"outfits": []}
+
+@api_router.get("/outfits/celebrity")
+async def get_celebrity_outfits():
+    """Get celebrity outfits (Dress Like Your Icon)"""
+    try:
+        logger.info("Fetching celebrity outfits")
+        
+        # Get all celebrity outfits
+        outfits = list(outfits_collection.find({"isCelebrity": True}))
+        
+        # Convert ObjectId to string
+        for outfit in outfits:
+            outfit['id'] = str(outfit['_id'])
+            del outfit['_id']
+        
+        logger.info(f"Found {len(outfits)} celebrity outfits")
+        return {"outfits": outfits}
+    except Exception as e:
+        logger.error(f"Celebrity outfits error: {e}")
         return {"outfits": []}
 
 @api_router.post("/music/search")
