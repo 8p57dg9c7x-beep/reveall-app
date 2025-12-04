@@ -224,6 +224,22 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginBottom: 60,
   },
+  countdownText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginTop: 40,
+  },
+  stopButton: {
+    marginTop: 40,
+    alignItems: 'center',
+  },
+  stopButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 8,
+  },
   pulseOuter: {
     width: 350,
     height: 350,
