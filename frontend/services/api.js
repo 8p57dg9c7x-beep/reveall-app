@@ -166,12 +166,28 @@ export const recognizeVideo = async (videoUri) => {
   }
 };
 
-export const searchMovie = async (query) => {
+export const searchMovies = async (query) => {
   try {
-    const response = await api.post('/api/search', { query });
-    return response.data;
+    const response = await fetch(`${API_BASE_URL}/api/search?query=${encodeURIComponent(query)}`);
+    return await response.json();
   } catch (error) {
     console.error('Search error:', error);
+    throw error;
+  }
+};
+
+export const searchMusic = async (title, artist) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/music/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title, artist }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Music search error:', error);
     throw error;
   }
 };
