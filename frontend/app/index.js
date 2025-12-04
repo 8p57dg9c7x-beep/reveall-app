@@ -1,37 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Alert, Animated } from 'react-native';
-import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { Audio } from 'expo-av';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { recognizeImage, recognizeAudio, recognizeVideo, recognizeMusic } from '../services/api';
+import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLORS } from '../constants/theme';
+import { recognizeMusic } from '../services/api';
 
 export default function HomeScreen() {
-  const router = useRouter();
-  const [recording, setRecording] = useState(null);
   const [isListening, setIsListening] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [statusText, setStatusText] = useState('');
-  const [showOptions, setShowOptions] = useState(false);
+  const [recording, setRecording] = useState(null);
   const [pulseAnim] = useState(new Animated.Value(1));
-  const [rotateAnim] = useState(new Animated.Value(0));
-  const [optionsAnim] = useState(new Animated.Value(0));
+  const [recentlyFound, setRecentlyFound] = useState([]);
 
   useEffect(() => {
-    return () => {
-      if (recording && recording._canRecord) {
-        recording.stopAndUnloadAsync().catch(err => console.log('Cleanup:', err));
-      }
-    };
-  }, [recording]);
+    loadRecentlyFound();
+  }, []);
 
   useEffect(() => {
     if (isListening) {
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.1,
+            toValue: 1.2,
             duration: 1000,
             useNativeDriver: true,
           }),
@@ -42,54 +41,41 @@ export default function HomeScreen() {
           }),
         ])
       ).start();
-      
-      Animated.loop(
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 3000,
-          useNativeDriver: true,
-        })
-      ).start();
     } else {
       pulseAnim.setValue(1);
-      rotateAnim.setValue(0);
     }
   }, [isListening]);
 
-  useEffect(() => {
-    if (showOptions) {
-      Animated.spring(optionsAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }).start();
-    } else {
-      Animated.timing(optionsAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [showOptions]);
-
-  const handleMainButton = () => {
-    if (!isListening && !isProcessing) {
-      setShowOptions(!showOptions);
+  const loadRecentlyFound = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('recentlyFound');
+      if (stored) {
+        setRecentlyFound(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('Error loading recently found:', error);
     }
   };
 
-  const handleAudio = async () => {
-    setShowOptions(false);
+  const saveToRecentlyFound = async (item) => {
+    try {
+      const newRecent = [item, ...recentlyFound.slice(0, 9)];
+      await AsyncStorage.setItem('recentlyFound', JSON.stringify(newRecent));
+      setRecentlyFound(newRecent);
+    } catch (error) {
+      console.error('Error saving recently found:', error);
+    }
+  };
+
+  const handleIdentify = async () => {
     try {
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please enable microphone access');
+        alert('Please enable microphone access');
         return;
       }
 
       setIsListening(true);
-      setStatusText('Listening...');
 
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
@@ -103,303 +89,108 @@ export default function HomeScreen() {
 
       setTimeout(async () => {
         if (newRecording && newRecording._canRecord) {
-          await stopAndIdentifyAudio(newRecording);
+          await stopAndIdentify(newRecording);
         }
       }, 10000);
     } catch (error) {
-      console.error('Audio error:', error);
-      setStatusText('Failed to start recording');
+      console.error('Error starting recording:', error);
       setIsListening(false);
-      setTimeout(() => setStatusText(''), 2000);
     }
   };
 
-  const stopAndIdentifyAudio = async (recordingToStop) => {
+  const stopAndIdentify = async (recordingToStop) => {
     try {
-      setStatusText('Identifying...');
-      setIsListening(false);
-      setIsProcessing(true);
-      
       await recordingToStop.stopAndUnloadAsync();
       const uri = recordingToStop.getURI();
       setRecording(null);
-
-      const response = await recognizeAudio(uri);
-      
-      if (response.success && response.movie) {
-        setStatusText('');
-        router.push({
-          pathname: '/result',
-          params: { movieData: JSON.stringify(response.movie) }
-        });
-      } else {
-        setStatusText(response.error || 'No movie found');
-        setTimeout(() => setStatusText(''), 3000);
-      }
-    } catch (error) {
-      console.error('Recognition error:', error);
-      setStatusText('Failed to identify');
-      setTimeout(() => setStatusText(''), 3000);
-      setRecording(null);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleMusic = async () => {
-    setShowOptions(false);
-    try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please enable microphone access');
-        return;
-      }
-
-      setIsListening(true);
-      setStatusText('Listening for music...');
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(newRecording);
-
-      setTimeout(async () => {
-        if (newRecording && newRecording._canRecord) {
-          await stopAndIdentifyMusic(newRecording);
-        }
-      }, 10000);
-    } catch (error) {
-      console.error('Music recognition error:', error);
-      setStatusText('Failed to start recording');
       setIsListening(false);
-      setTimeout(() => setStatusText(''), 2000);
-    }
-  };
 
-  const stopAndIdentifyMusic = async (recordingToStop) => {
-    try {
-      setStatusText('Identifying song...');
-      setIsListening(false);
-      setIsProcessing(true);
-      
-      await recordingToStop.stopAndUnloadAsync();
-      const uri = recordingToStop.getURI();
-      setRecording(null);
-
-      // Use music recognition endpoint (AudD - like Shazam)
       const response = await recognizeMusic(uri);
-      
+
       if (response.success && response.song) {
-        setStatusText('');
+        await saveToRecentlyFound({
+          ...response.song,
+          timestamp: Date.now(),
+        });
         router.push({
           pathname: '/result',
           params: { songData: JSON.stringify(response.song) }
         });
       } else {
-        setStatusText('Song not found - try a clearer recording');
-        setTimeout(() => setStatusText(''), 3000);
+        alert('Song not found - try again');
       }
     } catch (error) {
-      console.error('Music recognition error:', error);
-      setStatusText('Failed to identify song');
-      setTimeout(() => setStatusText(''), 3000);
+      console.error('Error identifying:', error);
+      setIsListening(false);
       setRecording(null);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  const handleVideo = async () => {
-    setShowOptions(false);
-    try {
-      setStatusText('Select video...');
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'video/*',
-      });
-
-      if (!result.canceled) {
-        setIsProcessing(true);
-        setStatusText('Scanning...');
-        
-        const response = await recognizeVideo(result.assets[0].uri);
-        
-        if (response.success && response.movie) {
-          setStatusText('');
-          router.push({
-            pathname: '/result',
-            params: { movieData: JSON.stringify(response.movie) }
-          });
-        } else {
-          setStatusText(response.error || 'No movie found');
-          setTimeout(() => setStatusText(''), 3000);
-        }
-      } else {
-        setStatusText('');
-      }
-    } catch (error) {
-      console.error('Video error:', error);
-      setStatusText('Failed to process video');
-      setTimeout(() => setStatusText(''), 3000);
-    } finally {
-      setIsProcessing(false);
+  const cancelListening = async () => {
+    if (recording) {
+      await recording.stopAndUnloadAsync();
+      setRecording(null);
     }
+    setIsListening(false);
   };
 
-  const handleImage = async () => {
-    setShowOptions(false);
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please enable photo access');
-        return;
-      }
+  if (isListening) {
+    return (
+      <View style={styles.listeningContainer}>
+        <TouchableOpacity style={styles.cancelButton} onPress={cancelListening}>
+          <MaterialCommunityIcons name="close" size={24} color={COLORS.textPrimary} />
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
 
-      setStatusText('Choose image...');
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.8,
-      });
+        <View style={styles.listeningContent}>
+          <Animated.View style={[styles.pulseCircle, { transform: [{ scale: pulseAnim }] }]}>
+            <View style={styles.logoCircle}>
+              <MaterialCommunityIcons name="music-note" size={80} color={COLORS.textPrimary} />
+            </View>
+          </Animated.View>
 
-      if (!result.canceled) {
-        setIsProcessing(true);
-        setStatusText('Scanning...');
-        
-        const response = await recognizeImage(result.assets[0].uri);
-        
-        if (response.success && response.movie) {
-          setStatusText('');
-          router.push({
-            pathname: '/result',
-            params: { movieData: JSON.stringify(response.movie) }
-          });
-        } else {
-          setStatusText(response.error || 'No movie found');
-          setTimeout(() => setStatusText(''), 3000);
-        }
-      } else {
-        setStatusText('');
-      }
-    } catch (error) {
-      console.error('Image error:', error);
-      setStatusText('Failed to process image');
-      setTimeout(() => setStatusText(''), 3000);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const rotate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+          <Text style={styles.listeningTitle}>Listening for music</Text>
+          <Text style={styles.listeningSubtitle}>Make sure your device can hear the song clearly</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      
-      {/* Logo Section */}
-      <View style={styles.logoSection}>
-        <MaterialCommunityIcons name="filmstrip" size={60} color="#FFFFFF" />
-        <Text style={styles.logo}>CINESCAN</Text>
-        <Text style={styles.tagline}>Identify any movie instantly</Text>
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={styles.tapText}>Tap to Identify</Text>
 
-      {/* Main Content */}
-      <View style={styles.mainContent}>
-        {/* Options */}
-        {showOptions && (
-          <Animated.View 
-            style={[
-              styles.optionsContainer,
-              {
-                opacity: optionsAnim,
-                transform: [
-                  {
-                    translateY: optionsAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [50, 0],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <TouchableOpacity style={styles.optionButton} onPress={handleAudio}>
-              <MaterialCommunityIcons name="movie-open" size={32} color="#FFFFFF" />
-              <Text style={styles.optionText}>Movie Audio</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.optionButton} onPress={handleMusic}>
-              <MaterialCommunityIcons name="music" size={32} color="#FFFFFF" />
-              <Text style={styles.optionText}>Identify Song</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.optionButton} onPress={handleVideo}>
-              <MaterialCommunityIcons name="video" size={32} color="#FFFFFF" />
-              <Text style={styles.optionText}>Video</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.optionButton} onPress={handleImage}>
-              <MaterialCommunityIcons name="image" size={32} color="#FFFFFF" />
-              <Text style={styles.optionText}>Image</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* Main Circle Button */}
-        <TouchableOpacity 
-          style={styles.mainButtonContainer}
-          onPress={handleMainButton}
-          disabled={isListening || isProcessing}
-          activeOpacity={0.8}
-        >
-          <Animated.View 
-            style={[
-              styles.mainButton,
-              { 
-                transform: [
-                  { scale: isListening ? pulseAnim : 1 },
-                  { rotate: isListening ? rotate : '0deg' }
-                ] 
-              }
-            ]}
-          >
-            <MaterialCommunityIcons 
-              name="filmstrip" 
-              size={100} 
-              color="#FFFFFF" 
-            />
-          </Animated.View>
+        <TouchableOpacity style={styles.identifyButton} onPress={handleIdentify} activeOpacity={0.8}>
+          <View style={styles.logoCircle}>
+            <MaterialCommunityIcons name="music-note" size={80} color={COLORS.textPrimary} />
+          </View>
         </TouchableOpacity>
 
-        {/* Status Text */}
-        {statusText ? (
-          <View style={styles.statusContainer}>
-            <Text style={styles.statusText}>{statusText}</Text>
+        {recentlyFound.length > 0 && (
+          <View style={styles.recentlyFoundSection}>
+            <Text style={styles.sectionTitle}>Recently Found</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recentScroll}>
+              {recentlyFound.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.recentCard}
+                  onPress={() => router.push({
+                    pathname: '/result',
+                    params: { songData: JSON.stringify(item) }
+                  })}
+                >
+                  <View style={styles.recentCardContent}>
+                    <MaterialCommunityIcons name="music" size={24} color={COLORS.primary} />
+                    <Text style={styles.recentTitle} numberOfLines={1}>{item.title}</Text>
+                    <Text style={styles.recentArtist} numberOfLines={1}>{item.artist}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        ) : null}
-
-        {/* Stop button */}
-        {isListening && recording && (
-          <TouchableOpacity 
-            style={styles.stopButton}
-            onPress={() => stopAndIdentifyAudio(recording)}
-          >
-            <View style={styles.stopButtonContent}>
-              <MaterialCommunityIcons name="stop-circle" size={24} color="#FFFFFF" />
-              <Text style={styles.stopButtonText}>Stop</Text>
-            </View>
-          </TouchableOpacity>
         )}
-      </View>
-
-      {/* Bottom Indicator */}
-      <View style={styles.bottomIndicator} />
+      </ScrollView>
     </View>
   );
 }
@@ -407,100 +198,117 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a0033',  // Deep purple
+    backgroundColor: COLORS.background,
   },
-  logoSection: {
-    paddingTop: 80,
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logo: {
-    fontSize: 40,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 4,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  tagline: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    fontWeight: '300',
-    letterSpacing: 1,
-  },
-  mainContent: {
-    flex: 1,
-    justifyContent: 'center',
+  scrollContent: {
+    paddingTop: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 100,
     alignItems: 'center',
   },
-  mainButtonContainer: {
-    marginBottom: 80,
-  },
-  mainButton: {
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: '#000000',
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    gap: 24,
+  tapText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
     marginBottom: 60,
   },
-  optionButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#1A1A1A',
+  identifyButton: {
+    marginBottom: 80,
+  },
+  logoCircle: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: COLORS.card,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.border,
   },
-  optionText: {
-    fontSize: 11,
-    color: '#FFFFFF',
-    marginTop: 4,
-    fontWeight: '600',
+  recentlyFoundSection: {
+    width: '100%',
+    marginTop: 40,
   },
-  statusContainer: {
-    position: 'absolute',
-    bottom: 60,
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginBottom: 16,
   },
-  statusText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+  recentScroll: {
+    paddingRight: 24,
   },
-  stopButton: {
-    position: 'absolute',
-    bottom: 20,
-    backgroundColor: '#E22134',
-    borderRadius: 25,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+  recentCard: {
+    width: 140,
+    height: 140,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    marginRight: 12,
+    overflow: 'hidden',
   },
-  stopButtonContent: {
-    flexDirection: 'row',
+  recentCardContent: {
+    flex: 1,
+    padding: 12,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  stopButtonText: {
-    fontSize: 16,
+  recentTitle: {
+    fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
-    marginLeft: 8,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginTop: 8,
   },
-  bottomIndicator: {
+  recentArtist: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  listeningContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  cancelButton: {
     position: 'absolute',
-    bottom: 30,
-    left: '25%',
-    right: '25%',
-    height: 4,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 2,
+    top: 60,
+    left: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  cancelText: {
+    fontSize: 16,
+    color: COLORS.textPrimary,
+    marginLeft: 8,
+    fontWeight: '600',
+  },
+  listeningContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  pulseCircle: {
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  listeningTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  listeningSubtitle: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
