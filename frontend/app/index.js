@@ -18,6 +18,8 @@ export default function HomeScreen() {
   const [pulseAnim] = useState(new Animated.Value(1));
   const [isListening, setIsListening] = useState(false);
   const [recording, setRecording] = useState(null);
+  const [countdown, setCountdown] = useState(7);
+  const [timerId, setTimerId] = useState(null);
 
   useEffect(() => {
     Animated.loop(
