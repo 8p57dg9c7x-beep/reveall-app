@@ -370,4 +370,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  similarSection: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  similarCard: {
+    width: 120,
+    marginRight: 12,
+  },
+  similarPoster: {
+    width: 120,
+    height: 180,
+    borderRadius: 8,
+    backgroundColor: COLORS.card,
+  },
+  similarTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 12,
+    marginTop: 8,
+    fontWeight: '600',
+  },
 });
