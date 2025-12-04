@@ -146,6 +146,75 @@ export default function HomeScreen() {
     }
   };
 
+  const handleMusic = async () => {
+    setShowOptions(false);
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please enable microphone access');
+        return;
+      }
+
+      setIsListening(true);
+      setStatusText('Listening for music...');
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording: newRecording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(newRecording);
+
+      setTimeout(async () => {
+        if (newRecording && newRecording._canRecord) {
+          await stopAndIdentifyMusic(newRecording);
+        }
+      }, 10000);
+    } catch (error) {
+      console.error('Music recognition error:', error);
+      setStatusText('Failed to start recording');
+      setIsListening(false);
+      setTimeout(() => setStatusText(''), 2000);
+    }
+  };
+
+  const stopAndIdentifyMusic = async (recordingToStop) => {
+    try {
+      setStatusText('Identifying song...');
+      setIsListening(false);
+      setIsProcessing(true);
+      
+      await recordingToStop.stopAndUnloadAsync();
+      const uri = recordingToStop.getURI();
+      setRecording(null);
+
+      // For now, we'll use the same audio recognition endpoint
+      // In a real app, you'd use a music identification service like Shazam API
+      const response = await recognizeAudio(uri);
+      
+      if (response.success && response.song) {
+        setStatusText('');
+        router.push({
+          pathname: '/result',
+          params: { songData: JSON.stringify(response.song) }
+        });
+      } else {
+        setStatusText('Song not found - try a clearer recording');
+        setTimeout(() => setStatusText(''), 3000);
+      }
+    } catch (error) {
+      console.error('Music recognition error:', error);
+      setStatusText('Failed to identify song');
+      setTimeout(() => setStatusText(''), 3000);
+      setRecording(null);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleVideo = async () => {
     setShowOptions(false);
     try {
