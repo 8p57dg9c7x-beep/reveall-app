@@ -395,8 +395,8 @@ const styles = StyleSheet.create({
   },
   similarSection: {
     width: '100%',
-    marginBottom: 32,
-    paddingTop: 8,
+    marginBottom: 40,
+    paddingTop: 16,
   },
   similarCard: {
     width: 120,
