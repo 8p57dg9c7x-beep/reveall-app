@@ -6,311 +6,222 @@ import {
   StyleSheet,
   Animated,
   ScrollView,
-  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../constants/theme';
-import { recognizeMusic } from '../services/api';
+import { recognizeMusic, recognizeImage } from '../services/api';
 
 export default function HomeScreen() {
-  const [isListening, setIsListening] = useState(false);
-  const [recording, setRecording] = useState(null);
   const [pulseAnim] = useState(new Animated.Value(1));
-  const [recentlyFound, setRecentlyFound] = useState([]);
+  const [showOptions, setShowOptions] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    loadRecentlyFound();
+    // Continuous pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
   }, []);
 
-  useEffect(() => {
-    if (isListening) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.2,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      pulseAnim.setValue(1);
-    }
-  }, [isListening]);
-
-  const loadRecentlyFound = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('recentlyFound');
-      if (stored) {
-        setRecentlyFound(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Error loading recently found:', error);
-    }
+  const handleIdentifyTap = () => {
+    setShowOptions(!showOptions);
   };
 
-  const saveToRecentlyFound = async (item) => {
-    try {
-      const newRecent = [item, ...recentlyFound.slice(0, 9)];
-      await AsyncStorage.setItem('recentlyFound', JSON.stringify(newRecent));
-      setRecentlyFound(newRecent);
-    } catch (error) {
-      console.error('Error saving recently found:', error);
-    }
-  };
-
-  const handleIdentify = async () => {
+  const handleMusic = async () => {
+    setShowOptions(false);
     try {
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
-        alert('Please enable microphone access');
+        Alert.alert('Permission Required', 'Please enable microphone access');
         return;
       }
 
-      setIsListening(true);
-
+      setIsProcessing(true);
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
 
-      const { recording: newRecording } = await Audio.Recording.createAsync(
+      const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      setRecording(newRecording);
 
       setTimeout(async () => {
-        if (newRecording && newRecording._canRecord) {
-          await stopAndIdentify(newRecording);
+        try {
+          await recording.stopAndUnloadAsync();
+          const uri = recording.getURI();
+          const response = await recognizeMusic(uri);
+
+          if (response.success && response.song) {
+            router.push({
+              pathname: '/result',
+              params: { songData: JSON.stringify(response.song) }
+            });
+          } else {
+            Alert.alert('Not Found', 'Song not recognized. Try again.');
+          }
+        } catch (error) {
+          Alert.alert('Error', 'Failed to identify music');
+        } finally {
+          setIsProcessing(false);
         }
       }, 10000);
     } catch (error) {
-      console.error('Error starting recording:', error);
-      setIsListening(false);
+      setIsProcessing(false);
+      Alert.alert('Error', 'Failed to start recording');
     }
   };
 
-  const stopAndIdentify = async (recordingToStop) => {
+  const handlePoster = async () => {
+    setShowOptions(false);
     try {
-      await recordingToStop.stopAndUnloadAsync();
-      const uri = recordingToStop.getURI();
-      setRecording(null);
-      setIsListening(false);
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please enable photo library access');
+        return;
+      }
 
-      const response = await recognizeMusic(uri);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+      });
 
-      if (response.success && response.song) {
-        await saveToRecentlyFound({
-          ...response.song,
-          timestamp: Date.now(),
-        });
-        router.push({
-          pathname: '/result',
-          params: { songData: JSON.stringify(response.song) }
-        });
-      } else {
-        alert('Song not found - try again');
+      if (!result.canceled && result.assets[0]) {
+        setIsProcessing(true);
+        const response = await recognizeImage(result.assets[0].uri);
+
+        if (response.success && response.movie) {
+          router.push({
+            pathname: '/result',
+            params: { movieData: JSON.stringify(response.movie) }
+          });
+        } else {
+          Alert.alert('Not Found', 'Movie not recognized from poster.');
+        }
+        setIsProcessing(false);
       }
     } catch (error) {
-      console.error('Error identifying:', error);
-      setIsListening(false);
-      setRecording(null);
+      setIsProcessing(false);
+      Alert.alert('Error', 'Failed to identify poster');
     }
   };
-
-  const cancelListening = async () => {
-    if (recording) {
-      await recording.stopAndUnloadAsync();
-      setRecording(null);
-    }
-    setIsListening(false);
-  };
-
-  if (isListening) {
-    return (
-      <View style={styles.listeningContainer}>
-        <TouchableOpacity style={styles.cancelButton} onPress={cancelListening}>
-          <MaterialCommunityIcons name="close" size={24} color={COLORS.textPrimary} />
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-
-        <View style={styles.listeningContent}>
-          <Animated.View style={[styles.pulseCircle, { transform: [{ scale: pulseAnim }] }]}>
-            <View style={styles.logoCircle}>
-              <MaterialCommunityIcons name="music-note" size={80} color={COLORS.textPrimary} />
-            </View>
-          </Animated.View>
-
-          <Text style={styles.listeningTitle}>Listening for music</Text>
-          <Text style={styles.listeningSubtitle}>Make sure your device can hear the song clearly</Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.tapText}>Tap to Identify</Text>
+    <LinearGradient
+      colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
+      style={styles.container}
+    >
+      <View style={styles.header}>
+        <MaterialCommunityIcons name="filmstrip" size={32} color={COLORS.textPrimary} />
+        <Text style={styles.logo}>CINESCAN</Text>
+      </View>
 
-        <TouchableOpacity style={styles.identifyButton} onPress={handleIdentify} activeOpacity={0.8}>
-          <View style={styles.logoCircle}>
-            <MaterialCommunityIcons name="radar" size={80} color={COLORS.textPrimary} />
-          </View>
-        </TouchableOpacity>
-        
-        <Text style={styles.identifyHint}>Music, Movies & More</Text>
+      <View style={styles.centerContent}>
+        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+          <TouchableOpacity
+            style={styles.identifyButton}
+            onPress={handleIdentifyTap}
+            activeOpacity={0.8}
+            disabled={isProcessing}
+          >
+            <MaterialCommunityIcons
+              name="filmstrip-box"
+              size={100}
+              color={COLORS.textPrimary}
+            />
+          </TouchableOpacity>
+        </Animated.View>
 
-        {recentlyFound.length > 0 && (
-          <View style={styles.recentlyFoundSection}>
-            <Text style={styles.sectionTitle}>Recently Found</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recentScroll}>
-              {recentlyFound.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.recentCard}
-                  onPress={() => router.push({
-                    pathname: '/result',
-                    params: { songData: JSON.stringify(item) }
-                  })}
-                >
-                  <View style={styles.recentCardContent}>
-                    <MaterialCommunityIcons name="music" size={24} color={COLORS.primary} />
-                    <Text style={styles.recentTitle} numberOfLines={1}>{item.title}</Text>
-                    <Text style={styles.recentArtist} numberOfLines={1}>{item.artist}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+        {showOptions && (
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity style={styles.optionButton} onPress={handleMusic}>
+              <MaterialCommunityIcons name="music" size={36} color={COLORS.textPrimary} />
+              <Text style={styles.optionText}>Music</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.optionButton} onPress={handlePoster}>
+              <MaterialCommunityIcons name="image" size={36} color={COLORS.textPrimary} />
+              <Text style={styles.optionText}>Poster</Text>
+            </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
-    </View>
+
+        {isProcessing && (
+          <Text style={styles.processingText}>Processing...</Text>
+        )}
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  scrollContent: {
-    paddingTop: 100,
-    paddingHorizontal: 24,
-    paddingBottom: 100,
-    alignItems: 'center',
-  },
-  tapText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginBottom: 60,
-  },
-  identifyButton: {
-    marginBottom: 80,
-  },
-  logoCircle: {
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: COLORS.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.border,
-  },
-  recentlyFoundSection: {
-    width: '100%',
-    marginTop: 40,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginBottom: 16,
-  },
-  recentScroll: {
-    paddingRight: 24,
-  },
-  recentCard: {
-    width: 140,
-    height: 140,
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    marginRight: 12,
-    overflow: 'hidden',
-  },
-  recentCardContent: {
-    flex: 1,
-    padding: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  recentTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  recentArtist: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  listeningContainer: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  cancelButton: {
-    position: 'absolute',
-    top: 60,
-    left: 24,
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    zIndex: 10,
+    justifyContent: 'center',
+    paddingTop: 60,
+    paddingBottom: 20,
   },
-  cancelText: {
-    fontSize: 16,
+  logo: {
+    fontSize: 32,
+    fontWeight: 'bold',
     color: COLORS.textPrimary,
-    marginLeft: 8,
-    fontWeight: '600',
+    marginLeft: 12,
+    letterSpacing: 2,
   },
-  listeningContent: {
+  centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
   },
-  pulseCircle: {
+  identifyButton: {
     width: 280,
     height: 280,
     borderRadius: 140,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderWidth: 5,
+    borderColor: COLORS.border,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 40,
   },
-  listeningTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  optionsContainer: {
+    flexDirection: 'row',
+    marginTop: 40,
+    gap: 30,
+  },
+  optionButton: {
+    alignItems: 'center',
+    padding: 16,
+  },
+  optionText: {
     color: COLORS.textPrimary,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  listeningSubtitle: {
     fontSize: 16,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  processingText: {
+    color: COLORS.accent,
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 24,
   },
 });
