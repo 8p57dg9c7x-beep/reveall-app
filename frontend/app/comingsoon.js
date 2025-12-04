@@ -83,8 +83,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingTop: 60,
+    paddingTop: 80,
+    paddingBottom: 120,
+    paddingHorizontal: 20,
   },
   headerTitle: {
     fontSize: 32,
