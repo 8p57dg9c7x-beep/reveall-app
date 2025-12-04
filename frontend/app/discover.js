@@ -6,11 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
+import { searchMusic } from '../services/api';
 
 export default function DiscoverScreen() {
   const [trendingMovies, setTrendingMovies] = useState([]);
