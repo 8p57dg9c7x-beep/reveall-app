@@ -89,7 +89,10 @@ export default function StyleScreen() {
       style={styles.outfitCard}
       onPress={() => router.push({
         pathname: '/outfitdetail',
-        params: { outfitData: JSON.stringify(item) }
+        params: { 
+          outfitData: JSON.stringify(item),
+          returnPath: '/style'
+        }
       })}
     >
       <Image source={{ uri: item.image }} style={styles.outfitImage} />
@@ -127,6 +130,7 @@ export default function StyleScreen() {
               horizontal 
               showsHorizontalScrollIndicator={false} 
               style={styles.celebrityScroll}
+              contentContainerStyle={styles.celebrityScrollContent}
               nestedScrollEnabled
             >
               {celebrityOutfits.map((outfit) => (
@@ -135,7 +139,10 @@ export default function StyleScreen() {
                   style={styles.celebrityCard}
                   onPress={() => router.push({
                     pathname: '/outfitdetail',
-                    params: { outfitData: JSON.stringify(outfit) }
+                    params: { 
+                      outfitData: JSON.stringify(outfit),
+                      returnPath: '/style'
+                    }
                   })}
                 >
                   <Image source={{ uri: outfit.image }} style={styles.celebrityImage} />
@@ -205,10 +212,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
-  },
-  outfitsContainer: {
-    paddingHorizontal: 12,
+    paddingBottom: 120,
   },
   header: {
     paddingTop: 60,
@@ -227,107 +231,14 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 4,
   },
-  categoriesContainer: {
-    maxHeight: 56,
-    marginBottom: 16,
-  },
-  categoriesContent: {
-    paddingHorizontal: 16,
-  },
-  categoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginRight: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  categoryButtonActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  categoryText: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-  categoryTextActive: {
-    color: COLORS.textPrimary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: COLORS.textSecondary,
-    fontSize: 16,
-    marginTop: 16,
-  },
-  outfitsGrid: {
-    paddingHorizontal: 12,
-    paddingBottom: 100,
-  },
-  row: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  outfitCard: {
-    flex: 0.48,
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginHorizontal: 4,
-  },
-  outfitImage: {
-    width: '100%',
-    height: 240,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  outfitInfo: {
-    padding: 12,
-  },
-  outfitTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  outfitPrice: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginTop: 24,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 20,
-  },
   celebritySection: {
     marginBottom: 24,
-    paddingHorizontal: 20,
   },
   celebritySectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    paddingHorizontal: 20,
   },
   celebritySectionTitle: {
     fontSize: 22,
@@ -336,8 +247,11 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   celebrityScroll: {
-    marginLeft: -20,
-    paddingLeft: 20,
+    flexGrow: 0,
+  },
+  celebrityScrollContent: {
+    paddingHorizontal: 20,
+    paddingRight: 20,
   },
   celebrityCard: {
     width: 160,
@@ -368,5 +282,96 @@ const styles = StyleSheet.create({
   celebrityPrice: {
     fontSize: 11,
     color: COLORS.textSecondary,
+  },
+  categoriesContainer: {
+    maxHeight: 56,
+    marginBottom: 20,
+  },
+  categoriesContent: {
+    paddingHorizontal: 20,
+  },
+  categoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  categoryButtonActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  categoryText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  categoryTextActive: {
+    color: COLORS.textPrimary,
+  },
+  loadingContainer: {
+    paddingVertical: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    fontSize: 16,
+    marginTop: 16,
+  },
+  outfitsContainer: {
+    paddingHorizontal: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  outfitCard: {
+    flex: 0.48,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  outfitImage: {
+    width: '100%',
+    height: 240,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  outfitInfo: {
+    padding: 12,
+  },
+  outfitTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  outfitPrice: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+  },
+  emptyState: {
+    paddingVertical: 60,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginTop: 24,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 20,
   },
 });

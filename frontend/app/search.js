@@ -9,6 +9,8 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -62,7 +64,10 @@ export default function SearchScreen() {
         if (response.success && response.movie) {
           router.push({
             pathname: '/result',
-            params: { movieData: JSON.stringify(response.movie) }
+            params: { 
+              movieData: JSON.stringify(response.movie),
+              returnPath: '/search'
+            }
           });
         } else {
           Alert.alert('Not Found', 'Movie not recognized. Try a clearer poster.');
@@ -95,7 +100,10 @@ export default function SearchScreen() {
         if (response.success && response.movie) {
           router.push({
             pathname: '/result',
-            params: { movieData: JSON.stringify(response.movie) }
+            params: { 
+              movieData: JSON.stringify(response.movie),
+              returnPath: '/search'
+            }
           });
         } else {
           Alert.alert('Not Found', 'Movie not recognized. Try a clearer poster.');
@@ -113,84 +121,95 @@ export default function SearchScreen() {
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Search Movies</Text>
-        
-        {/* Text Search */}
-        <View style={styles.searchContainer}>
-          <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textSecondary} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search by title..."
-            placeholderTextColor={COLORS.textSecondary}
-            value={query}
-            onChangeText={setQuery}
-            onSubmitEditing={() => searchMovies(query)}
-            returnKeyType="search"
-          />
-          {query.length > 0 && (
-            <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }}>
-              <MaterialCommunityIcons name="close" size={24} color={COLORS.textSecondary} />
-            </TouchableOpacity>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Search Movies</Text>
+          
+          {/* Text Search */}
+          <View style={styles.searchContainer}>
+            <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textSecondary} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by title..."
+              placeholderTextColor={COLORS.textSecondary}
+              value={query}
+              onChangeText={setQuery}
+              onSubmitEditing={() => searchMovies(query)}
+              returnKeyType="search"
+            />
+            {query.length > 0 && (
+              <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }}>
+                <MaterialCommunityIcons name="close" size={24} color={COLORS.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Image Upload Options */}
+          <View style={styles.uploadSection}>
+            <Text style={styles.orText}>Or identify by poster:</Text>
+            <View style={styles.uploadButtons}>
+              <TouchableOpacity
+                style={styles.uploadButton}
+                onPress={takePhoto}
+                disabled={isProcessing}
+              >
+                <MaterialCommunityIcons name="camera" size={32} color={COLORS.textPrimary} />
+                <Text style={styles.uploadText}>Camera</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.uploadButton}
+                onPress={pickImage}
+                disabled={isProcessing}
+              >
+                <MaterialCommunityIcons name="image-multiple" size={32} color={COLORS.textPrimary} />
+                <Text style={styles.uploadText}>Gallery</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {loading || isProcessing ? (
+            <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          ) : results.length === 0 ? (
+            <View style={styles.emptyState}>
+              <MaterialCommunityIcons name="movie-search" size={80} color={COLORS.textSecondary} />
+              <Text style={styles.emptyText}>Search or Upload</Text>
+              <Text style={styles.emptySubtext}>Find movies by title or poster</Text>
+            </View>
+          ) : (
+            results.map(movie => (
+              <TouchableOpacity
+                key={movie.id}
+                style={styles.movieItem}
+                onPress={() => router.push({
+                  pathname: '/result',
+                  params: { 
+                    movieData: JSON.stringify(movie),
+                    returnPath: '/search'
+                  }
+                })}
+              >
+                <Image
+                  source={{ uri: `https://image.tmdb.org/t/p/w200${movie.poster_path}` }}
+                  style={styles.poster}
+                />
+                <View style={styles.info}>
+                  <Text style={styles.title}>{movie.title}</Text>
+                  <Text style={styles.year}>{movie.release_date?.substring(0, 4)}</Text>
+                  <Text style={styles.rating}>⭐ {movie.vote_average?.toFixed(1)}</Text>
+                </View>
+              </TouchableOpacity>
+            ))
           )}
-        </View>
-
-        {/* Image Upload Options */}
-        <View style={styles.uploadSection}>
-          <Text style={styles.orText}>Or identify by poster:</Text>
-          <View style={styles.uploadButtons}>
-            <TouchableOpacity
-              style={styles.uploadButton}
-              onPress={takePhoto}
-              disabled={isProcessing}
-            >
-              <MaterialCommunityIcons name="camera" size={32} color={COLORS.textPrimary} />
-              <Text style={styles.uploadText}>Camera</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.uploadButton}
-              onPress={pickImage}
-              disabled={isProcessing}
-            >
-              <MaterialCommunityIcons name="image-multiple" size={32} color={COLORS.textPrimary} />
-              <Text style={styles.uploadText}>Gallery</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {loading || isProcessing ? (
-          <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
-        ) : results.length === 0 ? (
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="movie-search" size={80} color={COLORS.textSecondary} />
-            <Text style={styles.emptyText}>Search or Upload</Text>
-            <Text style={styles.emptySubtext}>Find movies by title or poster</Text>
-          </View>
-        ) : (
-          results.map(movie => (
-            <TouchableOpacity
-              key={movie.id}
-              style={styles.movieItem}
-              onPress={() => router.push({
-                pathname: '/result',
-                params: { movieData: JSON.stringify(movie) }
-              })}
-            >
-              <Image
-                source={{ uri: `https://image.tmdb.org/t/p/w200${movie.poster_path}` }}
-                style={styles.poster}
-              />
-              <View style={styles.info}>
-                <Text style={styles.title}>{movie.title}</Text>
-                <Text style={styles.year}>{movie.release_date?.substring(0, 4)}</Text>
-                <Text style={styles.rating}>⭐ {movie.vote_average?.toFixed(1)}</Text>
-              </View>
-            </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
@@ -199,16 +218,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  keyboardAvoid: {
+    flex: 1,
+  },
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 20,
   },
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -217,7 +239,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 50,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   searchInput: {
     flex: 1,
@@ -254,7 +276,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 120,
   },
   loader: {
     marginTop: 40,

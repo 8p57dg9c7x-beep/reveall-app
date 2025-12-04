@@ -11,13 +11,15 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import { searchMusic } from '../services/api';
 
 export default function TrendingSongsScreen() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const params = useLocalSearchParams();
+  const returnPath = params.returnPath || '/discover';
 
   useEffect(() => {
     loadTrendingSongs();
@@ -68,7 +70,10 @@ export default function TrendingSongsScreen() {
         // Use full data from AudD (with lyrics and streaming links)
         router.push({
           pathname: '/result',
-          params: { songData: JSON.stringify(response.song) }
+          params: { 
+            songData: JSON.stringify(response.song),
+            returnPath: '/trendingsongs'
+          }
         });
       } else {
         // Fallback to basic data if search fails
@@ -84,7 +89,10 @@ export default function TrendingSongsScreen() {
         
         router.push({
           pathname: '/result',
-          params: { songData: JSON.stringify(songData) }
+          params: { 
+            songData: JSON.stringify(songData),
+            returnPath: '/trendingsongs'
+          }
         });
         
         // Optional: Show a brief message
@@ -107,7 +115,10 @@ export default function TrendingSongsScreen() {
       
       router.push({
         pathname: '/result',
-        params: { songData: JSON.stringify(songData) }
+        params: { 
+          songData: JSON.stringify(songData),
+          returnPath: '/trendingsongs'
+        }
       });
     }
   };
@@ -146,7 +157,10 @@ export default function TrendingSongsScreen() {
       style={styles.container}
     >
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/discover')}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.replace(returnPath)}
+        >
           <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -156,7 +170,11 @@ export default function TrendingSongsScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {songs.map((song, index) => renderSongCard(song, index))}
       </ScrollView>
     </LinearGradient>
@@ -203,7 +221,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
   songCard: {
     flexDirection: 'row',

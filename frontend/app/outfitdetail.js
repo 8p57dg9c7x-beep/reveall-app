@@ -34,8 +34,15 @@ export default function OutfitDetailScreen() {
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={styles.container}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.push(returnPath)}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.replace(returnPath)}
+        >
           <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
@@ -110,7 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
   backButton: {
     position: 'absolute',
@@ -130,7 +137,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   content: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 20,
   },
   title: {
     fontSize: 28,
