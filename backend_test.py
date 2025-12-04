@@ -18,7 +18,7 @@ from io import BytesIO
 import base64
 
 # Backend URL from environment
-BACKEND_URL = "https://cinescan-app-2.preview.emergentagent.com"
+BACKEND_URL = "https://reveal-app.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class MusicIdentificationTester:

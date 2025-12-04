@@ -32,7 +32,7 @@ export default function ResultScreen() {
   const loadSimilarMovies = async () => {
     if (!movie?.id) return;
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan-app-2.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/movie/${movie.id}/similar`);
       const data = await response.json();
       setSimilarMovies(data.results?.slice(0, 10) || []);
