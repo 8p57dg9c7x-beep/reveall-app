@@ -185,6 +185,30 @@ export default function ResultScreen() {
             </View>
           )}
 
+          {similarMovies.length > 0 && (
+            <View style={styles.similarSection}>
+              <Text style={styles.sectionTitle}>Similar Movies</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {similarMovies.map(similarMovie => (
+                  <TouchableOpacity
+                    key={similarMovie.id}
+                    style={styles.similarCard}
+                    onPress={() => router.push({
+                      pathname: '/result',
+                      params: { movieData: JSON.stringify(similarMovie) }
+                    })}
+                  >
+                    <Image
+                      source={{ uri: `https://image.tmdb.org/t/p/w200${similarMovie.poster_path}` }}
+                      style={styles.similarPoster}
+                    />
+                    <Text style={styles.similarTitle} numberOfLines={2}>{similarMovie.title}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
           <TouchableOpacity
             style={[styles.watchlistButton, inWatchlist && styles.watchlistButtonActive]}
             onPress={toggleWatchlist}
