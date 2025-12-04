@@ -294,4 +294,53 @@ const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 20,
   },
+  celebritySection: {
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  celebritySectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  celebritySectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginLeft: 12,
+  },
+  celebrityScroll: {
+    marginLeft: -20,
+    paddingLeft: 20,
+  },
+  celebrityCard: {
+    width: 160,
+    marginRight: 16,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  celebrityImage: {
+    width: 160,
+    height: 200,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  celebrityInfo: {
+    padding: 12,
+  },
+  celebrityName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.accent,
+    marginBottom: 4,
+  },
+  celebrityTitle: {
+    fontSize: 12,
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+  },
+  celebrityPrice: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+  },
 });
