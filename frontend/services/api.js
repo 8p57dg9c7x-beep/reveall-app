@@ -50,6 +50,39 @@ export const recognizeImage = async (imageUri) => {
   }
 };
 
+export const recognizeMusic = async (audioUri) => {
+  try {
+    console.log('Recognizing music from URI:', audioUri);
+    console.log('API URL:', `${API_BASE_URL}/api/recognize-music`);
+    
+    const formData = new FormData();
+    
+    const uriParts = audioUri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
+    
+    formData.append('file', {
+      uri: audioUri,
+      name: `audio.${fileType}`,
+      type: `audio/${fileType}`,
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/recognize-music`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+    console.log('Music recognition response:', data);
+    return data;
+  } catch (error) {
+    console.error('Music recognition error:', error);
+    return {
+      success: false,
+      error: error.message || 'Failed to identify song'
+    };
+  }
+};
+
 export const recognizeAudio = async (audioUri) => {
   try {
     console.log('Recognizing audio from URI:', audioUri);
