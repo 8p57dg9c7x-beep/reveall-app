@@ -795,6 +795,19 @@ async def get_upcoming():
         logger.error(f"Upcoming error: {e}")
         return {"results": []}
 
+@api_router.get("/movie/{movie_id}/similar")
+async def get_similar_movies(movie_id: int):
+    """Get similar movies for a given movie ID"""
+    try:
+        url = f"https://api.themoviedb.org/3/movie/{movie_id}/similar"
+        params = {'api_key': TMDB_API_KEY, 'language': 'en-US', 'page': 1}
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Similar movies error: {e}")
+        return {"results": []}
+
 # Include router
 app.include_router(api_router)
 
