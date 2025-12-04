@@ -191,9 +191,8 @@ export default function HomeScreen() {
       const uri = recordingToStop.getURI();
       setRecording(null);
 
-      // For now, we'll use the same audio recognition endpoint
-      // In a real app, you'd use a music identification service like Shazam API
-      const response = await recognizeAudio(uri);
+      // Use music recognition endpoint (AudD - like Shazam)
+      const response = await recognizeMusic(uri);
       
       if (response.success && response.song) {
         setStatusText('');
