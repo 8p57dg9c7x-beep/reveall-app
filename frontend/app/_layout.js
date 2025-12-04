@@ -63,6 +63,15 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="comingsoon"
+          options={{
+            title: 'Coming Soon',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="calendar-clock" size={26} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="result"
           options={{
             href: null, // Hide from tabs
