@@ -146,7 +146,7 @@ export default function TrendingSongsScreen() {
       style={styles.container}
     >
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/discover')}>
           <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
