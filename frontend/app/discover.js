@@ -23,7 +23,7 @@ export default function DiscoverScreen() {
 
   const loadMovies = async () => {
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://moviedetect.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan-app-2.preview.emergentagent.com';
       
       const [trendingRes, popularRes] = await Promise.all([
         fetch(`${API_URL}/api/discover/trending`),

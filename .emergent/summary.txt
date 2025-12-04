@@ -1,80 +1,96 @@
 <analysis>
-This trajectory details the development of a Shazam for Movies mobile app called CINESCAN using an Expo/FastAPI stack. The process was highly iterative and driven by user feedback, leading to multiple significant pivots in UI design and a complete backend rebuild.
+The trajectory documents the highly iterative and often challenging development of the CINESCAN mobile app. The project began as a Shazam for Movies but underwent numerous pivots driven by user feedback and technical limitations. The user is deeply invested but frequently frustrated by features not working as expected, leading to cycles of bug fixing and redesigns.
 
-Initially, the project began with a Shazam-style purple/pink gradient design. This was quickly scrapped for a futuristic black/blue/silver theme based on a user-provided PDF. User dissatisfaction with this design and its functionality led to another redesign with a black/gold Shazam-like immediate-action UI. This also failed to meet expectations, resulting in a color change to blue.
+Key development phases include:
+1.  **Multiple UI/UX Overhauls:** The design shifted from a purple/pink theme to a futuristic blue, then black/gold, and finally settled on a professional, dark, Shazam-inspired UI with a blue/purple palette, based on user-provided screenshots.
+2.  **Backend Rebuild:** An initial non-functional placeholder backend was completely rewritten to integrate TMDB, AudD, and Google Vision APIs for actual media recognition.
+3.  **Core Functionality Debugging:** A significant portion of the work involved fixing critical bugs. This included a Network Error caused by using  and a persistent  error due to mismatches between React Native's  and FastAPI's  expectations. The solution involved multiple attempts, switching between , ,  encoding, and multipart form data.
+4.  **Pivoting Requirements:** The user's request to identify movies from random dialogue and scenes proved technically unfeasible with the available APIs. After a detailed explanation of the limitations, the project's focus shifted to a more achievable goal: a high-quality music identification app (like Shazam) combined with robust movie discovery features (posters, trending, watchlist).
+5.  **Current State:** The most recent work focused on implementing the user's final UI/UX vision and fixing the core music identification feature, which was failing. The AI engineer was in the process of refactoring the audio submission method from file upload to base64 encoding to resolve the issue.
 
-A critical turning point occurred when the user reported total non-functionality with screenshots. A deep investigation revealed the core issue: the backend was merely a placeholder with no actual movie recognition logic. The user then provided API keys for TMDB, AudD, OpenAI, and Google Vision. I subsequently rebuilt the backend from scratch, implementing the required recognition endpoints.
-
-Following successful backend tests, the focus returned to UI, cycling through several more designs based on user screenshots before settling on a simple, functional black-and-white layout to prioritize getting the core features working. The most recent issue identified was a Network Error during mobile testing, caused by the frontend incorrectly calling  instead of the public backend URL. I have just corrected the API endpoint URL in the code and am about to restart the frontend service to apply this critical fix.
-
-The user's preferred language is English. Future responses should be in English.
+The user's primary language is English. All future communications should be in English.
 </analysis>
 
 <product_requirements>
-The goal is to build **CINESCAN**, a mobile app for iOS and Android that identifies movies, animes, and TV series from images, audio, or video clips, similar to Shazam for music.
+The goal is to build **CINESCAN**, a polished and professional mobile app for iOS and Android. The core value proposition has pivoted to be a Shazam for Music + Movie Discovery platform.
 
-**Core Functionality:**
-1.  **Recognition:** The user must be able to identify media through three methods:
-    *   **Image:** Using the device camera or gallery.
-    *   **Audio:** Recording live audio or uploading a file.
-    *   **Video:** Uploading a video file.
-2.  **User Experience:** The recognition process should be fast and seamless. The user prefers a one-tap action, where selecting a method (e.g., Audio) immediately starts the process (e.g., listening).
-3.  **Results:** Display the identified movie's poster, title, and other details.
-4.  **Watchlist:** Allow users to save identified movies to a local watchlist using .
+**Final Agreed-Upon Features:**
 
-**Design Evolution:**
-The design has undergone numerous iterations based on user feedback. The initial purple/pink gradient was replaced multiple times. The current agreed-upon direction is a clean, minimal, professional black-and-white theme with a single large button on the home screen. Functionality is the top priority, with a final wow factor design to be implemented after the core features are proven to work flawlessly on the user's device.
+1.  **Home Screen:** A clean, Shazam-like UI with a single, large, animated button dedicated to identifying music.
+2.  **Music Identification:** Must work flawlessly, identifying any song playing nearby, similar to Shazam, using the user's paid AudD API key.
+3.  **Movie Poster Identification:** The Search tab should contain functionality to search for movies by title AND an option to identify a movie by taking a photo of its poster or uploading an image.
+4.  **Movie Discovery:** The app must feature Discover and Coming Soon tabs.
+    *   : Showcases trending, popular, and top-rated movies from the TMDB API.
+    *   : Will be enhanced to show upcoming movies in cinemas, upcoming concerts, and general movie releases.
+5.  **Watchlist/Playlist:** A dedicated tab that contains two separate, clearly distinguished sections: a Watchlist for saved movies and a Playlist for identified songs.
+6.  **UI/UX:** A modern, cinematic, dark-themed UI using a specific blue/purple color palette (, , ). The app must use a 5-tab bottom navigation (Home, Discover, Search, Watchlist, Coming Soon).
 </product_requirements>
 
 <key_technical_concepts>
-- **Frontend:** Expo, React Native,  for file-based navigation.
-- **Backend:** FastAPI, Python.
-- **State Management:** React Hooks (, ). Watchlist uses .
-- **API Communication:**  for HTTP requests to the backend.
-- **Media Handling:**  (camera/gallery),  (audio recording),  (reading files as base64).
-- **External APIs:** The backend integrates Google Vision, AudD, TMDB, and OpenAI Whisper for recognition.
-- **Styling:**  for all component styling.
+- **Frontend:** React Native, Expo,  for tab-based navigation.
+- **Backend:** Python with FastAPI.
+- **APIs:** AudD (music recognition), TMDB (movie data/discovery), Google Vision (image recognition).
+- **Data Handling:**  with  for file uploads (images). A new  encoding approach via  is being implemented for audio.
+- **Local Storage:**  for the movie watchlist and music playlist.
+- **Styling:**  with a centralized  file.
 </key_technical_concepts>
 
 <code_architecture>
-The project is a full-stack application with a React Native (Expo) frontend and a Python (FastAPI) backend.
+The application follows a standard full-stack monorepo structure with a frontend and backend directory.
 
 **Directory Structure:**
 
 
-**Key Files:**
+**Key File Analysis:**
 
--   ****: This is the main screen of the application. It contains the logic for the central button, displaying the action options (Audio, Video, Image), and handling the recognition flow by calling the API service. It was reverted to a simple, functional design to prioritize stability.
+-   ****
+    -   **Importance:** This is the root of the navigation, setting up the  Tabs layout.
+    -   **Changes:** It was created to switch from a stack to a tab-based navigation system. It was recently updated to define the 5 tabs (Home, Discover, Search, Watchlist, Coming Soon) and apply the custom dark theme styling to the tab bar. The Search tab's name was changed to Poster and then back to Search with an icon to reflect its dual purpose.
 
--   ****: This file centralizes all communication with the backend. It exports functions for image, audio, and video recognition.
-    -   **Summary:** It uses  to send  (for files) or JSON (for base64 audio) to the backend API endpoints.
-    -   **Recent Change:** The  was just changed from  to the production URL  to fix a Network Error on mobile devices.
-    -   **Code Snippet (Post-Fix):**
-        
+-   ****
+    -   **Importance:** The main home screen of the app.
+    -   **Changes:** This file has been completely rewritten multiple times to match user's evolving design requests. The latest version implements the final Shazam-inspired UI with a purple gradient background and a single large button for music identification, removing the previous two-button (Music/Poster) layout. It contains the logic to start/stop audio recording and call the music recognition API. It was just edited to automatically save identified songs to the playlist in AsyncStorage.
 
--   ****: The FastAPI backend.
-    -   **Summary:** It was completely rewritten from a placeholder to a fully functional recognition server. It loads API keys from the  file and exposes three main endpoints: , , and .
-    -   **Changes:** It now contains the logic to call Google Vision for image labels, AudD for audio fingerprinting, and TMDB to fetch movie details based on the recognition results.
+-   ****
+    -   **Importance:** Provides movie search and poster recognition functionality.
+    -   **Changes:** This screen was completely rebuilt to include both a text input for searching movies by title and two buttons (Take Photo, Choose from Gallery) for poster identification, fulfilling the user's request to have both features on the same tab.
 
--   ****: Contains all the secret API keys provided by the user.
-    -   **Summary:** This file holds keys for , , , , and . It is critical for the backend functionality.
+-   ****
+    -   **Importance:** Displays items saved by the user.
+    -   **Changes:** This screen was recently updated to include a segmented control (tabs) at the top, allowing the user to switch between their Movie Watchlist and Music Playlist, keeping the two lists separate but accessible from one place.
 
--   ****: Defines the color scheme and styles for the app. The latest version uses a simple black and white palette to align with the user's request for a clean, minimal design.
+-   ****
+    -   **Importance:** Centralizes all API calls to the backend.
+    -   **Changes:** This file has been a major source of bugs and fixes. It was just modified to fix the failing music identification. The  function was changed to read the audio file into a  string and send it to a new  endpoint, moving away from the problematic  file upload for audio.
+
+-   ****
+    -   **Importance:** The FastAPI application that powers all recognition and data-fetching logic.
+    -   **Changes:** It has been heavily modified. The image recognition logic is now a multi-strategy process using Google Vision's Web Entities and custom scoring to achieve 90% accuracy. The most recent change was the addition of a new  endpoint to accept audio as a base64 string, intended to finally fix the core music ID feature.
 </code_architecture>
 
 <pending_tasks>
-- Finalize the UI/UX design to have a wow factor once the core functionality is confirmed to be stable and working by the user on their mobile device.
-- Thoroughly test the complete end-to-end user flow on a real mobile device (iOS and Android) after the current fix is applied.
+- **Fix Core Music ID:** The music identification feature must be thoroughly tested and confirmed to be working perfectly, as this is the app's central feature.
+- **Implement Coming Soon Content:** The Coming Soon tab needs to be built out to display three distinct sections as requested: upcoming movies in cinemas, upcoming concerts, and general upcoming movie releases.
+- **Fix Movie Search:** The user reported that the movie search functionality on the Search tab is not working.
+- **Improve Music Recording UI:** The user wants the music recording animation/UI to feel more polished and like Shazam.
 </pending_tasks>
 
 <current_work>
-The user tested the app on their mobile phone and received a Network Error, which they shared via a screenshot. I diagnosed the root cause: the frontend was configured to call . This address is only accessible from the development environment's browser, not from an external mobile device, which interprets localhost as the phone itself.
+The most critical task at hand is fixing the core **music identification feature**, which has been consistently failing and is the user's primary source of frustration. The user explicitly stated this must be fixed, no matter how long it takes.
 
-To resolve this, I have just edited the  file, changing the  from the hardcoded  URL to the publicly accessible Render backend URL: .
+The previous engineer diagnosed the issue as a  error, indicating the audio file sent from the frontend was being rejected by the backend. The chosen solution was to abandon the  approach for audio and switch to sending the audio file as a base64-encoded string.
 
-This change ensures that when the user tests the app on their phone, the API requests are correctly routed to the live backend server instead of a non-existent server on their phone. The code has been saved, and the next logical step is to apply this change by restarting the Expo development server.
+**The following actions were just completed:**
+
+1.  **Backend Update:** A new endpoint, , was added to . This endpoint is designed to receive a Pydantic model containing an .
+
+2.  **Frontend API Service Update:** The  function in  was refactored. It now uses  with  to convert the recorded audio file into a base64 string and sends it as JSON to the new backend endpoint.
+
+3.  **Auto-Save to Playlist:** The main  screen was modified to automatically call an  function upon successful music identification, saving the song to .
+
+The very last edit was adding the  line to  to support this new auto-save functionality. The backend and frontend services have not been restarted since this final code change.
 </current_work>
 
 <optional_next_step>
-Restart the Expo service to apply the critical API URL fix and enable proper mobile testing.
+Restart the frontend and backend services to apply the latest changes for the base64 audio fix, then conduct a thorough end-to-end test of the music identification feature to confirm it is finally working correctly.
 </optional_next_step>

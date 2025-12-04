@@ -333,10 +333,10 @@ The complete redesign is finished and tested! All screens now match the futurist
 **Accessibility**: High contrast maintained  
 
 **Test URLs**:
-- Home: https://moviedetect.preview.emergentagent.com/
-- Scan: https://moviedetect.preview.emergentagent.com/scan
-- Identify: https://moviedetect.preview.emergentagent.com/identify
-- Watchlist: https://moviedetect.preview.emergentagent.com/watchlist
+- Home: https://cinescan-app-2.preview.emergentagent.com/
+- Scan: https://cinescan-app-2.preview.emergentagent.com/scan
+- Identify: https://cinescan-app-2.preview.emergentagent.com/identify
+- Watchlist: https://cinescan-app-2.preview.emergentagent.com/watchlist
 
 ---
 

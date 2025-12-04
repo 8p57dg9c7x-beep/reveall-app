@@ -26,7 +26,7 @@ def test_simple_image():
         # Send as multipart/form-data (correct format)
         files = {'file': ('inception.jpg', img_response.content, 'image/jpeg')}
         response = requests.post(
-            "https://moviedetect.preview.emergentagent.com/api/recognize-image",
+            "https://cinescan-app-2.preview.emergentagent.com/api/recognize-image",
             files=files,
             timeout=30  # Longer timeout
         )

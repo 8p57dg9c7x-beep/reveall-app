@@ -3,7 +3,7 @@
 COMPREHENSIVE VIDEO SCENE RECOGNITION TESTING
 CRITICAL MISSION: Test video recognition with 10 famous movie scenes
 SUCCESS CRITERIA: 8/10 minimum accuracy for deployment
-Backend URL: https://moviedetect.preview.emergentagent.com
+Backend URL: https://cinescan-app-2.preview.emergentagent.com
 
 USER EXPECTATION: Identify movies from video clips/scenes (visual recognition, not audio)
 Since we cannot use actual copyrighted movie clips, we'll simulate video frame 
@@ -18,7 +18,7 @@ from io import BytesIO
 import base64
 
 # Backend URL from environment
-BACKEND_URL = "https://moviedetect.preview.emergentagent.com"
+BACKEND_URL = "https://cinescan-app-2.preview.emergentagent.com"
 
 class VideoRecognitionTester:
     def __init__(self):
