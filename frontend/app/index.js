@@ -66,13 +66,12 @@ export default function HomeScreen() {
       console.error('Processing error:', error);
     } finally {
       setIsListening(false);
-      setCountdown(7);
-      if (timerId) clearInterval(timerId);
+      if (timerId) clearTimeout(timerId);
     }
   };
 
   const stopListening = async () => {
-    if (timerId) clearInterval(timerId);
+    if (timerId) clearTimeout(timerId);
     await processRecording(recording);
   };
 
