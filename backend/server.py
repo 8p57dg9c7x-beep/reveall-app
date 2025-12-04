@@ -9,6 +9,8 @@ from pydantic import BaseModel
 import base64
 import requests
 import time
+from pymongo import MongoClient
+from bson import ObjectId
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,6 +20,14 @@ TMDB_API_KEY = os.environ.get('TMDB_API_KEY')
 AUDD_API_KEY = os.environ.get('AUDD_API_KEY')
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 GOOGLE_VISION_API_KEY = os.environ.get('GOOGLE_VISION_API_KEY')
+
+# MongoDB connection
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
+mongo_client = MongoClient(MONGO_URL)
+db = mongo_client['cinescan']
+outfits_collection = db['outfits']
+
+logger.info(f"MongoDB connected: {MONGO_URL}")
 
 # Create the main app
 app = FastAPI(title="CINESCAN API", version="1.0.0")
