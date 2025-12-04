@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 12,
-    marginTop: 32,
+    marginTop: 40,
     gap: 8,
   },
   watchlistButtonActive: {
