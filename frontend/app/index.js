@@ -93,6 +93,9 @@ export default function HomeScreen() {
         style={styles.container}
       >
         <View style={styles.listeningContent}>
+          <Text style={styles.listeningTitle}>Listening...</Text>
+          <Text style={styles.listeningSubtitle}>Hold your device near the music</Text>
+          
           <Animated.View style={[styles.pulseOuter, { transform: [{ scale: pulseAnim }] }]}>
             <View style={styles.pulseMiddle}>
               <View style={styles.pulseInner}>
