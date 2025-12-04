@@ -59,6 +59,14 @@ export default function ComingSoonScreen() {
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={styles.container}
     >
+      {/* Back Button */}
+      <TouchableOpacity 
+        style={styles.backButton} 
+        onPress={() => router.replace('/discover')}
+      >
+        <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
+      </TouchableOpacity>
+
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -84,24 +92,28 @@ export default function ComingSoonScreen() {
               })}
             >
               <Image
-                source={{ uri: `https://image.tmdb.org/t/p/w300${movie.poster_path}` }}
+                source={{ uri: `https://image.tmdb.org/t/p/w342${movie.poster_path}` }}
                 style={styles.poster}
                 resizeMode="cover"
               />
               <View style={styles.cardContent}>
-                <Text style={styles.title} numberOfLines={2}>{movie.title}</Text>
-                
-                <View style={styles.metadata}>
-                  <MaterialCommunityIcons name="calendar" size={14} color={COLORS.accent} />
-                  <Text style={styles.date}>{formatReleaseDate(movie.release_date)}</Text>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.title} numberOfLines={2}>{movie.title}</Text>
                 </View>
-
-                {movie.vote_average > 0 && (
-                  <View style={styles.ratingContainer}>
-                    <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
-                    <Text style={styles.rating}>{movie.vote_average.toFixed(1)}</Text>
+                
+                <View style={styles.metadataSection}>
+                  <View style={styles.metadata}>
+                    <MaterialCommunityIcons name="calendar" size={14} color={COLORS.accent} />
+                    <Text style={styles.date}>{formatReleaseDate(movie.release_date)}</Text>
                   </View>
-                )}
+
+                  {movie.vote_average > 0 && (
+                    <View style={styles.ratingContainer}>
+                      <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
+                      <Text style={styles.rating}>{movie.vote_average.toFixed(1)}</Text>
+                    </View>
+                  )}
+                </View>
 
                 {movie.overview && (
                   <Text style={styles.overview} numberOfLines={3}>
