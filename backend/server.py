@@ -346,6 +346,75 @@ async def recognize_image(file: UploadFile = File(...)):
             "movie": None
         }
 
+@api_router.post("/recognize-music-base64")
+async def recognize_music_base64(request: dict):
+    """Recognize music from base64 audio (mobile-friendly)"""
+    try:
+        audio_base64 = request.get('audio_base64')
+        if not audio_base64:
+            return {
+                "success": False,
+                "error": "No audio data provided"
+            }
+        
+        logger.info(f"Received base64 audio, length: {len(audio_base64)}")
+        
+        # Use AudD to identify the song
+        try:
+            audd_url = "https://api.audd.io/"
+            audd_data = {
+                'api_token': AUDD_API_KEY,
+                'audio': audio_base64,
+                'return': 'apple_music,spotify'
+            }
+            
+            response = requests.post(audd_url, data=audd_data, timeout=30)
+            response.raise_for_status()
+            result = response.json()
+            
+            logger.info(f"AudD response: {result}")
+            
+            if result.get('status') == 'success' and result.get('result'):
+                song_data = result['result']
+                logger.info(f"✅ Found song: {song_data.get('title')} by {song_data.get('artist')}")
+                
+                return {
+                    "success": True,
+                    "source": "AudD Music Recognition",
+                    "song": {
+                        "title": song_data.get('title'),
+                        "artist": song_data.get('artist'),
+                        "album": song_data.get('album'),
+                        "release_date": song_data.get('release_date'),
+                        "label": song_data.get('label'),
+                        "spotify": song_data.get('spotify', {}),
+                        "apple_music": song_data.get('apple_music', {}),
+                    }
+                }
+            else:
+                logger.info("Song not found in AudD database")
+                return {
+                    "success": False,
+                    "error": "Song not found. Try again with clearer audio.",
+                    "song": None
+                }
+                
+        except Exception as e:
+            logger.error(f"AudD API error: {e}")
+            return {
+                "success": False,
+                "error": "Failed to identify song",
+                "song": None
+            }
+        
+    except Exception as e:
+        logger.error(f"Music recognition error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "song": None
+        }
+
 @api_router.post("/recognize-music")
 async def recognize_music(file: UploadFile = File(...)):
     """Recognize any song/music using AudD (Shazam-like)"""
