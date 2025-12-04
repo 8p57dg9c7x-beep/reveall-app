@@ -91,7 +91,10 @@ export default function DiscoverScreen() {
         // Use full data from AudD
         router.push({
           pathname: '/result',
-          params: { songData: JSON.stringify(response.song) }
+          params: { 
+            songData: JSON.stringify(response.song),
+            returnPath: '/discover'
+          }
         });
       } else {
         // Fallback to basic data
@@ -107,7 +110,10 @@ export default function DiscoverScreen() {
         
         router.push({
           pathname: '/result',
-          params: { songData: JSON.stringify(songData) }
+          params: { 
+            songData: JSON.stringify(songData),
+            returnPath: '/discover'
+          }
         });
       }
     } catch (error) {
@@ -127,7 +133,10 @@ export default function DiscoverScreen() {
       
       router.push({
         pathname: '/result',
-        params: { songData: JSON.stringify(songData) }
+        params: { 
+          songData: JSON.stringify(songData),
+          returnPath: '/discover'
+        }
       });
     }
   };
