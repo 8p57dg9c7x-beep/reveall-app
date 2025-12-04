@@ -96,6 +96,16 @@ export default function ResultScreen() {
                   <Text style={styles.platformText}>Apple Music</Text>
                 </TouchableOpacity>
               )}
+              <TouchableOpacity
+                style={styles.platformButton}
+                onPress={() => {
+                  const searchQuery = encodeURIComponent(`${song.title} ${song.artist}`);
+                  Linking.openURL(`https://www.youtube.com/results?search_query=${searchQuery}`);
+                }}
+              >
+                <MaterialCommunityIcons name="youtube" size={40} color="#FF0000" />
+                <Text style={styles.platformText}>YouTube</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
