@@ -389,6 +389,7 @@ async def recognize_music_base64(request: dict):
                         "label": song_data.get('label'),
                         "spotify": song_data.get('spotify', {}),
                         "apple_music": song_data.get('apple_music', {}),
+                        "lyrics": song_data.get('lyrics', {}),
                     }
                 }
             else:
