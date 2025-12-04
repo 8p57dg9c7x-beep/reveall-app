@@ -20,6 +20,7 @@ export default function ResultScreen() {
   const [similarMovies, setSimilarMovies] = useState([]);
   const movie = params.movieData ? JSON.parse(params.movieData) : null;
   const song = params.songData ? JSON.parse(params.songData) : null;
+  const returnPath = params.returnPath || '/discover'; // Default return path
 
   useEffect(() => {
     if (movie) {
