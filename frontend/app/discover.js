@@ -174,14 +174,21 @@ export default function DiscoverScreen() {
     console.log('Explore card pressed:', categoryId);
     try {
       if (categoryId === 'styles') {
-        router.push('/style');
+        console.log('Navigating to Style tab');
+        router.replace('/style');
       } else if (categoryId === 'brands') {
-        router.push('/style');
+        console.log('Navigating to Style tab (brands)');
+        router.replace('/style');
       } else if (categoryId === 'music') {
-        router.push('/trendingsongs');
+        console.log('Navigating to Trending Songs');
+        router.push({
+          pathname: '/trendingsongs'
+        });
       } else if (categoryId === 'genres') {
-        router.push('/comingsoon');
+        console.log('Navigating to Coming Soon');
+        router.replace('/comingsoon');
       }
+      console.log('Navigation command executed');
     } catch (error) {
       console.error('Navigation error:', error);
     }
