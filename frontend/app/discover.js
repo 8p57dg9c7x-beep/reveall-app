@@ -65,7 +65,10 @@ export default function DiscoverScreen() {
       style={styles.trendingCard}
       onPress={() => router.push({
         pathname: '/result',
-        params: { movieData: JSON.stringify(movie) }
+        params: { 
+          movieData: JSON.stringify(movie),
+          returnPath: '/discover'
+        }
       })}
     >
       <Image
