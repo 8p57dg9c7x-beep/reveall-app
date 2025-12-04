@@ -175,8 +175,18 @@ export default function DiscoverScreen() {
       key={category.id}
       style={styles.exploreCard}
       onPress={() => {
-        if (category.id === 'styles') router.push('/style');
-        // Other categories can be implemented later
+        if (category.id === 'styles') {
+          router.push('/style');
+        } else if (category.id === 'brands') {
+          // Navigate to Style tab with Luxury category (brand-focused)
+          router.push('/style');
+        } else if (category.id === 'music') {
+          // Navigate to Trending Songs
+          router.push('/trendingsongs');
+        } else if (category.id === 'genres') {
+          // Navigate to Coming Soon (movie content)
+          router.push('/comingsoon');
+        }
       }}
     >
       <MaterialCommunityIcons name={category.icon} size={32} color={category.color} />
