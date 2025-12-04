@@ -1,25 +1,28 @@
-// CINESCAN Purple/Pink Gradient Theme
+// CINESCAN - Shazam-inspired Clean Theme
 export const COLORS = {
-  background: '#1a0033',  // Deep purple
-  backgroundGradient: '#2d1b4e',  // Purple gradient
+  background: '#0A1E2F',  // Dark teal/blue like Shazam
+  backgroundLight: '#132B3D',  // Slightly lighter
   
-  primary: '#9D4EDD',  // Vibrant purple
-  primaryDark: '#7209B7',  // Darker purple
-  primaryLight: '#C77DFF',  // Light purple
+  primary: '#3B82F6',  // Bright blue
+  primaryDark: '#2563EB',  // Darker blue
+  primaryLight: '#60A5FA',  // Light blue
   
-  accent: '#F72585',  // Hot pink accent
-  accentLight: '#FF006E',  // Bright pink
+  accent: '#A855F7',  // Purple accent
+  accentLight: '#C084FC',  // Light purple
   
-  card: '#240046',  // Dark purple card
-  cardHover: '#3c096c',  // Lighter purple hover
+  card: '#1A2F42',  // Dark card background
+  cardHover: '#243B52',  // Hover state
   
   textPrimary: '#FFFFFF',
-  textSecondary: '#C77DFF',  // Purple tinted text
+  textSecondary: '#94A3B8',  // Gray text
+  textTertiary: '#64748B',  // Light gray
   
-  success: '#06FFA5',  // Neon green
-  error: '#FF006E',  // Pink error
+  success: '#10B981',  // Green
+  error: '#EF4444',  // Red
+  warning: '#F59E0B',  // Orange
   
-  blue: '#00F5FF',  // Neon blue for ratings
+  border: '#1E3A52',  // Subtle border
+  tabBarBackground: '#0F1B2A',  // Bottom tab bar
 };
 
 export const SHADOWS = {
