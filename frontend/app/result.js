@@ -221,6 +221,34 @@ const styles = StyleSheet.create({
     color: COLORS.blue,
     fontWeight: '600',
   },
+  providersContainer: {
+    marginTop: 16,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  providersTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: 12,
+  },
+  providersLogos: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  providerLogo: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    overflow: 'hidden',
+    margin: 6,
+    backgroundColor: COLORS.card,
+  },
+  providerImage: {
+    width: '100%',
+    height: '100%',
+  },
   overviewContainer: {
     marginBottom: 32,
   },
