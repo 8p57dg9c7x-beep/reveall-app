@@ -687,6 +687,45 @@ async def search_movie(request: SearchRequest):
             "movie": None
         }
 
+@api_router.get("/discover/trending")
+async def get_trending():
+    """Get trending movies"""
+    try:
+        url = f"https://api.themoviedb.org/3/trending/movie/week"
+        params = {'api_key': TMDB_API_KEY}
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Trending error: {e}")
+        return {"results": []}
+
+@api_router.get("/discover/popular")
+async def get_popular():
+    """Get popular movies"""
+    try:
+        url = f"https://api.themoviedb.org/3/movie/popular"
+        params = {'api_key': TMDB_API_KEY}
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Popular error: {e}")
+        return {"results": []}
+
+@api_router.get("/discover/upcoming")
+async def get_upcoming():
+    """Get upcoming movies"""
+    try:
+        url = f"https://api.themoviedb.org/3/movie/upcoming"
+        params = {'api_key': TMDB_API_KEY}
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"Upcoming error: {e}")
+        return {"results": []}
+
 # Include router
 app.include_router(api_router)
 
