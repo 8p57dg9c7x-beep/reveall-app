@@ -187,17 +187,23 @@ frontend:
         agent: "main"
         comment: "Image picker integration implemented with expo-image-picker (camera + gallery). Needs backend URL for full testing."
   
-  - task: "Audio Recognition - Recording and upload"
+  - task: "Music Identification - Base64 audio recognition"
     implemented: true
     working: "NA"
-    file: "app/identify.js"
-    stuck_count: 0
-    priority: "high"
+    file: "frontend/services/api.js, frontend/app/index.js, backend/server.py"
+    stuck_count: 3
+    priority: "critical"
     needs_retesting: true
     status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported music identification not working. Getting 422 Unprocessable Entity error with FormData approach."
       - working: "NA"
         agent: "main"
-        comment: "Audio recording with expo-av and file upload implemented. Needs backend URL for full testing."
+        comment: "Implemented base64 encoding approach. Frontend now reads audio file as base64 using FileReader and sends to new /api/recognize-music-base64 endpoint. Backend accepts base64 audio and forwards to AudD API. Services restarted. Needs comprehensive testing."
+      - working: "NA"
+        agent: "main"
+        comment: "Added auto-save to playlist feature. When song is identified, it's automatically saved to AsyncStorage playlist. User wants 9/10 accuracy for any music in the world."
   
   - task: "Video Recognition - Upload functionality"
     implemented: true
