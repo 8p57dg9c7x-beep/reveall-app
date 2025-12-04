@@ -16,6 +16,7 @@ import { COLORS } from '../constants/theme';
 export default function OutfitDetailScreen() {
   const params = useLocalSearchParams();
   const outfit = params.outfitData ? JSON.parse(params.outfitData) : null;
+  const returnPath = params.returnPath || '/style'; // Default to Style tab
 
   if (!outfit) {
     return (
