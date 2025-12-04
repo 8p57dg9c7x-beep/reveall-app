@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
 
@@ -33,13 +34,22 @@ export default function ComingSoonScreen() {
     }
   };
 
+  const formatReleaseDate = (dateString) => {
+    if (!dateString) return 'TBA';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   if (loading) {
     return (
       <LinearGradient
         colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
         style={styles.container}
       >
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.loadingText}>Loading upcoming movies...</Text>
+        </View>
       </LinearGradient>
     );
   }
@@ -49,30 +59,63 @@ export default function ComingSoonScreen() {
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.headerTitle}>Coming Soon</Text>
-        <Text style={styles.subtitle}>New releases in theaters</Text>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <MaterialCommunityIcons name="calendar-star" size={32} color={COLORS.primary} />
+          <Text style={styles.headerTitle}>Coming Soon</Text>
+          <Text style={styles.subtitle}>New releases in theaters</Text>
+        </View>
 
-        {upcoming.map(movie => (
-          <TouchableOpacity
-            key={movie.id}
-            style={styles.movieItem}
-            onPress={() => router.push({
-              pathname: '/result',
-              params: { movieData: JSON.stringify(movie) }
-            })}
-          >
-            <Image
-              source={{ uri: `https://image.tmdb.org/t/p/w200${movie.poster_path}` }}
-              style={styles.poster}
-            />
-            <View style={styles.info}>
-              <Text style={styles.title}>{movie.title}</Text>
-              <Text style={styles.date}>Release: {movie.release_date}</Text>
-              <Text style={styles.overview} numberOfLines={3}>{movie.overview}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        <View style={styles.moviesContainer}>
+          {upcoming.map(movie => (
+            <TouchableOpacity
+              key={movie.id}
+              style={styles.movieCard}
+              activeOpacity={0.7}
+              onPress={() => router.push({
+                pathname: '/result',
+                params: { 
+                  movieData: JSON.stringify(movie),
+                  returnPath: '/comingsoon'
+                }
+              })}
+            >
+              <Image
+                source={{ uri: `https://image.tmdb.org/t/p/w300${movie.poster_path}` }}
+                style={styles.poster}
+                resizeMode="cover"
+              />
+              <View style={styles.cardContent}>
+                <Text style={styles.title} numberOfLines={2}>{movie.title}</Text>
+                
+                <View style={styles.metadata}>
+                  <MaterialCommunityIcons name="calendar" size={14} color={COLORS.accent} />
+                  <Text style={styles.date}>{formatReleaseDate(movie.release_date)}</Text>
+                </View>
+
+                {movie.vote_average > 0 && (
+                  <View style={styles.ratingContainer}>
+                    <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
+                    <Text style={styles.rating}>{movie.vote_average.toFixed(1)}</Text>
+                  </View>
+                )}
+
+                {movie.overview && (
+                  <Text style={styles.overview} numberOfLines={3}>
+                    {movie.overview}
+                  </Text>
+                )}
+              </View>
+
+              <View style={styles.chevronContainer}>
+                <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </LinearGradient>
   );
