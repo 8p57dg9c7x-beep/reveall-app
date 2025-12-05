@@ -58,7 +58,10 @@ export default function HomeScreen() {
           
           router.push({
             pathname: '/result',
-            params: { songData: JSON.stringify(response.song) }
+            params: { 
+              songData: JSON.stringify(response.song),
+              returnPath: '/index'
+            }
           });
         }
       }
