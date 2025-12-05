@@ -962,11 +962,12 @@ async def get_trending_beauty():
         return {"looks": []}
 
 @api_router.post("/music/search")
-async def search_music(request: dict):
+async def search_music(request: Request):
     """Search for a song by title and artist using AudD API"""
     try:
-        title = request.get('title', '')
-        artist = request.get('artist', '')
+        body = await request.json()
+        title = body.get('title', '')
+        artist = body.get('artist', '')
         
         if not title or not artist:
             return {
