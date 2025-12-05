@@ -72,12 +72,18 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="beauty"
+          options={{
+            title: 'Beauty',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="lipstick" size={26} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="comingsoon"
           options={{
-            title: 'Coming Soon',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="calendar-clock" size={26} color={color} />
-            ),
+            href: null, // Hide from tabs
           }}
         />
         <Tabs.Screen
