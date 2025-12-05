@@ -810,16 +810,37 @@ async def get_upcoming():
 
 @api_router.get("/movie/{movie_id}/similar")
 async def get_similar_movies(movie_id: int):
-    """Get similar movies for a given movie ID"""
+    """Get similar movies for a given movie ID with fallback to recommendations"""
     try:
+        # Try similar movies first
         url = f"https://api.themoviedb.org/3/movie/{movie_id}/similar"
         params = {'api_key': TMDB_API_KEY, 'language': 'en-US', 'page': 1}
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        
+        # Log if empty response
+        if not data.get('results'):
+            logger.warning(f"TMDB returned empty similar movies for movie_id: {movie_id}")
+            
+            # Try recommendations endpoint as fallback
+            logger.info(f"Attempting recommendations fallback for movie_id: {movie_id}")
+            rec_url = f"https://api.themoviedb.org/3/movie/{movie_id}/recommendations"
+            rec_response = requests.get(rec_url, params=params, timeout=10)
+            rec_response.raise_for_status()
+            rec_data = rec_response.json()
+            
+            if rec_data.get('results'):
+                logger.info(f"Found {len(rec_data['results'])} recommendations for movie_id: {movie_id}")
+                return rec_data
+            else:
+                logger.warning(f"No recommendations found either for movie_id: {movie_id}")
+                return {"results": [], "fallback_message": "No similar movies available. Try browsing trending movies!"}
+        
+        return data
     except Exception as e:
-        logger.error(f"Similar movies error: {e}")
-        return {"results": []}
+        logger.error(f"Similar movies error for movie_id {movie_id}: {e}")
+        return {"results": [], "error": str(e)}
 
 @api_router.get("/outfits/{category}")
 async def get_outfits(category: str):
