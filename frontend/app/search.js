@@ -78,9 +78,13 @@ export default function SearchScreen() {
 
       if (!result.canceled && result.assets[0]) {
         setIsProcessing(true);
+        console.log('🖼️ Starting image recognition for:', result.assets[0].uri);
+        
         const response = await recognizeImage(result.assets[0].uri);
+        console.log('🖼️ Recognition response:', response);
 
         if (response.success && response.movie) {
+          console.log('✅ Movie found:', response.movie.title);
           router.push({
             pathname: '/result',
             params: { 
@@ -89,7 +93,8 @@ export default function SearchScreen() {
             }
           });
         } else {
-          Alert.alert('Not Found', 'Movie not recognized. Try a clearer poster.');
+          console.log('❌ No movie found:', response.error || 'Unknown error');
+          Alert.alert('Not Found', response.error || 'Movie not recognized. Try a clearer poster.');
         }
         setIsProcessing(false);
       }
@@ -114,9 +119,13 @@ export default function SearchScreen() {
 
       if (!result.canceled && result.assets[0]) {
         setIsProcessing(true);
+        console.log('🖼️ Starting image recognition for:', result.assets[0].uri);
+        
         const response = await recognizeImage(result.assets[0].uri);
+        console.log('🖼️ Recognition response:', response);
 
         if (response.success && response.movie) {
+          console.log('✅ Movie found:', response.movie.title);
           router.push({
             pathname: '/result',
             params: { 
@@ -125,7 +134,8 @@ export default function SearchScreen() {
             }
           });
         } else {
-          Alert.alert('Not Found', 'Movie not recognized. Try a clearer poster.');
+          console.log('❌ No movie found:', response.error || 'Unknown error');
+          Alert.alert('Not Found', response.error || 'Movie not recognized. Try a clearer poster.');
         }
         setIsProcessing(false);
       }
