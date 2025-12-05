@@ -147,13 +147,18 @@ export default function SearchScreen() {
               placeholderTextColor={COLORS.textSecondary}
               value={query}
               onChangeText={setQuery}
-              onSubmitEditing={() => searchMovies(query)}
+              onSubmitEditing={handleSearch}
               returnKeyType="search"
             />
             {query.length > 0 && (
-              <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }}>
-                <MaterialCommunityIcons name="close" size={24} color={COLORS.textSecondary} />
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }} style={styles.iconButton}>
+                  <MaterialCommunityIcons name="close" size={24} color={COLORS.textSecondary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSearch} style={styles.searchButton}>
+                  <MaterialCommunityIcons name="magnify" size={20} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+              </>
             )}
           </View>
 
