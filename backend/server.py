@@ -357,6 +357,146 @@ async def recognize_image(file: UploadFile = File(...)):
             "movie": None
         }
 
+@api_router.post("/recognize-image-base64")
+async def recognize_image_base64(request: Request):
+    """Recognize movie from base64 image (mobile-friendly)"""
+    try:
+        body = await request.json()
+        image_base64 = body.get('image_base64')
+        
+        if not image_base64:
+            return {
+                "success": False,
+                "error": "No image data provided",
+                "movie": None
+            }
+        
+        logger.info(f"Received base64 image, length: {len(image_base64)} characters")
+        
+        # Decode base64 to bytes
+        try:
+            # Remove data URL prefix if present
+            if ',' in image_base64:
+                image_base64 = image_base64.split(',')[1]
+            
+            image_content = base64.b64decode(image_base64)
+            logger.info(f"Decoded image size: {len(image_content)} bytes")
+        except Exception as e:
+            logger.error(f"Base64 decode error: {e}")
+            return {
+                "success": False,
+                "error": "Invalid base64 image data",
+                "movie": None
+            }
+        
+        # Use the same recognition logic as the file upload endpoint
+        vision_result = recognize_image_with_google_vision(image_content)
+        web_entities = vision_result.get('web_entities', [])
+        best_guess = vision_result.get('best_guess', [])
+        detected_texts = vision_result.get('text', [])
+        
+        logger.info(f"Web entities: {web_entities[:5]}")
+        logger.info(f"Best guess: {best_guess}")
+        
+        # STRATEGY 1: Try best guess labels first
+        if best_guess:
+            for guess in best_guess[:3]:
+                logger.info(f"Trying best guess: '{guess}'")
+                movie = search_tmdb_movie(guess)
+                if movie:
+                    logger.info(f"✅ FOUND via best guess: '{movie.get('title')}'")
+                    return {
+                        "success": True,
+                        "source": "Google Web Detection (Best Guess)",
+                        "movie": movie
+                    }
+        
+        # STRATEGY 2: SMART entity matching
+        if web_entities:
+            movie_candidates = []
+            generic_terms = ['video', 'film', 'movie', 'scene', 'poster', 'film poster', 'movie poster', 
+                            'illustration', 'artwork', 'cinema', 'hollywood', 'actor', 'actress',
+                            'director', 'crime film', 'drama', 'thriller', 'action film', 'comedy']
+            
+            for entity in web_entities[:25]:
+                query = entity['text']
+                entity_lower = query.lower().strip()
+                
+                if entity_lower in generic_terms:
+                    logger.info(f"Skipping generic term: '{query}'")
+                    continue
+                
+                logger.info(f"Checking: '{query}'")
+                movie = search_tmdb_movie(query)
+                
+                if movie:
+                    movie_title = movie.get('title', '').lower().strip()
+                    entity_clean = entity_lower.replace('the ', '').replace('a ', '').strip()
+                    title_clean = movie_title.replace('the ', '').replace('a ', '').strip()
+                    
+                    match_score = 0
+                    
+                    if entity_clean == title_clean or entity_lower == movie_title:
+                        match_score = 10000
+                        logger.info(f"  ✅ PERFECT: '{query}' = '{movie.get('title')}'")
+                    elif entity_clean in title_clean and len(entity_clean) > 5:
+                        match_score = 5000
+                        logger.info(f"  ✅ STRONG: '{query}' in '{movie.get('title')}'")
+                    elif title_clean in entity_clean and len(title_clean) > 5:
+                        match_score = 4000
+                        logger.info(f"  ✅ STRONG: '{movie.get('title')}' in '{query}'")
+                    else:
+                        match_score = 100
+                        logger.info(f"  ⚠️ WEAK: '{query}' -> '{movie.get('title')}'")
+                    
+                    movie_candidates.append({
+                        'movie': movie,
+                        'score': match_score,
+                        'query': query
+                    })
+            
+            if movie_candidates:
+                movie_candidates.sort(key=lambda x: x['score'], reverse=True)
+                best_match = movie_candidates[0]
+                
+                if best_match['score'] >= 4000:
+                    logger.info(f"✅ BEST MATCH: '{best_match['query']}' -> '{best_match['movie'].get('title')}' (score: {best_match['score']})")
+                    return {
+                        "success": True,
+                        "source": "Google Web Detection (Entity Match)",
+                        "movie": best_match['movie']
+                    }
+        
+        # STRATEGY 3: Text detection fallback
+        if detected_texts:
+            words = detected_texts[0].split()
+            
+            for i in range(len(words)):
+                if i < len(words) - 1:
+                    query = f"{words[i]} {words[i+1]}"
+                    movie = search_tmdb_movie(query)
+                    if movie:
+                        logger.info(f"✅ FOUND via text: '{movie.get('title')}'")
+                        return {
+                            "success": True,
+                            "source": "Text Detection",
+                            "movie": movie
+                        }
+        
+        return {
+            "success": False,
+            "error": "Could not identify movie. Try a clearer poster image.",
+            "movie": None
+        }
+        
+    except Exception as e:
+        logger.error(f"Base64 image recognition error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "movie": None
+        }
+
 @api_router.post("/recognize-music-base64")
 async def recognize_music_base64(request: dict):
     """Recognize music from base64 audio (mobile-friendly)"""
