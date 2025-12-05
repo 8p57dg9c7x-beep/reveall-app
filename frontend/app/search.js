@@ -64,17 +64,43 @@ export default function SearchScreen() {
 
   const pickImage = async () => {
     try {
+      console.log('📸 Requesting media library permissions...');
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('📸 Permission status:', status);
+      
       if (status !== 'granted') {
         Alert.alert('Permission Required', 'Please enable photo library access');
         return;
       }
 
+      console.log('📸 Launching image picker...');
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.8,
       });
+
+      console.log('📸 Picker result:', JSON.stringify(result, null, 2));
+      
+      // Check if user canceled
+      if (result.canceled) {
+        console.log('📸 User canceled image selection');
+        return;
+      }
+      
+      // Check if assets exist
+      if (!result.assets || result.assets.length === 0) {
+        console.log('❌ No assets in picker result');
+        Alert.alert('Error', 'No image was selected. Please try again.');
+        return;
+      }
+      
+      // Check if first asset has URI
+      if (!result.assets[0].uri) {
+        console.log('❌ No URI in asset:', result.assets[0]);
+        Alert.alert('Error', 'Invalid image selected. Please try another image.');
+        return;
+      }
 
       if (!result.canceled && result.assets[0]) {
         setIsProcessing(true);
