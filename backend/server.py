@@ -34,8 +34,9 @@ logger = logging.getLogger(__name__)
 # MongoDB connection
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
 mongo_client = MongoClient(MONGO_URL)
-db = mongo_client['cinescan']
+db = mongo_client['app_database']
 outfits_collection = db['outfits']
+beauty_collection = db['beauty_looks']
 
 logger.info(f"MongoDB connected: {MONGO_URL}")
 
