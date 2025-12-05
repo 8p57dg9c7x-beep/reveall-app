@@ -132,16 +132,42 @@ export default function SearchScreen() {
 
   const takePhoto = async () => {
     try {
+      console.log('📸 Requesting camera permissions...');
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      console.log('📸 Camera permission status:', status);
+      
       if (status !== 'granted') {
         Alert.alert('Permission Required', 'Please enable camera access');
         return;
       }
 
+      console.log('📸 Launching camera...');
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         quality: 0.8,
       });
+
+      console.log('📸 Camera result:', JSON.stringify(result, null, 2));
+      
+      // Check if user canceled
+      if (result.canceled) {
+        console.log('📸 User canceled camera');
+        return;
+      }
+      
+      // Check if assets exist
+      if (!result.assets || result.assets.length === 0) {
+        console.log('❌ No assets in camera result');
+        Alert.alert('Error', 'No photo was captured. Please try again.');
+        return;
+      }
+      
+      // Check if first asset has URI
+      if (!result.assets[0].uri) {
+        console.log('❌ No URI in camera asset:', result.assets[0]);
+        Alert.alert('Error', 'Invalid photo captured. Please try again.');
+        return;
+      }
 
       if (!result.canceled && result.assets[0]) {
         setIsProcessing(true);
