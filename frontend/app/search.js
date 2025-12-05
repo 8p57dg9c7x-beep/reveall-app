@@ -26,21 +26,31 @@ export default function SearchScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const searchMovies = async (searchQuery) => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      setResults([]);
+      return;
+    }
     
     setLoading(true);
     try {
       const API_KEY = '7e6817a0af67d296b7bd60bdf2ffc3a6';
+      console.log('Searching for:', searchQuery);
       const response = await fetch(
         `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}`
       );
       const data = await response.json();
+      console.log('Search results:', data.results?.length || 0, 'movies');
       setResults(data.results?.slice(0, 20) || []);
     } catch (error) {
       console.error('Search error:', error);
+      Alert.alert('Search Error', 'Unable to search movies. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = () => {
+    searchMovies(query);
   };
 
   const pickImage = async () => {
