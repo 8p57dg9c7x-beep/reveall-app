@@ -1,8 +1,8 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 
-// Use Render backend (accessible from mobile devices)
-const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://cinescan-backend-1.onrender.com';
+// Use REVEAL backend (accessible from mobile devices)
+const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://reveal-app.preview.emergentagent.com';
 
 console.log('API_BASE_URL:', API_BASE_URL);
 
