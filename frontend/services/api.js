@@ -17,25 +17,25 @@ const api = axios.create({
 export const recognizeImage = async (imageUri) => {
   try {
     console.log('Recognizing image from URI:', imageUri);
-    console.log('API URL:', `${API_BASE_URL}/api/recognize-image`);
+    console.log('API URL:', `${API_BASE_URL}/api/recognize-image-base64`);
     
-    // Use fetch with FormData for file uploads
-    const formData = new FormData();
+    // Read image file as base64 using expo-file-system (works on all platforms)
+    const FileSystem = require('expo-file-system').default;
     
-    // Create a file object with proper structure for React Native
-    const uriParts = imageUri.split('.');
-    const fileType = uriParts[uriParts.length - 1];
-    
-    formData.append('file', {
-      uri: imageUri,
-      name: `photo.${fileType}`,
-      type: `image/${fileType}`,
+    const base64 = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
     });
-
-    // Don't set Content-Type header - let fetch set it with proper boundary
-    const response = await fetch(`${API_BASE_URL}/api/recognize-image`, {
+    
+    console.log(`Image converted to base64, length: ${base64.length}`);
+    
+    const response = await fetch(`${API_BASE_URL}/api/recognize-image-base64`, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image_base64: base64,
+      }),
     });
 
     const data = await response.json();
