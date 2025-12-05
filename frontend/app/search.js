@@ -262,6 +262,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 12,
   },
+  iconButton: {
+    padding: 4,
+    marginRight: 8,
+  },
+  searchButton: {
+    backgroundColor: COLORS.primary,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
   uploadSection: {
     marginTop: 8,
   },
