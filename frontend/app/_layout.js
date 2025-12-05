@@ -99,6 +99,12 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="beautydetail"
+          options={{
+            href: null, // Hide from tabs
+          }}
+        />
+        <Tabs.Screen
           name="trendingsongs"
           options={{
             href: null, // Hide from tabs
