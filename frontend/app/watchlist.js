@@ -137,7 +137,10 @@ export default function WatchlistScreen() {
                   style={styles.songContent}
                   onPress={() => router.push({
                     pathname: '/result',
-                    params: { songData: JSON.stringify(song) }
+                    params: { 
+                      songData: JSON.stringify(song),
+                      returnPath: '/watchlist'
+                    }
                   })}
                 >
                   <MaterialCommunityIcons name="music-circle" size={60} color={COLORS.accent} />
