@@ -99,7 +99,10 @@ export default function WatchlistScreen() {
                   style={styles.movieContent}
                   onPress={() => router.push({
                     pathname: '/result',
-                    params: { movieData: JSON.stringify(movie) }
+                    params: { 
+                      movieData: JSON.stringify(movie),
+                      returnPath: '/watchlist'
+                    }
                   })}
                 >
                   <Image
