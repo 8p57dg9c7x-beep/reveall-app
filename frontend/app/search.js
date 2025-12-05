@@ -33,12 +33,21 @@ export default function SearchScreen() {
     
     setLoading(true);
     try {
-      const API_KEY = '7e6817a0af67d296b7bd60bdf2ffc3a6';
+      const API_KEY = '04253a70fe55d02b56ecc5f48e52b255';
       console.log('Searching for:', searchQuery);
       const response = await fetch(
         `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}`
       );
       const data = await response.json();
+      
+      // Check for API errors
+      if (!data.success && data.status_code) {
+        console.error('TMDB API error:', data.status_message);
+        Alert.alert('Search Error', data.status_message || 'Unable to search movies');
+        setLoading(false);
+        return;
+      }
+      
       console.log('Search results:', data.results?.length || 0, 'movies');
       setResults(data.results?.slice(0, 20) || []);
     } catch (error) {
