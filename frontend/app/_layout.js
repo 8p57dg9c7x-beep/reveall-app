@@ -110,12 +110,6 @@ export default function RootLayout() {
             href: null, // Hide from tabs
           }}
         />
-        <Tabs.Screen
-          name="index_old_backup"
-          options={{
-            href: null, // Hide from tabs
-          }}
-        />
       </Tabs>
     </GestureHandlerRootView>
   );
