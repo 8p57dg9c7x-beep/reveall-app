@@ -39,11 +39,21 @@ export default function HomeScreen() {
   }, []);
 
   const processRecording = async (rec) => {
+    let timeoutMessage = null;
+    
     try {
       if (rec) {
         await rec.stopAndUnloadAsync();
         const uri = rec.getURI();
+        
+        // Show helpful message after 3 seconds
+        timeoutMessage = setTimeout(() => {
+          console.log('Music recognition taking longer than expected...');
+        }, 3000);
+        
         const response = await recognizeMusic(uri);
+        
+        if (timeoutMessage) clearTimeout(timeoutMessage);
 
         if (response.success && response.song) {
           // Save to playlist
@@ -67,6 +77,7 @@ export default function HomeScreen() {
       }
     } catch (error) {
       console.error('Processing error:', error);
+      if (timeoutMessage) clearTimeout(timeoutMessage);
     } finally {
       setIsListening(false);
       if (timerId) clearTimeout(timerId);
