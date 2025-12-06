@@ -48,7 +48,7 @@ export default function ResultScreen() {
     if (!movieId) return;
     setLoadingDetails(true);
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app-1.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/movie/${movieId}`);
       
       if (!response.ok) {
@@ -67,7 +67,7 @@ export default function ResultScreen() {
   const loadSimilarMovies = async () => {
     if (!movieId) return;
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app-1.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/movie/${movieId}/similar`);
       const data = await response.json();
       setSimilarMovies(data.results?.slice(0, 10) || []);

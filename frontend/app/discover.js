@@ -31,7 +31,7 @@ export default function DiscoverScreen() {
     setLoadingMovies(true);
     setLoadingStyles(true);
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app-1.preview.emergentagent.com';
       
       // Load trending movies
       const moviesRes = await fetch(`${API_URL}/api/discover/trending`);

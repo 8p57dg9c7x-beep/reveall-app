@@ -37,7 +37,7 @@ export default function BeautyScreen() {
   const loadLooks = useCallback(async () => {
     setLoading(true);
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app-1.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/beauty/${selectedCategory}`);
       const data = await response.json();
       setLooks(data.looks || []);
