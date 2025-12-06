@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Alert,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
+import OptimizedImage from '../components/OptimizedImage';
+import { SkeletonOutfitCard } from '../components/SkeletonLoader';
 
 const CATEGORIES = [
   { id: 'natural', name: 'Natural', icon: 'leaf' },
@@ -30,7 +32,7 @@ export default function BeautyScreen() {
     loadLooks();
   }, [selectedCategory]);
 
-  const loadLooks = async () => {
+  const loadLooks = useCallback(async () => {
     setLoading(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
@@ -43,16 +45,30 @@ export default function BeautyScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
 
-  const renderCategoryButton = ({ item }) => (
+  const handleCategoryPress = useCallback((categoryId) => {
+    setSelectedCategory(categoryId);
+  }, []);
+
+  const handleLookPress = useCallback((item) => {
+    router.push({
+      pathname: '/beautydetail',
+      params: { 
+        lookData: JSON.stringify(item),
+        returnPath: '/beauty'
+      }
+    });
+  }, []);
+
+  const renderCategoryButton = useCallback(({ item }) => (
     <TouchableOpacity
       key={item.id}
       style={[
         styles.categoryButton,
         selectedCategory === item.id && styles.categoryButtonActive,
       ]}
-      onPress={() => setSelectedCategory(item.id)}
+      onPress={() => handleCategoryPress(item.id)}
     >
       <MaterialCommunityIcons
         name={item.icon}
@@ -68,39 +84,33 @@ export default function BeautyScreen() {
         {item.name}
       </Text>
     </TouchableOpacity>
-  );
+  ), [selectedCategory, handleCategoryPress]);
 
-  const renderLookCard = ({ item }) => (
+  const renderLookCard = useCallback(({ item }) => (
     <TouchableOpacity
       style={styles.lookCard}
       activeOpacity={0.7}
-      onPress={() => router.push({
-        pathname: '/beautydetail',
-        params: { 
-          lookData: JSON.stringify(item),
-          returnPath: '/beauty'
-        }
-      })}
+      onPress={() => handleLookPress(item)}
     >
-      <Image source={{ uri: item.image }} style={styles.lookImage} />
+      <OptimizedImage source={{ uri: item.image }} style={styles.lookImage} />
       <View style={styles.lookInfo}>
         <Text style={styles.lookTitle} numberOfLines={2}>{item.title}</Text>
         <Text style={styles.celebrity} numberOfLines={1}>{item.celebrity}</Text>
         <Text style={styles.priceRange}>{item.priceRange || 'View Details'}</Text>
       </View>
     </TouchableOpacity>
-  );
+  ), [handleLookPress]);
 
   return (
     <LinearGradient
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
-      style={styles.container}
-      pointerEvents="box-none"
+      style={[styles.container, { pointerEvents: 'box-none' }]}
     >
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        removeClippedSubviews
       >
         <View style={styles.header}>
           <MaterialCommunityIcons name="lipstick" size={32} color={COLORS.primary} />
@@ -115,6 +125,7 @@ export default function BeautyScreen() {
           style={styles.categoriesContainer}
           contentContainerStyle={styles.categoriesContent}
           nestedScrollEnabled
+          removeClippedSubviews
         >
           {CATEGORIES.map((item) => renderCategoryButton({ item }))}
         </ScrollView>
@@ -122,22 +133,25 @@ export default function BeautyScreen() {
         {/* Beauty Looks Grid */}
         {loading ? (
           <View style={styles.loadingContainer}>
-            <MaterialCommunityIcons name="loading" size={48} color={COLORS.primary} />
-            <Text style={styles.loadingText}>Loading looks...</Text>
+            <View style={styles.skeletonGrid}>
+              <SkeletonOutfitCard />
+              <SkeletonOutfitCard />
+              <SkeletonOutfitCard />
+              <SkeletonOutfitCard />
+            </View>
           </View>
         ) : looks.length > 0 ? (
-          <View style={styles.looksContainer}>
-            {looks.map((item, index) => {
-              if (index % 2 === 0) {
-                return (
-                  <View key={index} style={styles.row}>
-                    {renderLookCard({ item: looks[index] })}
-                    {looks[index + 1] && renderLookCard({ item: looks[index + 1] })}
-                  </View>
-                );
-              }
-              return null;
-            })}
+          <View style={styles.flashListContainer}>
+            <FlashList
+              data={looks}
+              renderItem={renderLookCard}
+              estimatedItemSize={300}
+              numColumns={2}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              removeClippedSubviews
+              contentContainerStyle={styles.flashListContent}
+            />
           </View>
         ) : (
           <View style={styles.emptyState}>
@@ -213,21 +227,20 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     paddingVertical: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: COLORS.textSecondary,
-    fontSize: 16,
-    marginTop: 16,
-  },
-  looksContainer: {
     paddingHorizontal: 16,
   },
-  row: {
+  skeletonGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 16,
+  },
+  flashListContainer: {
+    flex: 1,
+    minHeight: 400,
+    paddingHorizontal: 16,
+  },
+  flashListContent: {
+    paddingBottom: 20,
   },
   lookCard: {
     flex: 0.48,
