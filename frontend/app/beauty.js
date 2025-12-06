@@ -208,8 +208,19 @@ const styles = StyleSheet.create({
   flatListContent: {
     paddingBottom: 120,
   },
-  columnWrapper: {
+  lookRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  skeletonContainer: {
+    paddingHorizontal: 16,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   header: {
     paddingTop: 60,
