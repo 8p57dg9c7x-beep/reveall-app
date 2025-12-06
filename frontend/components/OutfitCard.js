@@ -4,6 +4,12 @@ import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
 
 const OutfitCard = memo(({ item, onPress, isLeft }) => {
+  console.log('🎨 OutfitCard rendering:', {
+    title: item.title,
+    hasImage: !!item.image,
+    imageUrl: item.image?.substring(0, 50),
+  });
+  
   return (
     <TouchableOpacity
       style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
