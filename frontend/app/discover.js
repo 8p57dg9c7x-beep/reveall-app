@@ -74,7 +74,7 @@ export default function DiscoverScreen() {
       })}
     >
       <OptimizedImage
-        source={{ uri: `https://image.tmdb.org/t/p/w300${movie.poster_path}` }}
+        source={{ uri: `https://image.tmdb.org/t/p/w185${movie.poster_path}` }}
         style={styles.trendingImage}
       />
       <Text style={styles.trendingTitle} numberOfLines={2}>{movie.title}</Text>
