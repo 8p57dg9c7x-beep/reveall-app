@@ -87,7 +87,7 @@ export default function ComingSoonScreen() {
               onPress={() => router.push({
                 pathname: '/result',
                 params: { 
-                  movieData: JSON.stringify(movie),
+                  movieId: movie.id.toString(),
                   returnPath: '/comingsoon'
                 }
               })}
