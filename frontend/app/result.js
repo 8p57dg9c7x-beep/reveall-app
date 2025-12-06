@@ -19,6 +19,7 @@ export default function ResultScreen() {
   const [inWatchlist, setInWatchlist] = useState(false);
   const [similarMovies, setSimilarMovies] = useState([]);
   const [movieDetails, setMovieDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const initialMovie = params.movieData ? JSON.parse(params.movieData) : null;
   const song = params.songData ? JSON.parse(params.songData) : null;
   const returnPath = params.returnPath || '/discover'; // Default return path
@@ -32,18 +33,29 @@ export default function ResultScreen() {
       loadMovieDetails();
       loadSimilarMovies();
     }
-  }, [initialMovie]);
+  }, []);
 
   const loadMovieDetails = async () => {
     if (!initialMovie?.id) return;
+    setLoadingDetails(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
-      const response = await fetch(`${API_URL}/api/movie/${initialMovie.id}`);
+      const response = await fetch(`${API_URL}/api/movie/${initialMovie.id}`, {
+        timeout: 5000 // 5 second timeout
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch movie details');
+      }
+      
       const data = await response.json();
       setMovieDetails(data);
     } catch (error) {
       console.error('Error loading movie details:', error);
       // Keep using initial movie data if fetch fails
+      setMovieDetails(initialMovie); // Use initial data as fallback
+    } finally {
+      setLoadingDetails(false);
     }
   };
 
