@@ -170,7 +170,7 @@ export default function DiscoverScreen() {
     </TouchableOpacity>
   ), []);
 
-  const handleExplorePress = (categoryId) => {
+  const handleExplorePress = useCallback((categoryId) => {
     console.log('Explore card pressed:', categoryId);
     try {
       if (categoryId === 'styles') {
@@ -192,7 +192,7 @@ export default function DiscoverScreen() {
     } catch (error) {
       console.error('Navigation error:', error);
     }
-  };
+  }, []);
 
   const renderExploreCard = (category) => (
     <TouchableOpacity
