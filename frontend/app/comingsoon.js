@@ -115,6 +115,25 @@ export default function ComingSoonScreen() {
                   )}
                 </View>
 
+                {movie.genre_ids && movie.genre_ids.length > 0 && (
+                  <View style={styles.genresRow}>
+                    {movie.genre_ids.slice(0, 2).map((genreId, index) => {
+                      const genreNames = {
+                        28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
+                        80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family',
+                        14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music',
+                        9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi', 10770: 'TV',
+                        53: 'Thriller', 10752: 'War', 37: 'Western'
+                      };
+                      return (
+                        <View key={index} style={styles.genreTag}>
+                          <Text style={styles.genreText}>{genreNames[genreId] || 'Movie'}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+
                 {movie.overview && (
                   <Text style={styles.overview} numberOfLines={3}>
                     {movie.overview}
