@@ -165,9 +165,27 @@ export default function ResultScreen() {
 
           <Text style={styles.title}>{movie.title}</Text>
           
-          {movie.vote_average && (
-            <Text style={styles.rating}>⭐ {movie.vote_average.toFixed(1)}/10</Text>
-          )}
+          {/* Movie Meta Information */}
+          <View style={styles.metaContainer}>
+            {movie.release_date && (
+              <Text style={styles.metaText}>
+                <MaterialCommunityIcons name="calendar" size={16} color={COLORS.textSecondary} />
+                {' '}{new Date(movie.release_date).getFullYear()}
+              </Text>
+            )}
+            {movie.runtime && (
+              <Text style={styles.metaText}>
+                <MaterialCommunityIcons name="clock-outline" size={16} color={COLORS.textSecondary} />
+                {' '}{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
+              </Text>
+            )}
+            {movie.vote_average && (
+              <Text style={styles.metaText}>
+                <MaterialCommunityIcons name="star" size={16} color={COLORS.accent} />
+                {' '}{movie.vote_average.toFixed(1)}/10
+              </Text>
+            )}
+          </View>
 
           {movie.genres && (
             <View style={styles.genres}>
