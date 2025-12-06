@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -23,6 +23,8 @@ const CATEGORIES = [
   { id: 'affordable', name: 'Affordable Fits', icon: 'tag-multiple' },
   { id: 'celebrity', name: 'Celebrity', icon: 'star' },
 ];
+
+const CARD_HEIGHT = 310; // Fixed height for performance
 
 export default function StyleScreen() {
   const [selectedCategory, setSelectedCategory] = useState('streetwear');
@@ -109,117 +111,127 @@ export default function StyleScreen() {
     </TouchableOpacity>
   ), [selectedCategory, handleCategoryPress]);
 
-  const renderOutfitCard = useCallback(({ item }) => (
-    <TouchableOpacity
-      style={styles.outfitCard}
-      activeOpacity={0.7}
-      onPress={() => handleOutfitPress(item)}
-    >
-      <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
-      <View style={styles.outfitInfo}>
-        <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
-        <Text style={styles.outfitPrice}>{item.priceRange || 'View Details'}</Text>
+  const renderOutfitCard = useCallback(({ item, index }) => {
+    // Render 2 columns
+    const isLeft = index % 2 === 0;
+    return (
+      <TouchableOpacity
+        style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
+        activeOpacity={0.7}
+        onPress={() => handleOutfitPress(item)}
+      >
+        <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
+        <View style={styles.outfitInfo}>
+          <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
+          <Text style={styles.outfitPrice}>{item.priceRange || 'View Details'}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }, [handleOutfitPress]);
+
+  const renderHeader = useCallback(() => (
+    <View>
+      <View style={styles.header}>
+        <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
+        <Text style={styles.headerTitle}>Style Discovery</Text>
+        <Text style={styles.headerSubtitle}>Curated outfit inspiration</Text>
       </View>
-    </TouchableOpacity>
-  ), [handleOutfitPress]);
+
+      {/* Dress Like Your Icon Section */}
+      {celebrityOutfits.length > 0 && (
+        <View style={styles.celebritySection}>
+          <View style={styles.celebritySectionHeader}>
+            <MaterialCommunityIcons name="star" size={24} color={COLORS.accent} />
+            <Text style={styles.celebritySectionTitle}>Dress Like Your Icon</Text>
+          </View>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.celebrityScroll}
+            contentContainerStyle={styles.celebrityScrollContent}
+            nestedScrollEnabled
+          >
+            {celebrityOutfits.map((outfit) => (
+              <TouchableOpacity
+                key={outfit.id}
+                style={styles.celebrityCard}
+                onPress={() => handleCelebrityPress(outfit)}
+              >
+                <OptimizedImage source={{ uri: outfit.image }} style={styles.celebrityImage} />
+                <View style={styles.celebrityInfo}>
+                  <Text style={styles.celebrityName}>{outfit.celebrity}</Text>
+                  <Text style={styles.celebrityTitle} numberOfLines={1}>{outfit.title}</Text>
+                  {outfit.priceRange && (
+                    <Text style={styles.celebrityPrice}>{outfit.priceRange}</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Category Filters */}
+      <FlatList
+        horizontal
+        data={CATEGORIES}
+        renderItem={renderCategoryButton}
+        keyExtractor={(item) => item.id}
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoriesContainer}
+        contentContainerStyle={styles.categoriesContent}
+      />
+    </View>
+  ), [celebrityOutfits, selectedCategory, handleCelebrityPress, renderCategoryButton]);
+
+  const renderEmptyComponent = useCallback(() => (
+    <View style={styles.emptyState}>
+      <MaterialCommunityIcons name="hanger" size={80} color={COLORS.textSecondary} />
+      <Text style={styles.emptyTitle}>No Outfits Yet</Text>
+      <Text style={styles.emptySubtitle}>
+        {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} outfits will appear here once added.
+      </Text>
+    </View>
+  ), [selectedCategory]);
+
+  const renderFooter = useCallback(() => {
+    if (!loading) return null;
+    return (
+      <View style={styles.loadingContainer}>
+        <View style={styles.skeletonGrid}>
+          <SkeletonOutfitCard />
+          <SkeletonOutfitCard />
+        </View>
+      </View>
+    );
+  }, [loading]);
 
   return (
     <LinearGradient
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
-      style={styles.container}
-      pointerEvents="box-none"
+      style={[styles.container, { pointerEvents: 'box-none' }]}
     >
-      <ScrollView 
-        style={styles.scrollView}
+      <FlatList
+        data={outfits}
+        renderItem={renderOutfitCard}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={!loading ? renderEmptyComponent : null}
+        ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        removeClippedSubviews
-      >
-        <View style={styles.header}>
-          <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
-          <Text style={styles.headerTitle}>Style Discovery</Text>
-          <Text style={styles.headerSubtitle}>Curated outfit inspiration</Text>
-        </View>
-
-        {/* Dress Like Your Icon Section */}
-        {celebrityOutfits.length > 0 && (
-          <View style={styles.celebritySection}>
-            <View style={styles.celebritySectionHeader}>
-              <MaterialCommunityIcons name="star" size={24} color={COLORS.accent} />
-              <Text style={styles.celebritySectionTitle}>Dress Like Your Icon</Text>
-            </View>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false} 
-              style={styles.celebrityScroll}
-              contentContainerStyle={styles.celebrityScrollContent}
-              nestedScrollEnabled
-              removeClippedSubviews
-            >
-              {celebrityOutfits.map((outfit) => (
-                <TouchableOpacity
-                  key={outfit.id}
-                  style={styles.celebrityCard}
-                  onPress={() => handleCelebrityPress(outfit)}
-                >
-                  <OptimizedImage source={{ uri: outfit.image }} style={styles.celebrityImage} />
-                  <View style={styles.celebrityInfo}>
-                    <Text style={styles.celebrityName}>{outfit.celebrity}</Text>
-                    <Text style={styles.celebrityTitle} numberOfLines={1}>{outfit.title}</Text>
-                    {outfit.priceRange && (
-                      <Text style={styles.celebrityPrice}>{outfit.priceRange}</Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-        {/* Category Filters */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoriesContainer}
-          contentContainerStyle={styles.categoriesContent}
-          nestedScrollEnabled
-        >
-          {CATEGORIES.map((item) => renderCategoryButton({ item }))}
-        </ScrollView>
-
-        {/* Outfits Grid */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <View style={styles.skeletonGrid}>
-              <SkeletonOutfitCard />
-              <SkeletonOutfitCard />
-              <SkeletonOutfitCard />
-              <SkeletonOutfitCard />
-            </View>
-          </View>
-        ) : outfits.length > 0 ? (
-          <View style={styles.flashListContainer}>
-            <FlashList
-              data={outfits}
-              renderItem={renderOutfitCard}
-              estimatedItemSize={300}
-              numColumns={2}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-              removeClippedSubviews
-              contentContainerStyle={styles.flashListContent}
-            />
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="hanger" size={80} color={COLORS.textSecondary} />
-            <Text style={styles.emptyTitle}>No Outfits Yet</Text>
-            <Text style={styles.emptySubtitle}>
-              {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} outfits will appear here once added.
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+        contentContainerStyle={styles.flatListContent}
+        columnWrapperStyle={styles.columnWrapper}
+        getItemLayout={(data, index) => ({
+          length: CARD_HEIGHT,
+          offset: CARD_HEIGHT * Math.floor(index / 2),
+          index,
+        })}
+        maxToRenderPerBatch={6}
+        windowSize={5}
+        removeClippedSubviews={true}
+        initialNumToRender={6}
+      />
     </LinearGradient>
   );
 }
@@ -228,11 +240,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
+  flatListContent: {
     paddingBottom: 120,
+  },
+  columnWrapper: {
+    paddingHorizontal: 16,
   },
   header: {
     paddingTop: 60,
@@ -335,7 +347,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   loadingContainer: {
-    paddingVertical: 60,
+    paddingVertical: 20,
     paddingHorizontal: 16,
   },
   skeletonGrid: {
@@ -343,19 +355,19 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  flashListContainer: {
-    flex: 1,
-    minHeight: 400,
-    paddingHorizontal: 16,
-  },
-  flashListContent: {
-    paddingBottom: 20,
-  },
   outfitCard: {
-    flex: 0.48,
+    width: '48%',
     backgroundColor: COLORS.card,
     borderRadius: 12,
     overflow: 'hidden',
+    marginBottom: 16,
+    height: CARD_HEIGHT,
+  },
+  cardLeft: {
+    marginRight: 8,
+  },
+  cardRight: {
+    marginLeft: 8,
   },
   outfitImage: {
     width: '100%',
