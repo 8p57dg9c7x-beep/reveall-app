@@ -297,7 +297,7 @@ export default function ResultScreen() {
           {similarMovies.length > 0 && (
             <View style={styles.similarSection}>
               <Text style={styles.sectionTitle}>Similar Movies</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} removeClippedSubviews>
                 {similarMovies.map(similarMovie => (
                   <TouchableOpacity
                     key={similarMovie.id}
