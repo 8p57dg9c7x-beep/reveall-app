@@ -232,7 +232,12 @@ export default function DiscoverScreen() {
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.horizontalScroll}
+            removeClippedSubviews
+          >
             {trendingMovies.map(renderMovieCard)}
           </ScrollView>
         </View>
@@ -245,7 +250,12 @@ export default function DiscoverScreen() {
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.horizontalScroll}
+            removeClippedSubviews
+          >
             {TRENDING_SONGS.map(renderSongCard)}
           </ScrollView>
         </View>
@@ -259,7 +269,12 @@ export default function DiscoverScreen() {
             </TouchableOpacity>
           </View>
           {trendingStyles.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={styles.horizontalScroll}
+              removeClippedSubviews
+            >
               {trendingStyles.map(renderStyleCard)}
             </ScrollView>
           ) : (
