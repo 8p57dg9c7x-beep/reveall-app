@@ -3,6 +3,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+// Bundle Version: 2.0.1 - Fixed all image URLs
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
