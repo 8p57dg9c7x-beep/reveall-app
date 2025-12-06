@@ -70,6 +70,7 @@ export default function ComingSoonScreen() {
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews
       >
         <View style={styles.header}>
           <MaterialCommunityIcons name="calendar-star" size={32} color={COLORS.primary} />
@@ -91,10 +92,9 @@ export default function ComingSoonScreen() {
                 }
               })}
             >
-              <Image
+              <OptimizedImage
                 source={{ uri: `https://image.tmdb.org/t/p/w342${movie.poster_path}` }}
                 style={styles.poster}
-                resizeMode="cover"
               />
               <View style={styles.cardContent}>
                 <View style={styles.cardHeader}>
