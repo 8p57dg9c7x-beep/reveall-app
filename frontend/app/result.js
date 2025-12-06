@@ -297,10 +297,16 @@ export default function ResultScreen() {
                   <TouchableOpacity
                     key={similarMovie.id}
                     style={styles.similarCard}
-                    onPress={() => router.push({
-                      pathname: '/result',
-                      params: { movieData: JSON.stringify(similarMovie) }
-                    })}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      router.push({
+                        pathname: '/result',
+                        params: { 
+                          movieData: JSON.stringify(similarMovie),
+                          returnPath: returnPath
+                        }
+                      });
+                    }}
                   >
                     <Image
                       source={{ uri: `https://image.tmdb.org/t/p/w200${similarMovie.poster_path}` }}
