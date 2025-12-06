@@ -246,18 +246,18 @@ export default function ResultScreen() {
           )}
 
           {/* Cast Section */}
-          {movie.credits?.cast && movie.credits.cast.length > 0 && (
+          {movie?.credits?.cast && Array.isArray(movie.credits.cast) && movie.credits.cast.length > 0 && (
             <View style={styles.castSection}>
               <Text style={styles.sectionTitle}>Cast</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} removeClippedSubviews>
-                {movie.credits.cast.slice(0, 10).map(actor => (
-                  <View key={actor.id} style={styles.castCard}>
+                {movie.credits.cast.slice(0, 10).map((actor, index) => (
+                  <View key={actor.id || `actor-${index}`} style={styles.castCard}>
                     <CastImage 
                       profilePath={actor.profile_path} 
                       style={styles.castImage} 
                     />
-                    <Text style={styles.castName} numberOfLines={2}>{actor.name}</Text>
-                    <Text style={styles.castCharacter} numberOfLines={2}>{actor.character}</Text>
+                    <Text style={styles.castName} numberOfLines={2}>{actor.name || 'Unknown'}</Text>
+                    <Text style={styles.castCharacter} numberOfLines={2}>{actor.character || 'Character'}</Text>
                   </View>
                 ))}
               </ScrollView>
@@ -265,10 +265,10 @@ export default function ResultScreen() {
           )}
 
           {/* Director Section */}
-          {movie.credits?.crew && (
+          {movie?.credits?.crew && Array.isArray(movie.credits.crew) && (
             (() => {
-              const director = movie.credits.crew.find(person => person.job === 'Director');
-              return director ? (
+              const director = movie.credits.crew.find(person => person?.job === 'Director');
+              return director && director.name ? (
                 <View style={styles.directorSection}>
                   <Text style={styles.directorLabel}>Director</Text>
                   <Text style={styles.directorName}>{director.name}</Text>
