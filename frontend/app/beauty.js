@@ -168,10 +168,12 @@ export default function BeautyScreen() {
           offset: CARD_HEIGHT * Math.floor(index / 2),
           index,
         })}
-        maxToRenderPerBatch={6}
-        windowSize={5}
+        maxToRenderPerBatch={4}
+        windowSize={3}
         removeClippedSubviews={true}
-        initialNumToRender={6}
+        initialNumToRender={4}
+        updateCellsBatchingPeriod={100}
+        legacyImplementation={false}
       />
     </LinearGradient>
   );
