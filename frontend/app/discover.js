@@ -78,6 +78,17 @@ export default function DiscoverScreen() {
         style={styles.trendingImage}
       />
       <Text style={styles.trendingTitle} numberOfLines={2}>{movie.title}</Text>
+      {movie.vote_average > 0 && (
+        <View style={styles.movieRatingRow}>
+          <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
+          <Text style={styles.movieRating}>{movie.vote_average.toFixed(1)}</Text>
+        </View>
+      )}
+      {movie.release_date && (
+        <Text style={styles.movieYear}>
+          {new Date(movie.release_date).getFullYear()}
+        </Text>
+      )}
     </TouchableOpacity>
   ), []);
 
