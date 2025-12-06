@@ -4,8 +4,6 @@ import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
 
 const BeautyCard = memo(({ item, onPress, isLeft }) => {
-  console.log('💄 Rendering BeautyCard:', item.id);
-  
   return (
     <TouchableOpacity
       style={[styles.lookCard, isLeft ? styles.cardLeft : styles.cardRight]}
