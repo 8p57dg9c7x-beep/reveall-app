@@ -50,7 +50,7 @@ export const SkeletonOutfitCard = () => (
 
 export const SkeletonHorizontalCard = () => (
   <View style={styles.horizontalCard}>
-    <SkeletonCard width={140} height={140} style={styles.skeletonHorizontalImage} />
+    <SkeletonCard width={140} height={210} style={styles.skeletonHorizontalImage} />
     <SkeletonCard width={120} height={12} style={styles.skeletonHorizontalTitle} />
   </View>
 );
