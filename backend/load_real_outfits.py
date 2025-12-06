@@ -74,7 +74,7 @@ outfits_data = [
   {
     "title": "Luxury Monochrome Black",
     "category": "luxury",
-    "image": "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b",
+    "image": "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=800&q=80",
     "description": "A sleek luxury-inspired fit with subtle upscale elements.",
     "priceRange": "$300 - $600",
     "gender": "male",
