@@ -307,7 +307,7 @@ export default function ResultScreen() {
                       router.push({
                         pathname: '/result',
                         params: { 
-                          movieData: JSON.stringify(similarMovie),
+                          movieId: similarMovie.id.toString(),
                           returnPath: returnPath
                         }
                       });
