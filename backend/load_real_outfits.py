@@ -128,7 +128,7 @@ outfits_data = [
   {
     "title": "Classic Retro Street Fit",
     "category": "streetwear",
-    "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
+    "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
     "description": "90s-inspired denim streetwear with clean sneakers.",
     "priceRange": "$130 - $220",
     "gender": "female",
