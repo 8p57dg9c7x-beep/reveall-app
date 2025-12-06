@@ -28,6 +28,8 @@ export default function DiscoverScreen() {
   }, []);
 
   const loadDiscoverData = async () => {
+    setLoadingMovies(true);
+    setLoadingStyles(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
       
@@ -35,13 +37,17 @@ export default function DiscoverScreen() {
       const moviesRes = await fetch(`${API_URL}/api/discover/trending`);
       const moviesData = await moviesRes.json();
       setTrendingMovies(moviesData.results?.slice(0, 10) || []);
+      setLoadingMovies(false);
 
       // Load trending styles (from all categories)
       const stylesRes = await fetch(`${API_URL}/api/outfits/trending`);
       const stylesData = await stylesRes.json();
       setTrendingStyles(stylesData.outfits || []);
+      setLoadingStyles(false);
     } catch (error) {
       console.error('Error loading discover data:', error);
+      setLoadingMovies(false);
+      setLoadingStyles(false);
     } finally {
       setLoading(false);
     }
