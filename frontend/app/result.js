@@ -182,6 +182,13 @@ export default function ResultScreen() {
         colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
         style={styles.container}
       >
+        {/* Loading Indicator */}
+        {loadingDetails && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          </View>
+        )}
+
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.push(returnPath)}>
             <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
