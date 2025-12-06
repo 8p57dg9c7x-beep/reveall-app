@@ -26,7 +26,7 @@ export default function DiscoverScreen() {
 
   const loadDiscoverData = async () => {
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
       
       // Load trending movies
       const moviesRes = await fetch(`${API_URL}/api/discover/trending`);

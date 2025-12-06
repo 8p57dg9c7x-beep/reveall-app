@@ -38,7 +38,7 @@ export default function StyleScreen() {
   const loadOutfits = async () => {
     setLoading(true);
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/outfits/${selectedCategory}`);
       const data = await response.json();
       setOutfits(data.outfits || []);
@@ -52,7 +52,7 @@ export default function StyleScreen() {
 
   const loadCelebrityOutfits = async () => {
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/outfits/celebrity`);
       const data = await response.json();
       setCelebrityOutfits(data.outfits || []);

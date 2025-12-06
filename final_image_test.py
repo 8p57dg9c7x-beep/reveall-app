@@ -125,7 +125,7 @@ def test_comprehensive_image_recognition():
             files = {'file': (img['name'], img_response.content, 'image/jpeg')}
             
             response = requests.post(
-                "https://reveal-app.preview.emergentagent.com/api/recognize-image",
+                "https://reveal-mvp.preview.emergentagent.com/api/recognize-image",
                 files=files,
                 timeout=30  # Longer timeout for image processing
             )

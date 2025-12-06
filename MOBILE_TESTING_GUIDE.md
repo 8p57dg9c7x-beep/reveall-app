@@ -4,7 +4,7 @@
 
 ### Option 1: Web Preview (Instant)
 Access the app directly in your browser:
-- **URL**: https://reveal-app.preview.emergentagent.com
+- **URL**: https://reveal-mvp.preview.emergentagent.com
 - Works on desktop and mobile browsers
 - No installation required
 
@@ -174,10 +174,10 @@ tail -100 /var/log/supervisor/expo.out.log | grep -A 10 "Tunnel ready"
 
 ## 🔗 Useful Links
 
-- **Web Preview**: https://reveal-app.preview.emergentagent.com
-- **Home Screen**: https://reveal-app.preview.emergentagent.com/
-- **Identify Screen**: https://reveal-app.preview.emergentagent.com/identify
-- **Watchlist Screen**: https://reveal-app.preview.emergentagent.com/watchlist
+- **Web Preview**: https://reveal-mvp.preview.emergentagent.com
+- **Home Screen**: https://reveal-mvp.preview.emergentagent.com/
+- **Identify Screen**: https://reveal-mvp.preview.emergentagent.com/identify
+- **Watchlist Screen**: https://reveal-mvp.preview.emergentagent.com/watchlist
 
 ## 📝 Testing Notes
 
