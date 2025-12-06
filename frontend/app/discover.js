@@ -144,17 +144,17 @@ export default function DiscoverScreen() {
     }
   }, []);
 
-  const renderSongCard = (song) => (
+  const renderSongCard = useCallback((song) => (
     <TouchableOpacity 
       key={song.id} 
       style={styles.trendingCard}
       onPress={() => handleSongTap(song)}
     >
-      <Image source={{ uri: song.image }} style={styles.trendingImage} />
+      <OptimizedImage source={{ uri: song.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{song.title}</Text>
       <Text style={styles.trendingSubtitle} numberOfLines={1}>{song.artist}</Text>
     </TouchableOpacity>
-  );
+  ), [handleSongTap]);
 
   const renderStyleCard = (style) => (
     <TouchableOpacity
