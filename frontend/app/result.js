@@ -21,29 +21,28 @@ export default function ResultScreen() {
   const [similarMovies, setSimilarMovies] = useState([]);
   const [movieDetails, setMovieDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const initialMovie = params.movieData ? JSON.parse(params.movieData) : null;
-  const song = params.songData ? JSON.parse(params.songData) : null;
-  const returnPath = params.returnPath || '/discover'; // Default return path
   
-  // Use detailed movie data if available, otherwise use initial data
-  const movie = movieDetails || initialMovie;
+  // Get movieId from params or from legacy movieData
+  const movieId = params.movieId || (params.movieData ? JSON.parse(params.movieData).id : null);
+  const song = params.songData ? JSON.parse(params.songData) : null;
+  const returnPath = params.returnPath || '/discover';
+  
+  const movie = movieDetails;
 
   useEffect(() => {
-    if (initialMovie) {
-      checkWatchlist();
+    if (movieId) {
       loadMovieDetails();
       loadSimilarMovies();
+      checkWatchlist();
     }
-  }, []);
+  }, [movieId]);
 
   const loadMovieDetails = async () => {
-    if (!initialMovie?.id) return;
+    if (!movieId) return;
     setLoadingDetails(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
-      const response = await fetch(`${API_URL}/api/movie/${initialMovie.id}`, {
-        timeout: 5000 // 5 second timeout
-      });
+      const response = await fetch(`${API_URL}/api/movie/${movieId}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch movie details');
@@ -53,8 +52,6 @@ export default function ResultScreen() {
       setMovieDetails(data);
     } catch (error) {
       console.error('Error loading movie details:', error);
-      // Keep using initial movie data if fetch fails
-      setMovieDetails(initialMovie); // Use initial data as fallback
     } finally {
       setLoadingDetails(false);
     }
