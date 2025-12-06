@@ -146,7 +146,7 @@ outfits_data = [
   {
     "title": "Luxury Business Casual",
     "category": "luxury",
-    "image": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91",
+    "image": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&q=80",
     "description": "A refined, upscale business casual outfit.",
     "priceRange": "$280 - $550",
     "gender": "male",
