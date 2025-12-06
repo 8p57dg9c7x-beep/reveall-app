@@ -32,9 +32,15 @@ export default function ResultScreen() {
 
   useEffect(() => {
     if (movieId) {
-      loadMovieDetails();
-      loadSimilarMovies();
-      checkWatchlist();
+      // Load all data in parallel but wait for movie details before checking watchlist
+      const loadAllData = async () => {
+        await loadMovieDetails();
+        await Promise.all([
+          loadSimilarMovies(),
+          checkWatchlist()
+        ]);
+      };
+      loadAllData();
     }
   }, [movieId]);
 
