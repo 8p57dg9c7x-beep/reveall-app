@@ -38,7 +38,7 @@ outfits_data = [
   {
     "title": "Urban Black Techwear",
     "category": "streetwear",
-    "image": "https://images.unsplash.com/photo-1516826957135-700dedea698c",
+    "image": "https://images.unsplash.com/photo-1516826957135-700dedea698c?w=800&q=80",
     "description": "All-black techwear with futuristic lines and utility details.",
     "priceRange": "$180 - $300",
     "gender": "male",
