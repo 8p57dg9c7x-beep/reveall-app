@@ -141,6 +141,8 @@ export default function StyleScreen() {
             onPress={() => handleOutfitPress(item)}
           />
         ))}
+        {/* Add spacer if only one item in row */}
+        {row.items.length === 1 && <View style={styles.cardSpacer} />}
       </View>
     );
   }, [handleOutfitPress]);
