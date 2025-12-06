@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, router } from 'expo-router';
