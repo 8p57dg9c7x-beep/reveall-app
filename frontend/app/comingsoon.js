@@ -93,7 +93,7 @@ export default function ComingSoonScreen() {
               })}
             >
               <OptimizedImage
-                source={{ uri: `https://image.tmdb.org/t/p/w342${movie.poster_path}` }}
+                source={{ uri: `https://image.tmdb.org/t/p/w185${movie.poster_path}` }}
                 style={styles.poster}
               />
               <View style={styles.cardContent}>
