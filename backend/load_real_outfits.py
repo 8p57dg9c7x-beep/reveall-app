@@ -56,7 +56,7 @@ outfits_data = [
   {
     "title": "Soft Girl Pastel Fit",
     "category": "minimal",
-    "image": "https://images.unsplash.com/photo-1520256862855-398228c41684",
+    "image": "https://images.unsplash.com/photo-1520256862855-398228c41684?w=800&q=80",
     "description": "A light pastel outfit with soft edges and a dreamy aesthetic.",
     "priceRange": "$80 - $150",
     "gender": "female",
