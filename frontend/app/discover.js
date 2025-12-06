@@ -142,7 +142,7 @@ export default function DiscoverScreen() {
         }
       });
     }
-  };
+  }, []);
 
   const renderSongCard = (song) => (
     <TouchableOpacity 
