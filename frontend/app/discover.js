@@ -68,7 +68,7 @@ export default function DiscoverScreen() {
       onPress={() => router.push({
         pathname: '/result',
         params: { 
-          movieData: JSON.stringify(movie),
+          movieId: movie.id.toString(),
           returnPath: '/discover'
         }
       })}
