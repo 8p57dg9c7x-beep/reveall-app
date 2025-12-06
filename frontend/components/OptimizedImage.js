@@ -1,55 +1,21 @@
-import React, { memo, useState } from 'react';
-import FastImage from 'react-native-fast-image';
-import { Image, View, StyleSheet, Platform } from 'react-native';
+import React, { memo } from 'react';
+import { Image } from 'expo-image';
+import { View, StyleSheet, Text } from 'react-native';
+import { COLORS } from '../constants/theme';
 
 const OptimizedImage = memo(({ source, style, ...props }) => {
-  const [fastImageFailed, setFastImageFailed] = useState(false);
-
   if (!source?.uri) {
-    console.log('❌ OptimizedImage: No URI provided');
     return <View style={[style, styles.placeholder]} />;
-  }
-
-  // Validate URL
-  if (!source.uri.startsWith('http://') && !source.uri.startsWith('https://')) {
-    console.log('❌ OptimizedImage: Invalid URL format:', source.uri);
-    return <View style={[style, styles.placeholder]} />;
-  }
-
-  // Use regular Image on web, FastImage on native
-  if (Platform.OS === 'web' || fastImageFailed) {
-    return (
-      <Image
-        source={source}
-        style={style}
-        resizeMode="cover"
-        onError={(e) => {
-          console.log('❌ Image load failed:', source.uri);
-        }}
-        onLoad={() => {
-          console.log('✅ Image loaded successfully:', source.uri);
-        }}
-        {...props}
-      />
-    );
   }
 
   return (
-    <FastImage
-      source={{
-        uri: source.uri,
-        priority: FastImage.priority.normal,
-        cache: FastImage.cacheControl.immutable,
-      }}
+    <Image
+      source={source}
       style={style}
-      resizeMode={FastImage.resizeMode.cover}
-      onError={(e) => {
-        console.log('❌ FastImage failed, falling back to Image:', source.uri);
-        setFastImageFailed(true);
-      }}
-      onLoad={() => {
-        console.log('✅ FastImage loaded:', source.uri);
-      }}
+      contentFit="cover"
+      transition={200}
+      cachePolicy="memory-disk"
+      placeholder={{ blurhash: 'LGF5]+Yk^6#M@-5c,1J5@[or[Q6.' }}
       {...props}
     />
   );
