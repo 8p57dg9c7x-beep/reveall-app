@@ -14,6 +14,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
+import CastImage from '../components/CastImage';
 
 export default function ResultScreen() {
   const params = useLocalSearchParams();
