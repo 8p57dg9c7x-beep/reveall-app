@@ -194,7 +194,7 @@ export default function DiscoverScreen() {
     }
   }, []);
 
-  const renderExploreCard = (category) => (
+  const renderExploreCard = useCallback((category) => (
     <TouchableOpacity
       key={category.id}
       style={styles.exploreCard}
