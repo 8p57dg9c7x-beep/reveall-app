@@ -68,6 +68,10 @@ export default function StyleScreen() {
 
   const handleCategoryPress = useCallback((categoryId) => {
     setSelectedCategory(categoryId);
+    // Reset scroll position to top when switching categories
+    setTimeout(() => {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }, 100);
   }, []);
 
   const handleOutfitPress = useCallback((item) => {
