@@ -336,21 +336,20 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     paddingVertical: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: COLORS.textSecondary,
-    fontSize: 16,
-    marginTop: 16,
-  },
-  outfitsContainer: {
     paddingHorizontal: 16,
   },
-  row: {
+  skeletonGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 16,
+  },
+  flashListContainer: {
+    flex: 1,
+    minHeight: 400,
+    paddingHorizontal: 16,
+  },
+  flashListContent: {
+    paddingBottom: 20,
   },
   outfitCard: {
     flex: 0.48,
