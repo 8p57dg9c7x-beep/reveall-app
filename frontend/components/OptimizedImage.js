@@ -1,25 +1,23 @@
-import React, { useState, memo } from 'react';
-import { Image, View, StyleSheet } from 'react-native';
-import { COLORS } from '../constants/theme';
+import React, { memo } from 'react';
+import FastImage from 'react-native-fast-image';
+import { View, StyleSheet } from 'react-native';
 
 const OptimizedImage = memo(({ source, style, ...props }) => {
-  const [hasError, setHasError] = useState(false);
-
-  // Show placeholder if error
-  if (hasError || !source?.uri) {
-    return (
-      <View style={[style, styles.placeholder]} />
-    );
+  if (!source?.uri) {
+    return <View style={[style, styles.placeholder]} />;
   }
 
   return (
-    <Image
-      source={source}
+    <FastImage
+      source={{
+        uri: source.uri,
+        priority: FastImage.priority.normal,
+      }}
       style={style}
-      resizeMode="cover"
+      resizeMode={FastImage.resizeMode.cover}
+      defaultSource={require('../assets/placeholder.png')}
       onError={(e) => {
-        console.log('Image load error:', source?.uri);
-        setHasError(true);
+        console.log('FastImage error:', source?.uri);
       }}
       {...props}
     />
