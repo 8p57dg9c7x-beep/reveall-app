@@ -154,20 +154,15 @@ export default function StyleScreen() {
               style={styles.celebrityScroll}
               contentContainerStyle={styles.celebrityScrollContent}
               nestedScrollEnabled
+              removeClippedSubviews
             >
               {celebrityOutfits.map((outfit) => (
                 <TouchableOpacity
                   key={outfit.id}
                   style={styles.celebrityCard}
-                  onPress={() => router.push({
-                    pathname: '/outfitdetail',
-                    params: { 
-                      outfitData: JSON.stringify(outfit),
-                      returnPath: '/style'
-                    }
-                  })}
+                  onPress={() => handleCelebrityPress(outfit)}
                 >
-                  <Image source={{ uri: outfit.image }} style={styles.celebrityImage} />
+                  <OptimizedImage source={{ uri: outfit.image }} style={styles.celebrityImage} />
                   <View style={styles.celebrityInfo}>
                     <Text style={styles.celebrityName}>{outfit.celebrity}</Text>
                     <Text style={styles.celebrityTitle} numberOfLines={1}>{outfit.title}</Text>
