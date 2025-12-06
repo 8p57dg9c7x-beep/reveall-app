@@ -62,13 +62,37 @@ export default function StyleScreen() {
     }
   }, []);
 
-  const renderCategoryButton = ({ item }) => (
+  const handleCategoryPress = useCallback((categoryId) => {
+    setSelectedCategory(categoryId);
+  }, []);
+
+  const handleOutfitPress = useCallback((item) => {
+    router.push({
+      pathname: '/outfitdetail',
+      params: { 
+        outfitData: JSON.stringify(item),
+        returnPath: '/style'
+      }
+    });
+  }, []);
+
+  const handleCelebrityPress = useCallback((outfit) => {
+    router.push({
+      pathname: '/outfitdetail',
+      params: { 
+        outfitData: JSON.stringify(outfit),
+        returnPath: '/style'
+      }
+    });
+  }, []);
+
+  const renderCategoryButton = useCallback(({ item }) => (
     <TouchableOpacity
       style={[
         styles.categoryButton,
         selectedCategory === item.id && styles.categoryButtonActive,
       ]}
-      onPress={() => setSelectedCategory(item.id)}
+      onPress={() => handleCategoryPress(item.id)}
     >
       <MaterialCommunityIcons
         name={item.icon}
@@ -84,27 +108,21 @@ export default function StyleScreen() {
         {item.name}
       </Text>
     </TouchableOpacity>
-  );
+  ), [selectedCategory, handleCategoryPress]);
 
-  const renderOutfitCard = ({ item }) => (
+  const renderOutfitCard = useCallback(({ item }) => (
     <TouchableOpacity
       style={styles.outfitCard}
       activeOpacity={0.7}
-      onPress={() => router.push({
-        pathname: '/outfitdetail',
-        params: { 
-          outfitData: JSON.stringify(item),
-          returnPath: '/style'
-        }
-      })}
+      onPress={() => handleOutfitPress(item)}
     >
-      <Image source={{ uri: item.image }} style={styles.outfitImage} />
+      <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
       <View style={styles.outfitInfo}>
         <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
         <Text style={styles.outfitPrice}>{item.priceRange || 'View Details'}</Text>
       </View>
     </TouchableOpacity>
-  );
+  ), [handleOutfitPress]);
 
   return (
     <LinearGradient
