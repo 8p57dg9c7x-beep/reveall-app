@@ -205,7 +205,7 @@ export default function DiscoverScreen() {
       <Text style={styles.exploreTitle}>{category.title}</Text>
       <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
     </TouchableOpacity>
-  );
+  ), [handleExplorePress]);
 
   return (
     <LinearGradient
