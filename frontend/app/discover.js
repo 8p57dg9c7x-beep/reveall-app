@@ -212,7 +212,12 @@ export default function DiscoverScreen() {
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={styles.container}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        removeClippedSubviews
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <MaterialCommunityIcons name="compass" size={32} color={COLORS.primary} />
           <Text style={styles.headerTitle}>Discover</Text>
