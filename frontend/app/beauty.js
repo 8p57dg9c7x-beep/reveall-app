@@ -89,18 +89,11 @@ export default function BeautyScreen() {
   const renderLookCard = useCallback(({ item, index }) => {
     const isLeft = index % 2 === 0;
     return (
-      <TouchableOpacity
-        style={[styles.lookCard, isLeft ? styles.cardLeft : styles.cardRight]}
-        activeOpacity={0.7}
+      <BeautyCard
+        item={item}
+        isLeft={isLeft}
         onPress={() => handleLookPress(item)}
-      >
-        <OptimizedImage source={{ uri: item.image }} style={styles.lookImage} />
-        <View style={styles.lookInfo}>
-          <Text style={styles.lookTitle} numberOfLines={2}>{item.title}</Text>
-          <Text style={styles.celebrity} numberOfLines={1}>{item.celebrity}</Text>
-          <Text style={styles.priceRange}>{item.priceRange || 'View Details'}</Text>
-        </View>
-      </TouchableOpacity>
+      />
     );
   }, [handleLookPress]);
 
