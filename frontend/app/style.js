@@ -241,6 +241,7 @@ export default function StyleScreen() {
       style={[styles.container, { pointerEvents: 'box-none' }]}
     >
       <FlatList
+        ref={flatListRef}
         data={groupedOutfits}
         renderItem={renderOutfitRow}
         keyExtractor={(item) => item.id}
