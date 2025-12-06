@@ -54,11 +54,11 @@ export default function DiscoverScreen() {
   };
 
   const TRENDING_SONGS = [
-    { id: 1, title: 'SOAK CITY', artist: '310babii', image: 'https://i.scdn.co/image/ab67616d0000b2738b5e3c8b6d8e6e7b9c5f8e0a' },
-    { id: 2, title: 'Die With A Smile', artist: 'Lady Gaga, Bruno Mars', image: 'https://i.scdn.co/image/ab67616d0000b273c015d2f73b144e0e0c4e7b9f' },
-    { id: 3, title: 'Beautiful Things', artist: 'Benson Boone', image: 'https://i.scdn.co/image/ab67616d0000b273ef2d4ed7e8e8e3c8d9f0f8a3' },
-    { id: 4, title: 'Too Sweet', artist: 'Hozier', image: 'https://i.scdn.co/image/ab67616d0000b273b8c8e8e7f9c5d8e0e0c4e7b9' },
-    { id: 5, title: 'Espresso', artist: 'Sabrina Carpenter', image: 'https://i.scdn.co/image/ab67616d0000b273c5d8e0e0c4e7b9f8e8e7f9c5' },
+    { id: 1, title: 'SOAK CITY', artist: '310babii', image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80' },
+    { id: 2, title: 'Die With A Smile', artist: 'Lady Gaga, Bruno Mars', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80' },
+    { id: 3, title: 'Beautiful Things', artist: 'Benson Boone', image: 'https://images.unsplash.com/photo-1445985543470-41fba5c3144a?w=400&q=80' },
+    { id: 4, title: 'Too Sweet', artist: 'Hozier', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80' },
+    { id: 5, title: 'Espresso', artist: 'Sabrina Carpenter', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80' },
   ];
 
   const EXPLORE_CATEGORIES = [
