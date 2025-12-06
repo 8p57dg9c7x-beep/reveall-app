@@ -93,6 +93,7 @@ export default function BeautyScreen() {
     <LinearGradient
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={styles.container}
+      pointerEvents="box-none"
     >
       <ScrollView 
         style={styles.scrollView}
