@@ -204,6 +204,44 @@ export default function ResultScreen() {
             </View>
           )}
 
+          {/* Cast Section */}
+          {movie.credits?.cast && movie.credits.cast.length > 0 && (
+            <View style={styles.castSection}>
+              <Text style={styles.sectionTitle}>Cast</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {movie.credits.cast.slice(0, 10).map(actor => (
+                  <View key={actor.id} style={styles.castCard}>
+                    {actor.profile_path ? (
+                      <Image
+                        source={{ uri: `https://image.tmdb.org/t/p/w185${actor.profile_path}` }}
+                        style={styles.castImage}
+                      />
+                    ) : (
+                      <View style={[styles.castImage, styles.castImagePlaceholder]}>
+                        <MaterialCommunityIcons name="account" size={40} color={COLORS.textSecondary} />
+                      </View>
+                    )}
+                    <Text style={styles.castName} numberOfLines={2}>{actor.name}</Text>
+                    <Text style={styles.castCharacter} numberOfLines={2}>{actor.character}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* Director Section */}
+          {movie.credits?.crew && (
+            (() => {
+              const director = movie.credits.crew.find(person => person.job === 'Director');
+              return director ? (
+                <View style={styles.directorSection}>
+                  <Text style={styles.directorLabel}>Director</Text>
+                  <Text style={styles.directorName}>{director.name}</Text>
+                </View>
+              ) : null;
+            })()
+          )}
+
           {movie['watch/providers']?.results?.US && (
             <View style={styles.watchSection}>
               <Text style={styles.sectionTitle}>Where to Watch</Text>
