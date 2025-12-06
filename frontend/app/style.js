@@ -383,6 +383,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
+  skeletonContainer: {
+    paddingHorizontal: 16,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
   emptyState: {
     paddingVertical: 60,
     paddingHorizontal: 40,
