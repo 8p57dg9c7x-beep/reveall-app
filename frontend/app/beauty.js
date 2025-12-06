@@ -181,6 +181,7 @@ export default function BeautyScreen() {
       style={[styles.container, { pointerEvents: 'box-none' }]}
     >
       <FlatList
+        ref={flatListRef}
         data={groupedLooks}
         renderItem={renderLookRow}
         keyExtractor={(item) => item.id}
