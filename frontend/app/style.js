@@ -224,11 +224,11 @@ export default function StyleScreen() {
             index,
           };
         }}
-        maxToRenderPerBatch={2}
-        windowSize={2}
-        removeClippedSubviews={true}
-        initialNumToRender={2}
-        updateCellsBatchingPeriod={50}
+        maxToRenderPerBatch={4}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS !== 'web'}
+        initialNumToRender={6}
+        updateCellsBatchingPeriod={100}
         legacyImplementation={false}
         scrollEventThrottle={16}
       />
