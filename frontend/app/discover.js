@@ -59,7 +59,9 @@ export default function DiscoverScreen() {
     { id: 'genres', title: 'Movie Genres', icon: 'movie', color: '#95E1D3' },
   ];
 
-  const renderMovieCard = (movie) => (
+  const [loadingSongId, setLoadingSongId] = useState(null);
+
+  const renderMovieCard = useCallback((movie) => (
     <TouchableOpacity
       key={movie.id}
       style={styles.trendingCard}
@@ -71,17 +73,15 @@ export default function DiscoverScreen() {
         }
       })}
     >
-      <Image
+      <OptimizedImage
         source={{ uri: `https://image.tmdb.org/t/p/w300${movie.poster_path}` }}
         style={styles.trendingImage}
       />
       <Text style={styles.trendingTitle} numberOfLines={2}>{movie.title}</Text>
     </TouchableOpacity>
-  );
+  ), []);
 
-  const [loadingSongId, setLoadingSongId] = useState(null);
-
-  const handleSongTap = async (song) => {
+  const handleSongTap = useCallback(async (song) => {
     try {
       setLoadingSongId(song.id);
       
