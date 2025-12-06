@@ -65,8 +65,11 @@ export default function SearchScreen() {
   const pickImage = async () => {
     try {
       console.log('📸 Requesting media library permissions...');
+      Alert.alert('Debug', 'Step 1: Requesting permissions...');
+      
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       console.log('📸 Permission status:', status);
+      Alert.alert('Debug', `Step 2: Permission status: ${status}`);
       
       if (status !== 'granted') {
         Alert.alert('Permission Required', 'Please enable photo library access');
@@ -74,6 +77,8 @@ export default function SearchScreen() {
       }
 
       console.log('📸 Launching image picker...');
+      Alert.alert('Debug', 'Step 3: Opening image picker...');
+      
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -81,26 +86,30 @@ export default function SearchScreen() {
       });
 
       console.log('📸 Picker result:', JSON.stringify(result, null, 2));
+      Alert.alert('Debug', `Step 4: Picker returned. Canceled: ${result.canceled}, Has assets: ${result.assets ? result.assets.length : 0}`);
       
       // Check if user canceled
       if (result.canceled) {
         console.log('📸 User canceled image selection');
+        Alert.alert('Info', 'You canceled image selection');
         return;
       }
       
       // Check if assets exist
       if (!result.assets || result.assets.length === 0) {
         console.log('❌ No assets in picker result');
-        Alert.alert('Error', 'No image was selected. Please try again.');
+        Alert.alert('Error', 'No image was selected. Picker returned empty. This may be an environment issue.');
         return;
       }
       
       // Check if first asset has URI
       if (!result.assets[0].uri) {
         console.log('❌ No URI in asset:', result.assets[0]);
-        Alert.alert('Error', 'Invalid image selected. Please try another image.');
+        Alert.alert('Error', `Invalid image selected. Asset has no URI. Keys: ${Object.keys(result.assets[0]).join(', ')}`);
         return;
       }
+
+      Alert.alert('Debug', `Step 5: Image URI found! Starting recognition...`);
 
       if (!result.canceled && result.assets[0]) {
         setIsProcessing(true);
