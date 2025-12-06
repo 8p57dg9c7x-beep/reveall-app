@@ -282,6 +282,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
   },
+  cardSpacer: {
+    width: '48%',
+    marginLeft: 8,
+  },
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
