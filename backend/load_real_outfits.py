@@ -20,7 +20,7 @@ outfits_data = [
   {
     "title": "Minimal Beige Streetwear",
     "category": "streetwear",
-    "image": "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c",
+    "image": "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&q=80",
     "description": "Clean neutral streetwear look with layered textures.",
     "priceRange": "$150 - $280",
     "gender": "female",
