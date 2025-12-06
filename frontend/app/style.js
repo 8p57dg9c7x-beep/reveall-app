@@ -351,38 +351,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  outfitCard: {
-    width: '48%',
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
-    height: CARD_HEIGHT,
-  },
-  cardLeft: {
-    marginRight: 8,
-  },
-  cardRight: {
-    marginLeft: 8,
-  },
-  outfitImage: {
-    width: '100%',
-    height: 240,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  outfitInfo: {
-    padding: 12,
-  },
-  outfitTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  outfitPrice: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-  },
   emptyState: {
     paddingVertical: 60,
     paddingHorizontal: 40,
