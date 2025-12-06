@@ -53,6 +53,7 @@ export default function DiscoverScreen() {
     }
   };
 
+  // Updated with working Unsplash placeholder images - v2.1
   const TRENDING_SONGS = [
     { id: 1, title: 'SOAK CITY', artist: '310babii', image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80' },
     { id: 2, title: 'Die With A Smile', artist: 'Lady Gaga, Bruno Mars', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80' },
@@ -60,6 +61,7 @@ export default function DiscoverScreen() {
     { id: 4, title: 'Too Sweet', artist: 'Hozier', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80' },
     { id: 5, title: 'Espresso', artist: 'Sabrina Carpenter', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80' },
   ];
+  console.log('🎵 Discover Songs loaded with Unsplash URLs');
 
   const EXPLORE_CATEGORIES = [
     { id: 'styles', title: 'Discover New Styles', icon: 'hanger', color: COLORS.accent },
