@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
-import { Image } from 'expo-image';
-import { View, StyleSheet, Text } from 'react-native';
+import { Image, View, StyleSheet, Platform } from 'react-native';
 import { COLORS } from '../constants/theme';
 
 const OptimizedImage = memo(({ source, style, ...props }) => {
@@ -12,10 +11,7 @@ const OptimizedImage = memo(({ source, style, ...props }) => {
     <Image
       source={source}
       style={style}
-      contentFit="cover"
-      transition={200}
-      cachePolicy="memory-disk"
-      placeholder={{ blurhash: 'LGF5]+Yk^6#M@-5c,1J5@[or[Q6.' }}
+      resizeMode="cover"
       {...props}
     />
   );
