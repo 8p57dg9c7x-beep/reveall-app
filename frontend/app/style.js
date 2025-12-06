@@ -205,6 +205,19 @@ export default function StyleScreen() {
     </View>
   ), [selectedCategory]);
 
+  const renderSkeletonRows = useCallback(() => {
+    return (
+      <View style={styles.skeletonContainer}>
+        {[1, 2, 3, 4].map((row) => (
+          <View key={row} style={styles.skeletonRow}>
+            <SkeletonOutfitCard />
+            <SkeletonOutfitCard />
+          </View>
+        ))}
+      </View>
+    );
+  }, []);
+
   const renderFooter = useCallback(() => {
     if (!loading) return null;
     return (
