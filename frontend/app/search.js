@@ -242,28 +242,8 @@ export default function SearchScreen() {
             )}
           </View>
 
-          {/* Image Upload Options */}
-          <View style={styles.uploadSection}>
-            <Text style={styles.orText}>Or identify by poster:</Text>
-            <View style={styles.uploadButtons}>
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={takePhoto}
-                disabled={isProcessing}
-              >
-                <MaterialCommunityIcons name="camera" size={32} color={COLORS.textPrimary} />
-                <Text style={styles.uploadText}>Camera</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={pickImage}
-                disabled={isProcessing}
-              >
-                <MaterialCommunityIcons name="image-multiple" size={32} color={COLORS.textPrimary} />
-                <Text style={styles.uploadText}>Gallery</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          {/* Image Upload Options - Temporarily Disabled for MVP */}
+          {/* Will re-enable after core features are stable */}
         </View>
 
         <ScrollView 
