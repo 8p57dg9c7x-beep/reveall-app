@@ -224,12 +224,13 @@ export default function StyleScreen() {
             index,
           };
         }}
-        maxToRenderPerBatch={4}
-        windowSize={3}
+        maxToRenderPerBatch={2}
+        windowSize={2}
         removeClippedSubviews={true}
-        initialNumToRender={4}
-        updateCellsBatchingPeriod={100}
+        initialNumToRender={2}
+        updateCellsBatchingPeriod={50}
         legacyImplementation={false}
+        scrollEventThrottle={16}
       />
     </LinearGradient>
   );
