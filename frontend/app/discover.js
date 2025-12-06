@@ -156,7 +156,7 @@ export default function DiscoverScreen() {
     </TouchableOpacity>
   ), [handleSongTap]);
 
-  const renderStyleCard = (style) => (
+  const renderStyleCard = useCallback((style) => (
     <TouchableOpacity
       key={style.id}
       style={styles.trendingCard}
@@ -165,10 +165,10 @@ export default function DiscoverScreen() {
         params: { outfitData: JSON.stringify(style) }
       })}
     >
-      <Image source={{ uri: style.image }} style={styles.trendingImage} />
+      <OptimizedImage source={{ uri: style.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{style.title}</Text>
     </TouchableOpacity>
-  );
+  ), []);
 
   const handleExplorePress = (categoryId) => {
     console.log('Explore card pressed:', categoryId);
