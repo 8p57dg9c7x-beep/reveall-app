@@ -10,7 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
-import OptimizedImage from '../components/OptimizedImage';
+import BeautyCard from '../components/BeautyCard';
 import { SkeletonOutfitCard } from '../components/SkeletonLoader';
 
 const CATEGORIES = [
