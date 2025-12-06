@@ -164,7 +164,7 @@ outfits_data = [
   {
     "title": "Minimal All-White Summer Fit",
     "category": "minimal",
-    "image": "https://images.unsplash.com/photo-1521572163474-dfce991d38e1",
+    "image": "https://images.unsplash.com/photo-1521572163474-dfce991d38e1?w=800&q=80",
     "description": "A bright, fresh minimalist outfit for warm days.",
     "priceRange": "$70 - $140",
     "gender": "female",
