@@ -223,28 +223,23 @@ export default function StyleScreen() {
       style={[styles.container, { pointerEvents: 'box-none' }]}
     >
       <FlatList
-        data={outfits}
-        renderItem={renderOutfitCard}
+        data={groupedOutfits}
+        renderItem={renderOutfitRow}
         keyExtractor={(item) => item.id}
-        numColumns={2}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={!loading ? renderEmptyComponent : null}
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.flatListContent}
-        columnWrapperStyle={styles.columnWrapper}
-        getItemLayout={(data, index) => {
-          const row = Math.floor(index / 2);
-          return {
-            length: CARD_HEIGHT,
-            offset: CARD_HEIGHT * row + (16 * row),
-            index,
-          };
-        }}
-        maxToRenderPerBatch={4}
-        windowSize={5}
+        getItemLayout={(data, index) => ({
+          length: CARD_HEIGHT + 16,
+          offset: (CARD_HEIGHT + 16) * index,
+          index,
+        })}
+        maxToRenderPerBatch={3}
+        windowSize={4}
         removeClippedSubviews={Platform.OS !== 'web'}
-        initialNumToRender={6}
+        initialNumToRender={4}
         updateCellsBatchingPeriod={100}
         legacyImplementation={false}
         scrollEventThrottle={16}
