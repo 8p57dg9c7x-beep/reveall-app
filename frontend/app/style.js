@@ -134,6 +134,7 @@ export default function StyleScreen() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        removeClippedSubviews
       >
         <View style={styles.header}>
           <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
