@@ -72,13 +72,18 @@ export default function BeautyScreen() {
   const renderLookCard = ({ item }) => (
     <TouchableOpacity
       style={styles.lookCard}
-      onPress={() => router.push({
-        pathname: '/beautydetail',
-        params: { 
-          lookData: JSON.stringify(item),
-          returnPath: '/beauty'
-        }
-      })}
+      activeOpacity={0.7}
+      onPress={() => {
+        Alert.alert('Debug', `Beauty card tapped: ${item.title}`);
+        console.log('Beauty look tapped:', item.title);
+        router.push({
+          pathname: '/beautydetail',
+          params: { 
+            lookData: JSON.stringify(item),
+            returnPath: '/beauty'
+          }
+        });
+      }}
     >
       <Image source={{ uri: item.image }} style={styles.lookImage} />
       <View style={styles.lookInfo}>
