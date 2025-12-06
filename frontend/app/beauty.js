@@ -156,11 +156,14 @@ export default function BeautyScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.flatListContent}
         columnWrapperStyle={styles.columnWrapper}
-        getItemLayout={(data, index) => ({
-          length: CARD_HEIGHT,
-          offset: CARD_HEIGHT * Math.floor(index / 2),
-          index,
-        })}
+        getItemLayout={(data, index) => {
+          const row = Math.floor(index / 2);
+          return {
+            length: CARD_HEIGHT,
+            offset: CARD_HEIGHT * row + (16 * row),
+            index,
+          };
+        }}
         maxToRenderPerBatch={4}
         windowSize={3}
         removeClippedSubviews={true}
