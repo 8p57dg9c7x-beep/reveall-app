@@ -36,7 +36,7 @@ export default function StyleScreen() {
     loadCelebrityOutfits();
   }, [selectedCategory]);
 
-  const loadOutfits = async () => {
+  const loadOutfits = useCallback(async () => {
     setLoading(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
@@ -49,9 +49,9 @@ export default function StyleScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
 
-  const loadCelebrityOutfits = async () => {
+  const loadCelebrityOutfits = useCallback(async () => {
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/outfits/celebrity`);
@@ -60,7 +60,7 @@ export default function StyleScreen() {
     } catch (error) {
       console.error('Error loading celebrity outfits:', error);
     }
-  };
+  }, []);
 
   const renderCategoryButton = ({ item }) => (
     <TouchableOpacity
