@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   outfitCard: {
-    flex: 0.48,
+    width: '48%',
     backgroundColor: COLORS.card,
     borderRadius: 12,
     overflow: 'hidden',
