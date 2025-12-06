@@ -19,6 +19,8 @@ import { SkeletonHorizontalCard } from '../components/SkeletonLoader';
 export default function DiscoverScreen() {
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingStyles, setTrendingStyles] = useState([]);
+  const [loadingMovies, setLoadingMovies] = useState(true);
+  const [loadingStyles, setLoadingStyles] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
