@@ -255,8 +255,11 @@ const styles = StyleSheet.create({
   flatListContent: {
     paddingBottom: 120,
   },
-  columnWrapper: {
+  outfitRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   header: {
     paddingTop: 60,
