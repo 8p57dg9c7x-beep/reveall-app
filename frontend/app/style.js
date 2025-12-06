@@ -190,22 +190,25 @@ export default function StyleScreen() {
         {/* Outfits Grid */}
         {loading ? (
           <View style={styles.loadingContainer}>
-            <MaterialCommunityIcons name="loading" size={48} color={COLORS.primary} />
-            <Text style={styles.loadingText}>Loading outfits...</Text>
+            <View style={styles.skeletonGrid}>
+              <SkeletonOutfitCard />
+              <SkeletonOutfitCard />
+              <SkeletonOutfitCard />
+              <SkeletonOutfitCard />
+            </View>
           </View>
         ) : outfits.length > 0 ? (
-          <View style={styles.outfitsContainer}>
-            {outfits.map((item, index) => {
-              if (index % 2 === 0) {
-                return (
-                  <View key={index} style={styles.row}>
-                    {renderOutfitCard({ item: outfits[index] })}
-                    {outfits[index + 1] && renderOutfitCard({ item: outfits[index + 1] })}
-                  </View>
-                );
-              }
-              return null;
-            })}
+          <View style={styles.flashListContainer}>
+            <FlashList
+              data={outfits}
+              renderItem={renderOutfitCard}
+              estimatedItemSize={300}
+              numColumns={2}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              removeClippedSubviews
+              contentContainerStyle={styles.flashListContent}
+            />
           </View>
         ) : (
           <View style={styles.emptyState}>
