@@ -87,13 +87,18 @@ export default function StyleScreen() {
   const renderOutfitCard = ({ item }) => (
     <TouchableOpacity
       style={styles.outfitCard}
-      onPress={() => router.push({
-        pathname: '/outfitdetail',
-        params: { 
-          outfitData: JSON.stringify(item),
-          returnPath: '/style'
-        }
-      })}
+      activeOpacity={0.7}
+      onPress={() => {
+        Alert.alert('Debug', `Card tapped: ${item.title}`);
+        console.log('Outfit card tapped:', item.title);
+        router.push({
+          pathname: '/outfitdetail',
+          params: { 
+            outfitData: JSON.stringify(item),
+            returnPath: '/style'
+          }
+        });
+      }}
     >
       <Image source={{ uri: item.image }} style={styles.outfitImage} />
       <View style={styles.outfitInfo}>
