@@ -113,14 +113,30 @@ export default function StyleScreen() {
     </TouchableOpacity>
   ), [selectedCategory, handleCategoryPress]);
 
-  const renderOutfitCard = useCallback(({ item, index }) => {
-    const isLeft = index % 2 === 0;
+  // Group items into rows of 2 for single-column FlatList
+  const groupedOutfits = useMemo(() => {
+    const groups = [];
+    for (let i = 0; i < outfits.length; i += 2) {
+      groups.push({
+        id: `row-${i}`,
+        items: [outfits[i], outfits[i + 1]].filter(Boolean)
+      });
+    }
+    return groups;
+  }, [outfits]);
+
+  const renderOutfitRow = useCallback(({ item: row }) => {
     return (
-      <OutfitCard
-        item={item}
-        isLeft={isLeft}
-        onPress={() => handleOutfitPress(item)}
-      />
+      <View style={styles.outfitRow}>
+        {row.items.map((item, index) => (
+          <OutfitCard
+            key={item.id}
+            item={item}
+            isLeft={index === 0}
+            onPress={() => handleOutfitPress(item)}
+          />
+        ))}
+      </View>
     );
   }, [handleOutfitPress]);
 
