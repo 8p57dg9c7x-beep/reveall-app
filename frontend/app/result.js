@@ -389,6 +389,66 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 24,
   },
+  metaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginBottom: 16,
+  },
+  metaText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontWeight: '600',
+  },
+  castSection: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  castCard: {
+    width: 100,
+    marginRight: 12,
+    alignItems: 'center',
+  },
+  castImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  castImagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  castName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  castCharacter: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+  },
+  directorSection: {
+    width: '100%',
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  directorLabel: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+  },
+  directorName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
   listenSection: {
     width: '100%',
     marginTop: 24,
