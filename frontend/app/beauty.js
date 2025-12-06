@@ -28,6 +28,7 @@ export default function BeautyScreen() {
   const [selectedCategory, setSelectedCategory] = useState('natural');
   const [looks, setLooks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const flatListRef = React.useRef(null);
 
   useEffect(() => {
     loadLooks();
