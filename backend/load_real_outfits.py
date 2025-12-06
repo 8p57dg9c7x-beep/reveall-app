@@ -110,7 +110,7 @@ outfits_data = [
   {
     "title": "Athleisure Morning Run",
     "category": "sport",
-    "image": "https://images.unsplash.com/photo-1599058917212-d750089bc07b",
+    "image": "https://images.unsplash.com/photo-1599058917212-d750089bc07b?w=800&q=80",
     "description": "A functional but stylish morning workout outfit.",
     "priceRange": "$90 - $180",
     "gender": "female",
