@@ -182,7 +182,7 @@ outfits_data = [
   {
     "title": "Sporty Street Runner",
     "category": "sport",
-    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
     "description": "Sport-inspired streetwear with a modern silhouette.",
     "priceRange": "$100 - $190",
     "gender": "male",
