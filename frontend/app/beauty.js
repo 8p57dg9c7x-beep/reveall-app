@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -22,6 +20,8 @@ const CATEGORIES = [
   { id: 'everyday', name: 'Everyday', icon: 'calendar-today' },
   { id: 'festival', name: 'Festival', icon: 'party-popper' },
 ];
+
+const CARD_HEIGHT = 310;
 
 export default function BeautyScreen() {
   const [selectedCategory, setSelectedCategory] = useState('natural');
@@ -86,83 +86,93 @@ export default function BeautyScreen() {
     </TouchableOpacity>
   ), [selectedCategory, handleCategoryPress]);
 
-  const renderLookCard = useCallback(({ item }) => (
-    <TouchableOpacity
-      style={styles.lookCard}
-      activeOpacity={0.7}
-      onPress={() => handleLookPress(item)}
-    >
-      <OptimizedImage source={{ uri: item.image }} style={styles.lookImage} />
-      <View style={styles.lookInfo}>
-        <Text style={styles.lookTitle} numberOfLines={2}>{item.title}</Text>
-        <Text style={styles.celebrity} numberOfLines={1}>{item.celebrity}</Text>
-        <Text style={styles.priceRange}>{item.priceRange || 'View Details'}</Text>
+  const renderLookCard = useCallback(({ item, index }) => {
+    const isLeft = index % 2 === 0;
+    return (
+      <TouchableOpacity
+        style={[styles.lookCard, isLeft ? styles.cardLeft : styles.cardRight]}
+        activeOpacity={0.7}
+        onPress={() => handleLookPress(item)}
+      >
+        <OptimizedImage source={{ uri: item.image }} style={styles.lookImage} />
+        <View style={styles.lookInfo}>
+          <Text style={styles.lookTitle} numberOfLines={2}>{item.title}</Text>
+          <Text style={styles.celebrity} numberOfLines={1}>{item.celebrity}</Text>
+          <Text style={styles.priceRange}>{item.priceRange || 'View Details'}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }, [handleLookPress]);
+
+  const renderHeader = useCallback(() => (
+    <View>
+      <View style={styles.header}>
+        <MaterialCommunityIcons name="lipstick" size={32} color={COLORS.primary} />
+        <Text style={styles.headerTitle}>Beauty Discovery</Text>
+        <Text style={styles.headerSubtitle}>Celebrity makeup looks & dupes</Text>
       </View>
-    </TouchableOpacity>
-  ), [handleLookPress]);
+
+      {/* Category Filters */}
+      <FlatList
+        horizontal
+        data={CATEGORIES}
+        renderItem={renderCategoryButton}
+        keyExtractor={(item) => item.id}
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoriesContainer}
+        contentContainerStyle={styles.categoriesContent}
+      />
+    </View>
+  ), [selectedCategory, renderCategoryButton]);
+
+  const renderEmptyComponent = useCallback(() => (
+    <View style={styles.emptyState}>
+      <MaterialCommunityIcons name="lipstick" size={80} color={COLORS.textSecondary} />
+      <Text style={styles.emptyTitle}>No Looks Yet</Text>
+      <Text style={styles.emptySubtitle}>
+        {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} looks will appear here once added.
+      </Text>
+    </View>
+  ), [selectedCategory]);
+
+  const renderFooter = useCallback(() => {
+    if (!loading) return null;
+    return (
+      <View style={styles.loadingContainer}>
+        <View style={styles.skeletonGrid}>
+          <SkeletonOutfitCard />
+          <SkeletonOutfitCard />
+        </View>
+      </View>
+    );
+  }, [loading]);
 
   return (
     <LinearGradient
       colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
       style={[styles.container, { pointerEvents: 'box-none' }]}
     >
-      <ScrollView 
-        style={styles.scrollView}
+      <FlatList
+        data={looks}
+        renderItem={renderLookCard}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={!loading ? renderEmptyComponent : null}
+        ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        removeClippedSubviews
-      >
-        <View style={styles.header}>
-          <MaterialCommunityIcons name="lipstick" size={32} color={COLORS.primary} />
-          <Text style={styles.headerTitle}>Beauty Discovery</Text>
-          <Text style={styles.headerSubtitle}>Celebrity makeup looks & dupes</Text>
-        </View>
-
-        {/* Category Filters */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoriesContainer}
-          contentContainerStyle={styles.categoriesContent}
-          nestedScrollEnabled
-          removeClippedSubviews
-        >
-          {CATEGORIES.map((item) => renderCategoryButton({ item }))}
-        </ScrollView>
-
-        {/* Beauty Looks Grid */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <View style={styles.skeletonGrid}>
-              <SkeletonOutfitCard />
-              <SkeletonOutfitCard />
-              <SkeletonOutfitCard />
-              <SkeletonOutfitCard />
-            </View>
-          </View>
-        ) : looks.length > 0 ? (
-          <View style={styles.flashListContainer}>
-            <FlashList
-              data={looks}
-              renderItem={renderLookCard}
-              estimatedItemSize={300}
-              numColumns={2}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-              removeClippedSubviews
-              contentContainerStyle={styles.flashListContent}
-            />
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="lipstick" size={80} color={COLORS.textSecondary} />
-            <Text style={styles.emptyTitle}>No Looks Yet</Text>
-            <Text style={styles.emptySubtitle}>
-              {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} looks will appear here once added.
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+        contentContainerStyle={styles.flatListContent}
+        columnWrapperStyle={styles.columnWrapper}
+        getItemLayout={(data, index) => ({
+          length: CARD_HEIGHT,
+          offset: CARD_HEIGHT * Math.floor(index / 2),
+          index,
+        })}
+        maxToRenderPerBatch={6}
+        windowSize={5}
+        removeClippedSubviews={true}
+        initialNumToRender={6}
+      />
     </LinearGradient>
   );
 }
@@ -171,11 +181,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
+  flatListContent: {
     paddingBottom: 120,
+  },
+  columnWrapper: {
+    paddingHorizontal: 16,
   },
   header: {
     paddingTop: 60,
@@ -226,7 +236,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   loadingContainer: {
-    paddingVertical: 60,
+    paddingVertical: 20,
     paddingHorizontal: 16,
   },
   skeletonGrid: {
@@ -234,19 +244,19 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  flashListContainer: {
-    flex: 1,
-    minHeight: 400,
-    paddingHorizontal: 16,
-  },
-  flashListContent: {
-    paddingBottom: 20,
-  },
   lookCard: {
-    flex: 0.48,
+    width: '48%',
     backgroundColor: COLORS.card,
     borderRadius: 12,
     overflow: 'hidden',
+    marginBottom: 16,
+    height: CARD_HEIGHT,
+  },
+  cardLeft: {
+    marginRight: 8,
+  },
+  cardRight: {
+    marginLeft: 8,
   },
   lookImage: {
     width: '100%',
