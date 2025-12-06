@@ -113,20 +113,13 @@ export default function StyleScreen() {
   ), [selectedCategory, handleCategoryPress]);
 
   const renderOutfitCard = useCallback(({ item, index }) => {
-    // Render 2 columns
     const isLeft = index % 2 === 0;
     return (
-      <TouchableOpacity
-        style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
-        activeOpacity={0.7}
+      <OutfitCard
+        item={item}
+        isLeft={isLeft}
         onPress={() => handleOutfitPress(item)}
-      >
-        <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
-        <View style={styles.outfitInfo}>
-          <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
-          <Text style={styles.outfitPrice}>{item.priceRange || 'View Details'}</Text>
-        </View>
-      </TouchableOpacity>
+      />
     );
   }, [handleOutfitPress]);
 
