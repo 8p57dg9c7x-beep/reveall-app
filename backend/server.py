@@ -948,6 +948,16 @@ async def get_upcoming():
         logger.error(f"Upcoming error: {e}")
         return {"results": []}
 
+@api_router.get("/movie/{movie_id}")
+async def get_movie_detail(movie_id: int):
+    """Get full movie details including cast and crew"""
+    try:
+        details = get_movie_details(movie_id)
+        return details
+    except Exception as e:
+        logger.error(f"Error fetching movie details for {movie_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/movie/{movie_id}/similar")
 async def get_similar_movies(movie_id: int):
     """Get similar movies for a given movie ID with fallback to recommendations"""
