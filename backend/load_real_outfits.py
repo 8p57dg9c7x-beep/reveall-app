@@ -92,7 +92,7 @@ outfits_data = [
   {
     "title": "Elegant Date Night Dress",
     "category": "elegant",
-    "image": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2",
+    "image": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80",
     "description": "A timeless satin dress paired with minimalist heels.",
     "priceRange": "$120 - $250",
     "gender": "female",
