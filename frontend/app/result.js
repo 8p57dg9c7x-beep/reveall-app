@@ -163,7 +163,12 @@ export default function ResultScreen() {
             <Text style={styles.sectionTitle}>Lyrics</Text>
             {song.lyrics ? (
               <View style={styles.lyricsContainer}>
-                <ScrollView style={styles.lyricsScroll} nestedScrollEnabled>
+                <ScrollView 
+                  style={styles.lyricsScroll} 
+                  nestedScrollEnabled
+                  removeClippedSubviews
+                  showsVerticalScrollIndicator={false}
+                >
                   <Text style={styles.lyricsText}>{song.lyrics.lyrics}</Text>
                 </ScrollView>
               </View>
