@@ -87,14 +87,30 @@ export default function BeautyScreen() {
     </TouchableOpacity>
   ), [selectedCategory, handleCategoryPress]);
 
-  const renderLookCard = useCallback(({ item, index }) => {
-    const isLeft = index % 2 === 0;
+  // Group items into rows of 2 for single-column FlatList
+  const groupedLooks = useMemo(() => {
+    const groups = [];
+    for (let i = 0; i < looks.length; i += 2) {
+      groups.push({
+        id: `row-${i}`,
+        items: [looks[i], looks[i + 1]].filter(Boolean)
+      });
+    }
+    return groups;
+  }, [looks]);
+
+  const renderLookRow = useCallback(({ item: row }) => {
     return (
-      <BeautyCard
-        item={item}
-        isLeft={isLeft}
-        onPress={() => handleLookPress(item)}
-      />
+      <View style={styles.lookRow}>
+        {row.items.map((item, index) => (
+          <BeautyCard
+            key={item.id}
+            item={item}
+            isLeft={index === 0}
+            onPress={() => handleLookPress(item)}
+          />
+        ))}
+      </View>
     );
   }, [handleLookPress]);
 
