@@ -44,11 +44,15 @@ export default function StyleScreen() {
     setLoading(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
+      console.log('🔍 Fetching outfits from:', `${API_URL}/api/outfits/${selectedCategory}`);
       const response = await fetch(`${API_URL}/api/outfits/${selectedCategory}`);
       const data = await response.json();
+      console.log('✅ Fetched outfits:', data.outfits?.length, 'items');
+      console.log('📸 First outfit image:', data.outfits?.[0]?.image);
+      console.log('📦 Full first outfit:', JSON.stringify(data.outfits?.[0], null, 2));
       setOutfits(data.outfits || []);
     } catch (error) {
-      console.error('Error loading outfits:', error);
+      console.error('❌ Error loading outfits:', error);
       setOutfits([]);
     } finally {
       setLoading(false);
