@@ -14,6 +14,7 @@ import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import { searchMusic } from '../services/api';
 import OptimizedImage from '../components/OptimizedImage';
+import { SkeletonHorizontalCard } from '../components/SkeletonLoader';
 
 export default function DiscoverScreen() {
   const [trendingMovies, setTrendingMovies] = useState([]);
