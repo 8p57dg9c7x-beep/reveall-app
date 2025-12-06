@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
-  FlatList,
   Alert,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
+import OptimizedImage from '../components/OptimizedImage';
+import { SkeletonOutfitCard } from '../components/SkeletonLoader';
 
 const CATEGORIES = [
   { id: 'streetwear', name: 'Streetwear', icon: 'tshirt-crew' },
