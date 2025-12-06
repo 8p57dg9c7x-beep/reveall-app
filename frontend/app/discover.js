@@ -380,6 +380,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  movieRatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  movieRating: {
+    color: COLORS.accent,
+    fontSize: 13,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  movieYear: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
+  },
   exploreCard: {
     flexDirection: 'row',
     alignItems: 'center',
