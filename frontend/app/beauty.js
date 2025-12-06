@@ -51,6 +51,10 @@ export default function BeautyScreen() {
 
   const handleCategoryPress = useCallback((categoryId) => {
     setSelectedCategory(categoryId);
+    // Reset scroll position to top when switching categories
+    setTimeout(() => {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }, 100);
   }, []);
 
   const handleLookPress = useCallback((item) => {
