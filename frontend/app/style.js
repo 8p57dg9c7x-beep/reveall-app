@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import OptimizedImage from '../components/OptimizedImage';
+import OutfitCard from '../components/OutfitCard';
 import { SkeletonOutfitCard } from '../components/SkeletonLoader';
 
 const CATEGORIES = [
