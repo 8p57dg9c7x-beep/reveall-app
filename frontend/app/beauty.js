@@ -239,43 +239,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  lookCard: {
-    width: '48%',
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
-    height: CARD_HEIGHT,
-  },
-  cardLeft: {
-    marginRight: 8,
-  },
-  cardRight: {
-    marginLeft: 8,
-  },
-  lookImage: {
-    width: '100%',
-    height: 240,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  lookInfo: {
-    padding: 12,
-  },
-  lookTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  celebrity: {
-    color: COLORS.accent,
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  priceRange: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-  },
   emptyState: {
     paddingVertical: 60,
     paddingHorizontal: 40,
