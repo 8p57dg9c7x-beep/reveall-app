@@ -71,12 +71,11 @@ export default function ResultScreen() {
   };
 
   const checkWatchlist = async () => {
+    if (!movieDetails?.id) return;
     try {
       const stored = await AsyncStorage.getItem('watchlist');
-      if (stored) {
-        const watchlist = JSON.parse(stored);
-        setInWatchlist(watchlist.some(m => m.id === movie.id));
-      }
+      let watchlist = stored ? JSON.parse(stored) : [];
+      setInWatchlist(watchlist.some(m => m.id === movieDetails.id));
     } catch (error) {
       console.error('Error checking watchlist:', error);
     }
