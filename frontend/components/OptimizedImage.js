@@ -12,10 +12,10 @@ const OptimizedImage = memo(({ source, style, ...props }) => {
       source={{
         uri: source.uri,
         priority: FastImage.priority.normal,
+        cache: FastImage.cacheControl.immutable,
       }}
       style={style}
       resizeMode={FastImage.resizeMode.cover}
-      defaultSource={require('../assets/placeholder.png')}
       onError={(e) => {
         console.log('FastImage error:', source?.uri);
       }}
