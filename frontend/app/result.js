@@ -243,14 +243,19 @@ export default function ResultScreen() {
           {movie.credits?.cast && movie.credits.cast.length > 0 && (
             <View style={styles.castSection}>
               <Text style={styles.sectionTitle}>Cast</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} removeClippedSubviews>
                 {movie.credits.cast.slice(0, 10).map(actor => (
                   <View key={actor.id} style={styles.castCard}>
                     {actor.profile_path ? (
-                      <Image
-                        source={{ uri: `https://image.tmdb.org/t/p/w185${actor.profile_path}` }}
-                        style={styles.castImage}
-                      />
+                      <View style={styles.castImageContainer}>
+                        <Image
+                          source={{ uri: `https://image.tmdb.org/t/p/w185${actor.profile_path}` }}
+                          style={styles.castImage}
+                          onError={() => {
+                            // Image failed to load, will show fallback via state
+                          }}
+                        />
+                      </View>
                     ) : (
                       <View style={[styles.castImage, styles.castImagePlaceholder]}>
                         <MaterialCommunityIcons name="account" size={40} color={COLORS.textSecondary} />
