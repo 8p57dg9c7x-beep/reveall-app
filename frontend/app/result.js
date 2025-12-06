@@ -18,16 +18,34 @@ export default function ResultScreen() {
   const params = useLocalSearchParams();
   const [inWatchlist, setInWatchlist] = useState(false);
   const [similarMovies, setSimilarMovies] = useState([]);
-  const movie = params.movieData ? JSON.parse(params.movieData) : null;
+  const [movieDetails, setMovieDetails] = useState(null);
+  const initialMovie = params.movieData ? JSON.parse(params.movieData) : null;
   const song = params.songData ? JSON.parse(params.songData) : null;
   const returnPath = params.returnPath || '/discover'; // Default return path
+  
+  // Use detailed movie data if available, otherwise use initial data
+  const movie = movieDetails || initialMovie;
 
   useEffect(() => {
-    if (movie) {
+    if (initialMovie) {
       checkWatchlist();
+      loadMovieDetails();
       loadSimilarMovies();
     }
-  }, [movie]);
+  }, [initialMovie]);
+
+  const loadMovieDetails = async () => {
+    if (!initialMovie?.id) return;
+    try {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-mvp.preview.emergentagent.com';
+      const response = await fetch(`${API_URL}/api/movie/${initialMovie.id}`);
+      const data = await response.json();
+      setMovieDetails(data);
+    } catch (error) {
+      console.error('Error loading movie details:', error);
+      // Keep using initial movie data if fetch fails
+    }
+  };
 
   const loadSimilarMovies = async () => {
     if (!movie?.id) return;
