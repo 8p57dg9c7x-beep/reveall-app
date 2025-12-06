@@ -33,6 +33,7 @@ export default function StyleScreen() {
   const [outfits, setOutfits] = useState([]);
   const [celebrityOutfits, setCelebrityOutfits] = useState([]);
   const [loading, setLoading] = useState(false);
+  const flatListRef = React.useRef(null);
 
   useEffect(() => {
     loadOutfits();
