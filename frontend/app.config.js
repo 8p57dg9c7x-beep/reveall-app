@@ -2,7 +2,7 @@ export default {
   expo: {
     name: "REVEAL",
     slug: "reveal",
-    version: "1.0.2",
+    version: "1.0.3",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "reveal",
@@ -73,8 +73,8 @@ export default {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.EXPO_PUBLIC_API_URL || "https://ward-newly-tissue-contractors.trycloudflare.com",
-      buildVersion: "v0.4.1 (Dec 7)"
+      apiUrl: process.env.EXPO_PUBLIC_API_URL || "https://intent-develop-provisions-insured.trycloudflare.com",
+      buildVersion: "v0.4.2 (Dec 7 - 2:17pm)"
     }
   }
 };
