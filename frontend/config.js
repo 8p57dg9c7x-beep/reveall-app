@@ -8,8 +8,8 @@ const getApiUrl = () => {
   // Fallback to environment variable
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
   
-  // Final fallback (should never be used in production)
-  const fallbackUrl = 'https://conservation-naturals-completing-eligibility.trycloudflare.com';
+  // Final fallback (locked stable URL)
+  const fallbackUrl = 'https://social-granted-runner-mas.trycloudflare.com';
   
   const finalUrl = configUrl || envUrl || fallbackUrl;
   
