@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 
 // Stable locked configuration
-const STABLE_API_URL = 'https://social-granted-runner-mas.trycloudflare.com';
+const STABLE_API_URL = 'https://ward-newly-tissue-contractors.trycloudflare.com';
 const BUILD_VERSION = 'v0.4.1 (Dec 7)';
 
 // Get API URL from expo constants (injected via app.config.js)
