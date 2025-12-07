@@ -91,3 +91,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+
+// Default export for convenience
+export default SkeletonCard;
