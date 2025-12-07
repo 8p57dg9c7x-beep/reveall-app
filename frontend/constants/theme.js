@@ -16,10 +16,12 @@ export const COLORS = {
   card: '#1D003C',  // Dark purple card
   cardHover: '#2A004F',  // Hover state
   
+  text: '#FFFFFF',  // Alias for textPrimary
   textPrimary: '#FFFFFF',  // Pure white
   textSecondary: '#B3A5C6',  // Light purple gray
   textTertiary: '#8B7FA3',  // Muted purple
   
+  surface: '#1D003C',  // Alias for card
   success: '#10B981',  // Green
   error: '#EF4444',  // Red
   warning: '#F59E0B',  // Orange
