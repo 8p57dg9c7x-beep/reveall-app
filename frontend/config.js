@@ -1,14 +1,14 @@
 import Constants from 'expo-constants';
 
-// FINAL STABLE CONFIGURATION - DO NOT CHANGE
-const STABLE_API_URL = 'https://officially-began-morris-audio.trycloudflare.com';
-const BUILD_VERSION = 'v0.4.3 (Dec 7 - Final)';
+// PRODUCTION CONFIGURATION - Render Backend
+const API_BASE_URL_STABLE = 'https://cinescan-backend-1.onrender.com';
+const BUILD_VERSION = 'v1.0.0 (Render Production)';
 
 // Get API URL from expo constants
 const getApiUrl = () => {
   const configUrl = Constants.expoConfig?.extra?.apiUrl;
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
-  const finalUrl = configUrl || envUrl || STABLE_API_URL;
+  const finalUrl = configUrl || envUrl || API_BASE_URL_STABLE;
   
   console.log(`✅ REVEAL ${BUILD_VERSION}`);
   console.log(`🌐 API: ${finalUrl}`);
