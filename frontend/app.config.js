@@ -73,7 +73,7 @@ export default {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.EXPO_PUBLIC_API_URL || "https://social-granted-runner-mas.trycloudflare.com",
+      apiUrl: process.env.EXPO_PUBLIC_API_URL || "https://ward-newly-tissue-contractors.trycloudflare.com",
       buildVersion: "v0.4.1 (Dec 7)"
     }
   }
