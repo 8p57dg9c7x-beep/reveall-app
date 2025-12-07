@@ -1,28 +1,24 @@
 import Constants from 'expo-constants';
 
+// Stable locked configuration
+const STABLE_API_URL = 'https://social-granted-runner-mas.trycloudflare.com';
+const BUILD_VERSION = 'v0.4.1 (Dec 7)';
+
 // Get API URL from expo constants (injected via app.config.js)
 const getApiUrl = () => {
-  // First try to get from expo config
   const configUrl = Constants.expoConfig?.extra?.apiUrl;
-  
-  // Fallback to environment variable
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
+  const finalUrl = configUrl || envUrl || STABLE_API_URL;
   
-  // Final fallback (locked stable URL)
-  const fallbackUrl = 'https://social-granted-runner-mas.trycloudflare.com';
-  
-  const finalUrl = configUrl || envUrl || fallbackUrl;
-  
-  console.log('🔧 Config System:');
-  console.log('  - From expo config:', configUrl);
-  console.log('  - From env variable:', envUrl);
-  console.log('  - Using API URL:', finalUrl);
+  console.log(`✅ REVEAL ${BUILD_VERSION} | API: ${finalUrl.substring(0, 50)}...`);
   
   return finalUrl;
 };
 
 export const API_BASE_URL = getApiUrl();
+export { BUILD_VERSION };
 
 export default {
   API_BASE_URL,
+  BUILD_VERSION,
 };
