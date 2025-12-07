@@ -110,6 +110,39 @@ export default function ResultScreen() {
     }
   };
 
+  const fetchLyrics = async () => {
+    if (!song) return;
+    
+    setLoadingLyrics(true);
+    try {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app-1.preview.emergentagent.com';
+      const query = encodeURIComponent(`${song.title} ${song.artist}`);
+      const res = await fetch(`${API_URL}/api/lyrics/${query}`);
+      const data = await res.json();
+      
+      if (data.success && data.lyrics) {
+        setLyrics({
+          lyrics: data.lyrics,
+          title: data.title,
+          artist: data.artist
+        });
+      } else {
+        setLyrics({
+          lyrics: null,
+          message: data.message || "No lyrics found for this song yet."
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching lyrics:', error);
+      setLyrics({
+        lyrics: null,
+        message: "Unable to fetch lyrics at this time."
+      });
+    } finally {
+      setLoadingLyrics(false);
+    }
+  };
+
   if (song) {
     return (
       <LinearGradient
