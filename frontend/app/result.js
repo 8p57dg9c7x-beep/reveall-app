@@ -22,6 +22,8 @@ export default function ResultScreen() {
   const [similarMovies, setSimilarMovies] = useState([]);
   const [movieDetails, setMovieDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [lyrics, setLyrics] = useState(null);
+  const [loadingLyrics, setLoadingLyrics] = useState(false);
   
   // Get movieId from params or from legacy movieData
   const movieId = params.movieId || (params.movieData ? JSON.parse(params.movieData).id : null);
@@ -41,8 +43,11 @@ export default function ResultScreen() {
         ]);
       };
       loadAllData();
+    } else if (song) {
+      // If it's a song, fetch lyrics from AudD
+      fetchLyrics();
     }
-  }, [movieId]);
+  }, [movieId, song]);
 
   const loadMovieDetails = async () => {
     if (!movieId) return;
