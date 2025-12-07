@@ -139,9 +139,6 @@ export default function StyleDiscovery() {
         <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
         <Text style={styles.headerTitle}>Style Discovery</Text>
         <Text style={styles.headerSubtitle}>Curated outfit inspiration</Text>
-        <Text style={{fontSize: 10, color: '#888', marginTop: 5}}>
-          DEBUG: Category='{selectedCategory}' | Outfits={outfits.length} | Loading={loading ? 'Yes' : 'No'}
-        </Text>
       </View>
 
       {celebrityOutfits.length > 0 && (
