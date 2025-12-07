@@ -1,16 +1,17 @@
 import Constants from 'expo-constants';
 
-// Stable locked configuration
-const STABLE_API_URL = 'https://intent-develop-provisions-insured.trycloudflare.com';
-const BUILD_VERSION = 'v0.4.2 (Dec 7 - 2:17pm)';
+// FINAL STABLE CONFIGURATION - DO NOT CHANGE
+const STABLE_API_URL = 'https://officially-began-morris-audio.trycloudflare.com';
+const BUILD_VERSION = 'v0.4.3 (Dec 7 - Final)';
 
-// Get API URL from expo constants (injected via app.config.js)
+// Get API URL from expo constants
 const getApiUrl = () => {
   const configUrl = Constants.expoConfig?.extra?.apiUrl;
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
   const finalUrl = configUrl || envUrl || STABLE_API_URL;
   
-  console.log(`✅ REVEAL ${BUILD_VERSION} | API: ${finalUrl.substring(0, 50)}...`);
+  console.log(`✅ REVEAL ${BUILD_VERSION}`);
+  console.log(`🌐 API: ${finalUrl}`);
   
   return finalUrl;
 };
