@@ -2,9 +2,10 @@ import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 
 // Use REVEAL backend (accessible from mobile devices)
-const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://reveal-app-1.preview.emergentagent.com';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app-1.preview.emergentagent.com';
 
-console.log('API_BASE_URL:', API_BASE_URL);
+console.log('🌐 API_BASE_URL from env:', process.env.EXPO_PUBLIC_API_URL);
+console.log('🎯 Using API_BASE_URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
