@@ -199,7 +199,9 @@ export default function ResultScreen() {
           {/* Lyrics Section */}
           <View style={styles.lyricsSection}>
             <Text style={styles.sectionTitle}>Lyrics</Text>
-            {song.lyrics ? (
+            {loadingLyrics ? (
+              <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />
+            ) : lyrics?.lyrics ? (
               <View style={styles.lyricsContainer}>
                 <ScrollView 
                   style={styles.lyricsScroll} 
@@ -207,13 +209,13 @@ export default function ResultScreen() {
                   removeClippedSubviews
                   showsVerticalScrollIndicator={false}
                 >
-                  <Text style={styles.lyricsText}>{song.lyrics.lyrics}</Text>
+                  <Text style={styles.lyricsText}>{lyrics.lyrics}</Text>
                 </ScrollView>
               </View>
             ) : (
               <View style={styles.noLyricsContainer}>
                 <MaterialCommunityIcons name="music-note-off" size={40} color={COLORS.textSecondary} />
-                <Text style={styles.noLyricsText}>No lyrics found for this song yet.</Text>
+                <Text style={styles.noLyricsText}>{lyrics?.message || "No lyrics found for this song yet."}</Text>
               </View>
             )}
           </View>
