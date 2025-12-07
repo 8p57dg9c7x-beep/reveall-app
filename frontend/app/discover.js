@@ -171,10 +171,14 @@ export default function DiscoverScreen() {
       key={song.id} 
       style={styles.trendingCard}
       onPress={() => handleSongTap(song)}
+      onLongPress={() => alert(`Song: ${song.title}\nImage URL: ${song.image?.substring(0, 60)}...`)}
     >
       <OptimizedImage source={{ uri: song.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{song.title}</Text>
       <Text style={styles.trendingSubtitle} numberOfLines={1}>{song.artist}</Text>
+      <Text style={[styles.debugText, {fontSize: 8, color: '#888'}]} numberOfLines={1}>
+        {song.image?.includes('unsplash') ? '✓ Unsplash' : '✗ OLD URL'}
+      </Text>
     </TouchableOpacity>
   ), [handleSongTap]);
 
