@@ -73,7 +73,8 @@ export default {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.EXPO_PUBLIC_API_URL || "https://conservation-naturals-completing-eligibility.trycloudflare.com"
+      apiUrl: process.env.EXPO_PUBLIC_API_URL || "https://social-granted-runner-mas.trycloudflare.com",
+      buildVersion: "v0.4.1 (Dec 7)"
     }
   }
 };
