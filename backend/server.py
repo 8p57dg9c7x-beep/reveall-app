@@ -992,38 +992,6 @@ async def get_similar_movies(movie_id: int):
         logger.error(f"Similar movies error for movie_id {movie_id}: {e}")
         return {"results": [], "error": str(e)}
 
-@api_router.get("/outfits/{category}")
-async def get_outfits(category: str):
-    """Get outfits by category"""
-    try:
-        logger.info(f"Fetching outfits for category: {category}")
-        
-        # Fetch from MongoDB
-        outfits = list(outfits_collection.find({"category": category}))
-        
-        # Convert ObjectId to string for JSON serialization
-        for outfit in outfits:
-            outfit['id'] = str(outfit['_id'])
-            del outfit['_id']
-        
-        logger.info(f"Found {len(outfits)} outfits for category: {category}")
-        return {"outfits": outfits, "category": category}
-    except Exception as e:
-        logger.error(f"Outfits error: {e}")
-        return {"outfits": [], "category": category}
-
-@api_router.post("/outfits")
-async def create_outfit(outfit: dict):
-    """Create a new outfit (for admin use)"""
-    try:
-        # This endpoint will be used to add outfits to the database
-        # For now, just return success
-        logger.info(f"Creating outfit: {outfit.get('title', 'Unnamed')}")
-        return {"success": True, "message": "Outfit endpoint ready for data"}
-    except Exception as e:
-        logger.error(f"Create outfit error: {e}")
-        return {"success": False, "error": str(e)}
-
 @api_router.get("/outfits/trending")
 async def get_trending_outfits():
     """Get trending outfits across all categories"""
@@ -1066,6 +1034,38 @@ async def get_celebrity_outfits():
     except Exception as e:
         logger.error(f"Celebrity outfits error: {e}")
         return {"outfits": []}
+
+@api_router.get("/outfits/{category}")
+async def get_outfits(category: str):
+    """Get outfits by category"""
+    try:
+        logger.info(f"Fetching outfits for category: {category}")
+        
+        # Fetch from MongoDB
+        outfits = list(outfits_collection.find({"category": category}))
+        
+        # Convert ObjectId to string for JSON serialization
+        for outfit in outfits:
+            outfit['id'] = str(outfit['_id'])
+            del outfit['_id']
+        
+        logger.info(f"Found {len(outfits)} outfits for category: {category}")
+        return {"outfits": outfits, "category": category}
+    except Exception as e:
+        logger.error(f"Outfits error: {e}")
+        return {"outfits": [], "category": category}
+
+@api_router.post("/outfits")
+async def create_outfit(outfit: dict):
+    """Create a new outfit (for admin use)"""
+    try:
+        # This endpoint will be used to add outfits to the database
+        # For now, just return success
+        logger.info(f"Creating outfit: {outfit.get('title', 'Unnamed')}")
+        return {"success": True, "message": "Outfit endpoint ready for data"}
+    except Exception as e:
+        logger.error(f"Create outfit error: {e}")
+        return {"success": False, "error": str(e)}
 
 # ========== BEAUTY ENDPOINTS ==========
 
