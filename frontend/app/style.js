@@ -44,8 +44,11 @@ export default function StyleScreen() {
     setLoading(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-app-1.preview.emergentagent.com';
+      console.log('🌐 ENV API_URL:', process.env.EXPO_PUBLIC_API_URL);
+      console.log('🎯 Using API_URL:', API_URL);
       console.log('🔍 Fetching outfits from:', `${API_URL}/api/outfits/${selectedCategory}`);
       const response = await fetch(`${API_URL}/api/outfits/${selectedCategory}`);
+      console.log('📡 Response status:', response.status, response.statusText);
       const data = await response.json();
       console.log('✅ Fetched outfits:', data.outfits?.length, 'items');
       console.log('📸 First outfit image:', data.outfits?.[0]?.image);
