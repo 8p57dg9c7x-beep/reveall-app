@@ -17,6 +17,9 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
       onPress={onPress}
     >
       <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
+      <View style={{position: 'absolute', top: 5, left: 5, backgroundColor: 'rgba(0,0,0,0.7)', padding: 3, borderRadius: 3}}>
+        <Text style={{color: '#fff', fontSize: 8}}>ID: {item.id?.toString().substring(0, 8)}</Text>
+      </View>
       <View style={styles.outfitInfo}>
         <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
         <Text style={styles.outfitPrice}>{item.priceRange || 'View Details'}</Text>
