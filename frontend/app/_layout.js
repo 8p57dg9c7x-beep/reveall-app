@@ -2,12 +2,14 @@ import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { FavoritesProvider } from '../contexts/FavoritesContext';
 
-// Bundle Version: 2.1.0 - Final cache clear
+// Bundle Version: 2.2.0 - Favorites system
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Tabs
+    <FavoritesProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Tabs
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
