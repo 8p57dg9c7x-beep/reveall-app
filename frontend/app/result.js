@@ -44,8 +44,12 @@ export default function ResultScreen() {
       };
       loadAllData();
     } else if (song) {
-      // If it's a song, fetch lyrics from AudD
-      fetchLyrics();
+      // Lyrics feature temporarily disabled
+      // fetchLyrics();
+      setLyrics({
+        lyrics: null,
+        message: "Lyrics feature is temporarily unavailable. We're working on bringing it back soon!"
+      });
     }
   }, [movieId, song]);
 
