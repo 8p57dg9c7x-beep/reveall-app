@@ -298,13 +298,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Image Recognition - Camera capture and gallery selection"
-    - "Video Recognition - Upload functionality"
-    - "Result Screen - Movie details display"
-    - "API Integration - All backend endpoints"
+    - "Lyrics Feature - Temporarily Disabled"
   stuck_tasks: []
   test_all: false
-  test_priority: "high_first"
+  test_priority: "critical_first"
 
 agent_communication:
   - agent: "main"
