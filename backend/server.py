@@ -1330,61 +1330,15 @@ async def search_music(request: Request):
 
 @api_router.get("/lyrics/{query}")
 async def get_lyrics(query: str):
-    """Fetch lyrics for a song using AudD API"""
-    try:
-        logger.info(f"Fetching lyrics for: {query}")
-        
-        # Use AudD findLyrics endpoint
-        url = "https://api.audd.io/findLyrics/"
-        params = {
-            "q": query,
-            "api_token": AUDD_API_KEY
-        }
-        
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        
-        # If lyrics found
-        if data.get("status") == "success" and data.get("result"):
-            # AudD returns an array of results
-            results = data["result"]
-            if isinstance(results, list) and len(results) > 0:
-                lyrics = results[0].get("lyrics")
-                song_title = results[0].get("title", "Unknown")
-                artist = results[0].get("artist", "Unknown")
-                
-                if lyrics:
-                    logger.info(f"✅ Found lyrics for: {song_title} by {artist}")
-                    return {
-                        "success": True,
-                        "lyrics": lyrics,
-                        "title": song_title,
-                        "artist": artist
-                    }
-        
-        # No lyrics found
-        logger.warning(f"No lyrics found for: {query}")
-        return {
-            "success": False,
-            "lyrics": None,
-            "message": "No lyrics found for this song yet."
-        }
-        
-    except requests.exceptions.Timeout:
-        logger.error("AudD lyrics request timeout")
-        return {
-            "success": False,
-            "lyrics": None,
-            "message": "Request timed out. Please try again."
-        }
-    except Exception as e:
-        logger.error(f"Lyrics fetch error: {e}")
-        return {
-            "success": False,
-            "lyrics": None,
-            "message": "Unable to fetch lyrics at this time."
-        }
+    """Lyrics feature temporarily disabled - AudD API free tier exhausted"""
+    logger.info(f"Lyrics request received for: {query} (feature temporarily disabled)")
+    
+    # Return static response - feature disabled
+    return {
+        "success": False,
+        "lyrics": None,
+        "message": "Lyrics feature is temporarily unavailable. We're working on bringing it back soon!"
+    }
 
 # Include router
 app.include_router(api_router)
