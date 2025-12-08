@@ -3,7 +3,7 @@ import { View, StyleSheet, Animated, Easing, Platform } from 'react-native';
 import { COLORS } from '../constants/theme';
 
 const SkeletonLoader = () => {
-  const animatedValue = React.useRef(new Animated.Value(0)).current;
+  const animatedValue = React.useMemo(() => new Animated.Value(0), []);
 
   React.useEffect(() => {
     Animated.loop(
@@ -38,7 +38,7 @@ const SkeletonLoader = () => {
 
 // Enhanced skeleton for outfit/beauty cards
 export const SkeletonCard = ({ isLeft }) => {
-  const shimmer = React.useRef(new Animated.Value(0)).current;
+  const shimmer = React.useMemo(() => new Animated.Value(0), []);
 
   React.useEffect(() => {
     Animated.loop(
