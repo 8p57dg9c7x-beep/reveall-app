@@ -105,6 +105,21 @@
 user_problem_statement: Build CINESCAN mobile app - "Shazam for Movies" with image/audio/video recognition, watchlist, and movie details display
 
 backend:
+  - task: "Lyrics Feature - Temporarily Disabled"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "User reported AudD.io lyrics API free tier exhausted, causing 'Network request failed' errors throughout the app. Requested to disable lyrics feature completely until more users allow API upgrade."
+      - working: "NA"
+        agent: "main"
+        comment: "✅ PHASE 1 - LYRICS FEATURE DISABLED: Modified backend /api/lyrics/{query} endpoint to return static placeholder response instead of calling AudD API. Response: {success: false, lyrics: null, message: 'Lyrics feature is temporarily unavailable. We're working on bringing it back soon!'}. Frontend fetchLyrics() function commented out in result.js. Static message set in useEffect hook to display unavailable message. Backend restarted successfully. Ready for backend testing to verify no more network errors."
+
   - task: "API endpoints setup"
     implemented: true
     working: true
