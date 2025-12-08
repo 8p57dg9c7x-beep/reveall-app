@@ -1,9 +1,19 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 const OutfitCard = memo(({ item, onPress, isLeft }) => {
+  const { toggleOutfitFavorite, isOutfitFavorite } = useFavorites();
+  const isFavorite = isOutfitFavorite(item.id);
+
+  const handleFavoritePress = (e) => {
+    e.stopPropagation();
+    toggleOutfitFavorite(item);
+  };
+
   return (
     <TouchableOpacity
       style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
@@ -12,6 +22,20 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
     >
       <View style={styles.imageContainer}>
         <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
+        
+        {/* Favorite Heart Button */}
+        <TouchableOpacity 
+          style={styles.favoriteButton}
+          onPress={handleFavoritePress}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={22}
+            color={isFavorite ? '#ff4444' : '#fff'}
+          />
+        </TouchableOpacity>
+        
         {item.gender && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{item.gender}</Text>
