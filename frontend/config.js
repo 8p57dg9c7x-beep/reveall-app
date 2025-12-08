@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 
 // PRODUCTION CONFIGURATION - Render Backend
-const API_BASE_URL_STABLE = 'https://cinescan-backend-1.onrender.com';
+const API_BASE_URL_STABLE = 'https://cinescan-backend.onrender.com';
 const BUILD_VERSION = 'v1.0.0 (Render Production)';
 
 // Get API URL from expo constants
