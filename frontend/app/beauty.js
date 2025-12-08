@@ -18,7 +18,9 @@ import { API_BASE_URL } from '../config';
 const CATEGORIES = [
   { id: 'natural', name: 'Natural', icon: 'leaf' },
   { id: 'glam', name: 'Glam', icon: 'shimmer' },
+  { id: 'bridal', name: 'Bridal', icon: 'heart' },
   { id: 'smokey', name: 'Smokey Eye', icon: 'eye' },
+  { id: 'bold', name: 'Bold', icon: 'lightning-bolt' },
   { id: 'everyday', name: 'Everyday', icon: 'calendar-today' },
   { id: 'festival', name: 'Festival', icon: 'party-popper' },
 ];
