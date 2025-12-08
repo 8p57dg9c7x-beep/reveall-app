@@ -49,7 +49,7 @@ export const SkeletonCard = ({ isLeft }) => {
         useNativeDriver: true,
       })
     ).start();
-  }, []);
+  }, [shimmer]);
 
   const translateX = shimmer.interpolate({
     inputRange: [0, 1],
