@@ -37,11 +37,30 @@ export default function StyleDiscovery() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/outfits/${selectedCategory}`);
+      const url = `${API_BASE_URL}/api/outfits/${selectedCategory}`;
+      console.log('🔍 Loading outfits from:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      console.log('📊 Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
+      console.log('✅ Loaded outfits:', data.outfits?.length || 0);
+      
       setOutfits(data.outfits || []);
     } catch (error) {
-      console.error('Error loading outfits:', error);
+      console.error('❌ Error loading outfits:', error);
+      console.error('   URL:', `${API_BASE_URL}/api/outfits/${selectedCategory}`);
+      console.error('   Error details:', error.message);
       setError('Unable to load outfits. Please try again.');
       setOutfits([]);
     } finally {
