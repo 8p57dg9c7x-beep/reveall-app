@@ -73,7 +73,7 @@ export default {
       typedRoutes: true
     },
     extra: {
-      apiUrl: "https://cinescan-backend-1.onrender.com",
+      apiUrl: "https://cinescan-backend.onrender.com",
       buildVersion: "v1.0.0 (Render Production)"
     }
   }
