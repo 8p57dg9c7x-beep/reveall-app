@@ -350,7 +350,7 @@ class BackendTester:
         self.check_backend_logs_for_audd_calls()
         
         # Print summary
-        self.print_summary()
+        return self.print_summary()
     
     def print_summary(self):
         """Print test summary"""
