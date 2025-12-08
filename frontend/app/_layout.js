@@ -126,12 +126,6 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="search"
-          options={{
-            href: null, // Hide old movie search from tabs
-          }}
-        />
-        <Tabs.Screen
           name="universal-search"
           options={{
             href: null, // Hide from tabs - accessed via header buttons
