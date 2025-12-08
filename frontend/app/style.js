@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import OutfitCard from '../components/OutfitCard';
-import SkeletonLoader from '../components/SkeletonLoader';
+import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
 
 const STYLE_CATEGORIES = [
@@ -13,7 +13,6 @@ const STYLE_CATEGORIES = [
   { id: 'minimal', name: 'Minimal', icon: 'circle-outline' },
   { id: 'sport', name: 'Sport', icon: 'run' },
   { id: 'elegant', name: 'Elegant', icon: 'shoe-heel' },
-  { id: 'affordable-fits', name: 'Affordable Fits', icon: 'cash-multiple' },
 ];
 
 export default function StyleDiscovery() {
@@ -22,6 +21,8 @@ export default function StyleDiscovery() {
   const [celebrityOutfits, setCelebrityOutfits] = useState([]);
   const [outfits, setOutfits] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadCelebrityOutfits();
@@ -33,20 +34,14 @@ export default function StyleDiscovery() {
 
   const loadOutfits = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      console.log('🌐 ENV API_URL:', process.env.EXPO_PUBLIC_API_URL);
-      console.log('🎯 Using API_URL:', API_BASE_URL);
-      console.log('🔍 Fetching outfits from:', `${API_BASE_URL}/api/outfits/${selectedCategory}`);
       const response = await fetch(`${API_BASE_URL}/api/outfits/${selectedCategory}`);
-      console.log('📡 Response status:', response.status, response.statusText);
       const data = await response.json();
-      console.log('✅ Fetched outfits:', data?.outfits?.length, 'items');
-      if (data?.outfits?.[0]) {
-        console.log('   First outfit image:', data.outfits[0].image);
-      }
       setOutfits(data.outfits || []);
     } catch (error) {
       console.error('Error loading outfits:', error);
+      setError('Unable to load outfits. Please try again.');
       setOutfits([]);
     } finally {
       setLoading(false);
@@ -63,10 +58,16 @@ export default function StyleDiscovery() {
     }
   }, []);
 
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadOutfits();
+    await loadCelebrityOutfits();
+    setRefreshing(false);
+  }, [loadOutfits, loadCelebrityOutfits]);
+
   const handleCategorySelect = useCallback((categoryId) => {
     if (categoryId === selectedCategory) return;
     setSelectedCategory(categoryId);
-    // Reset scroll position to top when switching categories
     if (flatListRef.current) {
       flatListRef.current.scrollToOffset({ offset: 0, animated: false });
     }
@@ -98,12 +99,12 @@ export default function StyleDiscovery() {
       <MaterialCommunityIcons
         name={category.icon}
         size={20}
-        color={selectedCategory === category.id ? COLORS.background : COLORS.textSecondary}
+        color={selectedCategory === category.id ? COLORS.textPrimary : COLORS.textSecondary}
       />
       <Text
         style={[
-          styles.categoryButtonText,
-          selectedCategory === category.id && styles.categoryButtonTextActive,
+          styles.categoryText,
+          selectedCategory === category.id && styles.categoryTextActive,
         ]}
       >
         {category.name}
@@ -111,46 +112,71 @@ export default function StyleDiscovery() {
     </TouchableOpacity>
   ), [selectedCategory, handleCategorySelect]);
 
-  // Group outfits into pairs for 2-column layout
-  const pairedOutfits = React.useMemo(() => {
-    const pairs = [];
-    for (let i = 0; i < outfits.length; i += 2) {
-      pairs.push({
-        id: `pair-${i}`,
-        left: outfits[i],
-        right: outfits[i + 1] || null,
-      });
-    }
-    return pairs;
-  }, [outfits]);
+  const renderOutfitRow = useCallback(({ item, index }) => {
+    const isLeft = index % 2 === 0;
+    const nextItem = index < outfits.length - 1 ? outfits[index + 1] : null;
 
-  const renderOutfitPair = useCallback(({ item }) => (
-    <View style={styles.outfitRow}>
-      <OutfitCard item={item.left} onPress={() => handleOutfitPress(item.left)} />
-      {item.right && (
-        <OutfitCard item={item.right} onPress={() => handleOutfitPress(item.right)} />
-      )}
+    if (!isLeft) return null;
+
+    return (
+      <View style={styles.row}>
+        <OutfitCard
+          item={item}
+          onPress={() => handleOutfitPress(item)}
+          isLeft={true}
+        />
+        {nextItem && (
+          <OutfitCard
+            item={nextItem}
+            onPress={() => handleOutfitPress(nextItem)}
+            isLeft={false}
+          />
+        )}
+      </View>
+    );
+  }, [outfits, handleOutfitPress]);
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <MaterialCommunityIcons name="hanger" size={64} color={COLORS.textSecondary} />
+      <Text style={styles.emptyTitle}>No Outfits Found</Text>
+      <Text style={styles.emptySubtitle}>
+        We're working on adding more {selectedCategory} styles
+      </Text>
+      <TouchableOpacity style={styles.retryButton} onPress={loadOutfits}>
+        <Text style={styles.retryText}>Try Again</Text>
+      </TouchableOpacity>
     </View>
-  ), [handleOutfitPress]);
+  );
 
-  return (
-    <View style={styles.container}>
+  const renderErrorState = () => (
+    <View style={styles.errorState}>
+      <MaterialCommunityIcons name="alert-circle-outline" size={64} color={COLORS.error || '#ff4444'} />
+      <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
+      <Text style={styles.errorSubtitle}>{error}</Text>
+      <TouchableOpacity style={styles.retryButton} onPress={loadOutfits}>
+        <MaterialCommunityIcons name="refresh" size={20} color="#fff" />
+        <Text style={styles.retryText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const ListHeaderComponent = () => (
+    <View>
       <View style={styles.header}>
-        <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
-        <Text style={styles.headerTitle}>Style Discovery</Text>
-        <Text style={styles.headerSubtitle}>Curated outfit inspiration</Text>
+        <View>
+          <Text style={styles.headerTitle}>Style Discovery</Text>
+          <Text style={styles.headerSubtitle}>Find your perfect look</Text>
+        </View>
       </View>
 
       {celebrityOutfits.length > 0 && (
         <View style={styles.celebritySection}>
-          <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="star" size={20} color={COLORS.accent} />
-            <Text style={styles.sectionTitle}>Dress Like Your Icon</Text>
-          </View>
+          <Text style={styles.sectionTitle}>Dress Like Your Icon</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.celebrityScroll}
+            contentContainerStyle={styles.celebrityScrollContent}
           >
             {celebrityOutfits.map((outfit) => (
               <TouchableOpacity
@@ -158,71 +184,223 @@ export default function StyleDiscovery() {
                 style={styles.celebrityCard}
                 onPress={() => handleCelebrityPress(outfit)}
               >
-                <OutfitCard item={outfit} onPress={() => handleCelebrityPress(outfit)} />
+                <View style={styles.celebrityImageContainer}>
+                  <Text style={styles.celebrityPlaceholder}>Celebrity</Text>
+                </View>
+                <Text style={styles.celebrityName} numberOfLines={2}>
+                  {outfit.title}
+                </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
       )}
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesContainer}
-        style={styles.categoriesScroll}
-      >
-        {STYLE_CATEGORIES.map(renderCategoryButton)}
-      </ScrollView>
+      <View style={styles.categoriesContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContent}
+        >
+          {STYLE_CATEGORIES.map(renderCategoryButton)}
+        </ScrollView>
+      </View>
+    </View>
+  );
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          {[1, 2, 3, 4].map((i) => (
-            <SkeletonLoader key={i} width="48%" height={240} style={{ marginBottom: 16 }} />
-          ))}
-        </View>
-      ) : outfits.length > 0 ? (
+  return (
+    <View style={styles.container}>
+      {loading && outfits.length === 0 ? (
+        <ScrollView style={styles.scrollView}>
+          <ListHeaderComponent />
+          <SkeletonGrid />
+        </ScrollView>
+      ) : error ? (
+        <ScrollView
+          style={styles.scrollView}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
+          }
+        >
+          <ListHeaderComponent />
+          {renderErrorState()}
+        </ScrollView>
+      ) : (
         <FlatList
           ref={flatListRef}
-          data={pairedOutfits}
-          renderItem={renderOutfitPair}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.outfitsGrid}
+          data={outfits}
+          renderItem={renderOutfitRow}
+          keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+          ListHeaderComponent={ListHeaderComponent}
+          ListEmptyComponent={renderEmptyState}
+          contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          removeClippedSubviews
-          maxToRenderPerBatch={5}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
+          }
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={6}
           windowSize={5}
         />
-      ) : (
-        <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="hanger" size={64} color={COLORS.textSecondary} />
-          <Text style={styles.emptyText}>No outfits yet</Text>
-          <Text style={styles.emptySubtext}>Check back soon for style inspiration</Text>
-        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { padding: 24, paddingTop: 60, alignItems: 'center' },
-  headerTitle: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, marginTop: 12 },
-  headerSubtitle: { fontSize: 14, color: COLORS.textSecondary, marginTop: 4 },
-  celebritySection: { marginBottom: 16 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginLeft: 8 },
-  celebrityScroll: { paddingHorizontal: 16, gap: 12 },
-  celebrityCard: { width: 160 },
-  categoriesScroll: { maxHeight: 50 },
-  categoriesContainer: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-  categoryButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: COLORS.surface, gap: 6 },
-  categoryButtonActive: { backgroundColor: COLORS.primary },
-  categoryButtonText: { fontSize: 14, fontWeight: '500', color: COLORS.textSecondary },
-  categoryButtonTextActive: { color: COLORS.background },
-  loadingContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 16 },
-  outfitsGrid: { paddingHorizontal: 16, paddingBottom: 80 },
-  outfitRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 },
-  emptyText: { fontSize: 18, fontWeight: '600', color: COLORS.textSecondary, marginTop: 16 },
-  emptySubtext: { fontSize: 14, color: COLORS.textSecondary, marginTop: 8, opacity: 0.7 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 120,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 24,
+    paddingBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  celebritySection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 16,
+    letterSpacing: -0.3,
+  },
+  celebrityScrollContent: {
+    paddingRight: 16,
+    gap: 16,
+  },
+  celebrityCard: {
+    width: 120,
+  },
+  celebrityImageContainer: {
+    width: 120,
+    height: 160,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    marginBottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  celebrityPlaceholder: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+  },
+  celebrityName: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  categoriesContainer: {
+    marginBottom: 24,
+  },
+  categoriesContent: {
+    gap: 12,
+    paddingRight: 16,
+  },
+  categoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  categoryButtonActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  categoryText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  categoryTextActive: {
+    color: COLORS.textPrimary,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  errorState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  errorSubtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
