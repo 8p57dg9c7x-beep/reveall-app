@@ -6,13 +6,14 @@ import {
   FlatList,
   TouchableOpacity,
   Platform,
+  RefreshControl,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import BeautyCard from '../components/BeautyCard';
-import { SkeletonOutfitCard } from '../components/SkeletonLoader';
+import { SkeletonGrid } from '../components/SkeletonLoader';
+import { API_BASE_URL } from '../config';
 
 const CATEGORIES = [
   { id: 'natural', name: 'Natural', icon: 'leaf' },
@@ -22,12 +23,12 @@ const CATEGORIES = [
   { id: 'festival', name: 'Festival', icon: 'party-popper' },
 ];
 
-const CARD_HEIGHT = 310;
-
 export default function BeautyScreen() {
   const [selectedCategory, setSelectedCategory] = useState('natural');
   const [looks, setLooks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   const flatListRef = React.useRef(null);
 
   useEffect(() => {
@@ -36,22 +37,28 @@ export default function BeautyScreen() {
 
   const loadLooks = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://backend-rescue-18.preview.emergentagent.com';
-      const response = await fetch(`${API_URL}/api/beauty/${selectedCategory}`);
+      const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
       const data = await response.json();
       setLooks(data.looks || []);
     } catch (error) {
       console.error('Error loading beauty looks:', error);
+      setError('Unable to load beauty looks. Please try again.');
       setLooks([]);
     } finally {
       setLoading(false);
     }
   }, [selectedCategory]);
 
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadLooks();
+    setRefreshing(false);
+  }, [loadLooks]);
+
   const handleCategoryPress = useCallback((categoryId) => {
     setSelectedCategory(categoryId);
-    // Reset scroll position to top when switching categories
     setTimeout(() => {
       flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
     }, 100);
@@ -92,215 +99,232 @@ export default function BeautyScreen() {
     </TouchableOpacity>
   ), [selectedCategory, handleCategoryPress]);
 
-  // Group items into rows of 2 for single-column FlatList
-  const groupedLooks = useMemo(() => {
-    const groups = [];
-    for (let i = 0; i < looks.length; i += 2) {
-      groups.push({
-        id: `row-${i}`,
-        items: [looks[i], looks[i + 1]].filter(Boolean)
-      });
-    }
-    return groups;
-  }, [looks]);
+  const renderBeautyRow = useCallback(({ item, index }) => {
+    const isLeft = index % 2 === 0;
+    const nextItem = index < looks.length - 1 ? looks[index + 1] : null;
 
-  const renderLookRow = useCallback(({ item: row }) => {
+    if (!isLeft) return null;
+
     return (
-      <View style={styles.lookRow}>
-        {row.items.map((item, index) => (
+      <View style={styles.row}>
+        <BeautyCard
+          item={item}
+          onPress={() => handleLookPress(item)}
+          isLeft={true}
+        />
+        {nextItem && (
           <BeautyCard
-            key={item.id}
-            item={item}
-            isLeft={index === 0}
-            onPress={() => handleLookPress(item)}
+            item={nextItem}
+            onPress={() => handleLookPress(nextItem)}
+            isLeft={false}
           />
-        ))}
+        )}
       </View>
     );
-  }, [handleLookPress]);
+  }, [looks, handleLookPress]);
 
-  const renderHeader = useCallback(() => (
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <MaterialCommunityIcons name="lipstick" size={64} color={COLORS.textSecondary} />
+      <Text style={styles.emptyTitle}>No Beauty Looks Found</Text>
+      <Text style={styles.emptySubtitle}>
+        We're working on adding more {selectedCategory} looks
+      </Text>
+      <TouchableOpacity style={styles.retryButton} onPress={loadLooks}>
+        <Text style={styles.retryText}>Try Again</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderErrorState = () => (
+    <View style={styles.errorState}>
+      <MaterialCommunityIcons name="alert-circle-outline" size={64} color={COLORS.error || '#ff4444'} />
+      <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
+      <Text style={styles.errorSubtitle}>{error}</Text>
+      <TouchableOpacity style={styles.retryButton} onPress={loadLooks}>
+        <MaterialCommunityIcons name="refresh" size={20} color="#fff" />
+        <Text style={styles.retryText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const ListHeaderComponent = () => (
     <View>
       <View style={styles.header}>
-        <MaterialCommunityIcons name="lipstick" size={32} color={COLORS.primary} />
-        <Text style={styles.headerTitle}>Beauty Discovery</Text>
-        <Text style={styles.headerSubtitle}>Celebrity makeup looks & dupes</Text>
-      </View>
-
-      {/* Category Filters */}
-      <FlatList
-        horizontal
-        data={CATEGORIES}
-        renderItem={renderCategoryButton}
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoriesContainer}
-        contentContainerStyle={styles.categoriesContent}
-      />
-    </View>
-  ), [selectedCategory, renderCategoryButton]);
-
-  const renderEmptyComponent = useCallback(() => (
-    <View style={styles.emptyState}>
-      <MaterialCommunityIcons name="lipstick" size={80} color={COLORS.textSecondary} />
-      <Text style={styles.emptyTitle}>No Looks Yet</Text>
-      <Text style={styles.emptySubtitle}>
-        {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} looks will appear here once added.
-      </Text>
-    </View>
-  ), [selectedCategory]);
-
-  const renderSkeletonRows = useCallback(() => {
-    return (
-      <View style={styles.skeletonContainer}>
-        {[1, 2, 3, 4].map((row) => (
-          <View key={row} style={styles.skeletonRow}>
-            <SkeletonOutfitCard />
-            <SkeletonOutfitCard />
-          </View>
-        ))}
-      </View>
-    );
-  }, []);
-
-  const renderFooter = useCallback(() => {
-    if (!loading) return null;
-    return (
-      <View style={styles.loadingContainer}>
-        <View style={styles.skeletonGrid}>
-          <SkeletonOutfitCard />
-          <SkeletonOutfitCard />
+        <View>
+          <Text style={styles.headerTitle}>Beauty Hub</Text>
+          <Text style={styles.headerSubtitle}>Discover celebrity-inspired makeup</Text>
         </View>
       </View>
+
+      <View style={styles.categoriesContainer}>
+        <FlatList
+          horizontal
+          data={CATEGORIES}
+          renderItem={renderCategoryButton}
+          keyExtractor={(item) => item.id}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContent}
+        />
+      </View>
+    </View>
+  );
+
+  if (loading && looks.length === 0) {
+    return (
+      <View style={styles.container}>
+        <ListHeaderComponent />
+        <SkeletonGrid />
+      </View>
     );
-  }, [loading]);
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <ListHeaderComponent />
+        {renderErrorState()}
+      </View>
+    );
+  }
 
   return (
-    <LinearGradient
-      colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
-      style={[styles.container, { pointerEvents: 'box-none' }]}
-    >
+    <View style={styles.container}>
       <FlatList
         ref={flatListRef}
-        data={groupedLooks}
-        renderItem={renderLookRow}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={!loading ? renderEmptyComponent : null}
-        ListFooterComponent={renderFooter}
+        data={looks}
+        renderItem={renderBeautyRow}
+        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={renderEmptyState}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.flatListContent}
-        getItemLayout={(data, index) => ({
-          length: CARD_HEIGHT + 16,
-          offset: (CARD_HEIGHT + 16) * index,
-          index,
-        })}
-        maxToRenderPerBatch={3}
-        windowSize={4}
-        removeClippedSubviews={Platform.OS !== 'web'}
-        initialNumToRender={4}
-        updateCellsBatchingPeriod={100}
-        legacyImplementation={false}
-        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
+        }
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={6}
+        windowSize={5}
       />
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
-  flatListContent: {
+  listContent: {
+    paddingHorizontal: 16,
     paddingBottom: 120,
   },
-  lookRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  skeletonContainer: {
-    paddingHorizontal: 16,
-  },
-  skeletonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
   header: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop: 24,
+    paddingBottom: 20,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '700',
     color: COLORS.textPrimary,
-    marginTop: 12,
+    letterSpacing: -0.5,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textSecondary,
     marginTop: 4,
+    fontWeight: '500',
   },
   categoriesContainer: {
-    maxHeight: 56,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   categoriesContent: {
-    paddingHorizontal: 20,
+    gap: 12,
+    paddingRight: 16,
   },
   categoryButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginRight: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    backgroundColor: COLORS.card,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'transparent',
   },
   categoryButtonActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
   categoryText: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    marginLeft: 6,
+    color: COLORS.textSecondary,
   },
   categoryTextActive: {
     color: COLORS.textPrimary,
   },
-  loadingContainer: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  skeletonGrid: {
+  row: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginBottom: 4,
   },
   emptyState: {
-    paddingVertical: 60,
-    paddingHorizontal: 40,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
   },
   emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     color: COLORS.textPrimary,
-    marginTop: 24,
+    marginTop: 20,
+    marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 20,
+    lineHeight: 22,
+  },
+  errorState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  errorSubtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
