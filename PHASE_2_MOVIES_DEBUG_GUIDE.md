@@ -51,10 +51,17 @@ curl https://cinescan-backend.onrender.com/api/discover/trending
 
 Or simply open your REVEAL app and navigate to the Movies/Discover tab.
 
-### Step 5: Check Render Logs
+### Step 5: Check Render Deployment Logs (CRITICAL STEP)
 1. In Render dashboard, go to your backend service
 2. Click **"Logs"** tab
-3. Look for lines starting with 🔍 and 📡:
+3. **First, look for the startup print statement:**
+   ```
+   TMDB_API_KEY loaded: <value>
+   ```
+   This appears during deployment/startup (scroll to the top of recent deployment logs).
+
+4. **Then, look for runtime logs** (after triggering the endpoint):
+   Lines starting with 🔍 and 📡:
 
 ```
 🔍 TMDB_API_KEY received from environment: 'YOUR_KEY_HERE'
