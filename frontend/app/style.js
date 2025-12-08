@@ -88,9 +88,7 @@ export default function StyleDiscovery() {
   const handleCategorySelect = useCallback((categoryId) => {
     if (categoryId === selectedCategory) return;
     setSelectedCategory(categoryId);
-    if (flatListRef.current) {
-      flatListRef.current.scrollToOffset({ offset: 0, animated: false });
-    }
+    // Don't force scroll - let user maintain their position
   }, [selectedCategory]);
 
   const handleCelebrityPress = useCallback((outfit) => {
