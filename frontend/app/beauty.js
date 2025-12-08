@@ -246,6 +246,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: '500',
   },
+  favoritesButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.card,
+  },
   categoriesContainer: {
     marginBottom: 24,
   },
