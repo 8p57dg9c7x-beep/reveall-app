@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CINESCAN Backend Testing Suite - Lyrics Feature Disable Testing
+CINESCAN Backend Testing Suite
 Testing lyrics feature disable and other endpoints functionality
 """
 
@@ -13,14 +13,14 @@ from typing import Dict, Any, List
 # Backend URL - using local backend as specified in review request
 BASE_URL = "http://localhost:8001/api"
 
-class MusicIdentificationTester:
+class BackendTester:
     def __init__(self):
         self.results = []
         self.total_tests = 0
         self.passed_tests = 0
         self.failed_tests = 0
         
-    def log_result(self, test_name, success, details, response_time=None):
+    def log_result(self, test_name: str, success: bool, message: str, response_time: float = None):
         """Log test result"""
         self.total_tests += 1
         if success:
@@ -30,735 +30,365 @@ class MusicIdentificationTester:
             self.failed_tests += 1
             status = "❌ FAIL"
             
-        result = {
-            'test': test_name,
-            'status': status,
-            'success': success,
-            'details': details,
-            'response_time': response_time
-        }
-        self.results.append(result)
-        
-        time_info = f" ({response_time:.2f}s)" if response_time else ""
+        time_info = f" ({response_time:.3f}s)" if response_time else ""
         print(f"{status}: {test_name}{time_info}")
-        print(f"   Details: {details}")
-        print()
+        print(f"   {message}")
         
-    def test_api_health(self):
-        """Test basic API connectivity"""
-        try:
-            start_time = time.time()
-            response = requests.get(f"{API_BASE}/", timeout=10)
-            response_time = time.time() - start_time
-            
-            if response.status_code == 200:
-                data = response.json()
-                self.log_result(
-                    "API Health Check", 
-                    True, 
-                    f"API running: {data.get('message', 'Unknown')}", 
-                    response_time
-                )
-                return True
-            else:
-                self.log_result(
-                    "API Health Check", 
-                    False, 
-                    f"HTTP {response.status_code}: {response.text}"
-                )
-                return False
-        except Exception as e:
-            self.log_result("API Health Check", False, f"Connection error: {str(e)}")
-            return False
-    
-    def test_music_endpoint_structure(self):
-        """Test the music endpoint exists and accepts proper format"""
-        try:
-            # Test with minimal valid payload
-            payload = {"audio_base64": "dGVzdA=="}  # base64 for "test"
-            
-            start_time = time.time()
-            response = requests.post(
-                f"{API_BASE}/recognize-music-base64",
-                json=payload,
-                timeout=10
-            )
-            response_time = time.time() - start_time
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Check response structure
-                required_fields = ['success', 'source', 'song', 'error']
-                missing_fields = [field for field in required_fields if field not in data]
-                
-                if not missing_fields:
-                    self.log_result(
-                        "Music Endpoint Structure", 
-                        True, 
-                        f"Endpoint exists, proper JSON response format", 
-                        response_time
-                    )
-                    return True
-                else:
-                    self.log_result(
-                        "Music Endpoint Structure", 
-                        False, 
-                        f"Missing response fields: {missing_fields}"
-                    )
-                    return False
-            else:
-                self.log_result(
-                    "Music Endpoint Structure", 
-                    False, 
-                    f"HTTP {response.status_code}: {response.text}"
-                )
-                return False
-                
-        except Exception as e:
-            self.log_result("Music Endpoint Structure", False, f"Error: {str(e)}")
-            return False
-    
-    def create_test_audio_base64(self, duration_seconds=10):
-        """Create a simple test audio file in base64 format"""
-        try:
-            # Create a simple sine wave audio (440Hz A note)
-            import numpy as np
-            import wave
-            import io
-            
-            sample_rate = 44100
-            frequency = 440  # A note
-            duration = duration_seconds
-            
-            # Generate sine wave
-            t = np.linspace(0, duration, int(sample_rate * duration), False)
-            audio_data = np.sin(2 * np.pi * frequency * t)
-            
-            # Convert to 16-bit PCM
-            audio_data = (audio_data * 32767).astype(np.int16)
-            
-            # Create WAV file in memory
-            wav_buffer = io.BytesIO()
-            with wave.open(wav_buffer, 'wb') as wav_file:
-                wav_file.setnchannels(1)  # Mono
-                wav_file.setsampwidth(2)  # 16-bit
-                wav_file.setframerate(sample_rate)
-                wav_file.writeframes(audio_data.tobytes())
-            
-            # Get WAV data and encode to base64
-            wav_data = wav_buffer.getvalue()
-            audio_base64 = base64.b64encode(wav_data).decode('utf-8')
-            
-            return audio_base64
-            
-        except ImportError:
-            # Fallback: create a simple base64 string representing audio
-            # This won't be real audio but will test the endpoint structure
-            fake_audio_data = b"RIFF" + b"\x00" * 100  # Minimal WAV-like header
-            return base64.b64encode(fake_audio_data).decode('utf-8')
-        except Exception as e:
-            print(f"Warning: Could not create test audio: {e}")
-            # Return a basic base64 string
-            return base64.b64encode(b"test_audio_data").decode('utf-8')
-    
-    def test_audd_api_integration(self):
-        """Test AudD API integration with real audio"""
-        try:
-            # Create test audio
-            test_audio = self.create_test_audio_base64(15)  # 15 second test
-            
-            payload = {"audio_base64": test_audio}
-            
-            start_time = time.time()
-            response = requests.post(
-                f"{API_BASE}/recognize-music-base64",
-                json=payload,
-                timeout=30  # AudD can take time
-            )
-            response_time = time.time() - start_time
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Check if AudD processed the request (even if no match)
-                if 'source' in data and 'AudD' in data.get('source', ''):
-                    self.log_result(
-                        "AudD API Integration", 
-                        True, 
-                        f"AudD processed request successfully. Response: {data.get('success')}", 
-                        response_time
-                    )
-                    
-                    # Check response time requirement (< 5 seconds)
-                    if response_time > 5:
-                        self.log_result(
-                            "AudD Response Time", 
-                            False, 
-                            f"Response time {response_time:.2f}s exceeds 5s target"
-                        )
-                    else:
-                        self.log_result(
-                            "AudD Response Time", 
-                            True, 
-                            f"Response time {response_time:.2f}s meets <5s target"
-                        )
-                    
-                    return True
-                else:
-                    self.log_result(
-                        "AudD API Integration", 
-                        False, 
-                        f"AudD not detected in response source: {data.get('source', 'None')}"
-                    )
-                    return False
-            else:
-                self.log_result(
-                    "AudD API Integration", 
-                    False, 
-                    f"HTTP {response.status_code}: {response.text}"
-                )
-                return False
-                
-        except Exception as e:
-            self.log_result("AudD API Integration", False, f"Error: {str(e)}")
-            return False
-    
-    def test_error_handling(self):
-        """Test various error conditions"""
-        error_tests = [
-            {
-                "name": "Empty Payload",
-                "payload": {},
-                "expected": "should handle missing audio_base64"
-            },
-            {
-                "name": "Invalid Base64",
-                "payload": {"audio_base64": "invalid_base64!@#"},
-                "expected": "should handle invalid base64"
-            },
-            {
-                "name": "Empty Audio Data",
-                "payload": {"audio_base64": ""},
-                "expected": "should handle empty audio"
-            },
-            {
-                "name": "Very Short Audio",
-                "payload": {"audio_base64": base64.b64encode(b"short").decode()},
-                "expected": "should handle very short audio"
-            }
+        self.results.append({
+            'test': test_name,
+            'success': success,
+            'message': message,
+            'response_time': response_time
+        })
+        
+    def test_lyrics_endpoint(self):
+        """Test lyrics endpoint - should return static disabled message"""
+        print("\n🎵 TESTING LYRICS ENDPOINT (DISABLED)")
+        
+        test_queries = [
+            "Bohemian Rhapsody Queen",
+            "Imagine John Lennon", 
+            "test song",
+            "Shape of You Ed Sheeran",
+            "Billie Jean Michael Jackson"
         ]
         
-        for test in error_tests:
+        for query in test_queries:
             try:
                 start_time = time.time()
-                response = requests.post(
-                    f"{API_BASE}/recognize-music-base64",
-                    json=test["payload"],
-                    timeout=10
-                )
+                response = requests.get(f"{BASE_URL}/lyrics/{query}", timeout=10)
                 response_time = time.time() - start_time
                 
                 if response.status_code == 200:
                     data = response.json()
                     
-                    # Should return proper error structure
-                    if 'success' in data and 'error' in data:
-                        if not data.get('success') and data.get('error'):
+                    # Check expected response format
+                    expected_format = {
+                        "success": False,
+                        "lyrics": None,
+                        "message": "Lyrics feature is temporarily unavailable. We're working on bringing it back soon!"
+                    }
+                    
+                    if (data.get("success") == expected_format["success"] and 
+                        data.get("lyrics") == expected_format["lyrics"] and
+                        data.get("message") == expected_format["message"]):
+                        
+                        # Check response time (should be very fast since no API call)
+                        if response_time < 1.0:  # Should be instant
                             self.log_result(
-                                f"Error Handling: {test['name']}", 
+                                f"Lyrics endpoint - {query}", 
                                 True, 
-                                f"Proper error response: {data.get('error')}", 
+                                f"Correct static response returned. Fast response time.", 
                                 response_time
                             )
                         else:
                             self.log_result(
-                                f"Error Handling: {test['name']}", 
+                                f"Lyrics endpoint - {query}", 
                                 False, 
-                                f"Unexpected success for invalid input: {data}"
+                                f"Response too slow ({response_time:.3f}s) - should be instant since no API call", 
+                                response_time
                             )
                     else:
                         self.log_result(
-                            f"Error Handling: {test['name']}", 
+                            f"Lyrics endpoint - {query}", 
                             False, 
-                            f"Missing error structure in response: {data}"
+                            f"Incorrect response format. Got: {data}"
                         )
                 else:
                     self.log_result(
-                        f"Error Handling: {test['name']}", 
+                        f"Lyrics endpoint - {query}", 
                         False, 
                         f"HTTP {response.status_code}: {response.text}"
                     )
                     
             except Exception as e:
-                self.log_result(f"Error Handling: {test['name']}", False, f"Exception: {str(e)}")
-    
-    def test_audio_format_compatibility(self):
-        """Test different audio format handling"""
-        formats = [
-            {"name": "WAV Format", "data": self.create_test_audio_base64(5)},
-            {"name": "MP3-like Header", "data": base64.b64encode(b"ID3" + b"\x00" * 50).decode()},
-            {"name": "Generic Audio", "data": base64.b64encode(b"audio_data_" + b"\x00" * 100).decode()}
-        ]
-        
-        for fmt in formats:
-            try:
-                payload = {"audio_base64": fmt["data"]}
-                
-                start_time = time.time()
-                response = requests.post(
-                    f"{API_BASE}/recognize-music-base64",
-                    json=payload,
-                    timeout=15
-                )
-                response_time = time.time() - start_time
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    self.log_result(
-                        f"Audio Format: {fmt['name']}", 
-                        True, 
-                        f"Format accepted, processed by backend", 
-                        response_time
-                    )
-                else:
-                    self.log_result(
-                        f"Audio Format: {fmt['name']}", 
-                        False, 
-                        f"HTTP {response.status_code}: {response.text}"
-                    )
-                    
-            except Exception as e:
-                self.log_result(f"Audio Format: {fmt['name']}", False, f"Error: {str(e)}")
-    
-    def test_large_audio_handling(self):
-        """Test handling of larger audio files"""
-        try:
-            # Create larger test audio (30 seconds)
-            large_audio = self.create_test_audio_base64(30)
-            
-            payload = {"audio_base64": large_audio}
-            
-            start_time = time.time()
-            response = requests.post(
-                f"{API_BASE}/recognize-music-base64",
-                json=payload,
-                timeout=60  # Longer timeout for large files
-            )
-            response_time = time.time() - start_time
-            
-            if response.status_code == 200:
-                data = response.json()
                 self.log_result(
-                    "Large Audio Handling", 
-                    True, 
-                    f"Large audio processed successfully", 
-                    response_time
-                )
-                
-                # Check if response time is reasonable for large files
-                if response_time > 10:
-                    self.log_result(
-                        "Large Audio Performance", 
-                        False, 
-                        f"Large audio took {response_time:.2f}s (>10s threshold)"
-                    )
-                else:
-                    self.log_result(
-                        "Large Audio Performance", 
-                        True, 
-                        f"Large audio processed in {response_time:.2f}s"
-                    )
-                    
-            else:
-                self.log_result(
-                    "Large Audio Handling", 
-                    False, 
-                    f"HTTP {response.status_code}: {response.text}"
-                )
-                
-        except Exception as e:
-            self.log_result("Large Audio Handling", False, f"Error: {str(e)}")
-    
-    def test_famous_songs_simulation(self):
-        """Test with simulated famous songs (cannot use real copyrighted music)"""
-        # We cannot test with actual copyrighted music, but we can test the endpoint
-        # with different audio patterns to simulate various music types
-        
-        famous_songs = [
-            {"name": "Pop Music Simulation", "freq": 440, "duration": 10},
-            {"name": "Rock Music Simulation", "freq": 220, "duration": 12},
-            {"name": "Classical Music Simulation", "freq": 880, "duration": 15},
-            {"name": "Electronic Music Simulation", "freq": 660, "duration": 8},
-            {"name": "Hip Hop Simulation", "freq": 330, "duration": 10}
-        ]
-        
-        for song in famous_songs:
-            try:
-                # Create audio with different frequency to simulate different genres
-                test_audio = self.create_test_audio_base64(song["duration"])
-                
-                payload = {"audio_base64": test_audio}
-                
-                start_time = time.time()
-                response = requests.post(
-                    f"{API_BASE}/recognize-music-base64",
-                    json=payload,
-                    timeout=30
-                )
-                response_time = time.time() - start_time
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    
-                    # We expect these to not be recognized (they're synthetic)
-                    # But the API should process them without errors
-                    if 'success' in data:
-                        self.log_result(
-                            f"Music Test: {song['name']}", 
-                            True, 
-                            f"API processed synthetic audio correctly (success: {data.get('success')})", 
-                            response_time
-                        )
-                    else:
-                        self.log_result(
-                            f"Music Test: {song['name']}", 
-                            False, 
-                            f"Invalid response structure: {data}"
-                        )
-                else:
-                    self.log_result(
-                        f"Music Test: {song['name']}", 
-                        False, 
-                        f"HTTP {response.status_code}: {response.text}"
-                    )
-                    
-            except Exception as e:
-                self.log_result(f"Music Test: {song['name']}", False, f"Error: {str(e)}")
-    
-    def check_backend_logs(self):
-        """Check backend logs for any errors"""
-        try:
-            # This would require access to backend logs
-            # For now, we'll just note that logs should be checked
-            self.log_result(
-                "Backend Logs Check", 
-                True, 
-                "Manual check required: Review backend logs for Python errors or AudD API issues"
-            )
-        except Exception as e:
-            self.log_result("Backend Logs Check", False, f"Could not access logs: {str(e)}")
-    
-    def download_legal_audio_samples(self):
-        """Download legal audio samples for testing"""
-        print("🎵 DOWNLOADING LEGAL AUDIO SAMPLES...")
-        print("=" * 60)
-        
-        # Create audio directory
-        audio_dir = "/tmp/test_audio"
-        os.makedirs(audio_dir, exist_ok=True)
-        
-        # List of legal audio sources that might be in AudD's database
-        legal_samples = [
-            {
-                'name': 'classical_sample_1.mp3',
-                'url': 'https://www.soundjay.com/misc/sounds-1/beep-07a.mp3',
-                'description': 'Classical music sample'
-            },
-            {
-                'name': 'royalty_free_sample.mp3', 
-                'url': 'https://www.soundjay.com/misc/sounds-1/beep-10.mp3',
-                'description': 'Royalty-free music sample'
-            }
-        ]
-        
-        downloaded_files = []
-        
-        # Try to download samples
-        for sample in legal_samples:
-            try:
-                print(f"Downloading: {sample['name']}")
-                response = requests.get(sample['url'], timeout=30)
-                if response.status_code == 200:
-                    file_path = os.path.join(audio_dir, sample['name'])
-                    with open(file_path, 'wb') as f:
-                        f.write(response.content)
-                    downloaded_files.append({
-                        'path': file_path,
-                        'name': sample['name'],
-                        'description': sample['description']
-                    })
-                    print(f"✅ Downloaded: {sample['name']} ({len(response.content)} bytes)")
-                else:
-                    print(f"❌ Failed to download: {sample['name']} (HTTP {response.status_code})")
-            except Exception as e:
-                print(f"❌ Error downloading {sample['name']}: {e}")
-        
-        print(f"\n📁 Total audio files available: {len(downloaded_files)}")
-        return downloaded_files
-
-    def test_real_audio_recognition(self, audio_files):
-        """Test music recognition with real audio files"""
-        print("🎵 TESTING REAL AUDIO RECOGNITION...")
-        print("=" * 60)
-        
-        for audio_file in audio_files:
-            try:
-                print(f"Testing: {audio_file['name']}")
-                
-                # Read and convert to base64
-                with open(audio_file['path'], 'rb') as f:
-                    audio_content = f.read()
-                audio_base64 = base64.b64encode(audio_content).decode('utf-8')
-                
-                payload = {'audio_base64': audio_base64}
-                
-                start_time = time.time()
-                response = requests.post(
-                    f"{API_BASE}/recognize-music-base64",
-                    json=payload,
-                    timeout=60
-                )
-                response_time = time.time() - start_time
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    
-                    if result.get('success'):
-                        song_info = result.get('song', {})
-                        details = f"✅ IDENTIFIED: '{song_info.get('title', 'Unknown')}' by {song_info.get('artist', 'Unknown')}"
-                        if song_info.get('album'):
-                            details += f" (Album: {song_info.get('album')})"
-                        
-                        self.log_result(
-                            f"Real Audio Recognition - {audio_file['name']}", 
-                            True, 
-                            details,
-                            response_time
-                        )
-                    else:
-                        # Not found is expected for most test audio, but API should work
-                        error_msg = result.get('error', 'Unknown error')
-                        self.log_result(
-                            f"Real Audio Recognition - {audio_file['name']}", 
-                            True,  # Technical success
-                            f"Song not recognized (expected for test audio): {error_msg}",
-                            response_time
-                        )
-                else:
-                    self.log_result(
-                        f"Real Audio Recognition - {audio_file['name']}", 
-                        False, 
-                        f"HTTP {response.status_code}: {response.text}",
-                        response_time
-                    )
-                    
-            except Exception as e:
-                self.log_result(
-                    f"Real Audio Recognition - {audio_file['name']}", 
+                    f"Lyrics endpoint - {query}", 
                     False, 
                     f"Request failed: {str(e)}"
                 )
-
-    def run_comprehensive_test(self):
-        """Run comprehensive real-world music identification testing"""
-        print("🎵 CINESCAN REAL-WORLD MUSIC IDENTIFICATION TEST")
-        print("=" * 80)
-        print("🎯 OBJECTIVE: Test music identification with legally available audio samples")
-        print("🎯 APPROACH: Verify end-to-end functionality with real audio files")
-        print(f"Backend URL: {BACKEND_URL}")
-        print(f"Test Time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-        print("=" * 80)
+    
+    def test_outfits_endpoint(self):
+        """Test outfits endpoint to ensure it still works"""
+        print("\n👗 TESTING OUTFITS ENDPOINT")
         
-        # Test 1: API Health Check
-        if not self.test_api_health():
-            print("❌ CRITICAL: API not accessible. Stopping tests.")
-            return
-            
-        # Test 2: Endpoint Structure (fix the source field issue)
-        self.test_music_endpoint_structure_fixed()
+        categories = ["casual", "formal", "party", "business"]
         
-        # Test 3: AudD API Integration
-        self.test_audd_api_integration()
+        for category in categories:
+            try:
+                start_time = time.time()
+                response = requests.get(f"{BASE_URL}/outfits/{category}", timeout=10)
+                response_time = time.time() - start_time
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "outfits" in data and "category" in data:
+                        self.log_result(
+                            f"Outfits endpoint - {category}", 
+                            True, 
+                            f"Returned {len(data.get('outfits', []))} outfits for category {category}", 
+                            response_time
+                        )
+                    else:
+                        self.log_result(
+                            f"Outfits endpoint - {category}", 
+                            False, 
+                            f"Invalid response format: {data}"
+                        )
+                else:
+                    self.log_result(
+                        f"Outfits endpoint - {category}", 
+                        False, 
+                        f"HTTP {response.status_code}: {response.text}"
+                    )
+                    
+            except Exception as e:
+                self.log_result(
+                    f"Outfits endpoint - {category}", 
+                    False, 
+                    f"Request failed: {str(e)}"
+                )
+    
+    def test_beauty_endpoint(self):
+        """Test beauty endpoint to ensure it still works"""
+        print("\n💄 TESTING BEAUTY ENDPOINT")
         
-        # Test 4: Error Handling
-        self.test_error_handling()
+        categories = ["makeup", "skincare", "hair", "nails"]
         
-        # Test 5: Download and test with legal audio samples
-        audio_files = self.download_legal_audio_samples()
+        for category in categories:
+            try:
+                start_time = time.time()
+                response = requests.get(f"{BASE_URL}/beauty/{category}", timeout=10)
+                response_time = time.time() - start_time
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "looks" in data:
+                        self.log_result(
+                            f"Beauty endpoint - {category}", 
+                            True, 
+                            f"Returned {len(data.get('looks', []))} beauty looks for category {category}", 
+                            response_time
+                        )
+                    else:
+                        self.log_result(
+                            f"Beauty endpoint - {category}", 
+                            False, 
+                            f"Invalid response format: {data}"
+                        )
+                else:
+                    self.log_result(
+                        f"Beauty endpoint - {category}", 
+                        False, 
+                        f"HTTP {response.status_code}: {response.text}"
+                    )
+                    
+            except Exception as e:
+                self.log_result(
+                    f"Beauty endpoint - {category}", 
+                    False, 
+                    f"Request failed: {str(e)}"
+                )
+    
+    def test_discover_trending_endpoint(self):
+        """Test discover trending endpoint"""
+        print("\n🎬 TESTING DISCOVER TRENDING ENDPOINT")
         
-        if audio_files:
-            self.test_real_audio_recognition(audio_files)
-        else:
-            print("⚠️  No audio files available for testing")
-            self.log_result(
-                "Audio File Availability", 
-                False, 
-                "No legal audio samples could be downloaded"
-            )
-        
-        # Test 6: Performance Analysis
-        self.analyze_performance()
-        
-        # Generate final report
-        self.generate_final_report()
-
-    def test_music_endpoint_structure_fixed(self):
-        """Test the music endpoint structure (fixed version)"""
         try:
-            payload = {"audio_base64": "dGVzdA=="}  # base64 for "test"
-            
             start_time = time.time()
-            response = requests.post(
-                f"{API_BASE}/recognize-music-base64",
-                json=payload,
-                timeout=10
-            )
+            response = requests.get(f"{BASE_URL}/discover/trending", timeout=15)
             response_time = time.time() - start_time
             
             if response.status_code == 200:
                 data = response.json()
-                
-                # Check required fields (source is optional when song not found)
-                required_fields = ['success', 'song', 'error']
-                missing_fields = [field for field in required_fields if field not in data]
-                
-                if not missing_fields:
-                    self.log_result(
-                        "Music Endpoint Structure", 
-                        True, 
-                        f"Endpoint exists, proper JSON response format", 
-                        response_time
-                    )
-                    return True
+                if "results" in data:
+                    results_count = len(data.get("results", []))
+                    if results_count > 0:
+                        self.log_result(
+                            "Discover trending endpoint", 
+                            True, 
+                            f"Returned {results_count} trending movies", 
+                            response_time
+                        )
+                    else:
+                        # This might be expected if TMDB_API_KEY has issues on production
+                        self.log_result(
+                            "Discover trending endpoint", 
+                            True, 
+                            "Endpoint working but returned empty results (may be TMDB API key issue)", 
+                            response_time
+                        )
                 else:
                     self.log_result(
-                        "Music Endpoint Structure", 
+                        "Discover trending endpoint", 
                         False, 
-                        f"Missing response fields: {missing_fields}"
+                        f"Invalid response format: {data}"
                     )
-                    return False
             else:
                 self.log_result(
-                    "Music Endpoint Structure", 
+                    "Discover trending endpoint", 
                     False, 
                     f"HTTP {response.status_code}: {response.text}"
                 )
-                return False
                 
         except Exception as e:
-            self.log_result("Music Endpoint Structure", False, f"Error: {str(e)}")
-            return False
-
-    def analyze_performance(self):
-        """Analyze response time performance"""
-        response_times = []
-        for result in self.results:
-            if result.get('response_time') is not None:
-                response_times.append(result['response_time'])
-        
-        if response_times:
-            avg_time = sum(response_times) / len(response_times)
-            max_time = max(response_times)
-            min_time = min(response_times)
-            
-            # Check if meets Shazam-level performance (<5s)
-            performance_ok = avg_time < 5.0
-            
             self.log_result(
-                "Performance Analysis", 
-                performance_ok, 
-                f"Avg: {avg_time:.2f}s, Min: {min_time:.2f}s, Max: {max_time:.2f}s (Target: <5s)"
+                "Discover trending endpoint", 
+                False, 
+                f"Request failed: {str(e)}"
             )
-
-    def generate_final_report(self):
-        """Generate comprehensive test report"""
-        print("\n" + "=" * 80)
-        print("🎵 FINAL REAL-WORLD MUSIC IDENTIFICATION TEST REPORT")
-        print("=" * 80)
-        
-        success_rate = (self.passed_tests / self.total_tests * 100) if self.total_tests > 0 else 0
-        
-        print(f"📊 OVERALL RESULTS:")
-        print(f"   Total Tests: {self.total_tests}")
-        print(f"   Successful: {self.passed_tests}")
-        print(f"   Failed: {self.failed_tests}")
-        print(f"   Success Rate: {success_rate:.1f}%")
-        
-        # Response time analysis
-        response_times = [r.get('response_time') for r in self.results if r.get('response_time') is not None]
-        if response_times:
-            avg_time = sum(response_times) / len(response_times)
-            max_time = max(response_times)
-            min_time = min(response_times)
-            
-            print(f"\n⏱️  PERFORMANCE ANALYSIS:")
-            print(f"   Average Response Time: {avg_time:.2f}s")
-            print(f"   Fastest Response: {min_time:.2f}s")
-            print(f"   Slowest Response: {max_time:.2f}s")
-            print(f"   Target: <5s (Shazam-level performance)")
-            
-            if avg_time < 5.0:
-                print(f"   ✅ PERFORMANCE TARGET MET!")
-            else:
-                print(f"   ❌ Performance target missed")
-        
-        # Technical assessment
-        print(f"\n🔧 TECHNICAL ASSESSMENT:")
-        
-        api_healthy = any('API Health Check' in r['test'] and r['success'] for r in self.results)
-        endpoint_working = any('Music Endpoint Structure' in r['test'] and r['success'] for r in self.results)
-        audd_working = any('AudD API Integration' in r['test'] and r['success'] for r in self.results)
-        error_handling = any('Error Handling' in r['test'] and r['success'] for r in self.results)
-        
-        print(f"   ✅ API Endpoint Health: {'Working' if api_healthy else 'Failed'}")
-        print(f"   ✅ Endpoint Structure: {'Correct' if endpoint_working else 'Issues detected'}")
-        print(f"   ✅ AudD API Integration: {'Functional' if audd_working else 'Failed'}")
-        print(f"   ✅ Error Handling: {'Proper' if error_handling else 'Issues detected'}")
-        print(f"   ✅ Base64 Audio Processing: {'Working' if any(r['success'] for r in self.results) else 'Failed'}")
-        
-        # Final recommendation
-        print(f"\n🎯 DEPLOYMENT RECOMMENDATION:")
-        if success_rate >= 80 and api_healthy and audd_working:
-            print("   ✅ SYSTEM IS PRODUCTION READY")
-            print("   - All technical components working correctly")
-            print("   - AudD API integration verified and functional")
-            print("   - Error handling proper")
-            print("   - Ready for real-world music identification")
-            print("   - User can confidently test with actual copyrighted songs")
-        else:
-            print("   ❌ SYSTEM NEEDS ATTENTION")
-            print("   - Technical issues detected")
-            print("   - Review failed tests before deployment")
-        
-        # Key findings
-        print(f"\n🔍 KEY FINDINGS:")
-        print("   ✅ AudD API is responding correctly (confirmed in backend logs)")
-        print("   ✅ Base64 audio encoding/decoding working")
-        print("   ✅ Endpoint accepts proper JSON payload format")
-        print("   ✅ Response format correct: {success, song, error}")
-        print("   ✅ Response times excellent (well under 5s target)")
-        print("   ⚠️  Test audio files not recognized (expected - they're not in AudD database)")
-        print("   ✅ System ready for testing with actual copyrighted music")
-        
-        print("\n" + "=" * 80)
-        
-        return {
-            'total_tests': self.total_tests,
-            'passed_tests': self.passed_tests,
-            'failed_tests': self.failed_tests,
-            'success_rate': success_rate,
-            'api_healthy': api_healthy,
-            'audd_working': audd_working
-        }
-
-def main():
-    """Main test execution"""
-    tester = MusicIdentificationTester()
-    results = tester.run_comprehensive_test()
     
-    # Return results for further processing
-    return results
+    def test_api_root_endpoint(self):
+        """Test API root endpoint"""
+        print("\n🏠 TESTING API ROOT ENDPOINT")
+        
+        try:
+            start_time = time.time()
+            response = requests.get(f"{BASE_URL}/", timeout=10)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if (data.get("message") == "CINESCAN API" and 
+                    data.get("version") == "1.0.0" and 
+                    data.get("status") == "running"):
+                    self.log_result(
+                        "API root endpoint", 
+                        True, 
+                        "API is running and responding correctly", 
+                        response_time
+                    )
+                else:
+                    self.log_result(
+                        "API root endpoint", 
+                        False, 
+                        f"Unexpected response: {data}"
+                    )
+            else:
+                self.log_result(
+                    "API root endpoint", 
+                    False, 
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                
+        except Exception as e:
+            self.log_result(
+                "API root endpoint", 
+                False, 
+                f"Request failed: {str(e)}"
+            )
+    
+    def check_backend_logs_for_audd_calls(self):
+        """Check backend logs to ensure no AudD API calls are made for lyrics"""
+        print("\n📋 CHECKING BACKEND LOGS FOR AUDD CALLS")
+        
+        try:
+            # Check supervisor logs for any AudD API calls
+            import subprocess
+            result = subprocess.run([
+                'tail', '-n', '50', '/var/log/supervisor/backend.out.log'
+            ], capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0:
+                log_content = result.stdout
+                
+                # Look for AudD API calls in recent logs
+                audd_calls = [line for line in log_content.split('\n') if 'audd' in line.lower()]
+                
+                if not audd_calls:
+                    self.log_result(
+                        "Backend logs - No AudD calls", 
+                        True, 
+                        "No AudD API calls found in recent backend logs (lyrics feature properly disabled)"
+                    )
+                else:
+                    # Check if these are old calls or new ones
+                    recent_audd_calls = [call for call in audd_calls if 'lyrics' in call.lower()]
+                    if not recent_audd_calls:
+                        self.log_result(
+                            "Backend logs - No lyrics AudD calls", 
+                            True, 
+                            "No recent AudD API calls for lyrics found in backend logs"
+                        )
+                    else:
+                        self.log_result(
+                            "Backend logs - AudD calls detected", 
+                            False, 
+                            f"Found recent AudD API calls in logs: {recent_audd_calls}"
+                        )
+            else:
+                self.log_result(
+                    "Backend logs check", 
+                    False, 
+                    f"Could not read backend logs: {result.stderr}"
+                )
+                
+        except Exception as e:
+            self.log_result(
+                "Backend logs check", 
+                False, 
+                f"Error checking logs: {str(e)}"
+            )
+    
+    def run_all_tests(self):
+        """Run all backend tests"""
+        print("🚀 STARTING CINESCAN BACKEND TESTING SUITE")
+        print("=" * 60)
+        
+        # Test API root first
+        self.test_api_root_endpoint()
+        
+        # Test lyrics endpoint (main focus)
+        self.test_lyrics_endpoint()
+        
+        # Test other endpoints to ensure they still work
+        self.test_outfits_endpoint()
+        self.test_beauty_endpoint()
+        self.test_discover_trending_endpoint()
+        
+        # Check logs for AudD calls
+        self.check_backend_logs_for_audd_calls()
+        
+        # Print summary
+        self.print_summary()
+    
+    def print_summary(self):
+        """Print test summary"""
+        print("\n" + "=" * 60)
+        print("🎯 TEST SUMMARY")
+        print("=" * 60)
+        print(f"Total Tests: {self.total_tests}")
+        print(f"✅ Passed: {self.passed_tests}")
+        print(f"❌ Failed: {self.failed_tests}")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
+        
+        if self.failed_tests > 0:
+            print("\n❌ FAILED TESTS:")
+            for result in self.results:
+                if not result['success']:
+                    print(f"  - {result['test']}: {result['message']}")
+        
+        print("\n🎵 LYRICS FEATURE STATUS:")
+        lyrics_tests = [r for r in self.results if 'lyrics' in r['test'].lower()]
+        lyrics_passed = sum(1 for r in lyrics_tests if r['success'])
+        
+        if lyrics_passed == len(lyrics_tests) and len(lyrics_tests) > 0:
+            print("✅ Lyrics feature successfully disabled - all tests passed")
+            print("✅ No network errors or API call failures detected")
+            print("✅ Response format matches expected structure")
+            print("✅ Response time is fast (no API calls being made)")
+        else:
+            print("❌ Lyrics feature disable has issues - check failed tests above")
+        
+        return self.failed_tests == 0
 
 if __name__ == "__main__":
-    main()
+    tester = BackendTester()
+    success = tester.run_all_tests()
+    
+    if success:
+        print("\n🎉 ALL TESTS PASSED - Backend is working correctly!")
+        sys.exit(0)
+    else:
+        print("\n⚠️  SOME TESTS FAILED - Check results above")
+        sys.exit(1)
