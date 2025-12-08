@@ -61,9 +61,7 @@ export default function BeautyScreen() {
 
   const handleCategoryPress = useCallback((categoryId) => {
     setSelectedCategory(categoryId);
-    setTimeout(() => {
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
-    }, 100);
+    // Don't force scroll - let user maintain their position
   }, []);
 
   const handleLookPress = useCallback((item) => {
