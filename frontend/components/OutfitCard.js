@@ -1,24 +1,22 @@
 import React, { memo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
 
 const OutfitCard = memo(({ item, onPress, isLeft }) => {
-  console.log('🎨 OutfitCard rendering:', {
-    title: item.title,
-    hasImage: !!item.image,
-    imageUrl: item.image?.substring(0, 50),
-  });
-  
   return (
     <TouchableOpacity
       style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
       onPress={onPress}
     >
-      <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
-      <View style={{position: 'absolute', top: 5, left: 5, backgroundColor: 'rgba(0,0,0,0.7)', padding: 3, borderRadius: 3}}>
-        <Text style={{color: '#fff', fontSize: 8}}>ID: {item.id?.toString().substring(0, 8)}</Text>
+      <View style={styles.imageContainer}>
+        <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
+        {item.gender && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{item.gender}</Text>
+          </View>
+        )}
       </View>
       <View style={styles.outfitInfo}>
         <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
@@ -27,7 +25,6 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
     </TouchableOpacity>
   );
 }, (prevProps, nextProps) => {
-  // Only re-render if item.id changed
   return prevProps.item.id === nextProps.item.id && 
          prevProps.isLeft === nextProps.isLeft;
 });
@@ -36,10 +33,21 @@ const styles = StyleSheet.create({
   outfitCard: {
     width: '48%',
     backgroundColor: COLORS.card,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 20,
     height: 310,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
   cardLeft: {
     marginRight: 8,
@@ -47,23 +55,48 @@ const styles = StyleSheet.create({
   cardRight: {
     marginLeft: 8,
   },
-  outfitImage: {
+  imageContainer: {
     width: '100%',
     height: 240,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    position: 'relative',
+  },
+  outfitImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  badge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    backdropFilter: 'blur(10px)',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   outfitInfo: {
-    padding: 12,
+    padding: 14,
+    gap: 4,
   },
   outfitTitle: {
     color: COLORS.textPrimary,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 4,
+    lineHeight: 20,
+    marginBottom: 2,
   },
   outfitPrice: {
     color: COLORS.textSecondary,
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: '500',
   },
 });
 
