@@ -114,6 +114,7 @@ export default function RootLayout() {
           }}
         />
       </Tabs>
-    </GestureHandlerRootView>
+      </GestureHandlerRootView>
+    </FavoritesProvider>
   );
 }
