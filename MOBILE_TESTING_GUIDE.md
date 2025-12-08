@@ -4,7 +4,7 @@
 
 ### Option 1: Web Preview (Instant)
 Access the app directly in your browser:
-- **URL**: https://backend-rescue-18.preview.emergentagent.com
+- **URL**: https://cinescan.preview.emergentagent.com
 - Works on desktop and mobile browsers
 - No installation required
 
@@ -174,10 +174,10 @@ tail -100 /var/log/supervisor/expo.out.log | grep -A 10 "Tunnel ready"
 
 ## 🔗 Useful Links
 
-- **Web Preview**: https://backend-rescue-18.preview.emergentagent.com
-- **Home Screen**: https://backend-rescue-18.preview.emergentagent.com/
-- **Identify Screen**: https://backend-rescue-18.preview.emergentagent.com/identify
-- **Watchlist Screen**: https://backend-rescue-18.preview.emergentagent.com/watchlist
+- **Web Preview**: https://cinescan.preview.emergentagent.com
+- **Home Screen**: https://cinescan.preview.emergentagent.com/
+- **Identify Screen**: https://cinescan.preview.emergentagent.com/identify
+- **Watchlist Screen**: https://cinescan.preview.emergentagent.com/watchlist
 
 ## 📝 Testing Notes
 
