@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { COLORS } from '../constants/theme';
+import { API_BASE_URL } from '../config';
 import { searchMusic } from '../services/api';
 import OptimizedImage from '../components/OptimizedImage';
 import { SkeletonHorizontalCard } from '../components/SkeletonLoader';
