@@ -157,6 +157,12 @@ export default function BeautyScreen() {
           <Text style={styles.headerTitle}>Beauty Hub</Text>
           <Text style={styles.headerSubtitle}>Discover celebrity-inspired makeup</Text>
         </View>
+        <TouchableOpacity 
+          style={styles.favoritesButton}
+          onPress={() => router.push('/saved-beauty')}
+        >
+          <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.categoriesContainer}>
