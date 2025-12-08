@@ -32,21 +32,23 @@ export default function DiscoverScreen() {
     setLoadingMovies(true);
     setLoadingStyles(true);
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://backend-rescue-18.preview.emergentagent.com';
+      console.log('🎬 Loading discover data from:', API_BASE_URL);
       
       // Load trending movies
-      const moviesRes = await fetch(`${API_URL}/api/discover/trending`);
+      const moviesRes = await fetch(`${API_BASE_URL}/api/discover/trending`);
+      console.log('📊 Movies response status:', moviesRes.status);
       const moviesData = await moviesRes.json();
+      console.log('✅ Loaded movies:', moviesData.results?.length || 0);
       setTrendingMovies(moviesData.results?.slice(0, 10) || []);
       setLoadingMovies(false);
 
       // Load trending styles (from all categories)
-      const stylesRes = await fetch(`${API_URL}/api/outfits/trending`);
+      const stylesRes = await fetch(`${API_BASE_URL}/api/outfits/trending`);
       const stylesData = await stylesRes.json();
       setTrendingStyles(stylesData.outfits || []);
       setLoadingStyles(false);
     } catch (error) {
-      console.error('Error loading discover data:', error);
+      console.error('❌ Error loading discover data:', error);
       setLoadingMovies(false);
       setLoadingStyles(false);
     } finally {
