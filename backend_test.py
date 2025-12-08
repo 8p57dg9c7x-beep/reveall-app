@@ -1,25 +1,17 @@
 #!/usr/bin/env python3
 """
-CINESCAN Backend Testing - REAL-WORLD MUSIC IDENTIFICATION TEST
-🎵 OPTION 2: Testing music identification with legally available audio samples
-
-OBJECTIVE: Test music identification with legally available audio samples to verify 
-the system works with actual music as requested in the review.
-
-APPROACH: Test with public domain, Creative Commons, and royalty-free music that 
-may be in AudD's database to verify end-to-end functionality.
+CINESCAN Backend Testing Suite - Lyrics Feature Disable Testing
+Testing lyrics feature disable and other endpoints functionality
 """
 
 import requests
 import time
 import json
-import os
-from io import BytesIO
-import base64
+import sys
+from typing import Dict, Any, List
 
-# Backend URL from environment
-BACKEND_URL = "https://cinescan.preview.emergentagent.com"
-API_BASE = f"{BACKEND_URL}/api"
+# Backend URL - using local backend as specified in review request
+BASE_URL = "http://localhost:8001/api"
 
 class MusicIdentificationTester:
     def __init__(self):
