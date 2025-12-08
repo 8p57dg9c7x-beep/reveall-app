@@ -17,6 +17,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 # Load API keys
 TMDB_API_KEY = os.environ.get('TMDB_API_KEY')
+print("TMDB_API_KEY loaded:", TMDB_API_KEY)
 AUDD_API_KEY = os.environ.get('AUDD_API_KEY')
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 GOOGLE_VISION_API_KEY = os.environ.get('GOOGLE_VISION_API_KEY')
