@@ -1,10 +1,22 @@
 # Phase 2: Movies API Debugging Guide
 
 ## What We Did
-Added diagnostic logging to the `/api/discover/trending` endpoint to see exactly what `TMDB_API_KEY` value Render is receiving.
+Added **critical startup diagnostic logging** to see if `TMDB_API_KEY` is loaded when the backend starts.
 
-The backend will now log:
-- ✅ The actual API key value (so we can see if it's missing/incorrect)
+The backend will now print during startup:
+```
+TMDB_API_KEY loaded: <value_here>
+```
+
+This will appear in Render's **deployment logs** (not runtime logs), so we can see immediately if the environment variable is being injected.
+
+**Local test confirmed working:**
+```
+TMDB_API_KEY loaded: 04253a70fe55d02b56ecc5f48e52b255 ✅
+```
+
+Additionally, the `/api/discover/trending` endpoint logs:
+- ✅ The actual API key value during requests
 - ✅ The length of the API key (should be 32 characters)
 - ✅ Whether the key is None/empty
 - ✅ The TMDB API response status code
