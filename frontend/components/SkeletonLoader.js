@@ -1,21 +1,23 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Animated, Easing, Platform } from 'react-native';
 import { COLORS } from '../constants/theme';
 
-export const SkeletonCard = ({ width, height, style }) => {
-  const animatedValue = useRef(new Animated.Value(0)).current;
+const SkeletonLoader = () => {
+  const animatedValue = React.useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+  React.useEffect(() => {
     Animated.loop(
       Animated.sequence([
         Animated.timing(animatedValue, {
           toValue: 1,
           duration: 1000,
+          easing: Easing.ease,
           useNativeDriver: true,
         }),
         Animated.timing(animatedValue, {
           toValue: 0,
           duration: 1000,
+          easing: Easing.ease,
           useNativeDriver: true,
         }),
       ])
@@ -28,69 +30,142 @@ export const SkeletonCard = ({ width, height, style }) => {
   });
 
   return (
-    <Animated.View
-      style={[
-        styles.skeleton,
-        { width, height, opacity },
-        style,
-      ]}
-    />
+    <View style={styles.container}>
+      <Animated.View style={[styles.skeleton, { opacity }]} />
+    </View>
   );
 };
 
-export const SkeletonOutfitCard = () => (
-  <View style={styles.outfitCard}>
-    <SkeletonCard width="100%" height={240} style={styles.skeletonImage} />
-    <View style={styles.skeletonInfo}>
-      <SkeletonCard width="80%" height={14} style={styles.skeletonTitle} />
-      <SkeletonCard width="50%" height={12} style={styles.skeletonPrice} />
-    </View>
-  </View>
-);
+// Enhanced skeleton for outfit/beauty cards
+export const SkeletonCard = ({ isLeft }) => {
+  const shimmer = React.useRef(new Animated.Value(0)).current;
 
-export const SkeletonHorizontalCard = () => (
-  <View style={styles.horizontalCard}>
-    <SkeletonCard width={140} height={210} style={styles.skeletonHorizontalImage} />
-    <SkeletonCard width={120} height={12} style={styles.skeletonHorizontalTitle} />
-  </View>
-);
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmer, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
+  const translateX = shimmer.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-300, 300],
+  });
+
+  return (
+    <View style={[styles.cardContainer, isLeft ? styles.cardLeft : styles.cardRight]}>
+      <View style={styles.imageBox}>
+        <Animated.View 
+          style={[
+            styles.shimmer,
+            { transform: [{ translateX }] }
+          ]} 
+        />
+      </View>
+      <View style={styles.infoBox}>
+        <View style={[styles.textLine, styles.titleLine]} />
+        <View style={[styles.textLine, styles.subtitleLine]} />
+        <View style={[styles.textLine, styles.priceLine]} />
+      </View>
+    </View>
+  );
+};
+
+// Grid of skeleton cards
+export const SkeletonGrid = () => {
+  return (
+    <View style={styles.gridContainer}>
+      <View style={styles.row}>
+        <SkeletonCard isLeft={true} />
+        <SkeletonCard isLeft={false} />
+      </View>
+      <View style={styles.row}>
+        <SkeletonCard isLeft={true} />
+        <SkeletonCard isLeft={false} />
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  skeleton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 8,
-  },
-  outfitCard: {
-    width: '48%',
-    backgroundColor: COLORS.card,
+  container: {
+    width: '100%',
+    height: 200,
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 16,
   },
-  skeletonImage: {
-    borderRadius: 0,
+  skeleton: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: COLORS.card,
   },
-  skeletonInfo: {
-    padding: 12,
+  cardContainer: {
+    width: '48%',
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 20,
+    height: 310,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
-  skeletonTitle: {
-    marginBottom: 8,
+  cardLeft: {
+    marginRight: 8,
   },
-  skeletonPrice: {
-    marginBottom: 4,
+  cardRight: {
+    marginLeft: 8,
   },
-  horizontalCard: {
-    marginRight: 16,
-    width: 140,
+  imageBox: {
+    width: '100%',
+    height: 240,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    position: 'relative',
+    overflow: 'hidden',
   },
-  skeletonHorizontalImage: {
-    borderRadius: 12,
-    marginBottom: 8,
+  shimmer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-  skeletonHorizontalTitle: {
-    marginTop: 4,
+  infoBox: {
+    padding: 14,
+    gap: 8,
+  },
+  textLine: {
+    height: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 6,
+  },
+  titleLine: {
+    width: '90%',
+    height: 14,
+  },
+  subtitleLine: {
+    width: '60%',
+  },
+  priceLine: {
+    width: '40%',
+  },
+  gridContainer: {
+    padding: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 
-// Default export for convenience
-export default SkeletonCard;
+export default SkeletonLoader;
