@@ -113,6 +113,18 @@ export default function RootLayout() {
             href: null, // Hide from tabs
           }}
         />
+        <Tabs.Screen
+          name="saved-outfits"
+          options={{
+            href: null, // Hide from tabs
+          }}
+        />
+        <Tabs.Screen
+          name="saved-beauty"
+          options={{
+            href: null, // Hide from tabs
+          }}
+        />
       </Tabs>
       </GestureHandlerRootView>
     </FavoritesProvider>
