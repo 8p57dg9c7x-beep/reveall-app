@@ -11,6 +11,7 @@ const STYLE_CATEGORIES = [
   { id: 'streetwear', name: 'Streetwear', icon: 'tshirt-crew' },
   { id: 'luxury', name: 'Luxury', icon: 'diamond-stone' },
   { id: 'minimal', name: 'Minimal', icon: 'circle-outline' },
+  { id: 'bohemian', name: 'Bohemian', icon: 'flower' },
   { id: 'sport', name: 'Sport', icon: 'run' },
   { id: 'elegant', name: 'Elegant', icon: 'shoe-heel' },
 ];
