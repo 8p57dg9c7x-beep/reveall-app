@@ -169,6 +169,12 @@ export default function StyleDiscovery() {
           <Text style={styles.headerTitle}>Style Discovery</Text>
           <Text style={styles.headerSubtitle}>Find your perfect look</Text>
         </View>
+        <TouchableOpacity 
+          style={styles.favoritesButton}
+          onPress={() => router.push('/saved-outfits')}
+        >
+          <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+        </TouchableOpacity>
       </View>
 
       {celebrityOutfits.length > 0 && (
