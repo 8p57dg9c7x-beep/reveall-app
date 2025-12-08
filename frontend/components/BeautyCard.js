@@ -3,8 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 const BeautyCard = memo(({ item, onPress, isLeft }) => {
+  const { toggleBeautyFavorite, isBeautyFavorite } = useFavorites();
+  const isFavorite = isBeautyFavorite(item.id);
+
+  const handleFavoritePress = (e) => {
+    e.stopPropagation();
+    toggleBeautyFavorite(item);
+  };
+
   return (
     <TouchableOpacity
       style={[styles.lookCard, isLeft ? styles.cardLeft : styles.cardRight]}
@@ -14,6 +23,20 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
       <View style={styles.imageContainer}>
         <OptimizedImage source={{ uri: item.image }} style={styles.lookImage} />
         <View style={styles.gradientOverlay} />
+        
+        {/* Favorite Heart Button */}
+        <TouchableOpacity 
+          style={styles.favoriteButton}
+          onPress={handleFavoritePress}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={22}
+            color={isFavorite ? '#ff4444' : '#fff'}
+          />
+        </TouchableOpacity>
+        
         {item.category && (
           <View style={styles.categoryBadge}>
             <MaterialCommunityIcons name="sparkles" size={10} color="#fff" />
