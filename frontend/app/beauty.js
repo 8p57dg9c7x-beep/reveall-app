@@ -242,6 +242,15 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 20,
   },
+  searchButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.card,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
   headerTitle: {
     fontSize: 32,
     fontWeight: '700',
