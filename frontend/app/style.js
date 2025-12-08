@@ -285,6 +285,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: '500',
   },
+  favoritesButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.card,
+  },
   celebritySection: {
     marginBottom: 24,
   },
