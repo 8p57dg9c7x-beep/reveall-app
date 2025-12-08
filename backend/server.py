@@ -1111,6 +1111,163 @@ async def get_trending_beauty():
         logger.error(f"Trending beauty error: {e}")
         return {"looks": []}
 
+
+# ========== SEARCH ENDPOINTS ==========
+
+@api_router.get("/search/outfits")
+async def search_outfits(
+    q: str = "",
+    category: str = None,
+    gender: str = None,
+    min_price: int = None,
+    max_price: int = None
+):
+    """Search outfits with filters"""
+    try:
+        logger.info(f"Searching outfits: q='{q}', category={category}, gender={gender}")
+        
+        # Build query
+        query = {}
+        
+        # Text search across multiple fields
+        if q:
+            query["$or"] = [
+                {"title": {"$regex": q, "$options": "i"}},
+                {"description": {"$regex": q, "$options": "i"}},
+                {"category": {"$regex": q, "$options": "i"}}
+            ]
+        
+        # Category filter
+        if category:
+            query["category"] = category
+        
+        # Gender filter
+        if gender:
+            query["gender"] = {"$regex": gender, "$options": "i"}
+        
+        # Fetch results
+        outfits = list(outfits_collection.find(query).limit(50))
+        
+        # Convert ObjectId to string
+        for outfit in outfits:
+            outfit['id'] = str(outfit['_id'])
+            del outfit['_id']
+        
+        logger.info(f"Found {len(outfits)} outfits matching search")
+        return {
+            "results": outfits,
+            "count": len(outfits),
+            "query": q
+        }
+    except Exception as e:
+        logger.error(f"Outfit search error: {e}")
+        return {"results": [], "count": 0, "error": str(e)}
+
+@api_router.get("/search/beauty")
+async def search_beauty(
+    q: str = "",
+    category: str = None,
+    celebrity: str = None
+):
+    """Search beauty looks with filters"""
+    try:
+        logger.info(f"Searching beauty: q='{q}', category={category}, celebrity={celebrity}")
+        
+        # Build query
+        query = {}
+        
+        # Text search
+        if q:
+            query["$or"] = [
+                {"title": {"$regex": q, "$options": "i"}},
+                {"description": {"$regex": q, "$options": "i"}},
+                {"celebrity": {"$regex": q, "$options": "i"}},
+                {"category": {"$regex": q, "$options": "i"}}
+            ]
+        
+        # Category filter
+        if category:
+            query["category"] = category
+        
+        # Celebrity filter
+        if celebrity:
+            query["celebrity"] = {"$regex": celebrity, "$options": "i"}
+        
+        # Fetch results
+        looks = list(beauty_collection.find(query).limit(50))
+        
+        # Convert ObjectId to string
+        for look in looks:
+            look['id'] = str(look['_id'])
+            del look['_id']
+        
+        logger.info(f"Found {len(looks)} beauty looks matching search")
+        return {
+            "results": looks,
+            "count": len(looks),
+            "query": q
+        }
+    except Exception as e:
+        logger.error(f"Beauty search error: {e}")
+        return {"results": [], "count": 0, "error": str(e)}
+
+@api_router.get("/search/movies")
+async def search_movies(
+    q: str = "",
+    genre: str = None,
+    year: int = None,
+    min_rating: float = None
+):
+    """Search movies using TMDB API with filters"""
+    try:
+        logger.info(f"Searching movies: q='{q}', genre={genre}, year={year}")
+        
+        if not q:
+            return {"results": [], "count": 0, "message": "Search query required"}
+        
+        # TMDB search
+        url = f"https://api.themoviedb.org/3/search/movie"
+        params = {
+            'api_key': TMDB_API_KEY,
+            'query': q,
+            'include_adult': 'false',
+            'language': 'en-US',
+            'page': 1
+        }
+        
+        if year:
+            params['year'] = year
+        
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        results = data.get('results', [])
+        
+        # Apply additional filters
+        if min_rating:
+            results = [m for m in results if m.get('vote_average', 0) >= min_rating]
+        
+        # Get genre mapping
+        genres_url = f"https://api.themoviedb.org/3/genre/movie/list"
+        genres_params = {'api_key': TMDB_API_KEY, 'language': 'en-US'}
+        genres_response = requests.get(genres_url, params=genres_params, timeout=10)
+        genre_map = {g['id']: g['name'] for g in genres_response.json().get('genres', [])}
+        
+        # Add genre names
+        for movie in results:
+            movie['genres'] = [genre_map.get(gid) for gid in movie.get('genre_ids', [])]
+        
+        logger.info(f"Found {len(results)} movies matching search")
+        return {
+            "results": results[:20],  # Limit to 20 results
+            "count": len(results[:20]),
+            "query": q
+        }
+    except Exception as e:
+        logger.error(f"Movie search error: {e}")
+        return {"results": [], "count": 0, "error": str(e)}
+
 @api_router.post("/music/search")
 async def search_music(request: Request):
     """Search for a song by title and artist using AudD API"""
