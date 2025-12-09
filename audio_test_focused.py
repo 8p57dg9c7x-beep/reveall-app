@@ -7,7 +7,7 @@ import requests
 import os
 import time
 
-BACKEND_URL = "https://cinescan.preview.emergentagent.com"
+BACKEND_URL = "https://category-navbar.preview.emergentagent.com"
 TEST_AUDIO_DIR = "/app/test_audio"
 
 def test_audio_endpoint_detailed():

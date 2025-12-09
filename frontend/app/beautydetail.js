@@ -26,7 +26,7 @@ export default function BeautyDetail() {
       
       setLoadingSimilar(true);
       try {
-        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan.preview.emergentagent.com';
+        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://category-navbar.preview.emergentagent.com';
         const response = await fetch(`${API_URL}/api/beauty/${look.category}`);
         const data = await response.json();
         
