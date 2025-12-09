@@ -270,6 +270,7 @@ export default function DiscoverScreen() {
       style={styles.container}
     >
       <ScrollView 
+        ref={scrollRef}
         style={styles.scrollView} 
         contentContainerStyle={styles.scrollContent}
         removeClippedSubviews
