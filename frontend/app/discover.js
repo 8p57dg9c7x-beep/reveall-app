@@ -58,11 +58,14 @@ export default function DiscoverScreen() {
         const stylesData = await stylesRes.json();
         const beautyData = await beautyRes.json();
         
+        console.log('🔍🔍🔍 RAW TRENDING RESPONSES:');
+        console.log('Movies response:', moviesData);
+        console.log('Styles response:', stylesData);
+        console.log('Beauty response:', beautyData);
+        
         console.log('✅ Loaded movies:', moviesData.results?.length || 0);
         console.log('✅ Loaded styles:', stylesData.outfits?.length || 0);
         console.log('✅ Loaded beauty:', beautyData.looks?.length || 0);
-        console.log('📦 Styles data:', JSON.stringify(stylesData).substring(0, 200));
-        console.log('💄 Beauty data:', JSON.stringify(beautyData).substring(0, 200));
         
         if (isMounted) {
           const styles = stylesData.outfits?.slice(0, 10) || [];
