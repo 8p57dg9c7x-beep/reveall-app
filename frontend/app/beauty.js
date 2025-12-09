@@ -191,78 +191,7 @@ export default function BeautyScreen() {
 
   const ListHeaderComponent = () => (
     <View>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Beauty Hub</Text>
-          <Text style={styles.headerSubtitle}>Discover celebrity-inspired makeup</Text>
-        </View>
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity 
-            style={styles.searchButton}
-            onPress={() => router.push('/universal-search')}
-          >
-            <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.favoritesButton}
-            onPress={() => router.push('/saved-beauty')}
-          >
-            <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.categoriesContainer}>
-        <ScrollView
-          ref={categoryScrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesContent}
-          scrollEnabled={false}
-          nestedScrollEnabled={false}
-          removeClippedSubviews={false}
-          bounces={false}
-          scrollEventThrottle={16}
-          onScrollBeginDrag={(e) => {
-            e.preventDefault();
-            if (categoryScrollRef.current) {
-              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
-            }
-          }}
-          onMomentumScrollBegin={(e) => {
-            e.preventDefault();
-            if (categoryScrollRef.current) {
-              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
-            }
-          }}
-        >
-          {CATEGORIES.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.categoryButton,
-                selectedCategory === item.id && styles.categoryButtonActive,
-              ]}
-              onPress={() => handleCategoryPress(item.id)}
-            >
-              <MaterialCommunityIcons
-                name={item.icon}
-                size={20}
-                color={selectedCategory === item.id ? '#FFFFFF' : '#8B7BA8'}
-                style={styles.categoryIcon}
-              />
-              <Text
-                style={[
-                  styles.categoryText,
-                  selectedCategory === item.id && styles.categoryTextActive,
-                ]}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+      {/* Empty - header moved outside */}
     </View>
   );
 
