@@ -80,9 +80,9 @@ export default function ResultScreen() {
     return unsubscribe;
   }, [navigation]);
 
-  const loadMovieDetails = async () => {
+  const loadMovieDetails = async (isMounted = true) => {
     if (!movieId) return;
-    setLoadingDetails(true);
+    if (isMounted) setLoadingDetails(true);
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/movie/${movieId}`);
@@ -92,32 +92,32 @@ export default function ResultScreen() {
       }
       
       const data = await response.json();
-      setMovieDetails(data);
+      if (isMounted) setMovieDetails(data);
     } catch (error) {
       console.error('Error loading movie details:', error);
     } finally {
-      setLoadingDetails(false);
+      if (isMounted) setLoadingDetails(false);
     }
   };
 
-  const loadSimilarMovies = async () => {
+  const loadSimilarMovies = async (isMounted = true) => {
     if (!movieId) return;
     try {
       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/movie/${movieId}/similar`);
       const data = await response.json();
-      setSimilarMovies(data.results?.slice(0, 10) || []);
+      if (isMounted) setSimilarMovies(data.results?.slice(0, 10) || []);
     } catch (error) {
       console.error('Error loading similar movies:', error);
     }
   };
 
-  const checkWatchlist = async () => {
+  const checkWatchlist = async (isMounted = true) => {
     if (!movieDetails?.id) return;
     try {
       const stored = await AsyncStorage.getItem('watchlist');
       let watchlist = stored ? JSON.parse(stored) : [];
-      setInWatchlist(watchlist.some(m => m.id === movieDetails.id));
+      if (isMounted) setInWatchlist(watchlist.some(m => m.id === movieDetails.id));
     } catch (error) {
       console.error('Error checking watchlist:', error);
     }
