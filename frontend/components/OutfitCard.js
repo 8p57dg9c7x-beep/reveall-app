@@ -10,6 +10,15 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
   const { toggleOutfitFavorite, isOutfitFavorite } = useFavorites();
   const isFavorite = isOutfitFavorite(item.id);
 
+  // Log full item to debug image issues
+  console.log('👔 OutfitCard rendering:', {
+    id: item.id,
+    title: item.title,
+    image: item.image,
+    image_url: item.image_url,
+    hasImage: !!(item.image || item.image_url)
+  });
+
   const handleFavoritePress = (e) => {
     console.log('❤️ OutfitCard: Heart button pressed!');
     console.log('  Item ID:', item.id);
