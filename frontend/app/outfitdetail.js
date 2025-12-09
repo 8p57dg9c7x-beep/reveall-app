@@ -20,12 +20,45 @@ export default function OutfitDetail() {
   const [similarOutfits, setSimilarOutfits] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
+  // Fetch outfit by ID if coming from deep link
+  useEffect(() => {
+    const fetchOutfitById = async () => {
+      if (id && !outfit) {
+        setLoading(true);
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/outfits/id/${id}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            setOutfit(data.outfit);
+            trackOutfitView(data.outfit);
+          } else {
+            Alert.alert('Error', 'Outfit not found');
+            router.back();
+          }
+        } catch (error) {
+          console.error('Error fetching outfit:', error);
+          Alert.alert('Error', 'Unable to load outfit');
+          router.back();
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchOutfitById();
+  }, [id]);
+
   // Auto-scroll to top when opening a new outfit
   useEffect(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-    
-    // Track outfit view
-    trackOutfitView(outfit);
+    if (outfit) {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+      
+      // Track outfit view (only if not from deep link, already tracked above)
+      if (!id) {
+        trackOutfitView(outfit);
+      }
+    }
   }, [outfitData]);
 
   // Fetch similar outfits from the same category
