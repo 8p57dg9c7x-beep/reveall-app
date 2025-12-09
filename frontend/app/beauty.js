@@ -211,18 +211,43 @@ export default function BeautyScreen() {
       </View>
 
       <View style={styles.categoriesContainer}>
-        <FlatList
-          ref={flatListRef}
+        <ScrollView
           horizontal
-          data={CATEGORIES}
-          renderItem={renderCategoryButton}
-          keyExtractor={(item) => item.id}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesContent}
           scrollEnabled={true}
           nestedScrollEnabled={false}
-          onScrollToIndexFailed={() => {}}
-        />
+          removeClippedSubviews={false}
+          scrollEventThrottle={16}
+          onScroll={() => {}}
+          directionalLockEnabled={true}
+        >
+          {CATEGORIES.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={[
+                styles.categoryButton,
+                selectedCategory === item.id && styles.categoryButtonActive,
+              ]}
+              onPress={() => handleCategoryPress(item.id)}
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={20}
+                color={selectedCategory === item.id ? '#FFFFFF' : '#8B7BA8'}
+                style={styles.categoryIcon}
+              />
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === item.id && styles.categoryTextActive,
+                ]}
+              >
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
     </View>
   );
