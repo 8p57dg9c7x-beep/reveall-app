@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import { API_BASE_URL } from '../config';
 import { searchMusic } from '../services/api';
@@ -18,15 +18,71 @@ import OptimizedImage from '../components/OptimizedImage';
 import { SkeletonHorizontalCard } from '../components/SkeletonLoader';
 
 export default function DiscoverScreen() {
+  const navigation = useNavigation();
+  const scrollRef = useRef(null);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingStyles, setTrendingStyles] = useState([]);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingStyles, setLoadingStyles] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
+  // FIX 1: Prevent infinite re-renders with cleanup
   useEffect(() => {
-    loadDiscoverData();
+    let isMounted = true;
+
+    const loadData = async () => {
+      if (isMounted) {
+        setLoadingMovies(true);
+        setLoadingStyles(true);
+      }
+      try {
+        console.log('🎬 Loading discover data from:', API_BASE_URL);
+        
+        // Load trending movies
+        const moviesRes = await fetch(`${API_BASE_URL}/api/discover/trending`);
+        console.log('📊 Movies response status:', moviesRes.status);
+        const moviesData = await moviesRes.json();
+        console.log('✅ Loaded movies:', moviesData.results?.length || 0);
+        if (isMounted) {
+          setTrendingMovies(moviesData.results?.slice(0, 10) || []);
+          setLoadingMovies(false);
+        }
+
+        // Load trending styles (from all categories)
+        const stylesRes = await fetch(`${API_BASE_URL}/api/outfits/trending`);
+        const stylesData = await stylesRes.json();
+        if (isMounted) {
+          setTrendingStyles(stylesData.outfits || []);
+          setLoadingStyles(false);
+        }
+      } catch (error) {
+        console.error('❌ Error loading discover data:', error);
+        if (isMounted) {
+          setLoadingMovies(false);
+          setLoadingStyles(false);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  // FIX 3: Fix back button freeze after opening YouTube
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setRefreshing(true);
+      setTimeout(() => setRefreshing(false), 50);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const loadDiscoverData = async () => {
     setLoadingMovies(true);
