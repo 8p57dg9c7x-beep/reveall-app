@@ -17,6 +17,7 @@ import OptimizedImage from '../components/OptimizedImage';
 import { SkeletonHorizontalScroll } from '../components/SkeletonLoader';
 import AnimatedPressable from '../components/AnimatedPressable';
 import FadeInView from '../components/FadeInView';
+import { asCardItem } from '../utils/helpers';
 
 export default function DiscoverScreen() {
   const navigation = useNavigation();
@@ -24,24 +25,13 @@ export default function DiscoverScreen() {
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingStyles, setTrendingStyles] = useState([]);
   const [trendingBeauty, setTrendingBeauty] = useState([]);
-  
-  // DEBUG: Log state changes
-  useEffect(() => {
-    console.log('🔴🔴🔴 TRENDING STYLES STATE CHANGED:', trendingStyles.length, 'items');
-    console.log('🔴 First style:', trendingStyles[0]?.title);
-  }, [trendingStyles]);
-  
-  useEffect(() => {
-    console.log('💜💜💜 TRENDING BEAUTY STATE CHANGED:', trendingBeauty.length, 'items');
-    console.log('💜 First beauty:', trendingBeauty[0]?.title);
-  }, [trendingBeauty]);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingStyles, setLoadingStyles] = useState(true);
   const [loadingBeauty, setLoadingBeauty] = useState(true);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // FIX 1: Prevent infinite re-renders with cleanup
+  // Load data with cleanup
   useEffect(() => {
     let isMounted = true;
 
@@ -60,41 +50,22 @@ export default function DiscoverScreen() {
           fetch(`${API_BASE_URL}/api/outfits/trending`),
           fetch(`${API_BASE_URL}/api/beauty/trending`)
         ]);
-
-        console.log('📊 Movies response status:', moviesRes.status);
-        console.log('👗 Styles response status:', stylesRes.status);
-        console.log('💄 Beauty response status:', beautyRes.status);
         
         const moviesData = await moviesRes.json();
         const stylesData = await stylesRes.json();
         const beautyData = await beautyRes.json();
         
-        console.log('🔍🔍🔍 RAW TRENDING RESPONSES:');
-        console.log('Movies response:', moviesData);
-        console.log('Styles response:', stylesData);
-        console.log('Beauty response:', beautyData);
-        
-        console.log('✅ Loaded movies:', moviesData.results?.length || 0);
-        console.log('✅ Loaded styles:', stylesData.outfits?.length || 0);
-        console.log('✅ Loaded beauty:', beautyData.looks?.length || 0);
-        
         if (isMounted) {
-          const styles = stylesData.outfits?.slice(0, 10) || [];
-          const beauty = beautyData.looks?.slice(0, 10) || [];
-          console.log('🎯🎯🎯 SETTING STATE NOW:');
-          console.log('  Styles to set:', styles.length, 'items');
-          console.log('  Beauty to set:', beauty.length, 'items');
-          console.log('  First style:', styles[0]?.title, 'has image:', !!(styles[0]?.image || styles[0]?.image_url));
-          console.log('  First beauty:', beauty[0]?.title, 'has image:', !!(beauty[0]?.image || beauty[0]?.image_url));
+          // 🔥 NORMALIZE ALL DATA BEFORE SETTING STATE
+          const normalizedStyles = (stylesData.outfits || []).slice(0, 10).map(asCardItem);
+          const normalizedBeauty = (beautyData.looks || []).slice(0, 10).map(asCardItem);
           
           setTrendingMovies(moviesData.results?.slice(0, 10) || []);
-          setTrendingStyles(styles);
-          setTrendingBeauty(beauty);
+          setTrendingStyles(normalizedStyles);
+          setTrendingBeauty(normalizedBeauty);
           setLoadingMovies(false);
           setLoadingStyles(false);
           setLoadingBeauty(false);
-          
-          console.log('✅✅✅ STATE SET COMPLETE!');
         }
       } catch (error) {
         console.error('❌ Error loading discover data:', error);
@@ -115,7 +86,7 @@ export default function DiscoverScreen() {
     };
   }, []);
 
-  // FIX 3: Fix back button freeze after opening YouTube
+  // Fix back button freeze after opening YouTube
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setRefreshing(true);
@@ -133,7 +104,6 @@ export default function DiscoverScreen() {
     { id: 4, title: 'Too Sweet', artist: 'Hozier', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80' },
     { id: 5, title: 'Espresso', artist: 'Sabrina Carpenter', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80' },
   ];
-  console.log('🎵 Discover Songs loaded with Unsplash URLs');
 
   const EXPLORE_CATEGORIES = [
     { id: 'styles', title: 'Discover New Styles', icon: 'hanger', color: COLORS.accent },
@@ -248,9 +218,6 @@ export default function DiscoverScreen() {
       <OptimizedImage source={{ uri: song.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{song.title}</Text>
       <Text style={styles.trendingSubtitle} numberOfLines={1}>{song.artist}</Text>
-      <Text style={[styles.debugText, {fontSize: 8, color: '#888'}]} numberOfLines={1}>
-        {song.image?.includes('unsplash') ? '✓ Unsplash' : '✗ OLD URL'}
-      </Text>
     </AnimatedPressable>
   ), [handleSongTap]);
 
@@ -263,7 +230,7 @@ export default function DiscoverScreen() {
         params: { outfitData: JSON.stringify(style) }
       })}
     >
-      <OptimizedImage source={{ uri: style.image_url || style.image }} style={styles.trendingImage} />
+      <OptimizedImage source={{ uri: style.imageToUse }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{style.title}</Text>
     </AnimatedPressable>
   ), []);
@@ -277,7 +244,7 @@ export default function DiscoverScreen() {
         params: { lookData: JSON.stringify(look) }
       })}
     >
-      <OptimizedImage source={{ uri: look.image_url || look.image }} style={styles.trendingImage} />
+      <OptimizedImage source={{ uri: look.imageToUse }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{look.title}</Text>
       {look.celebrity && (
         <Text style={styles.trendingSubtitle} numberOfLines={1}>{look.celebrity}</Text>

@@ -5,18 +5,20 @@ import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
 import AnimatedPressable from './AnimatedPressable';
+import { asCardItem } from '../utils/helpers';
 
 const BeautyCard = memo(({ item, onPress, isLeft }) => {
   const { toggleBeautyFavorite, isBeautyFavorite } = useFavorites();
-  const isFavorite = isBeautyFavorite(item.id);
+  
+  // Normalize the card (should already be normalized but double-check)
+  const card = asCardItem(item);
+  const isFavorite = isBeautyFavorite(card.id);
 
   const handleFavoritePress = (e) => {
-    console.log('💄 BeautyCard: Heart button pressed!');
-    console.log('  Item ID:', item.id);
-    console.log('  Item Title:', item.title);
-    console.log('  Current favorite status:', isFavorite);
-    e.stopPropagation();
-    toggleBeautyFavorite(item);
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+    toggleBeautyFavorite(card);
   };
 
   return (
@@ -25,7 +27,7 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
       onPress={onPress}
     >
       <View style={styles.imageContainer}>
-        <OptimizedImage source={{ uri: item.image_url || item.image }} style={styles.lookImage} />
+        <OptimizedImage source={{ uri: card.imageToUse }} style={styles.lookImage} />
         <View style={styles.gradientOverlay} />
         
         {/* Favorite Heart Button */}
