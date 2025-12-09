@@ -137,7 +137,7 @@ export default function OutfitDetail() {
       {/* Hero Image with Share Button */}
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: outfit.image || outfit.image_url }}
+          source={{ uri: outfit.image_url || outfit.image }}
           style={{
             width: "100%",
             height: 400,
