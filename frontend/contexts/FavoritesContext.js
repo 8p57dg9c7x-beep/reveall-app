@@ -61,28 +61,35 @@ export const FavoritesProvider = ({ children }) => {
 
   // Toggle outfit favorite
   const toggleOutfitFavorite = async (outfit) => {
-    const isFavorite = favoriteOutfits.some(item => item.id === outfit.id);
-    
-    if (isFavorite) {
-      const newFavorites = favoriteOutfits.filter(item => item.id !== outfit.id);
-      await saveFavoriteOutfits(newFavorites);
+    try {
+      console.log('Toggling outfit favorite:', outfit.id, outfit.title);
+      const isFavorite = favoriteOutfits.some(item => item.id === outfit.id);
       
-      // Track unfavorite
-      trackEvent('outfit_unfavorited', {
-        item_id: outfit.id?.toString(),
-        item_title: outfit.title,
-        category: outfit.category
-      });
-    } else {
-      const newFavorites = [...favoriteOutfits, outfit];
-      await saveFavoriteOutfits(newFavorites);
-      
-      // Track favorite
-      trackEvent('outfit_favorited', {
-        item_id: outfit.id?.toString(),
-        item_title: outfit.title,
-        category: outfit.category
-      });
+      if (isFavorite) {
+        const newFavorites = favoriteOutfits.filter(item => item.id !== outfit.id);
+        await saveFavoriteOutfits(newFavorites);
+        console.log('Outfit removed from favorites');
+        
+        // Track unfavorite
+        trackEvent('outfit_unfavorited', {
+          item_id: outfit.id?.toString(),
+          item_title: outfit.title,
+          category: outfit.category
+        });
+      } else {
+        const newFavorites = [...favoriteOutfits, outfit];
+        await saveFavoriteOutfits(newFavorites);
+        console.log('Outfit added to favorites');
+        
+        // Track favorite
+        trackEvent('outfit_favorited', {
+          item_id: outfit.id?.toString(),
+          item_title: outfit.title,
+          category: outfit.category
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling outfit favorite:', error);
     }
   };
 
