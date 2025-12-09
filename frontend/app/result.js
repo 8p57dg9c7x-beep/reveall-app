@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
@@ -18,12 +18,15 @@ import CastImage from '../components/CastImage';
 
 export default function ResultScreen() {
   const params = useLocalSearchParams();
+  const navigation = useNavigation();
+  const scrollRef = useRef(null);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [similarMovies, setSimilarMovies] = useState([]);
   const [movieDetails, setMovieDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [lyrics, setLyrics] = useState(null);
   const [loadingLyrics, setLoadingLyrics] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   // Get movieId from params or from legacy movieData
   const movieId = params.movieId || (params.movieData ? JSON.parse(params.movieData).id : null);
@@ -32,26 +35,50 @@ export default function ResultScreen() {
   
   const movie = movieDetails;
 
+  // FIX 1: Prevent infinite re-renders with cleanup
   useEffect(() => {
-    if (movieId) {
-      // Load all data in parallel but wait for movie details before checking watchlist
-      const loadAllData = async () => {
-        await loadMovieDetails();
-        await Promise.all([
-          loadSimilarMovies(),
-          checkWatchlist()
-        ]);
-      };
-      loadAllData();
-    } else if (song) {
-      // Lyrics feature temporarily disabled
-      // fetchLyrics();
-      setLyrics({
-        lyrics: null,
-        message: "Lyrics feature is temporarily unavailable. We're working on bringing it back soon!"
-      });
+    let isMounted = true;
+
+    const loadAllData = async () => {
+      if (movieId) {
+        await loadMovieDetails(isMounted);
+        if (isMounted) {
+          await Promise.all([
+            loadSimilarMovies(isMounted),
+            checkWatchlist(isMounted)
+          ]);
+        }
+      } else if (song && isMounted) {
+        setLyrics({
+          lyrics: null,
+          message: "Lyrics feature is temporarily unavailable. We're working on bringing it back soon!"
+        });
+      }
+    };
+
+    loadAllData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [movieId, song]);
+
+  // FIX 2: Auto-scroll to top when movieId or song changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ y: 0, animated: true });
     }
   }, [movieId, song]);
+
+  // FIX 3: Fix back button freeze after opening YouTube
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setRefreshing(true);
+      setTimeout(() => setRefreshing(false), 50);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const loadMovieDetails = async () => {
     if (!movieId) return;
