@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import OutfitCard from '../components/OutfitCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
@@ -17,7 +17,9 @@ const STYLE_CATEGORIES = [
 ];
 
 export default function StyleDiscovery() {
+  const navigation = useNavigation();
   const flatListRef = useRef(null);
+  const scrollRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('streetwear');
   const [celebrityOutfits, setCelebrityOutfits] = useState([]);
   const [outfits, setOutfits] = useState([]);
@@ -25,13 +27,83 @@ export default function StyleDiscovery() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
+  // FIX 1: Load celebrity outfits with cleanup
   useEffect(() => {
-    loadCelebrityOutfits();
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/outfits/celebrity`);
+        const data = await response.json();
+        if (isMounted) setCelebrityOutfits(data.outfits || []);
+      } catch (err) {
+        console.error('Error loading celebrity outfits:', err);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
+  // FIX 1: Load outfits with cleanup
   useEffect(() => {
-    loadOutfits();
+    let isMounted = true;
+
+    const fetchOutfits = async () => {
+      if (isMounted) {
+        setLoading(true);
+        setError(null);
+      }
+      try {
+        const url = `${API_BASE_URL}/api/outfits/${selectedCategory}`;
+        console.log('🔍 Loading outfits from:', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        
+        console.log('📊 Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Loaded outfits:', data.outfits?.length || 0);
+        
+        if (isMounted) {
+          setOutfits(data.outfits || []);
+        }
+      } catch (err) {
+        console.error('❌ Error loading outfits:', err);
+        if (isMounted) setError(err.message);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchOutfits();
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedCategory]);
+
+  // FIX 3: Fix back button freeze
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setRefreshing(true);
+      setTimeout(() => setRefreshing(false), 50);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const loadOutfits = useCallback(async () => {
     setLoading(true);
