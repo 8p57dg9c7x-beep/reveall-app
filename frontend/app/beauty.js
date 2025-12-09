@@ -201,38 +201,41 @@ export default function BeautyScreen() {
     <View style={styles.container}>
       {/* Fixed Header - Outside FlatList */}
       <View style={styles.fixedHeader}>
-        <View style={styles.header}>
+        <FadeInView style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Beauty Hub</Text>
             <Text style={styles.headerSubtitle}>Discover celebrity-inspired makeup</Text>
           </View>
           <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity 
+            <AnimatedPressable 
               style={styles.searchButton}
               onPress={() => router.push('/universal-search')}
+              scaleValue={0.9}
             >
               <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-            <TouchableOpacity 
+            </AnimatedPressable>
+            <AnimatedPressable 
               style={styles.favoritesButton}
               onPress={() => router.push('/saved-beauty')}
+              scaleValue={0.9}
             >
               <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
-            </TouchableOpacity>
+            </AnimatedPressable>
           </View>
-        </View>
+        </FadeInView>
 
         {/* Fixed Category Filter Bar */}
         <View style={styles.categoriesContainer}>
           <View style={styles.categoriesWrapper}>
             {CATEGORIES.map((item) => (
-              <TouchableOpacity
+              <AnimatedPressable
                 key={item.id}
                 style={[
                   styles.categoryButton,
                   selectedCategory === item.id && styles.categoryButtonActive,
                 ]}
                 onPress={() => handleCategoryPress(item.id)}
+                scaleValue={0.95}
               >
                 <MaterialCommunityIcons
                   name={item.icon}
@@ -247,7 +250,7 @@ export default function BeautyScreen() {
                 >
                   {item.name}
                 </Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))}
           </View>
         </View>
