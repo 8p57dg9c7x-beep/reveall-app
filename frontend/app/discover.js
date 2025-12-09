@@ -385,9 +385,7 @@ export default function DiscoverScreen() {
             </TouchableOpacity>
           </View>
           {loadingBeauty ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={COLORS.primary} />
-            </View>
+            <SkeletonHorizontalScroll />
           ) : trendingBeauty.length > 0 ? (
             <ScrollView 
               horizontal 
