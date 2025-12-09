@@ -13,9 +13,10 @@ import { API_BASE_URL } from '../config';
 export default function BeautyDetail() {
   const navigation = useNavigation();
   const scrollRef = useRef(null);
-  const { lookData } = useLocalSearchParams();
-  const look = JSON.parse(lookData);
+  const { lookData, id } = useLocalSearchParams();
   
+  const [look, setLook] = useState(lookData ? JSON.parse(lookData) : null);
+  const [loading, setLoading] = useState(!lookData && id ? true : false);
   const [similarLooks, setSimilarLooks] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
