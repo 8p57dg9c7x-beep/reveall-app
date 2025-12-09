@@ -255,27 +255,6 @@ export default function StyleDiscovery() {
 
   const ListHeaderComponent = () => (
     <View>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Style Discovery</Text>
-          <Text style={styles.headerSubtitle}>Find your perfect look</Text>
-        </View>
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity 
-            style={styles.searchButton}
-            onPress={() => router.push('/universal-search')}
-          >
-            <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.favoritesButton}
-            onPress={() => router.push('/saved-outfits')}
-          >
-            <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
       {celebrityOutfits.length > 0 && (
         <View style={styles.celebritySection}>
           <Text style={styles.sectionTitle}>Dress Like Your Icon</Text>
@@ -301,37 +280,6 @@ export default function StyleDiscovery() {
           </ScrollView>
         </View>
       )}
-
-      <View style={styles.categoriesContainer}>
-        <ScrollView
-          ref={categoryScrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            alignItems: "center",
-          }}
-          scrollEnabled={false}
-          nestedScrollEnabled={false}
-          removeClippedSubviews={false}
-          bounces={false}
-          scrollEventThrottle={16}
-          onScrollBeginDrag={(e) => {
-            e.preventDefault();
-            if (categoryScrollRef.current) {
-              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
-            }
-          }}
-          onMomentumScrollBegin={(e) => {
-            e.preventDefault();
-            if (categoryScrollRef.current) {
-              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
-            }
-          }}
-        >
-          {STYLE_CATEGORIES.map(renderCategoryButton)}
-        </ScrollView>
-      </View>
     </View>
   );
 
