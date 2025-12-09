@@ -7,16 +7,25 @@ import { useFavorites } from '../contexts/FavoritesContext';
 import AnimatedPressable from './AnimatedPressable';
 
 const OutfitCard = memo(({ item, onPress, isLeft }) => {
-  const { toggleOutfitFavorite, isOutfitFavorite } = useFavorites();
+  const { toggleOutfitFavorite, isOutfitFavorite, favoriteOutfits } = useFavorites();
+  
+  // CRITICAL DEBUG: Log ALL item fields
+  console.log('👔 OUTFIT CARD FULL DEBUG:', {
+    'item.id': item.id,
+    'item._id': item._id,
+    'item.title': item.title,
+    'item.image': item.image,
+    'item.image_url': item.image_url,
+    'allKeys': Object.keys(item),
+    'imageToUse': item.image_url || item.image,
+  });
+  
   const isFavorite = isOutfitFavorite(item.id);
-
-  // Log full item to debug image issues
-  console.log('👔 OutfitCard rendering:', {
-    id: item.id,
-    title: item.title,
-    image: item.image,
-    image_url: item.image_url,
-    hasImage: !!(item.image || item.image_url)
+  console.log('❤️ Favorite check:', {
+    itemId: item.id,
+    isFavorite: isFavorite,
+    totalFavorites: favoriteOutfits.length,
+    favoriteIds: favoriteOutfits.map(f => f.id)
   });
 
   const handleFavoritePress = (e) => {
