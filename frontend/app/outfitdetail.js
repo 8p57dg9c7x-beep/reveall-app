@@ -95,6 +95,42 @@ export default function OutfitDetail() {
     });
   };
 
+  const handleShare = async () => {
+    try {
+      const deepLink = Linking.createURL(`/outfitdetail`, {
+        queryParams: { id: outfit.id }
+      });
+      
+      const result = await Share.share({
+        message: `Check out this ${outfit.title} outfit on REVEAL! 🔥\n\n${deepLink}`,
+        title: outfit.title,
+      });
+
+      if (result.action === Share.sharedAction) {
+        console.log('Shared successfully!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      Alert.alert('Error', 'Unable to share');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#FFFFFF', fontSize: 16 }}>Loading outfit...</Text>
+      </View>
+    );
+  }
+
+  if (!outfit) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#FFFFFF', fontSize: 16 }}>Outfit not found</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView ref={scrollRef} style={{ flex: 1, backgroundColor: "#0D001A" }}>
 
