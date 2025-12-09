@@ -133,7 +133,15 @@ export default function OutfitDetail() {
             contentContainerStyle={{ paddingHorizontal: 20 }}
           >
             {outfit.products.map((product, index) => (
-              <ProductCard key={index} product={product} />
+              <ProductCard 
+                key={index} 
+                product={product} 
+                itemContext={{
+                  item_id: outfit.id?.toString(),
+                  item_title: outfit.title,
+                  category: outfit.category
+                }}
+              />
             ))}
           </ScrollView>
         </View>
