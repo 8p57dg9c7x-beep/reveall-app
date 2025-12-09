@@ -98,9 +98,10 @@ export default function BeautyScreen() {
   }, [loadLooks]);
 
   const handleCategoryPress = useCallback((categoryId) => {
+    if (categoryId === selectedCategory) return;
     setSelectedCategory(categoryId);
-    // Don't force scroll - let user maintain their position
-  }, []);
+    // Don't scroll - let user maintain their position
+  }, [selectedCategory]);
 
   const handleLookPress = useCallback((item) => {
     router.push({
