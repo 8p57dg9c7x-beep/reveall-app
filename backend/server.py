@@ -1187,6 +1187,38 @@ async def get_beauty_looks(category: str):
         logger.error(f"Beauty looks error: {e}")
         return {"looks": []}
 
+# ========== BEAUTY ID ENDPOINT (for deep linking) ==========
+
+@api_router.get("/beauty/id/{beauty_id}")
+async def get_beauty_by_id(beauty_id: str):
+    """Get a specific beauty look by ID (for deep linking)"""
+    try:
+        from bson import ObjectId
+        logger.info(f"Fetching beauty look by ID: {beauty_id}")
+        
+        # Convert string ID to ObjectId
+        try:
+            object_id = ObjectId(beauty_id)
+        except:
+            logger.error(f"Invalid beauty ID format: {beauty_id}")
+            return {"success": False, "error": "Invalid ID format"}
+        
+        # Find the beauty look
+        look = beauty_collection.find_one({"_id": object_id})
+        
+        if not look:
+            logger.warning(f"Beauty look not found: {beauty_id}")
+            return {"success": False, "error": "Beauty look not found"}
+        
+        # Convert ObjectId to string
+        look['id'] = str(look['_id'])
+        del look['_id']
+        
+        logger.info(f"Found beauty look: {look.get('title')}")
+        return {"success": True, "look": look}
+    except Exception as e:
+        logger.error(f"Get beauty by ID error: {e}")
+        return {"success": False, "error": str(e)}
 
 # ========== SEARCH ENDPOINTS ==========
 
