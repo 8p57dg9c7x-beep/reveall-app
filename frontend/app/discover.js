@@ -61,11 +61,18 @@ export default function DiscoverScreen() {
         console.log('✅ Loaded movies:', moviesData.results?.length || 0);
         console.log('✅ Loaded styles:', stylesData.outfits?.length || 0);
         console.log('✅ Loaded beauty:', beautyData.looks?.length || 0);
+        console.log('📦 Styles data:', JSON.stringify(stylesData).substring(0, 200));
+        console.log('💄 Beauty data:', JSON.stringify(beautyData).substring(0, 200));
         
         if (isMounted) {
+          const styles = stylesData.outfits?.slice(0, 10) || [];
+          const beauty = beautyData.looks?.slice(0, 10) || [];
+          console.log('🎯 Setting trending styles count:', styles.length);
+          console.log('🎯 Setting trending beauty count:', beauty.length);
+          
           setTrendingMovies(moviesData.results?.slice(0, 10) || []);
-          setTrendingStyles(stylesData.outfits?.slice(0, 10) || []);
-          setTrendingBeauty(beautyData.looks?.slice(0, 10) || []);
+          setTrendingStyles(styles);
+          setTrendingBeauty(beauty);
           setLoadingMovies(false);
           setLoadingStyles(false);
           setLoadingBeauty(false);
