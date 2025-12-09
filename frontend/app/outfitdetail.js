@@ -13,9 +13,10 @@ import { API_BASE_URL } from '../config';
 export default function OutfitDetail() {
   const navigation = useNavigation();
   const scrollRef = useRef(null);
-  const { outfitData } = useLocalSearchParams();
-  const outfit = JSON.parse(outfitData);
+  const { outfitData, id } = useLocalSearchParams();
   
+  const [outfit, setOutfit] = useState(outfitData ? JSON.parse(outfitData) : null);
+  const [loading, setLoading] = useState(!outfitData && id ? true : false);
   const [similarOutfits, setSimilarOutfits] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
