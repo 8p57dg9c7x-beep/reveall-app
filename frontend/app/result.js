@@ -191,7 +191,7 @@ export default function ResultScreen() {
         style={styles.container}
       >
         <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.push(returnPath)}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
           </TouchableOpacity>
 
@@ -279,7 +279,7 @@ export default function ResultScreen() {
         )}
 
         <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.push(returnPath)}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
           </TouchableOpacity>
 
