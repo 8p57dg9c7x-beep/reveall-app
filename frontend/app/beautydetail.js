@@ -114,7 +114,15 @@ export default function BeautyDetail() {
             contentContainerStyle={{ paddingHorizontal: 20 }}
           >
             {look.products.map((product, index) => (
-              <ProductCard key={index} product={product} />
+              <ProductCard 
+                key={index} 
+                product={product} 
+                itemContext={{
+                  item_id: look.id?.toString(),
+                  item_title: look.title,
+                  category: look.category
+                }}
+              />
             ))}
           </ScrollView>
         </View>
