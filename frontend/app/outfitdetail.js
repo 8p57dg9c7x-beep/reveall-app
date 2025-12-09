@@ -110,6 +110,31 @@ export default function OutfitDetail() {
 
       </View>
 
+      {/* Shop The Look - Affiliate Products */}
+      {outfit.products && outfit.products.length > 0 && (
+        <View style={{ marginTop: 30, marginBottom: 10 }}>
+          <Text style={{ 
+            fontSize: 22, 
+            fontWeight: "bold", 
+            color: "#FFFFFF",
+            paddingHorizontal: 20,
+            marginBottom: 15
+          }}>
+            🛍️ Shop The Look
+          </Text>
+          
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+          >
+            {outfit.products.map((product, index) => (
+              <ProductCard key={index} product={product} />
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
       {/* Similar Styles Section */}
       {similarOutfits.length > 0 && (
         <View style={{ marginTop: 20, paddingBottom: 40 }}>
