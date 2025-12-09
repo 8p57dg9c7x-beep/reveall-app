@@ -119,7 +119,7 @@ export default function DiscoverScreen() {
   const [loadingSongId, setLoadingSongId] = useState(null);
 
   const renderMovieCard = useCallback((movie) => (
-    <TouchableOpacity
+    <AnimatedPressable
       key={movie.id}
       style={styles.trendingCard}
       onPress={() => router.push({
@@ -146,7 +146,7 @@ export default function DiscoverScreen() {
           {new Date(movie.release_date).getFullYear()}
         </Text>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   ), []);
 
   const handleSongTap = useCallback(async (song) => {
