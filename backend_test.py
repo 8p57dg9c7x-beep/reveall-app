@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-CINESCAN Backend Testing Suite
-Testing lyrics feature disable and other endpoints functionality
+CINESCAN Backend Testing - TMDB Integration Verification
+Testing all TMDB-related endpoints for production readiness
 """
 
 import requests
-import time
 import json
+import time
 import sys
 from typing import Dict, Any, List
 
-# Backend URL - using local backend as specified in review request
-BASE_URL = "http://localhost:8001/api"
+# Backend URL from frontend/.env
+BACKEND_URL = "http://localhost:8001/api"
 
 class BackendTester:
     def __init__(self):
