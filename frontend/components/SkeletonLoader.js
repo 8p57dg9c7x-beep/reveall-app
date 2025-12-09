@@ -215,6 +215,48 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  // Horizontal skeleton styles
+  horizontalScrollContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+  },
+  horizontalCard: {
+    width: 140,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  horizontalImageBox: {
+    width: '100%',
+    height: 190,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  horizontalInfoBox: {
+    padding: 10,
+    gap: 6,
+  },
+  horizontalTitleLine: {
+    width: '85%',
+    height: 12,
+  },
+  horizontalSubtitleLine: {
+    width: '60%',
+    height: 10,
+  },
 });
 
 export default SkeletonLoader;
