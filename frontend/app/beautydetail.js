@@ -19,6 +19,9 @@ export default function BeautyDetail() {
   // Auto-scroll to top when opening a new beauty look
   useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+    
+    // Track beauty view
+    trackBeautyView(look);
   }, [lookData]);
 
   // Fetch similar beauty looks from the same category
