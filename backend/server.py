@@ -1110,6 +1110,39 @@ async def create_outfit(outfit: dict):
         logger.error(f"Create outfit error: {e}")
         return {"success": False, "error": str(e)}
 
+# ========== OUTFIT ID ENDPOINT (for deep linking) ==========
+
+@api_router.get("/outfits/id/{outfit_id}")
+async def get_outfit_by_id(outfit_id: str):
+    """Get a specific outfit by ID (for deep linking)"""
+    try:
+        from bson import ObjectId
+        logger.info(f"Fetching outfit by ID: {outfit_id}")
+        
+        # Convert string ID to ObjectId
+        try:
+            object_id = ObjectId(outfit_id)
+        except:
+            logger.error(f"Invalid outfit ID format: {outfit_id}")
+            return {"success": False, "error": "Invalid ID format"}
+        
+        # Find the outfit
+        outfit = outfits_collection.find_one({"_id": object_id})
+        
+        if not outfit:
+            logger.warning(f"Outfit not found: {outfit_id}")
+            return {"success": False, "error": "Outfit not found"}
+        
+        # Convert ObjectId to string
+        outfit['id'] = str(outfit['_id'])
+        del outfit['_id']
+        
+        logger.info(f"Found outfit: {outfit.get('title')}")
+        return {"success": True, "outfit": outfit}
+    except Exception as e:
+        logger.error(f"Get outfit by ID error: {e}")
+        return {"success": False, "error": str(e)}
+
 # ========== BEAUTY ENDPOINTS ==========
 
 @api_router.get("/beauty/trending")
