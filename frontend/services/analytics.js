@@ -4,7 +4,6 @@
  */
 
 import { API_BASE_URL } from '../config';
-import * as Device from 'expo-device';
 
 // Generate a simple session ID (persists during app session)
 let sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
