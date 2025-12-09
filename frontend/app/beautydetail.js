@@ -9,13 +9,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ProductCard from "../components/ProductCard";
 import { trackBeautyView } from "../services/analytics";
 import { API_BASE_URL } from '../config';
+import { asCardItem } from '../utils/helpers';
 
 export default function BeautyDetail() {
   const navigation = useNavigation();
   const scrollRef = useRef(null);
   const { lookData, id } = useLocalSearchParams();
   
-  const [look, setLook] = useState(lookData ? JSON.parse(lookData) : null);
+  const [look, setLook] = useState(lookData ? asCardItem(JSON.parse(lookData)) : null);
   const [loading, setLoading] = useState(!lookData && id ? true : false);
   const [similarLooks, setSimilarLooks] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
@@ -30,8 +31,10 @@ export default function BeautyDetail() {
           const data = await response.json();
           
           if (data.success) {
-            setLook(data.look);
-            trackBeautyView(data.look);
+            // 🔥 NORMALIZE the fetched beauty look
+            const normalizedLook = asCardItem(data.look);
+            setLook(normalizedLook);
+            trackBeautyView(normalizedLook);
           } else {
             Alert.alert('Error', 'Beauty look not found');
             router.back();
@@ -64,18 +67,19 @@ export default function BeautyDetail() {
   // Fetch similar beauty looks from the same category
   useEffect(() => {
     const fetchSimilarLooks = async () => {
-      if (!look.category) return;
+      if (!look?.category) return;
       
       setLoadingSimilar(true);
       try {
-        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
-        const response = await fetch(`${API_URL}/api/beauty/${look.category}`);
+        const response = await fetch(`${API_BASE_URL}/api/beauty/${look.category}`);
         const data = await response.json();
         
         // Filter out the current look and limit to 10 items
+        // 🔥 NORMALIZE similar looks
         const filtered = (data.looks || [])
-          .filter(item => item.id !== look.id)
-          .slice(0, 10);
+          .filter(item => item.id !== look.id && item._id?.toString() !== look.id)
+          .slice(0, 10)
+          .map(asCardItem);
         
         setSimilarLooks(filtered);
       } catch (error) {
@@ -86,7 +90,7 @@ export default function BeautyDetail() {
     };
 
     fetchSimilarLooks();
-  }, [look.category, look.id]);
+  }, [look?.category, look?.id]);
 
   const handleSimilarLookPress = (similarLook) => {
     router.push({
@@ -115,18 +119,6 @@ export default function BeautyDetail() {
     }
   };
 
-  // DEBUG: Log the look object
-  if (look) {
-    console.log('💄💄💄 BEAUTY DETAIL LOADED:');
-    console.log('  Title:', look.title);
-    console.log('  Has image:', !!look.image);
-    console.log('  Has image_url:', !!look.image_url);
-    console.log('  Image value:', look.image);
-    console.log('  Image_url value:', look.image_url);
-    console.log('  Will use:', look.image_url || look.image);
-    console.log('  All keys:', Object.keys(look));
-  }
-
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
@@ -149,7 +141,7 @@ export default function BeautyDetail() {
       {/* Hero Image with Share Button */}
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: look.image_url || look.image }}
+          source={{ uri: look.imageToUse }}
           style={{
             width: "100%",
             height: 400,
@@ -266,7 +258,7 @@ export default function BeautyDetail() {
                 }}
               >
                 <Image
-                  source={{ uri: item.image || item.image_url }}
+                  source={{ uri: item.imageToUse }}
                   style={{
                     width: 160,
                     height: 200,

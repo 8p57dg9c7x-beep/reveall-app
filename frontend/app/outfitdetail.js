@@ -9,13 +9,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ProductCard from "../components/ProductCard";
 import { trackOutfitView } from "../services/analytics";
 import { API_BASE_URL } from '../config';
+import { asCardItem } from '../utils/helpers';
 
 export default function OutfitDetail() {
   const navigation = useNavigation();
   const scrollRef = useRef(null);
   const { outfitData, id } = useLocalSearchParams();
   
-  const [outfit, setOutfit] = useState(outfitData ? JSON.parse(outfitData) : null);
+  const [outfit, setOutfit] = useState(outfitData ? asCardItem(JSON.parse(outfitData)) : null);
   const [loading, setLoading] = useState(!outfitData && id ? true : false);
   const [similarOutfits, setSimilarOutfits] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
@@ -30,8 +31,10 @@ export default function OutfitDetail() {
           const data = await response.json();
           
           if (data.success) {
-            setOutfit(data.outfit);
-            trackOutfitView(data.outfit);
+            // 🔥 NORMALIZE the fetched outfit
+            const normalizedOutfit = asCardItem(data.outfit);
+            setOutfit(normalizedOutfit);
+            trackOutfitView(normalizedOutfit);
           } else {
             Alert.alert('Error', 'Outfit not found');
             router.back();
@@ -64,18 +67,19 @@ export default function OutfitDetail() {
   // Fetch similar outfits from the same category
   useEffect(() => {
     const fetchSimilarOutfits = async () => {
-      if (!outfit.category) return;
+      if (!outfit?.category) return;
       
       setLoadingSimilar(true);
       try {
-        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
-        const response = await fetch(`${API_URL}/api/outfits/${outfit.category}`);
+        const response = await fetch(`${API_BASE_URL}/api/outfits/${outfit.category}`);
         const data = await response.json();
         
         // Filter out the current outfit and limit to 10 items
+        // 🔥 NORMALIZE similar outfits
         const filtered = (data.outfits || [])
-          .filter(item => item.id !== outfit.id)
-          .slice(0, 10);
+          .filter(item => item.id !== outfit.id && item._id?.toString() !== outfit.id)
+          .slice(0, 10)
+          .map(asCardItem);
         
         setSimilarOutfits(filtered);
       } catch (error) {
@@ -86,7 +90,7 @@ export default function OutfitDetail() {
     };
 
     fetchSimilarOutfits();
-  }, [outfit.category, outfit.id]);
+  }, [outfit?.category, outfit?.id]);
 
   const handleSimilarOutfitPress = (similarOutfit) => {
     router.push({
@@ -137,7 +141,7 @@ export default function OutfitDetail() {
       {/* Hero Image with Share Button */}
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: outfit.image_url || outfit.image }}
+          source={{ uri: outfit.imageToUse }}
           style={{
             width: "100%",
             height: 400,
@@ -273,7 +277,7 @@ export default function OutfitDetail() {
                 }}
               >
                 <Image
-                  source={{ uri: item.image || item.image_url }}
+                  source={{ uri: item.imageToUse }}
                   style={{
                     width: 160,
                     height: 200,
