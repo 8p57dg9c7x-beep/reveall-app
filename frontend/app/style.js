@@ -182,13 +182,14 @@ export default function StyleDiscovery() {
   }, []);
 
   const renderCategoryButton = useCallback((category) => (
-    <TouchableOpacity
+    <AnimatedPressable
       key={category.id}
       style={[
         styles.categoryButton,
         selectedCategory === category.id && styles.categoryButtonActive,
       ]}
       onPress={() => handleCategorySelect(category.id)}
+      scaleValue={0.95}
     >
       <MaterialCommunityIcons
         name={category.icon}
@@ -203,7 +204,7 @@ export default function StyleDiscovery() {
       >
         {category.name}
       </Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   ), [selectedCategory, handleCategorySelect]);
 
   const renderOutfitRow = useCallback(({ item, index }) => {
