@@ -269,7 +269,7 @@ export default function ResultScreen() {
           </View>
         )}
 
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.push(returnPath)}>
             <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
           </TouchableOpacity>
