@@ -211,12 +211,16 @@ export default function BeautyScreen() {
 
       <View style={styles.categoriesContainer}>
         <FlatList
+          ref={flatListRef}
           horizontal
           data={CATEGORIES}
           renderItem={renderCategoryButton}
           keyExtractor={(item) => item.id}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesContent}
+          scrollEnabled={true}
+          nestedScrollEnabled={false}
+          onScrollToIndexFailed={() => {}}
         />
       </View>
     </View>
