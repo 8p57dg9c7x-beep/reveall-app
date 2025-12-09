@@ -306,7 +306,12 @@ export default function StyleDiscovery() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesContent}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            alignItems: "center",
+          }}
+          scrollEventThrottle={16}
+          onScroll={() => {}}
         >
           {STYLE_CATEGORIES.map(renderCategoryButton)}
         </ScrollView>
