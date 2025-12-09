@@ -285,6 +285,38 @@ export default function StyleDiscovery() {
 
   return (
     <View style={styles.container}>
+      {/* Fixed Header - Outside FlatList */}
+      <View style={styles.fixedHeader}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>Style Discovery</Text>
+            <Text style={styles.headerSubtitle}>Find your perfect look</Text>
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity 
+              style={styles.searchButton}
+              onPress={() => router.push('/universal-search')}
+            >
+              <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.favoritesButton}
+              onPress={() => router.push('/saved-outfits')}
+            >
+              <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Fixed Category Filter Bar */}
+        <View style={styles.categoriesContainer}>
+          <View style={styles.categoriesWrapper}>
+            {STYLE_CATEGORIES.map(renderCategoryButton)}
+          </View>
+        </View>
+      </View>
+
+      {/* Scrollable Content */}
       {loading && outfits.length === 0 ? (
         <ScrollView style={styles.scrollView}>
           <ListHeaderComponent />
