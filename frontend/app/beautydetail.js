@@ -137,7 +137,7 @@ export default function BeautyDetail() {
       {/* Hero Image with Share Button */}
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: look.image || look.image_url }}
+          source={{ uri: look.image_url || look.image }}
           style={{
             width: "100%",
             height: 400,
