@@ -111,6 +111,10 @@ export default function StyleDiscovery() {
   const loadOutfits = useCallback(async () => {
     setLoading(true);
     setError(null);
+    
+    // Track category view
+    trackCategoryView(selectedCategory, 'outfit');
+    
     try {
       const url = `${API_BASE_URL}/api/outfits/${selectedCategory}`;
       console.log('🔍 Loading outfits from:', url);
