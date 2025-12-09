@@ -427,6 +427,11 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 120,
   },
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
