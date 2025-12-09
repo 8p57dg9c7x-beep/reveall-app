@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
+import AnimatedPressable from './AnimatedPressable';
 
 const BeautyCard = memo(({ item, onPress, isLeft }) => {
   const { toggleBeautyFavorite, isBeautyFavorite } = useFavorites();
