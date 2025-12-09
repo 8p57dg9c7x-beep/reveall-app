@@ -8,6 +8,7 @@ import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
 import AnimatedPressable from '../components/AnimatedPressable';
 import FadeInView from '../components/FadeInView';
+import { trackCategoryView } from '../services/analytics';
 
 const STYLE_CATEGORIES = [
   { id: 'streetwear', name: 'Streetwear', icon: 'tshirt-crew' },
