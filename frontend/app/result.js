@@ -48,7 +48,8 @@ export default function ResultScreen() {
             checkWatchlist(isMounted)
           ]);
         }
-      } else if (song && isMounted) {
+      } else if (song && isMounted && lyrics === null) {
+        // Only set this ONCE so it doesn't loop forever
         setLyrics({
           lyrics: null,
           message: "Lyrics feature is temporarily unavailable. We're working on bringing it back soon!"
