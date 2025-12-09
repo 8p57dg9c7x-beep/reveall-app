@@ -4,13 +4,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
 import AnimatedPressable from './AnimatedPressable';
 import { COLORS } from '../constants/theme';
+import { trackProductClick } from '../services/analytics';
 
 /**
  * ProductCard - Displays affiliate products with shop button
  * Handles affiliate links and Google search fallback
  */
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, itemContext = {} }) => {
   const handleShopPress = async () => {
+    // Track product click
+    trackProductClick(product, itemContext);
+    
     let url = product.affiliate_url;
     
     // Fallback to Google search if no affiliate link
