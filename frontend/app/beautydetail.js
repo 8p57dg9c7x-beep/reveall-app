@@ -115,6 +115,18 @@ export default function BeautyDetail() {
     }
   };
 
+  // DEBUG: Log the look object
+  if (look) {
+    console.log('💄💄💄 BEAUTY DETAIL LOADED:');
+    console.log('  Title:', look.title);
+    console.log('  Has image:', !!look.image);
+    console.log('  Has image_url:', !!look.image_url);
+    console.log('  Image value:', look.image);
+    console.log('  Image_url value:', look.image_url);
+    console.log('  Will use:', look.image_url || look.image);
+    console.log('  All keys:', Object.keys(look));
+  }
+
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
