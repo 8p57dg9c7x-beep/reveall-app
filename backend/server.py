@@ -1383,6 +1383,146 @@ async def get_lyrics(query: str):
         "message": "Lyrics feature is temporarily unavailable. We're working on bringing it back soon!"
     }
 
+# ============================================================================
+# ANALYTICS ENDPOINTS
+# ============================================================================
+
+@api_router.post("/analytics/track")
+async def track_analytics_event(event: AnalyticsEvent):
+    """
+    Track user analytics events for monetization insights
+    Event types: product_click, outfit_view, beauty_view, category_view
+    """
+    try:
+        import time
+        from datetime import datetime
+        
+        # Prepare event data
+        event_data = {
+            "event_type": event.event_type,
+            "item_id": event.item_id,
+            "item_title": event.item_title,
+            "category": event.category,
+            "product_name": event.product_name,
+            "product_price": event.product_price,
+            "product_affiliate_url": event.product_affiliate_url,
+            "session_id": event.session_id,
+            "referral_source": event.referral_source,
+            "timestamp": time.time(),
+            "datetime": datetime.utcnow().isoformat()
+        }
+        
+        # Store in analytics collection
+        result = analytics_collection.insert_one(event_data)
+        
+        logger.info(f"Analytics tracked: {event.event_type} - {event.item_title or event.product_name}")
+        
+        return {
+            "success": True,
+            "event_id": str(result.inserted_id),
+            "message": "Event tracked successfully"
+        }
+    except Exception as e:
+        logger.error(f"Analytics tracking error: {str(e)}")
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+@api_router.get("/analytics/dashboard")
+async def get_analytics_dashboard():
+    """
+    Get analytics dashboard data
+    Returns: top products, top outfits, category stats, click rates
+    """
+    try:
+        from datetime import datetime, timedelta
+        
+        # Get stats for last 30 days
+        thirty_days_ago = (datetime.utcnow() - timedelta(days=30)).timestamp()
+        
+        # Top Product Clicks
+        product_clicks = list(analytics_collection.aggregate([
+            {"$match": {"event_type": "product_click", "timestamp": {"$gte": thirty_days_ago}}},
+            {"$group": {
+                "_id": "$product_name",
+                "clicks": {"$sum": 1},
+                "price": {"$first": "$product_price"}
+            }},
+            {"$sort": {"clicks": -1}},
+            {"$limit": 10}
+        ]))
+        
+        # Top Outfits Viewed
+        outfit_views = list(analytics_collection.aggregate([
+            {"$match": {"event_type": "outfit_view", "timestamp": {"$gte": thirty_days_ago}}},
+            {"$group": {
+                "_id": "$item_id",
+                "title": {"$first": "$item_title"},
+                "views": {"$sum": 1}
+            }},
+            {"$sort": {"views": -1}},
+            {"$limit": 10}
+        ]))
+        
+        # Top Beauty Looks Viewed
+        beauty_views = list(analytics_collection.aggregate([
+            {"$match": {"event_type": "beauty_view", "timestamp": {"$gte": thirty_days_ago}}},
+            {"$group": {
+                "_id": "$item_id",
+                "title": {"$first": "$item_title"},
+                "views": {"$sum": 1}
+            }},
+            {"$sort": {"views": -1}},
+            {"$limit": 10}
+        ]))
+        
+        # Category Popularity
+        category_stats = list(analytics_collection.aggregate([
+            {"$match": {"event_type": "category_view", "timestamp": {"$gte": thirty_days_ago}}},
+            {"$group": {
+                "_id": "$category",
+                "views": {"$sum": 1}
+            }},
+            {"$sort": {"views": -1}}
+        ]))
+        
+        # Total Events Count
+        total_events = analytics_collection.count_documents({"timestamp": {"$gte": thirty_days_ago}})
+        total_product_clicks = analytics_collection.count_documents({
+            "event_type": "product_click",
+            "timestamp": {"$gte": thirty_days_ago}
+        })
+        total_outfit_views = analytics_collection.count_documents({
+            "event_type": "outfit_view",
+            "timestamp": {"$gte": thirty_days_ago}
+        })
+        total_beauty_views = analytics_collection.count_documents({
+            "event_type": "beauty_view",
+            "timestamp": {"$gte": thirty_days_ago}
+        })
+        
+        return {
+            "success": True,
+            "period": "Last 30 Days",
+            "summary": {
+                "total_events": total_events,
+                "product_clicks": total_product_clicks,
+                "outfit_views": total_outfit_views,
+                "beauty_views": total_beauty_views
+            },
+            "top_products": product_clicks,
+            "top_outfits": outfit_views,
+            "top_beauty_looks": beauty_views,
+            "category_stats": category_stats
+        }
+    except Exception as e:
+        logger.error(f"Analytics dashboard error: {str(e)}")
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
 # Include router
 app.include_router(api_router)
 
