@@ -292,7 +292,7 @@ class TMDBTester:
         if result["success"]:
             # Should return error or empty response for invalid ID
             data = result["data"]
-            if "error" in data or not data:
+            if data and ("error" in data or not data):
                 self.log_test("Error Handling - Invalid Movie ID", True,
                             "Properly handled invalid movie ID", result["response_time"])
             else:
