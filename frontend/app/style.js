@@ -359,6 +359,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  fixedHeader: {
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 16,
+    zIndex: 100,
+  },
   scrollView: {
     flex: 1,
   },
