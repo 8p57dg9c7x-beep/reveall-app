@@ -235,7 +235,7 @@ export default function DiscoverScreen() {
         params: { outfitData: JSON.stringify(style) }
       })}
     >
-      <OptimizedImage source={{ uri: style.image_url }} style={styles.trendingImage} />
+      <OptimizedImage source={{ uri: style.image_url || style.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{style.title}</Text>
     </TouchableOpacity>
   ), []);
@@ -249,7 +249,7 @@ export default function DiscoverScreen() {
         params: { lookData: JSON.stringify(look) }
       })}
     >
-      <OptimizedImage source={{ uri: look.image_url }} style={styles.trendingImage} />
+      <OptimizedImage source={{ uri: look.image_url || look.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{look.title}</Text>
       {look.celebrity && (
         <Text style={styles.trendingSubtitle} numberOfLines={1}>{look.celebrity}</Text>
