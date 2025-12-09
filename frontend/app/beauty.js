@@ -340,6 +340,11 @@ const styles = StyleSheet.create({
   categoriesContainer: {
     marginBottom: 24,
   },
+  categoriesWrapper: {
+    flexDirection: 'row',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
   categoriesContent: {
     gap: 12,
     paddingRight: 16,
