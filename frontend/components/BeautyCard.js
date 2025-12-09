@@ -11,6 +11,10 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
   const isFavorite = isBeautyFavorite(item.id);
 
   const handleFavoritePress = (e) => {
+    console.log('💄 BeautyCard: Heart button pressed!');
+    console.log('  Item ID:', item.id);
+    console.log('  Item Title:', item.title);
+    console.log('  Current favorite status:', isFavorite);
     e.stopPropagation();
     toggleBeautyFavorite(item);
   };
