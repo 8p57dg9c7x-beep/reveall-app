@@ -152,10 +152,12 @@ export default function StyleDiscovery() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadOutfits();
-    await loadCelebrityOutfits();
+    // Trigger re-fetch by toggling category temporarily
+    const current = selectedCategory;
+    setSelectedCategory('');
+    setTimeout(() => setSelectedCategory(current), 10);
     setRefreshing(false);
-  }, [loadOutfits, loadCelebrityOutfits]);
+  }, [selectedCategory]);
 
   const handleCategorySelect = useCallback((categoryId) => {
     if (categoryId === selectedCategory) return;
