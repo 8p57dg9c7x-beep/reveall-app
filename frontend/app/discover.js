@@ -70,8 +70,11 @@ export default function DiscoverScreen() {
         if (isMounted) {
           const styles = stylesData.outfits?.slice(0, 10) || [];
           const beauty = beautyData.looks?.slice(0, 10) || [];
-          console.log('🎯 Setting trending styles count:', styles.length);
-          console.log('🎯 Setting trending beauty count:', beauty.length);
+          console.log('🎯🎯🎯 SETTING STATE NOW:');
+          console.log('  Styles to set:', styles.length, 'items');
+          console.log('  Beauty to set:', beauty.length, 'items');
+          console.log('  First style:', styles[0]?.title, 'has image:', !!(styles[0]?.image || styles[0]?.image_url));
+          console.log('  First beauty:', beauty[0]?.title, 'has image:', !!(beauty[0]?.image || beauty[0]?.image_url));
           
           setTrendingMovies(moviesData.results?.slice(0, 10) || []);
           setTrendingStyles(styles);
@@ -79,6 +82,8 @@ export default function DiscoverScreen() {
           setLoadingMovies(false);
           setLoadingStyles(false);
           setLoadingBeauty(false);
+          
+          console.log('✅✅✅ STATE SET COMPLETE!');
         }
       } catch (error) {
         console.error('❌ Error loading discover data:', error);
