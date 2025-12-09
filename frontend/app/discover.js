@@ -357,7 +357,9 @@ export default function DiscoverScreen() {
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
-          {trendingStyles.length > 0 ? (
+          {loadingStyles ? (
+            <SkeletonHorizontalCard count={5} />
+          ) : trendingStyles.length > 0 ? (
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false} 
@@ -370,6 +372,33 @@ export default function DiscoverScreen() {
             <View style={styles.emptySection}>
               <MaterialCommunityIcons name="hanger" size={40} color={COLORS.textSecondary} />
               <Text style={styles.emptyText}>No trending styles yet</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Trending Beauty */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Trending Beauty</Text>
+            <TouchableOpacity onPress={() => router.push('/beauty')}>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          </View>
+          {loadingBeauty ? (
+            <SkeletonHorizontalCard count={5} />
+          ) : trendingBeauty.length > 0 ? (
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={styles.horizontalScroll}
+              removeClippedSubviews
+            >
+              {trendingBeauty.map(renderBeautyCard)}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptySection}>
+              <MaterialCommunityIcons name="shimmer" size={40} color={COLORS.textSecondary} />
+              <Text style={styles.emptyText}>No trending beauty looks yet</Text>
             </View>
           )}
         </View>
