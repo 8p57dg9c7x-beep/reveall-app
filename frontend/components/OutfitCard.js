@@ -8,26 +8,19 @@ import AnimatedPressable from './AnimatedPressable';
 import { getItemId, getImageUrl } from '../utils/helpers';
 
 const OutfitCard = memo(({ item, onPress, isLeft }) => {
-  const { toggleOutfitFavorite, isOutfitFavorite, favoriteOutfits } = useFavorites();
+  const { toggleOutfitFavorite, isOutfitFavorite } = useFavorites();
   
-  // CRITICAL DEBUG: Log ALL item fields
-  console.log('👔 OUTFIT CARD FULL DEBUG:', {
-    'item.id': item.id,
-    'item._id': item._id,
-    'item.title': item.title,
-    'item.image': item.image,
-    'item.image_url': item.image_url,
-    'allKeys': Object.keys(item),
-    'imageToUse': item.image_url || item.image,
-  });
+  // Standardize ID and image
+  const itemId = getItemId(item);
+  const imageUrl = getImageUrl(item);
+  const isFavorite = isOutfitFavorite(itemId);
   
-  const isFavorite = isOutfitFavorite(item.id);
-  console.log('❤️ Favorite check:', {
-    itemId: item.id,
-    isFavorite: isFavorite,
-    totalFavorites: favoriteOutfits.length,
-    favoriteIds: favoriteOutfits.map(f => f.id)
-  });
+  // Create standardized item for favorites
+  const standardizedItem = {
+    ...item,
+    id: itemId,
+    image: imageUrl
+  };
 
   const handleFavoritePress = (e) => {
     console.log('❤️❤️❤️ HEART BUTTON PRESSED! ❤️❤️❤️');
