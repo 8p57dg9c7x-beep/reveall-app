@@ -284,16 +284,15 @@ export default function DiscoverScreen() {
   }, []);
 
   const renderExploreCard = useCallback((category) => (
-    <TouchableOpacity
+    <AnimatedPressable
       key={category.id}
       style={styles.exploreCard}
       onPress={() => handleExplorePress(category.id)}
-      activeOpacity={0.7}
     >
       <MaterialCommunityIcons name={category.icon} size={32} color={category.color} />
       <Text style={styles.exploreTitle}>{category.title}</Text>
       <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
-    </TouchableOpacity>
+    </AnimatedPressable>
   ), [handleExplorePress]);
 
   return (
