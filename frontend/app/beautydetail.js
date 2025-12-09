@@ -20,12 +20,45 @@ export default function BeautyDetail() {
   const [similarLooks, setSimilarLooks] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
+  // Fetch beauty look by ID if coming from deep link
+  useEffect(() => {
+    const fetchBeautyById = async () => {
+      if (id && !look) {
+        setLoading(true);
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/beauty/id/${id}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            setLook(data.look);
+            trackBeautyView(data.look);
+          } else {
+            Alert.alert('Error', 'Beauty look not found');
+            router.back();
+          }
+        } catch (error) {
+          console.error('Error fetching beauty look:', error);
+          Alert.alert('Error', 'Unable to load beauty look');
+          router.back();
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchBeautyById();
+  }, [id]);
+
   // Auto-scroll to top when opening a new beauty look
   useEffect(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-    
-    // Track beauty view
-    trackBeautyView(look);
+    if (look) {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+      
+      // Track beauty view (only if not from deep link, already tracked above)
+      if (!id) {
+        trackBeautyView(look);
+      }
+    }
   }, [lookData]);
 
   // Fetch similar beauty looks from the same category
