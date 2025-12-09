@@ -1,20 +1,57 @@
-// BRICK UPDATE: New Outfit Detail Page Layout
+// BRICK UPDATE: Outfit Detail Page with Similar Styles Section
 
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 export default function OutfitDetail() {
   const navigation = useNavigation();
   const scrollRef = useRef(null);
   const { outfitData } = useLocalSearchParams();
   const outfit = JSON.parse(outfitData);
+  
+  const [similarOutfits, setSimilarOutfits] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
 
   // Auto-scroll to top when opening a new outfit
   useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [outfitData]);
+
+  // Fetch similar outfits from the same category
+  useEffect(() => {
+    const fetchSimilarOutfits = async () => {
+      if (!outfit.category) return;
+      
+      setLoadingSimilar(true);
+      try {
+        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://cinescan.preview.emergentagent.com';
+        const response = await fetch(`${API_URL}/api/outfits/${outfit.category}`);
+        const data = await response.json();
+        
+        // Filter out the current outfit and limit to 10 items
+        const filtered = (data.outfits || [])
+          .filter(item => item.id !== outfit.id)
+          .slice(0, 10);
+        
+        setSimilarOutfits(filtered);
+      } catch (error) {
+        console.error('Error fetching similar outfits:', error);
+      } finally {
+        setLoadingSimilar(false);
+      }
+    };
+
+    fetchSimilarOutfits();
+  }, [outfit.category, outfit.id]);
+
+  const handleSimilarOutfitPress = (similarOutfit) => {
+    router.push({
+      pathname: '/outfitdetail',
+      params: { outfitData: JSON.stringify(similarOutfit) }
+    });
+  };
 
   return (
     <ScrollView ref={scrollRef} style={{ flex: 1, backgroundColor: "#0D001A" }}>
@@ -71,6 +108,66 @@ export default function OutfitDetail() {
         </TouchableOpacity>
 
       </View>
+
+      {/* Similar Styles Section */}
+      {similarOutfits.length > 0 && (
+        <View style={{ marginTop: 20, paddingBottom: 40 }}>
+          <Text style={{ 
+            fontSize: 22, 
+            fontWeight: "bold", 
+            color: "#FFFFFF",
+            paddingHorizontal: 20,
+            marginBottom: 15
+          }}>
+            Similar Styles
+          </Text>
+          
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+          >
+            {similarOutfits.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => handleSimilarOutfitPress(item)}
+                style={{
+                  marginRight: 15,
+                  width: 160,
+                }}
+              >
+                <Image
+                  source={{ uri: item.image || item.image_url }}
+                  style={{
+                    width: 160,
+                    height: 200,
+                    borderRadius: 16,
+                    backgroundColor: "#1A0D2E",
+                  }}
+                  resizeMode="cover"
+                />
+                <Text 
+                  style={{ 
+                    color: "#FFFFFF", 
+                    fontSize: 14, 
+                    marginTop: 8,
+                    fontWeight: "500"
+                  }}
+                  numberOfLines={2}
+                >
+                  {item.title}
+                </Text>
+                {item.price_range && (
+                  <Text style={{ color: "#A390FF", fontSize: 12, marginTop: 4 }}>
+                    {item.price_range}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
     </ScrollView>
   );
 }
