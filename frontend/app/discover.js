@@ -236,8 +236,25 @@ export default function DiscoverScreen() {
         params: { outfitData: JSON.stringify(style) }
       })}
     >
-      <OptimizedImage source={{ uri: style.image }} style={styles.trendingImage} />
+      <OptimizedImage source={{ uri: style.image_url }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{style.title}</Text>
+    </TouchableOpacity>
+  ), []);
+
+  const renderBeautyCard = useCallback((look) => (
+    <TouchableOpacity
+      key={look.id}
+      style={styles.trendingCard}
+      onPress={() => router.push({
+        pathname: '/beautydetail',
+        params: { lookData: JSON.stringify(look) }
+      })}
+    >
+      <OptimizedImage source={{ uri: look.image_url }} style={styles.trendingImage} />
+      <Text style={styles.trendingTitle} numberOfLines={2}>{look.title}</Text>
+      {look.celebrity && (
+        <Text style={styles.trendingSubtitle} numberOfLines={1}>{look.celebrity}</Text>
+      )}
     </TouchableOpacity>
   ), []);
 
