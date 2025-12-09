@@ -9,6 +9,7 @@ import { API_BASE_URL } from '../config';
 import AnimatedPressable from '../components/AnimatedPressable';
 import FadeInView from '../components/FadeInView';
 import { trackCategoryView } from '../services/analytics';
+import { asCardItem } from '../utils/helpers';
 
 const STYLE_CATEGORIES = [
   { id: 'streetwear', name: 'Streetwear', icon: 'tshirt-crew' },
@@ -30,7 +31,7 @@ export default function StyleDiscovery() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  // FIX 1: Load celebrity outfits with cleanup
+  // Load celebrity outfits with cleanup
   useEffect(() => {
     let isMounted = true;
 
@@ -38,7 +39,11 @@ export default function StyleDiscovery() {
       try {
         const response = await fetch(`${API_BASE_URL}/api/outfits/celebrity`);
         const data = await response.json();
-        if (isMounted) setCelebrityOutfits(data.outfits || []);
+        if (isMounted) {
+          // 🔥 NORMALIZE celebrity outfits
+          const normalizedOutfits = (data.outfits || []).map(asCardItem);
+          setCelebrityOutfits(normalizedOutfits);
+        }
       } catch (err) {
         console.error('Error loading celebrity outfits:', err);
       }
@@ -51,7 +56,7 @@ export default function StyleDiscovery() {
     };
   }, []);
 
-  // FIX 1: Load outfits with cleanup
+  // Load outfits with cleanup
   useEffect(() => {
     let isMounted = true;
 
@@ -81,7 +86,9 @@ export default function StyleDiscovery() {
         console.log('✅ Loaded outfits:', data.outfits?.length || 0);
         
         if (isMounted) {
-          setOutfits(data.outfits || []);
+          // 🔥 NORMALIZE all outfits before setting state
+          const normalizedOutfits = (data.outfits || []).map(asCardItem);
+          setOutfits(normalizedOutfits);
         }
       } catch (err) {
         console.error('❌ Error loading outfits:', err);
@@ -98,7 +105,7 @@ export default function StyleDiscovery() {
     };
   }, [selectedCategory]);
 
-  // FIX 3: Fix back button freeze
+  // Fix back button freeze
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setRefreshing(true);
@@ -135,7 +142,9 @@ export default function StyleDiscovery() {
       const data = await response.json();
       console.log('✅ Loaded outfits:', data.outfits?.length || 0);
       
-      setOutfits(data.outfits || []);
+      // 🔥 NORMALIZE all outfits
+      const normalizedOutfits = (data.outfits || []).map(asCardItem);
+      setOutfits(normalizedOutfits);
     } catch (error) {
       console.error('❌ Error loading outfits:', error);
       console.error('   URL:', `${API_BASE_URL}/api/outfits/${selectedCategory}`);
@@ -151,7 +160,9 @@ export default function StyleDiscovery() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/outfits/celebrity`);
       const data = await response.json();
-      setCelebrityOutfits(data.outfits || []);
+      // 🔥 NORMALIZE celebrity outfits
+      const normalizedOutfits = (data.outfits || []).map(asCardItem);
+      setCelebrityOutfits(normalizedOutfits);
     } catch (error) {
       console.error('Error loading celebrity outfits:', error);
     }
@@ -471,13 +482,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     backgroundColor: COLORS.card,
-    height: 44, // ABSOLUTE fixed height
+    height: 44,
     minHeight: 44,
     maxHeight: 44,
   },
   categoryButtonActive: {
     backgroundColor: COLORS.primary,
-    // NO additional padding or styling that could shift layout
   },
   categoryText: {
     fontSize: 15,

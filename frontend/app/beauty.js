@@ -18,6 +18,7 @@ import { API_BASE_URL } from '../config';
 import AnimatedPressable from '../components/AnimatedPressable';
 import FadeInView from '../components/FadeInView';
 import { trackCategoryView } from '../services/analytics';
+import { asCardItem } from '../utils/helpers';
 
 const CATEGORIES = [
   { id: 'natural', name: 'Natural', icon: 'leaf' },
@@ -39,7 +40,7 @@ export default function BeautyScreen() {
   const flatListRef = React.useRef(null);
   const categoryScrollRef = React.useRef(null);
 
-  // FIX 1: Load looks with cleanup
+  // Load looks with cleanup
   useEffect(() => {
     let isMounted = true;
 
@@ -51,7 +52,11 @@ export default function BeautyScreen() {
       try {
         const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
         const data = await response.json();
-        if (isMounted) setLooks(data.looks || []);
+        if (isMounted) {
+          // 🔥 NORMALIZE all beauty looks before setting state
+          const normalizedLooks = (data.looks || []).map(asCardItem);
+          setLooks(normalizedLooks);
+        }
       } catch (error) {
         console.error('Error loading beauty looks:', error);
         if (isMounted) {
@@ -70,7 +75,7 @@ export default function BeautyScreen() {
     };
   }, [selectedCategory]);
 
-  // FIX 3: Fix back button freeze
+  // Fix back button freeze
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setRefreshing(true);
@@ -90,7 +95,9 @@ export default function BeautyScreen() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
       const data = await response.json();
-      setLooks(data.looks || []);
+      // 🔥 NORMALIZE all beauty looks
+      const normalizedLooks = (data.looks || []).map(asCardItem);
+      setLooks(normalizedLooks);
     } catch (error) {
       console.error('Error loading beauty looks:', error);
       setError('Unable to load beauty looks. Please try again.');
@@ -368,13 +375,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     backgroundColor: COLORS.card,
-    height: 44, // ABSOLUTE fixed height
+    height: 44,
     minHeight: 44,
     maxHeight: 44,
   },
   categoryButtonActive: {
     backgroundColor: COLORS.primary,
-    // NO additional padding or styling that could shift layout
   },
   categoryText: {
     fontSize: 15,
