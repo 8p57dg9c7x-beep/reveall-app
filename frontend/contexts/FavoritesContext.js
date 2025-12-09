@@ -66,9 +66,23 @@ export const FavoritesProvider = ({ children }) => {
     if (isFavorite) {
       const newFavorites = favoriteOutfits.filter(item => item.id !== outfit.id);
       await saveFavoriteOutfits(newFavorites);
+      
+      // Track unfavorite
+      trackEvent('outfit_unfavorited', {
+        item_id: outfit.id?.toString(),
+        item_title: outfit.title,
+        category: outfit.category
+      });
     } else {
       const newFavorites = [...favoriteOutfits, outfit];
       await saveFavoriteOutfits(newFavorites);
+      
+      // Track favorite
+      trackEvent('outfit_favorited', {
+        item_id: outfit.id?.toString(),
+        item_title: outfit.title,
+        category: outfit.category
+      });
     }
   };
 
