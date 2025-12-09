@@ -470,12 +470,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    minHeight: 44, // Fixed height to prevent jumping
   },
   categoryButtonActive: {
     backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
   },
   categoryText: {
     fontSize: 15,
