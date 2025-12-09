@@ -1098,26 +1098,6 @@ async def create_outfit(outfit: dict):
 
 # ========== BEAUTY ENDPOINTS ==========
 
-@api_router.get("/beauty/{category}")
-async def get_beauty_looks(category: str):
-    """Get beauty looks by category"""
-    try:
-        logger.info(f"Fetching beauty looks for category: {category}")
-        
-        # Get beauty looks for the specified category
-        looks = list(beauty_collection.find({"category": category}))
-        
-        # Convert ObjectId to string
-        for look in looks:
-            look['id'] = str(look['_id'])
-            del look['_id']
-        
-        logger.info(f"Found {len(looks)} beauty looks for category: {category}")
-        return {"looks": looks}
-    except Exception as e:
-        logger.error(f"Beauty looks error: {e}")
-        return {"looks": []}
-
 @api_router.get("/beauty/trending")
 async def get_trending_beauty():
     """Get trending beauty looks"""
@@ -1138,6 +1118,26 @@ async def get_trending_beauty():
         return {"looks": looks}
     except Exception as e:
         logger.error(f"Trending beauty error: {e}")
+        return {"looks": []}
+
+@api_router.get("/beauty/{category}")
+async def get_beauty_looks(category: str):
+    """Get beauty looks by category"""
+    try:
+        logger.info(f"Fetching beauty looks for category: {category}")
+        
+        # Get beauty looks for the specified category
+        looks = list(beauty_collection.find({"category": category}))
+        
+        # Convert ObjectId to string
+        for look in looks:
+            look['id'] = str(look['_id'])
+            del look['_id']
+        
+        logger.info(f"Found {len(looks)} beauty looks for category: {category}")
+        return {"looks": looks}
+    except Exception as e:
+        logger.error(f"Beauty looks error: {e}")
         return {"looks": []}
 
 
