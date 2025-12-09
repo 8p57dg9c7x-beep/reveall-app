@@ -213,7 +213,7 @@ export default function DiscoverScreen() {
   }, []);
 
   const renderSongCard = useCallback((song) => (
-    <TouchableOpacity 
+    <AnimatedPressable 
       key={song.id} 
       style={styles.trendingCard}
       onPress={() => handleSongTap(song)}
@@ -225,7 +225,7 @@ export default function DiscoverScreen() {
       <Text style={[styles.debugText, {fontSize: 8, color: '#888'}]} numberOfLines={1}>
         {song.image?.includes('unsplash') ? '✓ Unsplash' : '✗ OLD URL'}
       </Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   ), [handleSongTap]);
 
   const renderStyleCard = useCallback((style) => (
