@@ -5,28 +5,20 @@ import OptimizedImage from './OptimizedImage';
 import { COLORS } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
 import AnimatedPressable from './AnimatedPressable';
-import { getItemId, getImageUrl } from '../utils/helpers';
+import { asCardItem } from '../utils/helpers';
 
 const OutfitCard = memo(({ item, onPress, isLeft }) => {
   const { toggleOutfitFavorite, isOutfitFavorite } = useFavorites();
   
-  // Standardize ID and image
-  const itemId = getItemId(item);
-  const imageUrl = getImageUrl(item);
-  const isFavorite = isOutfitFavorite(itemId);
-  
-  // Create standardized item for favorites
-  const standardizedItem = {
-    ...item,
-    id: itemId,
-    image: imageUrl
-  };
+  // Normalize the card (should already be normalized but double-check)
+  const card = asCardItem(item);
+  const isFavorite = isOutfitFavorite(card.id);
 
   const handleFavoritePress = (e) => {
     if (e && e.stopPropagation) {
       e.stopPropagation();
     }
-    toggleOutfitFavorite(standardizedItem);
+    toggleOutfitFavorite(card);
   };
 
   return (
@@ -35,7 +27,7 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
       onPress={onPress}
     >
       <View style={styles.imageContainer}>
-        <OptimizedImage source={{ uri: imageUrl }} style={styles.outfitImage} />
+        <OptimizedImage source={{ uri: card.imageToUse }} style={styles.outfitImage} />
         
         {/* Favorite Heart Button */}
         <AnimatedPressable 
