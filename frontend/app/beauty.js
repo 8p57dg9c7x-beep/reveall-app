@@ -214,15 +214,27 @@ export default function BeautyScreen() {
 
       <View style={styles.categoriesContainer}>
         <ScrollView
+          ref={categoryScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesContent}
-          scrollEnabled={true}
+          scrollEnabled={false}
           nestedScrollEnabled={false}
           removeClippedSubviews={false}
+          bounces={false}
           scrollEventThrottle={16}
-          onScroll={() => {}}
-          directionalLockEnabled={true}
+          onScrollBeginDrag={(e) => {
+            e.preventDefault();
+            if (categoryScrollRef.current) {
+              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
+            }
+          }}
+          onMomentumScrollBegin={(e) => {
+            e.preventDefault();
+            if (categoryScrollRef.current) {
+              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
+            }
+          }}
         >
           {CATEGORIES.map((item) => (
             <TouchableOpacity
