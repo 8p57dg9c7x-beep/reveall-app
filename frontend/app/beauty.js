@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
-import { COLORS } from '../constants/theme';
+import { COLORS, ANIMATIONS } from '../constants/theme';
 import BeautyCard from '../components/BeautyCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
+import AnimatedPressable from '../components/AnimatedPressable';
+import FadeInView from '../components/FadeInView';
 
 const CATEGORIES = [
   { id: 'natural', name: 'Natural', icon: 'leaf' },
