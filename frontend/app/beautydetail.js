@@ -89,57 +89,32 @@ export default function BeautyDetail() {
           </Text>
         )}
 
-        {/* Products Section (if available) */}
-        {look.products && look.products.length > 0 && (
-          <View style={{ marginTop: 20 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: "#FFFFFF", marginBottom: 10 }}>
-              Products Used
-            </Text>
-            {look.products.map((product, index) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  paddingVertical: 8,
-                  borderBottomWidth: 1,
-                  borderBottomColor: "#2A1A3D",
-                }}
-              >
-                <Text style={{ color: "#CFCFCF", fontSize: 14, flex: 1 }}>
-                  {product.name}
-                </Text>
-                <Text style={{ color: "#A390FF", fontSize: 14, fontWeight: "600" }}>
-                  {product.price}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Shop Button (Affiliate placeholder) */}
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#A34CFF",
-            padding: 15,
-            borderRadius: 12,
-            marginTop: 25,
-            alignItems: "center",
-          }}
-          onPress={() => {
-            navigation.navigate("webview", {
-              url:
-                look.affiliate_url ||
-                "https://www.google.com/search?q=" + look.title + " makeup tutorial",
-            });
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600" }}>
-            Shop Products
-          </Text>
-        </TouchableOpacity>
-
       </View>
+
+      {/* Shop The Look - Affiliate Products */}
+      {look.products && look.products.length > 0 && (
+        <View style={{ marginTop: 30, marginBottom: 10 }}>
+          <Text style={{ 
+            fontSize: 22, 
+            fontWeight: "bold", 
+            color: "#FFFFFF",
+            paddingHorizontal: 20,
+            marginBottom: 15
+          }}>
+            💄 Shop The Look
+          </Text>
+          
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+          >
+            {look.products.map((product, index) => (
+              <ProductCard key={index} product={product} />
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       {/* Similar Beauty Looks Section */}
       {similarLooks.length > 0 && (
