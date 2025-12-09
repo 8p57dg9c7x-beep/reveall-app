@@ -304,18 +304,30 @@ export default function StyleDiscovery() {
 
       <View style={styles.categoriesContainer}>
         <ScrollView
+          ref={categoryScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
             paddingHorizontal: 20,
             alignItems: "center",
           }}
-          scrollEventThrottle={16}
-          onScroll={() => {}}
-          scrollEnabled={true}
+          scrollEnabled={false}
           nestedScrollEnabled={false}
           removeClippedSubviews={false}
-          directionalLockEnabled={true}
+          bounces={false}
+          scrollEventThrottle={16}
+          onScrollBeginDrag={(e) => {
+            e.preventDefault();
+            if (categoryScrollRef.current) {
+              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
+            }
+          }}
+          onMomentumScrollBegin={(e) => {
+            e.preventDefault();
+            if (categoryScrollRef.current) {
+              categoryScrollRef.current.scrollTo({ x: 0, animated: false });
+            }
+          }}
         >
           {STYLE_CATEGORIES.map(renderCategoryButton)}
         </ScrollView>
