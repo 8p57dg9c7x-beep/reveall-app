@@ -465,15 +465,19 @@ const styles = StyleSheet.create({
   categoryButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 24,
     backgroundColor: COLORS.card,
-    minHeight: 44, // Fixed height to prevent jumping
+    height: 44, // ABSOLUTE fixed height
+    minHeight: 44,
+    maxHeight: 44,
   },
   categoryButtonActive: {
     backgroundColor: COLORS.primary,
+    // NO additional padding or styling that could shift layout
   },
   categoryText: {
     fontSize: 15,
