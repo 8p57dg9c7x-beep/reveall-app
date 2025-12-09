@@ -54,7 +54,7 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
         )}
         <Text style={styles.priceRange}>{item.priceRange || 'View Details'}</Text>
       </View>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }, (prevProps, nextProps) => {
   return prevProps.item.id === nextProps.item.id && 
