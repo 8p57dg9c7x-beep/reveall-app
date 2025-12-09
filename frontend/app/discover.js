@@ -15,7 +15,6 @@ import { COLORS } from '../constants/theme';
 import { API_BASE_URL } from '../config';
 import { searchMusic } from '../services/api';
 import OptimizedImage from '../components/OptimizedImage';
-import { SkeletonHorizontalCard } from '../components/SkeletonLoader';
 
 export default function DiscoverScreen() {
   const navigation = useNavigation();
