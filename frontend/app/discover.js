@@ -37,32 +37,44 @@ export default function DiscoverScreen() {
       if (isMounted) {
         setLoadingMovies(true);
         setLoadingStyles(true);
+        setLoadingBeauty(true);
       }
       try {
         console.log('🎬 Loading discover data from:', API_BASE_URL);
         
-        // Load trending movies
-        const moviesRes = await fetch(`${API_BASE_URL}/api/discover/trending`);
+        // Load all trending data in parallel
+        const [moviesRes, stylesRes, beautyRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/discover/trending`),
+          fetch(`${API_BASE_URL}/api/outfits/trending`),
+          fetch(`${API_BASE_URL}/api/beauty/trending`)
+        ]);
+
         console.log('📊 Movies response status:', moviesRes.status);
+        console.log('👗 Styles response status:', stylesRes.status);
+        console.log('💄 Beauty response status:', beautyRes.status);
+        
         const moviesData = await moviesRes.json();
+        const stylesData = await stylesRes.json();
+        const beautyData = await beautyRes.json();
+        
         console.log('✅ Loaded movies:', moviesData.results?.length || 0);
+        console.log('✅ Loaded styles:', stylesData.outfits?.length || 0);
+        console.log('✅ Loaded beauty:', beautyData.looks?.length || 0);
+        
         if (isMounted) {
           setTrendingMovies(moviesData.results?.slice(0, 10) || []);
+          setTrendingStyles(stylesData.outfits?.slice(0, 10) || []);
+          setTrendingBeauty(beautyData.looks?.slice(0, 10) || []);
           setLoadingMovies(false);
-        }
-
-        // Load trending styles (from all categories)
-        const stylesRes = await fetch(`${API_BASE_URL}/api/outfits/trending`);
-        const stylesData = await stylesRes.json();
-        if (isMounted) {
-          setTrendingStyles(stylesData.outfits || []);
           setLoadingStyles(false);
+          setLoadingBeauty(false);
         }
       } catch (error) {
         console.error('❌ Error loading discover data:', error);
         if (isMounted) {
           setLoadingMovies(false);
           setLoadingStyles(false);
+          setLoadingBeauty(false);
         }
       } finally {
         if (isMounted) setLoading(false);
