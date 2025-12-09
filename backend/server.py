@@ -1552,6 +1552,30 @@ async def get_analytics_dashboard():
             {"$sort": {"views": -1}}
         ]))
         
+        # Most Favorited Outfits
+        most_favorited_outfits = list(analytics_collection.aggregate([
+            {"$match": {"event_type": "outfit_favorited", "timestamp": {"$gte": thirty_days_ago}}},
+            {"$group": {
+                "_id": "$item_id",
+                "title": {"$first": "$item_title"},
+                "favorites": {"$sum": 1}
+            }},
+            {"$sort": {"favorites": -1}},
+            {"$limit": 10}
+        ]))
+        
+        # Most Favorited Beauty Looks
+        most_favorited_beauty = list(analytics_collection.aggregate([
+            {"$match": {"event_type": "beauty_favorited", "timestamp": {"$gte": thirty_days_ago}}},
+            {"$group": {
+                "_id": "$item_id",
+                "title": {"$first": "$item_title"},
+                "favorites": {"$sum": 1}
+            }},
+            {"$sort": {"favorites": -1}},
+            {"$limit": 10}
+        ]))
+        
         # Total Events Count
         total_events = analytics_collection.count_documents({"timestamp": {"$gte": thirty_days_ago}})
         total_product_clicks = analytics_collection.count_documents({
@@ -1566,6 +1590,10 @@ async def get_analytics_dashboard():
             "event_type": "beauty_view",
             "timestamp": {"$gte": thirty_days_ago}
         })
+        total_favorites = analytics_collection.count_documents({
+            "event_type": {"$in": ["outfit_favorited", "beauty_favorited"]},
+            "timestamp": {"$gte": thirty_days_ago}
+        })
         
         return {
             "success": True,
@@ -1574,12 +1602,15 @@ async def get_analytics_dashboard():
                 "total_events": total_events,
                 "product_clicks": total_product_clicks,
                 "outfit_views": total_outfit_views,
-                "beauty_views": total_beauty_views
+                "beauty_views": total_beauty_views,
+                "total_favorites": total_favorites
             },
             "top_products": product_clicks,
             "top_outfits": outfit_views,
             "top_beauty_looks": beauty_views,
-            "category_stats": category_stats
+            "category_stats": category_stats,
+            "most_favorited_outfits": most_favorited_outfits,
+            "most_favorited_beauty": most_favorited_beauty
         }
     except Exception as e:
         logger.error(f"Analytics dashboard error: {str(e)}")
