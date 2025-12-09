@@ -82,6 +82,13 @@ export default function ResultScreen() {
     return unsubscribe;
   }, [navigation]);
 
+  // FIX 4: Force scroll-to-top when returning from external apps (YouTube, Spotify)
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    }, [song, movieId])
+  );
+
   const loadMovieDetails = async (isMounted = true) => {
     if (!movieId) return;
     if (isMounted) setLoadingDetails(true);
