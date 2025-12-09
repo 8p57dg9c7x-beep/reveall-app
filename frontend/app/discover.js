@@ -10,11 +10,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
-import { COLORS } from '../constants/theme';
+import { COLORS, ANIMATIONS } from '../constants/theme';
 import { API_BASE_URL } from '../config';
 import { searchMusic } from '../services/api';
 import OptimizedImage from '../components/OptimizedImage';
 import { SkeletonHorizontalScroll } from '../components/SkeletonLoader';
+import AnimatedPressable from '../components/AnimatedPressable';
+import FadeInView from '../components/FadeInView';
 
 export default function DiscoverScreen() {
   const navigation = useNavigation();
