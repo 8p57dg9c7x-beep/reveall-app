@@ -34,6 +34,7 @@ export default function BeautyScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const flatListRef = React.useRef(null);
+  const categoryScrollRef = React.useRef(null);
 
   // FIX 1: Load looks with cleanup
   useEffect(() => {
