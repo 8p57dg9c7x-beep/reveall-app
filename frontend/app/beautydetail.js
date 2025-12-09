@@ -95,6 +95,42 @@ export default function BeautyDetail() {
     });
   };
 
+  const handleShare = async () => {
+    try {
+      const deepLink = Linking.createURL(`/beautydetail`, {
+        queryParams: { id: look.id }
+      });
+      
+      const result = await Share.share({
+        message: `Check out this ${look.title} beauty look on REVEAL! 💄\n\n${deepLink}`,
+        title: look.title,
+      });
+
+      if (result.action === Share.sharedAction) {
+        console.log('Shared successfully!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      Alert.alert('Error', 'Unable to share');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#FFFFFF', fontSize: 16 }}>Loading beauty look...</Text>
+      </View>
+    );
+  }
+
+  if (!look) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#FFFFFF', fontSize: 16 }}>Beauty look not found</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView ref={scrollRef} style={{ flex: 1, backgroundColor: "#0D001A" }}>
 
