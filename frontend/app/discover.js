@@ -24,6 +24,17 @@ export default function DiscoverScreen() {
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingStyles, setTrendingStyles] = useState([]);
   const [trendingBeauty, setTrendingBeauty] = useState([]);
+  
+  // DEBUG: Log state changes
+  useEffect(() => {
+    console.log('🔴🔴🔴 TRENDING STYLES STATE CHANGED:', trendingStyles.length, 'items');
+    console.log('🔴 First style:', trendingStyles[0]?.title);
+  }, [trendingStyles]);
+  
+  useEffect(() => {
+    console.log('💜💜💜 TRENDING BEAUTY STATE CHANGED:', trendingBeauty.length, 'items');
+    console.log('💜 First beauty:', trendingBeauty[0]?.title);
+  }, [trendingBeauty]);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingStyles, setLoadingStyles] = useState(true);
   const [loadingBeauty, setLoadingBeauty] = useState(true);
