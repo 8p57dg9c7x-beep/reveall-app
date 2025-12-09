@@ -19,7 +19,7 @@ const STYLE_CATEGORIES = [
 export default function StyleDiscovery() {
   const navigation = useNavigation();
   const flatListRef = useRef(null);
-  const scrollRef = useRef(null);
+  const categoryScrollRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('streetwear');
   const [celebrityOutfits, setCelebrityOutfits] = useState([]);
   const [outfits, setOutfits] = useState([]);
