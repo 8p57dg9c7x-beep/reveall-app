@@ -83,6 +83,10 @@ export default function BeautyScreen() {
   const loadLooks = useCallback(async () => {
     setLoading(true);
     setError(null);
+    
+    // Track category view
+    trackCategoryView(selectedCategory, 'beauty');
+    
     try {
       const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
       const data = await response.json();
