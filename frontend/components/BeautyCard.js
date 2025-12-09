@@ -21,7 +21,7 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
       onPress={onPress}
     >
       <View style={styles.imageContainer}>
-        <OptimizedImage source={{ uri: item.image }} style={styles.lookImage} />
+        <OptimizedImage source={{ uri: item.image_url || item.image }} style={styles.lookImage} />
         <View style={styles.gradientOverlay} />
         
         {/* Favorite Heart Button */}
