@@ -914,27 +914,23 @@ async def search_movie(request: SearchRequest):
 async def get_trending():
     """Get trending movies"""
     try:
-        # DIAGNOSTIC LOGGING - Check environment variable
-        logger.info(f"🔍 TMDB_API_KEY received from environment: '{TMDB_API_KEY}'")
-        logger.info(f"🔍 TMDB_API_KEY length: {len(TMDB_API_KEY) if TMDB_API_KEY else 0}")
-        logger.info(f"🔍 TMDB_API_KEY is None: {TMDB_API_KEY is None}")
-        
         if not TMDB_API_KEY:
-            logger.error("❌ TMDB_API_KEY is missing or empty!")
+            logger.error("TMDB_API_KEY is missing or empty!")
             return {"results": [], "error": "TMDB API key not configured"}
         
         url = f"https://api.themoviedb.org/3/trending/movie/week"
         params = {'api_key': TMDB_API_KEY}
         
-        logger.info(f"📡 Making TMDB API request to: {url}")
         response = requests.get(url, params=params, timeout=10)
-        logger.info(f"📡 TMDB API response status: {response.status_code}")
-        
         response.raise_for_status()
+        
+        logger.info(f"Successfully fetched trending movies (status: {response.status_code})")
         return response.json()
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"TMDB API HTTP error: {e.response.status_code} - {e.response.text}")
+        return {"results": [], "error": f"TMDB API error: {e.response.status_code}"}
     except Exception as e:
-        logger.error(f"❌ Trending error: {e}")
-        logger.error(f"❌ Error type: {type(e).__name__}")
+        logger.error(f"Trending error: {e}")
         return {"results": [], "error": str(e)}
 
 @api_router.get("/discover/popular")
