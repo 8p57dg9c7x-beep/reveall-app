@@ -134,17 +134,42 @@ export default function BeautyDetail() {
   return (
     <ScrollView ref={scrollRef} style={{ flex: 1, backgroundColor: "#0D001A" }}>
 
-      {/* Hero Image */}
-      <Image
-        source={{ uri: look.image || look.image_url }}
-        style={{
-          width: "100%",
-          height: 400,
-          borderBottomLeftRadius: 40,
-          borderBottomRightRadius: 40,
-        }}
-        resizeMode="cover"
-      />
+      {/* Hero Image with Share Button */}
+      <View style={{ position: 'relative' }}>
+        <Image
+          source={{ uri: look.image || look.image_url }}
+          style={{
+            width: "100%",
+            height: 400,
+            borderBottomLeftRadius: 40,
+            borderBottomRightRadius: 40,
+          }}
+          resizeMode="cover"
+        />
+        
+        {/* Share Button */}
+        <TouchableOpacity
+          onPress={handleShare}
+          style={{
+            position: 'absolute',
+            top: 50,
+            right: 20,
+            backgroundColor: 'rgba(163, 76, 255, 0.9)',
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            justifyContent: 'center',
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 5,
+          }}
+        >
+          <MaterialCommunityIcons name="share-variant" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
 
       <View style={{ padding: 20 }}>
 
