@@ -22,8 +22,10 @@ export default function DiscoverScreen() {
   const scrollRef = useRef(null);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingStyles, setTrendingStyles] = useState([]);
+  const [trendingBeauty, setTrendingBeauty] = useState([]);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingStyles, setLoadingStyles] = useState(true);
+  const [loadingBeauty, setLoadingBeauty] = useState(true);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
