@@ -229,7 +229,7 @@ export default function DiscoverScreen() {
   ), [handleSongTap]);
 
   const renderStyleCard = useCallback((style) => (
-    <TouchableOpacity
+    <AnimatedPressable
       key={style.id}
       style={styles.trendingCard}
       onPress={() => router.push({
@@ -239,7 +239,7 @@ export default function DiscoverScreen() {
     >
       <OptimizedImage source={{ uri: style.image_url || style.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{style.title}</Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   ), []);
 
   const renderBeautyCard = useCallback((look) => (
