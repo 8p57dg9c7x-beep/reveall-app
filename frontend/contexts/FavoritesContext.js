@@ -95,28 +95,35 @@ export const FavoritesProvider = ({ children }) => {
 
   // Toggle beauty look favorite
   const toggleBeautyFavorite = async (look) => {
-    const isFavorite = favoriteBeauty.some(item => item.id === look.id);
-    
-    if (isFavorite) {
-      const newFavorites = favoriteBeauty.filter(item => item.id !== look.id);
-      await saveFavoriteBeauty(newFavorites);
+    try {
+      console.log('Toggling beauty favorite:', look.id, look.title);
+      const isFavorite = favoriteBeauty.some(item => item.id === look.id);
       
-      // Track unfavorite
-      trackEvent('beauty_unfavorited', {
-        item_id: look.id?.toString(),
-        item_title: look.title,
-        category: look.category
-      });
-    } else {
-      const newFavorites = [...favoriteBeauty, look];
-      await saveFavoriteBeauty(newFavorites);
-      
-      // Track favorite
-      trackEvent('beauty_favorited', {
-        item_id: look.id?.toString(),
-        item_title: look.title,
-        category: look.category
-      });
+      if (isFavorite) {
+        const newFavorites = favoriteBeauty.filter(item => item.id !== look.id);
+        await saveFavoriteBeauty(newFavorites);
+        console.log('Beauty look removed from favorites');
+        
+        // Track unfavorite
+        trackEvent('beauty_unfavorited', {
+          item_id: look.id?.toString(),
+          item_title: look.title,
+          category: look.category
+        });
+      } else {
+        const newFavorites = [...favoriteBeauty, look];
+        await saveFavoriteBeauty(newFavorites);
+        console.log('Beauty look added to favorites');
+        
+        // Track favorite
+        trackEvent('beauty_favorited', {
+          item_id: look.id?.toString(),
+          item_title: look.title,
+          category: look.category
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling beauty favorite:', error);
     }
   };
 
