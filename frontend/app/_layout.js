@@ -84,6 +84,21 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="favorites"
+          options={{
+            title: 'Favorites',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="heart" size={26} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="analytics"
+          options={{
+            href: null, // Hide from tabs - accessed via settings/admin
+          }}
+        />
+        <Tabs.Screen
           name="comingsoon"
           options={{
             href: null, // Hide from tabs
