@@ -1,9 +1,10 @@
-// BRICK UPDATE: Outfit Detail Page with Similar Styles Section
+// BRICK UPDATE: Outfit Detail Page with Similar Styles Section & Affiliate Products
 
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useEffect, useState } from "react";
+import ProductCard from "../components/ProductCard";
 
 export default function OutfitDetail() {
   const navigation = useNavigation();
