@@ -307,11 +307,11 @@ export default function DiscoverScreen() {
         removeClippedSubviews
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <FadeInView style={styles.header}>
           <MaterialCommunityIcons name="compass" size={32} color={COLORS.primary} />
           <Text style={styles.headerTitle}>Discover</Text>
           <Text style={styles.headerSubtitle}>Trending content across movies, music & style</Text>
-        </View>
+        </FadeInView>
 
         {/* Trending Movies */}
         <View style={styles.section}>
