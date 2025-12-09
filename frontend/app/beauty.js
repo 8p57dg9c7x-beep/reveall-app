@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { COLORS } from '../constants/theme';
 import BeautyCard from '../components/BeautyCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
@@ -26,6 +26,7 @@ const CATEGORIES = [
 ];
 
 export default function BeautyScreen() {
+  const navigation = useNavigation();
   const [selectedCategory, setSelectedCategory] = useState('natural');
   const [looks, setLooks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,9 +34,46 @@ export default function BeautyScreen() {
   const [error, setError] = useState(null);
   const flatListRef = React.useRef(null);
 
+  // FIX 1: Load looks with cleanup
   useEffect(() => {
-    loadLooks();
+    let isMounted = true;
+
+    const fetchLooks = async () => {
+      if (isMounted) {
+        setLoading(true);
+        setError(null);
+      }
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
+        const data = await response.json();
+        if (isMounted) setLooks(data.looks || []);
+      } catch (error) {
+        console.error('Error loading beauty looks:', error);
+        if (isMounted) {
+          setError('Unable to load beauty looks. Please try again.');
+          setLooks([]);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchLooks();
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedCategory]);
+
+  // FIX 3: Fix back button freeze
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setRefreshing(true);
+      setTimeout(() => setRefreshing(false), 50);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const loadLooks = useCallback(async () => {
     setLoading(true);
