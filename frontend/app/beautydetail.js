@@ -1,10 +1,11 @@
-// BRICK UPDATE: Beauty Detail Page with Similar Beauty Looks Section & Affiliate Products
+// BRICK UPDATE: Beauty Detail Page with Similar Beauty Looks Section & Affiliate Products & Analytics
 
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
+import { trackBeautyView } from "../services/analytics";
 
 export default function BeautyDetail() {
   const navigation = useNavigation();
