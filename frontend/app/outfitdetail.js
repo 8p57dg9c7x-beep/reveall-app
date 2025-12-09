@@ -19,6 +19,9 @@ export default function OutfitDetail() {
   // Auto-scroll to top when opening a new outfit
   useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+    
+    // Track outfit view
+    trackOutfitView(outfit);
   }, [outfitData]);
 
   // Fetch similar outfits from the same category
