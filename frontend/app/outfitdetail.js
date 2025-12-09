@@ -68,7 +68,7 @@ export default function OutfitDetail() {
       
       setLoadingSimilar(true);
       try {
-        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://category-navbar.preview.emergentagent.com';
+        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
         const response = await fetch(`${API_URL}/api/outfits/${outfit.category}`);
         const data = await response.json();
         

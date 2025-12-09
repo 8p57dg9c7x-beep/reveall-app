@@ -409,7 +409,7 @@ index 38a7d42d..e69de29b 100644
 ----------+    setLoadingMovies(true);
 ----------+    setLoadingStyles(true);
 ----------     try {
-----------       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://category-navbar.preview.emergentagent.com';
+----------       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
 ----------       
 ----------@@ -35,13 +37,17 @@ export default function DiscoverScreen() {
 ----------       const moviesRes = await fetch(`${API_URL}/api/discover/trending`);
@@ -969,7 +969,7 @@ index 38a7d42d..e69de29b 100644
 ---------------------------  const loadMovies = async () => {
 --------------------------+  const loadDiscoverData = async () => {
 --------------------------     try {
---------------------------       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://category-navbar.preview.emergentagent.com';
+--------------------------       const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
 --------------------------       
 ---------------------------      const [trendingRes, popularRes] = await Promise.all([
 ---------------------------        fetch(`${API_URL}/api/discover/trending`),
@@ -1310,7 +1310,7 @@ index 38a7d42d..e69de29b 100644
 ---------------------------+from pathlib import Path
 ---------------------------+
 ---------------------------+# Backend URL
----------------------------+BACKEND_URL = "https://category-navbar.preview.emergentagent.com/api"
+---------------------------+BACKEND_URL = "https://bugfix-champs.preview.emergentagent.com/api"
 ---------------------------+
 ---------------------------+class FinalMusicTester:
 ---------------------------+    def __init__(self):
@@ -2323,7 +2323,7 @@ index 38a7d42d..e69de29b 100644
 ----------------------------------------+CINESCAN AUDIO RECOGNITION TESTING - COMPREHENSIVE MOVIE SOUNDTRACK TESTING
 ----------------------------------------+CRITICAL MISSION: Test audio recognition with 10 REAL movie soundtrack clips
 ----------------------------------------+SUCCESS CRITERIA: 8/10 minimum accuracy, <5s response time average
-----------------------------------------+Backend URL: https://category-navbar.preview.emergentagent.com
+----------------------------------------+Backend URL: https://bugfix-champs.preview.emergentagent.com
 ----------------------------------------+"""
 ----------------------------------------+
 ----------------------------------------+import requests
@@ -2334,7 +2334,7 @@ index 38a7d42d..e69de29b 100644
 ----------------------------------------+from pathlib import Path
 ----------------------------------------+
 ----------------------------------------+# Backend URL from user request
-----------------------------------------+BACKEND_URL = "https://category-navbar.preview.emergentagent.com"
+----------------------------------------+BACKEND_URL = "https://bugfix-champs.preview.emergentagent.com"
 ----------------------------------------+
 ----------------------------------------+def test_audio_recognition(audio_file_path, expected_movie):
 ----------------------------------------+    """Test audio recognition with a single file"""
@@ -2474,7 +2474,7 @@ index 38a7d42d..e69de29b 100644
 ----------------------------------------+    print("🎵 CINESCAN AUDIO RECOGNITION TESTING")
 ----------------------------------------+    print("=" * 60)
 ----------------------------------------+    print("**USER REQUIREMENT**: 8/10 minimum accuracy for audio recognition from movie soundtracks/scenes")
-----------------------------------------+    print("**Backend URL**: https://category-navbar.preview.emergentagent.com")
+----------------------------------------+    print("**Backend URL**: https://bugfix-champs.preview.emergentagent.com")
 ----------------------------------------+    print("**MISSION**: Test audio recognition with 10 REAL movie soundtrack clips")
 ----------------------------------------+    print("=" * 60)
 ----------------------------------------+    
@@ -2582,14 +2582,14 @@ index 38a7d42d..e69de29b 100644
 ----------------------------------------+import os
 ----------------------------------------+import json
 ----------------------------------------+
-----------------------------------------+BACKEND_URL = "https://category-navbar.preview.emergentagent.com"
+----------------------------------------+BACKEND_URL = "https://bugfix-champs.preview.emergentagent.com"
 ----------------------------------------+
 ----------------------------------------+def test_audio_endpoint_comprehensive():
 ----------------------------------------+    """Comprehensive test of audio recognition endpoint"""
 ----------------------------------------+    print("🎵 COMPREHENSIVE AUDIO RECOGNITION TESTING")
 ----------------------------------------+    print("=" * 70)
 ----------------------------------------+    print("**USER REQUIREMENT**: 8/10 minimum accuracy for movie soundtracks")
-----------------------------------------+    print("**Backend URL**: https://category-navbar.preview.emergentagent.com")
+----------------------------------------+    print("**Backend URL**: https://bugfix-champs.preview.emergentagent.com")
 ----------------------------------------+    print("=" * 70)
 ----------------------------------------+    
 ----------------------------------------+    # Test 1: API Health Check
@@ -2909,7 +2909,7 @@ index 38a7d42d..e69de29b 100644
 -------------------------------------------+            files = {'file': (img['name'], img_response.content, 'image/jpeg')}
 -------------------------------------------+            
 -------------------------------------------+            response = requests.post(
--------------------------------------------+                "https://category-navbar.preview.emergentagent.com/api/recognize-image",
+-------------------------------------------+                "https://bugfix-champs.preview.emergentagent.com/api/recognize-image",
 -------------------------------------------+                files=files,
 -------------------------------------------+                timeout=30  # Longer timeout for image processing
 -------------------------------------------+            )
@@ -3084,7 +3084,7 @@ index 38a7d42d..e69de29b 100644
 --------------------------------------------+import os
 --------------------------------------------+import time
 --------------------------------------------+
---------------------------------------------+BACKEND_URL = "https://category-navbar.preview.emergentagent.com"
+--------------------------------------------+BACKEND_URL = "https://bugfix-champs.preview.emergentagent.com"
 --------------------------------------------+TEST_AUDIO_DIR = "/app/test_audio"
 --------------------------------------------+
 --------------------------------------------+def test_audio_endpoint_detailed():
@@ -3989,7 +3989,7 @@ index 38a7d42d..e69de29b 100644
 ---------------------------------------------         comment: "🎬 COMPREHENSIVE REAL-WORLD CINESCAN TESTING COMPLETE: Achieved SHAZAM-LEVEL PERFORMANCE! 26 tests run with 92.3% success rate. ALL SPEED TARGETS MET - Average response time 0.19s (well under 3s target). Movie Recognition: ✅ Fight Club, Inception, Matrix, Interstellar all found correctly. Anime Recognition: ✅ Naruto, Attack on Titan, One Piece, Demon Slayer found. TV Series: ✅ Breaking Bad, Game of Thrones, Stranger Things found. Accuracy: ✅ Dark Knight, Avengers, Star Wars found correctly. Minor: Misspellings 'Inceptoin' and 'Fight Clbu' failed (expected behavior). All endpoints (image/audio/video/search) working with proper JSON structure. TMDB API integration excellent. System is production-ready with Shazam-level speed and accuracy!"
 ---------------------------------------------+      - working: true
 ---------------------------------------------+        agent: "testing"
----------------------------------------------+        comment: "🎯 USER-REQUESTED COMPREHENSIVE TESTING COMPLETE (https://category-navbar.preview.emergentagent.com): 45 tests run with 91.1% success rate. ✅ CRITICAL SYSTEMS WORKING: All API endpoints functional, TMDB/Google Vision/AudD API keys verified, error handling proper, video endpoint returns correct 'coming soon' message. ✅ MOVIE SEARCH EXCELLENT: All classic movies (Godfather, Casablanca, Citizen Kane), anime (Naruto, Spirited Away), TV series (Breaking Bad, Game of Thrones) found correctly. ✅ SPEED TARGET EXCEEDED: Average 0.20s response time (target <3s). ⚠️ IMAGE RECOGNITION LIMITATION: Google Vision detects text correctly but prioritizes actor names over movie titles (detected 'ROBERT' from Avengers poster, 'BOY' from Matrix poster). This is expected behavior - algorithm searches detected text sequentially. Backend is 100% functional and ready for user deployment on mobile devices."
+---------------------------------------------+        comment: "🎯 USER-REQUESTED COMPREHENSIVE TESTING COMPLETE (https://bugfix-champs.preview.emergentagent.com): 45 tests run with 91.1% success rate. ✅ CRITICAL SYSTEMS WORKING: All API endpoints functional, TMDB/Google Vision/AudD API keys verified, error handling proper, video endpoint returns correct 'coming soon' message. ✅ MOVIE SEARCH EXCELLENT: All classic movies (Godfather, Casablanca, Citizen Kane), anime (Naruto, Spirited Away), TV series (Breaking Bad, Game of Thrones) found correctly. ✅ SPEED TARGET EXCEEDED: Average 0.20s response time (target <3s). ⚠️ IMAGE RECOGNITION LIMITATION: Google Vision detects text correctly but prioritizes actor names over movie titles (detected 'ROBERT' from Avengers poster, 'BOY' from Matrix poster). This is expected behavior - algorithm searches detected text sequentially. Backend is 100% functional and ready for user deployment on mobile devices."
 --------------------------------------------- 
 --------------------------------------------- frontend:
 ---------------------------------------------   - task: "Home Screen - Gradient background with title and navigation buttons"
@@ -4022,7 +4022,7 @@ index 38a7d42d..e69de29b 100644
 --------------------------------------------@@ -131,6 +131,9 @@ backend:
 --------------------------------------------       - working: true
 --------------------------------------------         agent: "testing"
---------------------------------------------         comment: "🎯 USER-REQUESTED COMPREHENSIVE TESTING COMPLETE (https://category-navbar.preview.emergentagent.com): 45 tests run with 91.1% success rate. ✅ CRITICAL SYSTEMS WORKING: All API endpoints functional, TMDB/Google Vision/AudD API keys verified, error handling proper, video endpoint returns correct 'coming soon' message. ✅ MOVIE SEARCH EXCELLENT: All classic movies (Godfather, Casablanca, Citizen Kane), anime (Naruto, Spirited Away), TV series (Breaking Bad, Game of Thrones) found correctly. ✅ SPEED TARGET EXCEEDED: Average 0.20s response time (target <3s). ⚠️ IMAGE RECOGNITION LIMITATION: Google Vision detects text correctly but prioritizes actor names over movie titles (detected 'ROBERT' from Avengers poster, 'BOY' from Matrix poster). This is expected behavior - algorithm searches detected text sequentially. Backend is 100% functional and ready for user deployment on mobile devices."
+--------------------------------------------         comment: "🎯 USER-REQUESTED COMPREHENSIVE TESTING COMPLETE (https://bugfix-champs.preview.emergentagent.com): 45 tests run with 91.1% success rate. ✅ CRITICAL SYSTEMS WORKING: All API endpoints functional, TMDB/Google Vision/AudD API keys verified, error handling proper, video endpoint returns correct 'coming soon' message. ✅ MOVIE SEARCH EXCELLENT: All classic movies (Godfather, Casablanca, Citizen Kane), anime (Naruto, Spirited Away), TV series (Breaking Bad, Game of Thrones) found correctly. ✅ SPEED TARGET EXCEEDED: Average 0.20s response time (target <3s). ⚠️ IMAGE RECOGNITION LIMITATION: Google Vision detects text correctly but prioritizes actor names over movie titles (detected 'ROBERT' from Avengers poster, 'BOY' from Matrix poster). This is expected behavior - algorithm searches detected text sequentially. Backend is 100% functional and ready for user deployment on mobile devices."
 --------------------------------------------+      - working: true
 --------------------------------------------+        agent: "testing"
 --------------------------------------------+        comment: "🎵 CRITICAL AUDIO RECOGNITION TESTING COMPLETE: User-requested comprehensive audio testing with REAL audio files completed successfully. 44 tests run with 88.6% success rate. ✅ AUDD API INTEGRATION VERIFIED: AudD API is fully functional and processing audio files correctly (0.46s average response time). Tested with 3 real audio files (cinematic_action.mp3, epic_orchestral_1.mp3, dramatic_orchestral.mp3) - all processed successfully by AudD but not recognized as movies (expected behavior for royalty-free music). ✅ BACKEND AUDIO ENDPOINT: Multipart file upload working perfectly, proper JSON response format {success: boolean, movie: object|null, error: string}, excellent error handling. ✅ TMDB INTEGRATION: Working perfectly for movie searches. ✅ SPEED PERFORMANCE: All tests under 3s target (Shazam-level performance achieved). System is production-ready for identifying movies from audio clips. The user can confidently use audio recognition - it will work with actual movie soundtracks/scenes that are in AudD's database."
@@ -4073,7 +4073,7 @@ index 38a7d42d..e69de29b 100644
 -------------------------------------------+        # Send as multipart/form-data (correct format)
 -------------------------------------------+        files = {'file': ('inception.jpg', img_response.content, 'image/jpeg')}
 -------------------------------------------+        response = requests.post(
--------------------------------------------+            "https://category-navbar.preview.emergentagent.com/api/recognize-image",
+-------------------------------------------+            "https://bugfix-champs.preview.emergentagent.com/api/recognize-image",
 -------------------------------------------+            files=files,
 -------------------------------------------+            timeout=30  # Longer timeout
 -------------------------------------------+        )
@@ -4183,7 +4183,7 @@ index 38a7d42d..e69de29b 100644
 ------------------------------------------   run_ui: false
 ------------------------------------------   last_tested_by: "testing_agent"
 -------------------------------------------  backend_url_tested: "https://cinescan-backend-1.onrender.com"
-------------------------------------------+  backend_url_tested: "https://category-navbar.preview.emergentagent.com"
+------------------------------------------+  backend_url_tested: "https://bugfix-champs.preview.emergentagent.com"
 ------------------------------------------+  last_retest_date: "2025-12-03"
 ------------------------------------------+  retest_algorithm: "NEW Web Detection Algorithm"
 ------------------------------------------ 

@@ -4,7 +4,7 @@
 
 ### Option 1: Web Preview (Instant)
 Access the app directly in your browser:
-- **URL**: https://category-navbar.preview.emergentagent.com
+- **URL**: https://bugfix-champs.preview.emergentagent.com
 - Works on desktop and mobile browsers
 - No installation required
 
@@ -174,10 +174,10 @@ tail -100 /var/log/supervisor/expo.out.log | grep -A 10 "Tunnel ready"
 
 ## 🔗 Useful Links
 
-- **Web Preview**: https://category-navbar.preview.emergentagent.com
-- **Home Screen**: https://category-navbar.preview.emergentagent.com/
-- **Identify Screen**: https://category-navbar.preview.emergentagent.com/identify
-- **Watchlist Screen**: https://category-navbar.preview.emergentagent.com/watchlist
+- **Web Preview**: https://bugfix-champs.preview.emergentagent.com
+- **Home Screen**: https://bugfix-champs.preview.emergentagent.com/
+- **Identify Screen**: https://bugfix-champs.preview.emergentagent.com/identify
+- **Watchlist Screen**: https://bugfix-champs.preview.emergentagent.com/watchlist
 
 ## 📝 Testing Notes
 

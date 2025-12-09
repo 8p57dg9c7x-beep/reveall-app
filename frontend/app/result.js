@@ -93,7 +93,7 @@ export default function ResultScreen() {
     if (!movieId) return;
     if (isMounted) setLoadingDetails(true);
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://category-navbar.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/movie/${movieId}`);
       
       if (!response.ok) {
@@ -112,7 +112,7 @@ export default function ResultScreen() {
   const loadSimilarMovies = async (isMounted = true) => {
     if (!movieId) return;
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://category-navbar.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/movie/${movieId}/similar`);
       const data = await response.json();
       if (isMounted) setSimilarMovies(data.results?.slice(0, 10) || []);
@@ -156,7 +156,7 @@ export default function ResultScreen() {
   //   
   //   setLoadingLyrics(true);
   //   try {
-  //     const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://category-navbar.preview.emergentagent.com';
+  //     const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bugfix-champs.preview.emergentagent.com';
   //     const query = encodeURIComponent(`${song.title} ${song.artist}`);
   //     const res = await fetch(`${API_URL}/api/lyrics/${query}`);
   //     const data = await res.json();
