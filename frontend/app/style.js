@@ -312,6 +312,10 @@ export default function StyleDiscovery() {
           }}
           scrollEventThrottle={16}
           onScroll={() => {}}
+          scrollEnabled={true}
+          nestedScrollEnabled={false}
+          removeClippedSubviews={false}
+          directionalLockEnabled={true}
         >
           {STYLE_CATEGORIES.map(renderCategoryButton)}
         </ScrollView>
