@@ -93,9 +93,23 @@ export const FavoritesProvider = ({ children }) => {
     if (isFavorite) {
       const newFavorites = favoriteBeauty.filter(item => item.id !== look.id);
       await saveFavoriteBeauty(newFavorites);
+      
+      // Track unfavorite
+      trackEvent('beauty_unfavorited', {
+        item_id: look.id?.toString(),
+        item_title: look.title,
+        category: look.category
+      });
     } else {
       const newFavorites = [...favoriteBeauty, look];
       await saveFavoriteBeauty(newFavorites);
+      
+      // Track favorite
+      trackEvent('beauty_favorited', {
+        item_id: look.id?.toString(),
+        item_title: look.title,
+        category: look.category
+      });
     }
   };
 
