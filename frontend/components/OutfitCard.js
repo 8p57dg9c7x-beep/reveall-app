@@ -16,26 +16,25 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
   };
 
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
-      activeOpacity={0.8}
       onPress={onPress}
     >
       <View style={styles.imageContainer}>
         <OptimizedImage source={{ uri: item.image }} style={styles.outfitImage} />
         
         {/* Favorite Heart Button */}
-        <TouchableOpacity 
+        <AnimatedPressable 
           style={styles.favoriteButton}
           onPress={handleFavoritePress}
-          activeOpacity={0.7}
+          scaleValue={0.85}
         >
           <MaterialCommunityIcons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={22}
             color={isFavorite ? '#ff4444' : '#fff'}
           />
-        </TouchableOpacity>
+        </AnimatedPressable>
         
         {item.gender && (
           <View style={styles.badge}>
@@ -47,7 +46,7 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
         <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
         <Text style={styles.outfitPrice}>{item.priceRange || 'View Details'}</Text>
       </View>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }, (prevProps, nextProps) => {
   return prevProps.item.id === nextProps.item.id && 
