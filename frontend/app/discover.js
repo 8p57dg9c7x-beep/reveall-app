@@ -243,7 +243,7 @@ export default function DiscoverScreen() {
   ), []);
 
   const renderBeautyCard = useCallback((look) => (
-    <TouchableOpacity
+    <AnimatedPressable
       key={look.id}
       style={styles.trendingCard}
       onPress={() => router.push({
@@ -256,7 +256,7 @@ export default function DiscoverScreen() {
       {look.celebrity && (
         <Text style={styles.trendingSubtitle} numberOfLines={1}>{look.celebrity}</Text>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   ), []);
 
   const handleExplorePress = useCallback((categoryId) => {
