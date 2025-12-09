@@ -71,3 +71,33 @@ export const SIZES = {
   borderRadius: 100,
   spacing: 20,
 };
+
+// Animation constants for consistent micro-animations
+export const ANIMATIONS = {
+  // Duration in milliseconds
+  duration: {
+    fast: 150,
+    normal: 250,
+    slow: 350,
+  },
+  
+  // Scale values for press animations
+  scale: {
+    pressed: 0.96,
+    normal: 1,
+    hover: 1.02,
+  },
+  
+  // Opacity values
+  opacity: {
+    pressed: 0.7,
+    disabled: 0.5,
+    normal: 1,
+  },
+  
+  // Spring configurations for native feel
+  spring: {
+    damping: 15,
+    stiffness: 150,
+  },
+};
