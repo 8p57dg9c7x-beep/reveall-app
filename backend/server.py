@@ -937,14 +937,23 @@ async def get_trending():
 async def get_popular():
     """Get popular movies"""
     try:
+        if not TMDB_API_KEY:
+            logger.error("TMDB_API_KEY is missing or empty!")
+            return {"results": [], "error": "TMDB API key not configured"}
+        
         url = f"https://api.themoviedb.org/3/movie/popular"
         params = {'api_key': TMDB_API_KEY}
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
+        
+        logger.info(f"Successfully fetched popular movies (status: {response.status_code})")
         return response.json()
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"TMDB API HTTP error: {e.response.status_code}")
+        return {"results": [], "error": f"TMDB API error: {e.response.status_code}"}
     except Exception as e:
         logger.error(f"Popular error: {e}")
-        return {"results": []}
+        return {"results": [], "error": str(e)}
 
 @api_router.get("/discover/upcoming")
 async def get_upcoming():
