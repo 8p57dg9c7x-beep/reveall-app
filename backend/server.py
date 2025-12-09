@@ -55,6 +55,19 @@ class VideoRecognitionRequest(BaseModel):
 class SearchRequest(BaseModel):
     query: str
 
+# Analytics Models
+class AnalyticsEvent(BaseModel):
+    event_type: str  # product_click, outfit_view, beauty_view, category_view
+    item_id: str = None  # outfit/beauty ID
+    item_title: str = None
+    category: str = None
+    product_name: str = None
+    product_price: str = None
+    product_affiliate_url: str = None
+    session_id: str = None
+    referral_source: str = None
+    timestamp: float = None
+
 # Helper Functions
 def search_tmdb_movie(query: str):
     """Search for a movie in TMDB database"""
