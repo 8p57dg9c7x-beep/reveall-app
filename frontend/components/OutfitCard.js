@@ -11,6 +11,10 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
   const isFavorite = isOutfitFavorite(item.id);
 
   const handleFavoritePress = (e) => {
+    console.log('❤️ OutfitCard: Heart button pressed!');
+    console.log('  Item ID:', item.id);
+    console.log('  Item Title:', item.title);
+    console.log('  Current favorite status:', isFavorite);
     e.stopPropagation();
     toggleOutfitFavorite(item);
   };
