@@ -21,15 +21,21 @@ export const getImageUrl = (item) => {
 };
 
 /**
- * Standardize item for consistent usage
- * Ensures id and image fields always exist
+ * Normalize item to standard card format
+ * ALWAYS use this before setting state or passing to components!
  */
-export const standardizeItem = (item) => {
+export const asCardItem = (item) => {
   if (!item) return null;
+  
+  const normalizedId = getItemId(item);
+  const normalizedImage = getImageUrl(item);
   
   return {
     ...item,
-    id: getItemId(item),
-    image: getImageUrl(item),
+    id: normalizedId,
+    imageToUse: normalizedImage,
+    // Keep original fields for backwards compatibility
+    image: normalizedImage,
+    image_url: normalizedImage,
   };
 };
