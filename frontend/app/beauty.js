@@ -195,42 +195,94 @@ export default function BeautyScreen() {
     </View>
   );
 
-  if (loading && looks.length === 0) {
-    return (
-      <View style={styles.container}>
-        <ListHeaderComponent />
-        <SkeletonGrid />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <ListHeaderComponent />
-        {renderErrorState()}
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={looks}
-        renderItem={renderBeautyRow}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={renderEmptyState}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
-        }
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={6}
-        windowSize={5}
-      />
+      {/* Fixed Header - Outside FlatList */}
+      <View style={styles.fixedHeader}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>Beauty Hub</Text>
+            <Text style={styles.headerSubtitle}>Discover celebrity-inspired makeup</Text>
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity 
+              style={styles.searchButton}
+              onPress={() => router.push('/universal-search')}
+            >
+              <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.favoritesButton}
+              onPress={() => router.push('/saved-beauty')}
+            >
+              <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Fixed Category Filter Bar */}
+        <View style={styles.categoriesContainer}>
+          <View style={styles.categoriesWrapper}>
+            {CATEGORIES.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === item.id && styles.categoryButtonActive,
+                ]}
+                onPress={() => handleCategoryPress(item.id)}
+              >
+                <MaterialCommunityIcons
+                  name={item.icon}
+                  size={20}
+                  color={selectedCategory === item.id ? '#FFFFFF' : '#8B7BA8'}
+                />
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategory === item.id && styles.categoryTextActive,
+                  ]}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </View>
+
+      {/* Scrollable Content */}
+      {loading && looks.length === 0 ? (
+        <ScrollView style={styles.scrollView}>
+          <SkeletonGrid />
+        </ScrollView>
+      ) : error ? (
+        <ScrollView
+          style={styles.scrollView}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
+          }
+        >
+          {renderErrorState()}
+        </ScrollView>
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          data={looks}
+          renderItem={renderBeautyRow}
+          keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+          ListHeaderComponent={ListHeaderComponent}
+          ListEmptyComponent={renderEmptyState}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
+          }
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={6}
+          windowSize={5}
+        />
+      )}
     </View>
   );
 }
