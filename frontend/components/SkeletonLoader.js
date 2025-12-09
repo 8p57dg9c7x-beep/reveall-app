@@ -91,6 +91,55 @@ export const SkeletonGrid = () => {
   );
 };
 
+// Horizontal skeleton card for trending sections (Netflix-style)
+export const SkeletonHorizontalCard = () => {
+  const shimmer = React.useMemo(() => new Animated.Value(0), []);
+
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmer, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, [shimmer]);
+
+  const translateX = shimmer.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-200, 200],
+  });
+
+  return (
+    <View style={styles.horizontalCard}>
+      <View style={styles.horizontalImageBox}>
+        <Animated.View 
+          style={[
+            styles.shimmer,
+            { transform: [{ translateX }] }
+          ]} 
+        />
+      </View>
+      <View style={styles.horizontalInfoBox}>
+        <View style={[styles.textLine, styles.horizontalTitleLine]} />
+        <View style={[styles.textLine, styles.horizontalSubtitleLine]} />
+      </View>
+    </View>
+  );
+};
+
+// Horizontal skeleton loader for trending sections
+export const SkeletonHorizontalScroll = () => {
+  return (
+    <View style={styles.horizontalScrollContainer}>
+      <SkeletonHorizontalCard />
+      <SkeletonHorizontalCard />
+      <SkeletonHorizontalCard />
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     width: '100%',
