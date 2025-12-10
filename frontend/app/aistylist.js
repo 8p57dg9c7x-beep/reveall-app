@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import GradientChip from '../components/GradientChip';
@@ -22,6 +23,7 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.85;
 
 export default function AIStylistScreen() {
+  const { getStylePreferences } = useAddilets();
   const [step, setStep] = useState(1); // 1: Upload, 2: Preferences, 3: Results
   const [frontPhoto, setFrontPhoto] = useState(null);
   const [sidePhoto, setSidePhoto] = useState(null);
@@ -30,6 +32,25 @@ export default function AIStylistScreen() {
   const [loading, setLoading] = useState(false);
   const [currentLookIndex, setCurrentLookIndex] = useState(0);
   const scrollX = new Animated.Value(0);
+
+  // Pre-fill style preferences from Addilets when user reaches step 2
+  useEffect(() => {
+    if (step === 2 && selectedStyles.length === 0) {
+      const addiletsPreferences = getStylePreferences();
+      if (addiletsPreferences && addiletsPreferences.length > 0) {
+        // Pre-select Addilets preferences that match available options
+        const matching = stylePreferences.filter(style => 
+          addiletsPreferences.some(pref => 
+            style.toLowerCase().includes(pref.toLowerCase()) || 
+            pref.toLowerCase().includes(style.toLowerCase())
+          )
+        );
+        if (matching.length > 0) {
+          setSelectedStyles(matching.slice(0, 3));
+        }
+      }
+    }
+  }, [step]);
 
   const stylePreferences = [
     'Streetwear', 'Luxury', 'Casual', 'Formal', 'Sporty', 'Bohemian', 
