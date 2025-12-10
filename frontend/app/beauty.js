@@ -196,7 +196,47 @@ export default function BeautyScreen() {
 
   const ListHeaderComponent = () => (
     <View>
-      {/* Empty - header moved outside */}
+      {/* Addilets Makeup Recommendations */}
+      {makeupRecommendations.length > 0 && (
+        <View style={styles.addiletsSection}>
+          <View style={styles.addiletsSectionHeader}>
+            <View style={styles.addiletsTitleRow}>
+              <MaterialCommunityIcons name="star-four-points" size={18} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>Recommended For You</Text>
+            </View>
+            <TouchableOpacity onPress={() => router.push('/addilets')}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.addiletsSubtitle}>Based on your beauty preferences</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.addiletsScroll}
+          >
+            {makeupRecommendations.map((makeup) => (
+              <TouchableOpacity
+                key={makeup.id}
+                style={styles.addiletsCard}
+                activeOpacity={0.8}
+              >
+                <Image source={{ uri: makeup.image }} style={styles.addiletsImage} />
+                <LinearGradient
+                  colors={['transparent', 'rgba(0,0,0,0.9)']}
+                  style={styles.addiletsOverlay}
+                >
+                  <Text style={styles.addiletsTitle}>{makeup.title}</Text>
+                  <Text style={styles.addiletsVibe}>{makeup.vibe}</Text>
+                  <View style={styles.addiletsMatch}>
+                    <MaterialCommunityIcons name="heart" size={12} color="#FF6EC7" />
+                    <Text style={styles.addiletsMatchText}>{makeup.match}% Match</Text>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 
