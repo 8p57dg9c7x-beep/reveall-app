@@ -5,17 +5,17 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
+  TextInput,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
-import { COLORS, ANIMATIONS } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
 import { API_BASE_URL } from '../config';
 import { searchMusic } from '../services/api';
 import OptimizedImage from '../components/OptimizedImage';
 import { SkeletonHorizontalScroll } from '../components/SkeletonLoader';
-import AnimatedPressable from '../components/AnimatedPressable';
 import FadeInView from '../components/FadeInView';
 import { asCardItem } from '../utils/helpers';
 
