@@ -14,18 +14,24 @@ export default function RootLayout() {
           headerShown: false,
           tabBarStyle: {
             backgroundColor: COLORS.tabBarBackground,
-            borderTopWidth: 0,
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(177, 76, 255, 0.1)',
             elevation: 0,
             height: 85,
             paddingBottom: 30,
             paddingTop: 8,
+            shadowColor: COLORS.primary,
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 12,
           },
-          tabBarActiveTintColor: COLORS.primary,
-          tabBarInactiveTintColor: COLORS.textSecondary,
+          tabBarActiveTintColor: COLORS.tabBarActive,
+          tabBarInactiveTintColor: COLORS.tabBarInactive,
           tabBarLabelStyle: {
             fontSize: 11,
             fontWeight: '600',
             marginTop: -4,
+            fontFamily: 'Inter',
           },
         }}
       >
