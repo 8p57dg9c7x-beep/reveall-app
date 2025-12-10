@@ -21,25 +21,26 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
   };
 
   return (
-    <AnimatedPressable
+    <TouchableOpacity
       style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
       onPress={onPress}
+      activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>
         <OptimizedImage source={{ uri: card.imageToUse }} style={styles.outfitImage} />
         
         {/* Favorite Heart Button */}
-        <AnimatedPressable 
+        <TouchableOpacity 
           style={styles.favoriteButton}
           onPress={handleFavoritePress}
-          scaleValue={0.85}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={22}
             color={isFavorite ? '#ff4444' : '#fff'}
           />
-        </AnimatedPressable>
+        </TouchableOpacity>
         
         {item.gender && (
           <View style={styles.badge}>
