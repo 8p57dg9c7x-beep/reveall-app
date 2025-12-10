@@ -36,7 +36,7 @@ const ProductCard = ({ product, itemContext = {} }) => {
   };
 
   return (
-    <AnimatedPressable style={styles.productCard} onPress={handleShopPress}>
+    <TouchableOpacity style={styles.productCard} onPress={handleShopPress} activeOpacity={0.8}>
       {/* Product Image */}
       <View style={styles.imageContainer}>
         <OptimizedImage 
@@ -58,7 +58,7 @@ const ProductCard = ({ product, itemContext = {} }) => {
           <Text style={styles.shopButtonText}>Shop Now</Text>
         </View>
       </View>
-    </AnimatedPressable>
+    </TouchableOpacity>
   );
 };
 
