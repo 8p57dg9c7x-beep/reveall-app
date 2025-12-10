@@ -164,7 +164,7 @@ export default function AddiletsScreen() {
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <MaterialCommunityIcons name="sparkles" size={32} color={COLORS.primary} />
+          <MaterialCommunityIcons name="star-four-points" size={32} color={COLORS.primary} />
           <Text style={styles.headerTitle}>Addilets</Text>
         </View>
         <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>

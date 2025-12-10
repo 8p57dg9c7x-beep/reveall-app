@@ -86,7 +86,7 @@ export default function HomeScreen() {
         <View style={styles.forYouSection}>
           <View style={styles.sectionHeader}>
             <View style={styles.forYouHeader}>
-              <MaterialCommunityIcons name="sparkles" size={24} color={COLORS.primary} />
+              <MaterialCommunityIcons name="star-four-points" size={24} color={COLORS.primary} />
               <Text style={styles.sectionTitle}>For You</Text>
             </View>
             <TouchableOpacity onPress={() => router.push('/addilets')}>
