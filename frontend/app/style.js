@@ -24,6 +24,7 @@ const STYLE_CATEGORIES = [
 
 export default function StyleDiscovery() {
   const navigation = useNavigation();
+  const { getRecommendedOutfits } = useAddilets();
   const flatListRef = useRef(null);
   const categoryScrollRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('streetwear');
@@ -32,6 +33,7 @@ export default function StyleDiscovery() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [addiletsRecommendations, setAddiletsRecommendations] = useState([]);
 
   // Load celebrity outfits with cleanup
   useEffect(() => {
