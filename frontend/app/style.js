@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 160,
     backgroundColor: COLORS.card,
-    borderRadius: 16,
+    borderRadius: SIZES.borderRadiusCard,
     marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
