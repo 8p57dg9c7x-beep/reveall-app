@@ -35,6 +35,12 @@ export default function StyleDiscovery() {
   const [error, setError] = useState(null);
   const [addiletsRecommendations, setAddiletsRecommendations] = useState([]);
 
+  // Load Addilets recommendations
+  useEffect(() => {
+    const recommendations = getRecommendedOutfits(3);
+    setAddiletsRecommendations(recommendations);
+  }, []);
+
   // Load celebrity outfits with cleanup
   useEffect(() => {
     let isMounted = true;
