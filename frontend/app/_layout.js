@@ -156,6 +156,7 @@ export default function RootLayout() {
         />
       </Tabs>
       </GestureHandlerRootView>
+      </AddiletsProvider>
     </FavoritesProvider>
   );
 }
