@@ -9,13 +9,14 @@ import {
   Platform,
   RefreshControl,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
-import { COLORS, ANIMATIONS } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import BeautyCard from '../components/BeautyCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
-import AnimatedPressable from '../components/AnimatedPressable';
+import GradientChip from '../components/GradientChip';
 import FadeInView from '../components/FadeInView';
 import { trackCategoryView } from '../services/analytics';
 import { asCardItem } from '../utils/helpers';
