@@ -98,13 +98,13 @@ export default function FavoritesScreen() {
 
         {/* Tab Selector */}
         <View style={styles.tabContainer}>
-          <AnimatedPressable
+          <TouchableOpacity
             style={[
               styles.tab,
               activeTab === 'outfits' && styles.tabActive
             ]}
             onPress={() => setActiveTab('outfits')}
-            scaleValue={0.98}
+            activeOpacity={0.8}
           >
             <MaterialCommunityIcons 
               name="hanger" 
@@ -117,15 +117,15 @@ export default function FavoritesScreen() {
             ]}>
               Outfits ({favoriteOutfits.length})
             </Text>
-          </AnimatedPressable>
+          </TouchableOpacity>
 
-          <AnimatedPressable
+          <TouchableOpacity
             style={[
               styles.tab,
               activeTab === 'beauty' && styles.tabActive
             ]}
             onPress={() => setActiveTab('beauty')}
-            scaleValue={0.98}
+            activeOpacity={0.8}
           >
             <MaterialCommunityIcons 
               name="palette-outline" 
@@ -138,7 +138,7 @@ export default function FavoritesScreen() {
             ]}>
               Beauty ({favoriteBeauty.length})
             </Text>
-          </AnimatedPressable>
+          </TouchableOpacity>
         </View>
       </FadeInView>
 
