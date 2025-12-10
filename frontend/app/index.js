@@ -1,169 +1,171 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  Animated,
+  ScrollView,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Audio } from 'expo-av';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { COLORS } from '../constants/theme';
-import { recognizeMusic } from '../services/api';
+import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
+import GradientButton from '../components/GradientButton';
+import { API_BASE_URL } from '../config';
 
 export default function HomeScreen() {
-  const [pulseAnim] = useState(new Animated.Value(1));
-  const [isListening, setIsListening] = useState(false);
-  const [recording, setRecording] = useState(null);
-  const [countdown, setCountdown] = useState(7);
-  const [timerId, setTimerId] = useState(null);
+  const [trendingStyles, setTrendingStyles] = useState([]);
+  const [trendingSongs, setTrendingSongs] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState([]);
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  const processRecording = async (rec) => {
-    let timeoutMessage = null;
-    
-    try {
-      if (rec) {
-        await rec.stopAndUnloadAsync();
-        const uri = rec.getURI();
-        
-        // Show helpful message after 3 seconds
-        timeoutMessage = setTimeout(() => {
-          console.log('Music recognition taking longer than expected...');
-        }, 3000);
-        
-        const response = await recognizeMusic(uri);
-        
-        if (timeoutMessage) clearTimeout(timeoutMessage);
-
-        if (response.success && response.song) {
-          // Save to playlist
-          try {
-            const stored = await AsyncStorage.getItem('playlist');
-            let playlist = stored ? JSON.parse(stored) : [];
-            playlist.unshift(response.song);
-            await AsyncStorage.setItem('playlist', JSON.stringify(playlist.slice(0, 50)));
-          } catch (e) {
-            console.error('Error saving to playlist:', e);
-          }
-          
-          router.push({
-            pathname: '/result',
-            params: { 
-              songData: JSON.stringify(response.song),
-              returnPath: '/index'
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Processing error:', error);
-      if (timeoutMessage) clearTimeout(timeoutMessage);
-    } finally {
-      setIsListening(false);
-      if (timerId) clearTimeout(timerId);
-    }
-  };
-
-  const stopListening = async () => {
-    if (timerId) clearTimeout(timerId);
-    await processRecording(recording);
-  };
-
-  const startListening = async () => {
-    try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') return;
-
-      setIsListening(true);
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(newRecording);
-
-      // Auto-stop after 6 seconds (optimal for speed + accuracy)
-      const timeout = setTimeout(async () => {
-        await processRecording(newRecording);
-      }, 6000);
-      setTimerId(timeout);
-    } catch (error) {
-      setIsListening(false);
-    }
-  };
-
-  if (isListening) {
-    return (
-      <LinearGradient
-        colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
-        style={styles.container}
-      >
-        <View style={styles.listeningContent}>
-          <Text style={styles.listeningTitle}>Listening...</Text>
-          <Text style={styles.listeningSubtitle}>Hold your device near the music</Text>
-          
-          <Animated.View style={[styles.pulseOuter, { transform: [{ scale: pulseAnim }] }]}>
-            <View style={styles.pulseMiddle}>
-              <View style={styles.pulseInner}>
-                <MaterialCommunityIcons name="music-note" size={100} color={COLORS.textPrimary} />
-              </View>
-            </View>
-          </Animated.View>
-          
-          <TouchableOpacity style={styles.stopButton} onPress={stopListening}>
-            <MaterialCommunityIcons name="stop-circle" size={60} color={COLORS.textPrimary} />
-            <Text style={styles.stopButtonText}>Stop & Identify</Text>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    );
-  }
+  // Quick action buttons
+  const quickActions = [
+    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/comingsoon' },
+    { id: 'scan-outfit', label: 'Scan Outfit', icon: 'camera', route: '/comingsoon' },
+    { id: 'identify-song', label: 'Identify Song', icon: 'music', route: '/comingsoon' },
+    { id: 'save-look', label: 'Save Look', icon: 'heart', route: '/favorites' },
+  ];
 
   return (
     <LinearGradient
-      colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
+      colors={GRADIENTS.background}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <MaterialCommunityIcons name="filmstrip" size={32} color={COLORS.textPrimary} />
-        <Text style={styles.logo}>CINESCAN</Text>
-      </View>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <MaterialCommunityIcons name="movie-open" size={48} color={COLORS.primary} />
+          <Text style={styles.heroTitle}>CINESCAN</Text>
+          <Text style={styles.heroSubtitle}>Discover • Identify • Explore</Text>
+        </View>
 
-      <View style={styles.centerContent}>
-        <Text style={styles.tapText}>Tap to Identify</Text>
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <TouchableOpacity
-            style={styles.mainButton}
-            onPress={startListening}
-            activeOpacity={0.8}
+        {/* Main CTA Button */}
+        <View style={styles.ctaSection}>
+          <GradientButton
+            title="Tap to Identify"
+            onPress={() => router.push('/comingsoon')}
+            size="large"
+            icon={<MaterialCommunityIcons name="movie-search" size={24} color="#FFFFFF" />}
+            style={styles.mainCTA}
+          />
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.quickActionsSection}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickActionsGrid}>
+            {quickActions.map((action) => (
+              <TouchableOpacity
+                key={action.id}
+                style={styles.quickActionButton}
+                onPress={() => router.push(action.route)}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={GRADIENTS.chip}
+                  style={styles.quickActionGradient}
+                >
+                  <MaterialCommunityIcons 
+                    name={action.icon} 
+                    size={28} 
+                    color={COLORS.textPrimary} 
+                  />
+                  <Text style={styles.quickActionLabel}>{action.label}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Trending Styles Section */}
+        <View style={styles.trendingSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Trending Styles</Text>
+            <TouchableOpacity onPress={() => router.push('/style')}>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalScroll}
           >
-            <MaterialCommunityIcons name="music" size={100} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+            {[1, 2, 3, 4, 5].map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={styles.trendingCard}
+                onPress={() => router.push('/style')}
+              >
+                <View style={styles.trendingImagePlaceholder}>
+                  <MaterialCommunityIcons name="hanger" size={32} color={COLORS.textMuted} />
+                </View>
+                <Text style={styles.trendingCardTitle}>Style {item}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Trending Songs Section */}
+        <View style={styles.trendingSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Trending Songs</Text>
+            <TouchableOpacity onPress={() => router.push('/trendingsongs')}>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalScroll}
+          >
+            {[1, 2, 3, 4, 5].map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={styles.trendingCard}
+                onPress={() => router.push('/trendingsongs')}
+              >
+                <View style={styles.trendingImagePlaceholder}>
+                  <MaterialCommunityIcons name="music-note" size={32} color={COLORS.textMuted} />
+                </View>
+                <Text style={styles.trendingCardTitle}>Song {item}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Trending Movies Section */}
+        <View style={styles.trendingSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Trending Movies</Text>
+            <TouchableOpacity onPress={() => router.push('/discover')}>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalScroll}
+          >
+            {[1, 2, 3, 4, 5].map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={styles.trendingCard}
+                onPress={() => router.push('/discover')}
+              >
+                <View style={styles.trendingImagePlaceholder}>
+                  <MaterialCommunityIcons name="movie" size={32} color={COLORS.textMuted} />
+                </View>
+                <Text style={styles.trendingCardTitle}>Movie {item}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -172,95 +174,107 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-    paddingBottom: 20,
+  scrollView: {
+    flex: 1,
   },
-  logo: {
-    fontSize: 32,
-    fontWeight: 'bold',
+  content: {
+    paddingBottom: 120,
+  },
+  heroSection: {
+    alignItems: 'center',
+    paddingTop: 80,
+    paddingBottom: 32,
+    paddingHorizontal: 20,
+  },
+  heroTitle: {
+    fontSize: 40,
+    fontWeight: '800',
     color: COLORS.textPrimary,
-    marginLeft: 12,
+    marginTop: 16,
     letterSpacing: 2,
   },
-  centerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tapText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    marginBottom: 60,
-  },
-  mainButton: {
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    borderWidth: 5,
-    borderColor: COLORS.border,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listeningContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listeningTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginBottom: 8,
-  },
-  listeningSubtitle: {
+  heroSubtitle: {
     fontSize: 16,
     color: COLORS.textSecondary,
-    marginBottom: 60,
-  },
-  countdownText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginTop: 40,
-  },
-  stopButton: {
-    marginTop: 40,
-    alignItems: 'center',
-  },
-  stopButtonText: {
-    color: COLORS.textPrimary,
-    fontSize: 16,
-    fontWeight: '600',
     marginTop: 8,
+    letterSpacing: 1,
   },
-  pulseOuter: {
-    width: 350,
-    height: 350,
-    borderRadius: 175,
-    backgroundColor: 'rgba(159, 91, 255, 0.1)',
+  ctaSection: {
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  mainCTA: {
+    width: '100%',
+  },
+  quickActionsSection: {
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 20,
+    letterSpacing: -0.5,
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  quickActionButton: {
+    width: '48%',
+  },
+  quickActionGradient: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    borderRadius: SIZES.borderRadiusCard,
+    gap: 12,
+  },
+  quickActionLabel: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  trendingSection: {
+    marginBottom: 32,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  seeAll: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  horizontalScroll: {
+    paddingLeft: 20,
+    paddingRight: 20,
+    gap: 16,
+  },
+  trendingCard: {
+    width: 140,
+  },
+  trendingImagePlaceholder: {
+    width: 140,
+    height: 140,
+    backgroundColor: COLORS.card,
+    borderRadius: SIZES.borderRadiusCard,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 12,
   },
-  pulseMiddle: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: 'rgba(159, 91, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pulseInner: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: 'rgba(159, 91, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  trendingCardTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
