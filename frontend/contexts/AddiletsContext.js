@@ -16,12 +16,43 @@ export const useAddilets = () => {
 export const AddiletsProvider = ({ children }) => {
   const { favoriteOutfits, favoriteBeauty } = useFavorites();
   const [personalization, setPersonalization] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load persisted personalization on mount
+  useEffect(() => {
+    loadPersistedData();
+  }, []);
 
   // Generate personalization whenever favorites change
   useEffect(() => {
-    generatePersonalization();
+    if (personalization !== null) {
+      generatePersonalization();
+    }
   }, [favoriteOutfits.length, favoriteBeauty.length]);
+
+  const loadPersistedData = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        setPersonalization(JSON.parse(stored));
+      } else {
+        generatePersonalization();
+      }
+    } catch (error) {
+      console.error('Error loading Addilets data:', error);
+      generatePersonalization();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const persistData = async (data) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error('Error persisting Addilets data:', error);
+    }
+  };
 
   const generatePersonalization = () => {
     setLoading(true);
