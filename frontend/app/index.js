@@ -21,10 +21,10 @@ export default function HomeScreen() {
 
   // Quick action buttons
   const quickActions = [
-    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/comingsoon' },
-    { id: 'scan-outfit', label: 'Scan Outfit', icon: 'camera', route: '/comingsoon' },
-    { id: 'identify-song', label: 'Identify Song', icon: 'music', route: '/comingsoon' },
-    { id: 'save-look', label: 'Save Look', icon: 'heart', route: '/favorites' },
+    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist' },
+    { id: 'ai-wardrobe', label: 'AI Wardrobe', icon: 'hanger', route: '/aiwardrobe' },
+    { id: 'body-scanner', label: 'Body Scanner', icon: 'tape-measure', route: '/bodyscanner' },
+    { id: 'favorites', label: 'Favorites', icon: 'heart', route: '/favorites' },
   ];
 
   return (
