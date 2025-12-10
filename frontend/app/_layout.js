@@ -3,12 +3,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
+import { AddiletsProvider } from '../contexts/AddiletsContext';
 
-// Bundle Version: 2.2.0 - Favorites system
+// Bundle Version: 2.3.0 - Addilets personalization system
 export default function RootLayout() {
   return (
     <FavoritesProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <AddiletsProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <Tabs
         screenOptions={{
           headerShown: false,
