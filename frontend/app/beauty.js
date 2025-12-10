@@ -197,7 +197,10 @@ export default function BeautyScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={GRADIENTS.background}
+      style={styles.container}
+    >
       {/* Fixed Header - Outside FlatList */}
       <View style={styles.fixedHeader}>
         <FadeInView style={styles.header}>
@@ -206,51 +209,27 @@ export default function BeautyScreen() {
             <Text style={styles.headerSubtitle}>Discover celebrity-inspired makeup</Text>
           </View>
           <View style={{ flexDirection: 'row' }}>
-            <AnimatedPressable 
+            <TouchableOpacity 
               style={styles.searchButton}
               onPress={() => router.push('/universal-search')}
-              scaleValue={0.9}
+              activeOpacity={0.7}
             >
               <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
-            </AnimatedPressable>
-            <AnimatedPressable 
+            </TouchableOpacity>
+            <TouchableOpacity 
               style={styles.favoritesButton}
               onPress={() => router.push('/saved-beauty')}
-              scaleValue={0.9}
+              activeOpacity={0.7}
             >
               <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
-            </AnimatedPressable>
+            </TouchableOpacity>
           </View>
         </FadeInView>
 
         {/* Fixed Category Filter Bar */}
         <View style={styles.categoriesContainer}>
           <View style={styles.categoriesWrapper}>
-            {CATEGORIES.map((item) => (
-              <AnimatedPressable
-                key={item.id}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === item.id && styles.categoryButtonActive,
-                ]}
-                onPress={() => handleCategoryPress(item.id)}
-                scaleValue={0.95}
-              >
-                <MaterialCommunityIcons
-                  name={item.icon}
-                  size={20}
-                  color={selectedCategory === item.id ? '#FFFFFF' : '#8B7BA8'}
-                />
-                <Text
-                  style={[
-                    styles.categoryText,
-                    selectedCategory === item.id && styles.categoryTextActive,
-                  ]}
-                >
-                  {item.name}
-                </Text>
-              </AnimatedPressable>
-            ))}
+            {CATEGORIES.map((item) => renderCategoryChip(item))}
           </View>
         </View>
       </View>
