@@ -459,4 +459,74 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Addilets Section
+  addiletsSection: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+    marginTop: 8,
+  },
+  addiletsSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  addiletsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  addiletsSubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    marginBottom: 16,
+  },
+  viewAllText: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  addiletsScroll: {
+    paddingRight: 20,
+  },
+  addiletsCard: {
+    width: 140,
+    height: 190,
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    marginRight: 12,
+    backgroundColor: COLORS.card,
+  },
+  addiletsImage: {
+    width: '100%',
+    height: '100%',
+  },
+  addiletsOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+  },
+  addiletsTitle: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  addiletsVibe: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 11,
+    marginBottom: 6,
+  },
+  addiletsMatch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  addiletsMatchText: {
+    color: '#FF6EC7',
+    fontSize: 11,
+    fontWeight: '600',
+  },
 });
