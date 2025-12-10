@@ -69,14 +69,15 @@ export default function FavoritesScreen() {
       <Text style={styles.emptySubtitle}>
         Tap the ❤️ heart icon to save your favorites
       </Text>
-      <AnimatedPressable
+      <TouchableOpacity
         style={styles.exploreButton}
         onPress={() => router.push(type === 'outfits' ? '/style' : '/beauty')}
+        activeOpacity={0.8}
       >
         <Text style={styles.exploreButtonText}>
           Explore {type === 'outfits' ? 'Outfits' : 'Beauty Looks'}
         </Text>
-      </AnimatedPressable>
+      </TouchableOpacity>
     </View>
   );
 
