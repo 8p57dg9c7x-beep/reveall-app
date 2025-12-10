@@ -15,7 +15,6 @@ import { useFavorites } from '../contexts/FavoritesContext';
 import OutfitCard from '../components/OutfitCard';
 import BeautyCard from '../components/BeautyCard';
 import FadeInView from '../components/FadeInView';
-import AnimatedPressable from '../components/AnimatedPressable';
 
 export default function FavoritesScreen() {
   const { favoriteOutfits, favoriteBeauty, loading } = useFavorites();
