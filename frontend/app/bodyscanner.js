@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 
@@ -20,24 +22,85 @@ export default function BodyScannerScreen() {
   const [sidePhoto, setSidePhoto] = useState(null);
   const [scanResults, setScanResults] = useState(null);
   const [scanning, setScanning] = useState(false);
+  const scanProgress = new Animated.Value(0);
 
-  const handlePhotoCapture = (type) => {
-    Alert.alert('Capture Photo', `${type} photo would be captured here`, [
-      {
-        text: 'OK',
-        onPress: () => {
-          if (type === 'Front') {
-            setFrontPhoto('https://via.placeholder.com/200x400');
-          } else {
-            setSidePhoto('https://via.placeholder.com/200x400');
-          }
-        }
+  const pickImage = async (type) => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Camera access is needed to capture photos');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      if (type === 'Front') {
+        setFrontPhoto(result.assets[0].uri);
+      } else {
+        setSidePhoto(result.assets[0].uri);
       }
-    ]);
+    }
+  };
+
+  const pickFromGallery = async (type) => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Photo library access is needed');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      if (type === 'Front') {
+        setFrontPhoto(result.assets[0].uri);
+      } else {
+        setSidePhoto(result.assets[0].uri);
+      }
+    }
+  };
+
+  const showPhotoOptions = (type) => {
+    Alert.alert(
+      'Select Photo',
+      'Choose how you want to add your photo',
+      [
+        {
+          text: 'Take Photo',
+          onPress: () => pickImage(type),
+        },
+        {
+          text: 'Choose from Gallery',
+          onPress: () => pickFromGallery(type),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    );
   };
 
   const performScan = () => {
     setScanning(true);
+    
+    // Animate progress
+    Animated.timing(scanProgress, {
+      toValue: 1,
+      duration: 3000,
+      useNativeDriver: false,
+    }).start();
     
     // Simulate AI processing
     setTimeout(() => {
@@ -64,7 +127,9 @@ export default function BodyScannerScreen() {
 
   const renderInstructions = () => (
     <View style={styles.instructionsContainer}>
-      <MaterialCommunityIcons name="account-outline" size={80} color={COLORS.primary} />
+      <View style={styles.iconCircle}>
+        <MaterialCommunityIcons name="account-outline" size={64} color={COLORS.primary} />
+      </View>
       <Text style={styles.instructionsTitle}>Body Scan Instructions</Text>
       <Text style={styles.instructionsSubtitle}>Get accurate measurements in seconds</Text>
       
@@ -75,7 +140,7 @@ export default function BodyScannerScreen() {
           </View>
           <View style={styles.instructionContent}>
             <Text style={styles.instructionTitle}>Wear Fitted Clothing</Text>
-            <Text style={styles.instructionText}>Tight or form-fitting clothes work best</Text>
+            <Text style={styles.instructionText}>Tight or form-fitting clothes work best for accurate measurements</Text>
           </View>
         </View>
         
@@ -85,7 +150,7 @@ export default function BodyScannerScreen() {
           </View>
           <View style={styles.instructionContent}>
             <Text style={styles.instructionTitle}>Find Good Lighting</Text>
-            <Text style={styles.instructionText}>Natural light or well-lit room</Text>
+            <Text style={styles.instructionText}>Natural light or a well-lit room ensures better results</Text>
           </View>
         </View>
         
@@ -95,7 +160,7 @@ export default function BodyScannerScreen() {
           </View>
           <View style={styles.instructionContent}>
             <Text style={styles.instructionTitle}>Stand Against Wall</Text>
-            <Text style={styles.instructionText}>Plain background for best results</Text>
+            <Text style={styles.instructionText}>Plain background helps AI focus on your body</Text>
           </View>
         </View>
         
@@ -105,7 +170,7 @@ export default function BodyScannerScreen() {
           </View>
           <View style={styles.instructionContent}>
             <Text style={styles.instructionTitle}>Take 2 Photos</Text>
-            <Text style={styles.instructionText}>Front view and side profile</Text>
+            <Text style={styles.instructionText}>Front view with arms at sides and side profile</Text>
           </View>
         </View>
       </View>
@@ -122,46 +187,54 @@ export default function BodyScannerScreen() {
   const renderCapture = () => (
     <View style={styles.captureContainer}>
       <Text style={styles.captureTitle}>Capture Your Photos</Text>
-      <Text style={styles.captureSubtitle}>Take front and side profile photos</Text>
+      <Text style={styles.captureSubtitle}>Take or upload front and side profile photos</Text>
       
       <View style={styles.photosContainer}>
         <View style={styles.photoSection}>
           <TouchableOpacity 
             style={styles.captureButton}
-            onPress={() => handlePhotoCapture('Front')}
+            onPress={() => showPhotoOptions('Front')}
+            activeOpacity={0.8}
           >
             {frontPhoto ? (
               <Image source={{ uri: frontPhoto }} style={styles.capturedPhoto} />
             ) : (
-              <>
-                <MaterialCommunityIcons name="camera" size={48} color={COLORS.textMuted} />
+              <View style={styles.captureButtonContent}>
+                <MaterialCommunityIcons name="camera-plus" size={48} color={COLORS.primary} />
                 <Text style={styles.captureLabel}>Front View</Text>
                 <Text style={styles.captureHint}>Arms at sides</Text>
-              </>
+              </View>
             )}
           </TouchableOpacity>
           {frontPhoto && (
-            <MaterialCommunityIcons name="check-circle" size={32} color="#10B981" style={styles.checkIcon} />
+            <View style={styles.checkContainer}>
+              <MaterialCommunityIcons name="check-circle" size={32} color="#10B981" />
+              <Text style={styles.checkText}>Captured</Text>
+            </View>
           )}
         </View>
         
         <View style={styles.photoSection}>
           <TouchableOpacity 
             style={styles.captureButton}
-            onPress={() => handlePhotoCapture('Side')}
+            onPress={() => showPhotoOptions('Side')}
+            activeOpacity={0.8}
           >
             {sidePhoto ? (
               <Image source={{ uri: sidePhoto }} style={styles.capturedPhoto} />
             ) : (
-              <>
-                <MaterialCommunityIcons name="camera" size={48} color={COLORS.textMuted} />
+              <View style={styles.captureButtonContent}>
+                <MaterialCommunityIcons name="camera-plus" size={48} color={COLORS.primary} />
                 <Text style={styles.captureLabel}>Side Profile</Text>
                 <Text style={styles.captureHint}>Stand sideways</Text>
-              </>
+              </View>
             )}
           </TouchableOpacity>
           {sidePhoto && (
-            <MaterialCommunityIcons name="check-circle" size={32} color="#10B981" style={styles.checkIcon} />
+            <View style={styles.checkContainer}>
+              <MaterialCommunityIcons name="check-circle" size={32} color="#10B981" />
+              <Text style={styles.checkText}>Captured</Text>
+            </View>
           )}
         </View>
       </View>
@@ -178,64 +251,69 @@ export default function BodyScannerScreen() {
 
   const renderResults = () => (
     <ScrollView style={styles.resultsContainer} contentContainerStyle={styles.resultsContent}>
-      <Text style={styles.resultsTitle}>Your Body Measurements</Text>
-      <View style={styles.confidenceBadge}>
-        <MaterialCommunityIcons name="check-decagram" size={20} color="#10B981" />
-        <Text style={styles.confidenceText}>{Math.round(scanResults.confidence * 100)}% Accurate</Text>
-      </View>
-      
-      {/* Body Type */}
-      <View style={styles.resultCard}>
-        <Text style={styles.resultCardTitle}>Body Type</Text>
-        <View style={styles.bodyTypeContainer}>
-          <MaterialCommunityIcons name="human" size={48} color={COLORS.primary} />
-          <Text style={styles.bodyTypeText}>{scanResults.bodyType}</Text>
+      <View style={styles.resultsHeader}>
+        <Text style={styles.resultsTitle}>Your Body Measurements</Text>
+        <View style={styles.confidenceBadge}>
+          <MaterialCommunityIcons name="check-decagram" size={20} color="#10B981" />
+          <Text style={styles.confidenceText}>{Math.round(scanResults.confidence * 100)}% Accurate</Text>
         </View>
       </View>
       
-      {/* Height */}
+      {/* Body Type Card */}
+      <View style={[styles.resultCard, styles.bodyTypeCard]}>
+        <LinearGradient
+          colors={['rgba(177, 76, 255, 0.2)', 'rgba(177, 76, 255, 0.05)']}
+          style={styles.bodyTypeGradient}
+        >
+          <MaterialCommunityIcons name="human" size={64} color={COLORS.primary} />
+          <View style={styles.bodyTypeInfo}>
+            <Text style={styles.bodyTypeLabel}>Body Type</Text>
+            <Text style={styles.bodyTypeText}>{scanResults.bodyType}</Text>
+          </View>
+        </LinearGradient>
+      </View>
+      
+      {/* Height Card */}
       <View style={styles.resultCard}>
-        <Text style={styles.resultCardTitle}>Height</Text>
+        <View style={styles.cardHeader}>
+          <MaterialCommunityIcons name="human-male-height" size={24} color={COLORS.primary} />
+          <Text style={styles.resultCardTitle}>Height</Text>
+        </View>
         <Text style={styles.measurementValue}>{scanResults.height} cm</Text>
-        <Text style={styles.measurementSubtext}>({(scanResults.height / 30.48).toFixed(1)} ft)</Text>
+        <Text style={styles.measurementSubtext}>{(scanResults.height / 30.48).toFixed(1)} feet</Text>
       </View>
       
-      {/* Measurements */}
+      {/* Measurements Card */}
       <View style={styles.resultCard}>
-        <Text style={styles.resultCardTitle}>Measurements (cm)</Text>
+        <View style={styles.cardHeader}>
+          <MaterialCommunityIcons name="tape-measure" size={24} color={COLORS.primary} />
+          <Text style={styles.resultCardTitle}>Measurements</Text>
+        </View>
         <View style={styles.measurementsList}>
-          <View style={styles.measurementRow}>
-            <Text style={styles.measurementLabel}>Chest</Text>
-            <Text style={styles.measurementValue}>{scanResults.measurements.chest} cm</Text>
-          </View>
-          <View style={styles.measurementRow}>
-            <Text style={styles.measurementLabel}>Waist</Text>
-            <Text style={styles.measurementValue}>{scanResults.measurements.waist} cm</Text>
-          </View>
-          <View style={styles.measurementRow}>
-            <Text style={styles.measurementLabel}>Hips</Text>
-            <Text style={styles.measurementValue}>{scanResults.measurements.hips} cm</Text>
-          </View>
-          <View style={styles.measurementRow}>
-            <Text style={styles.measurementLabel}>Shoulders</Text>
-            <Text style={styles.measurementValue}>{scanResults.measurements.shoulders} cm</Text>
-          </View>
-          <View style={styles.measurementRow}>
-            <Text style={styles.measurementLabel}>Inseam</Text>
-            <Text style={styles.measurementValue}>{scanResults.measurements.inseam} cm</Text>
-          </View>
+          {Object.entries(scanResults.measurements).map(([key, value]) => (
+            <View key={key} style={styles.measurementRow}>
+              <Text style={styles.measurementLabel}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+              <Text style={styles.measurementRowValue}>{value} cm</Text>
+            </View>
+          ))}
         </View>
       </View>
       
-      {/* Recommended Sizes */}
+      {/* Recommended Sizes Card */}
       <View style={styles.resultCard}>
-        <Text style={styles.resultCardTitle}>Recommended Sizes</Text>
+        <View style={styles.cardHeader}>
+          <MaterialCommunityIcons name="tag" size={24} color={COLORS.primary} />
+          <Text style={styles.resultCardTitle}>Recommended Sizes</Text>
+        </View>
         <View style={styles.sizesContainer}>
           <View style={styles.sizeItem}>
+            <MaterialCommunityIcons name="tshirt-crew" size={32} color={COLORS.primary} />
             <Text style={styles.sizeLabel}>Shirt</Text>
             <Text style={styles.sizeValue}>{scanResults.shirtSize}</Text>
           </View>
+          <View style={styles.sizeDivider} />
           <View style={styles.sizeItem}>
+            <MaterialCommunityIcons name="human-handsdown" size={32} color={COLORS.primary} />
             <Text style={styles.sizeLabel}>Pants</Text>
             <Text style={styles.sizeValue}>{scanResults.pantsSize}</Text>
           </View>
@@ -244,7 +322,14 @@ export default function BodyScannerScreen() {
       
       <GradientButton
         title="Save to Profile"
-        onPress={() => Alert.alert('Success', 'Measurements saved to your profile!')}
+        onPress={() => {
+          Alert.alert('Success!', 'Measurements saved to your profile', [
+            {
+              text: 'OK',
+              onPress: () => router.back(),
+            }
+          ]);
+        }}
         icon={<MaterialCommunityIcons name="content-save" size={20} color="#fff" />}
         style={styles.saveButton}
       />
@@ -257,6 +342,7 @@ export default function BodyScannerScreen() {
           setSidePhoto(null);
           setScanResults(null);
         }}
+        activeOpacity={0.8}
       >
         <Text style={styles.newScanText}>Start New Scan</Text>
       </TouchableOpacity>
@@ -280,9 +366,27 @@ export default function BodyScannerScreen() {
       {/* Content */}
       {scanning ? (
         <View style={styles.scanningContainer}>
-          <MaterialCommunityIcons name="loading" size={80} color={COLORS.primary} />
+          <View style={styles.scanningIconContainer}>
+            <MaterialCommunityIcons name="scan-helper" size={80} color={COLORS.primary} />
+          </View>
           <Text style={styles.scanningText}>Analyzing your measurements...</Text>
-          <Text style={styles.scanningSubtext}>This may take a few seconds</Text>
+          <Text style={styles.scanningSubtext}>AI is processing your body data</Text>
+          
+          <View style={styles.progressBar}>
+            <View style={styles.progressBarBg}>
+              <Animated.View 
+                style={[
+                  styles.progressBarFill,
+                  {
+                    width: scanProgress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  }
+                ]} 
+              />
+            </View>
+          </View>
         </View>
       ) : (
         <>
@@ -327,11 +431,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
   },
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
   instructionsTitle: {
     fontSize: 28,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginTop: 24,
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -351,9 +463,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   instructionNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -367,7 +479,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   instructionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: COLORS.textPrimary,
     marginBottom: 4,
@@ -375,6 +487,7 @@ const styles = StyleSheet.create({
   instructionText: {
     fontSize: 14,
     color: COLORS.textSecondary,
+    lineHeight: 20,
   },
   startButton: {
     width: '100%',
@@ -406,19 +519,22 @@ const styles = StyleSheet.create({
   },
   captureButton: {
     width: '100%',
-    aspectRatio: 0.5,
+    aspectRatio: 0.55,
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
+    borderWidth: 2,
+    borderColor: 'rgba(177, 76, 255, 0.3)',
+    borderStyle: 'dashed',
+    overflow: 'hidden',
+  },
+  captureButtonContent: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(177, 76, 255, 0.2)',
-    borderStyle: 'dashed',
   },
   capturedPhoto: {
     width: '100%',
     height: '100%',
-    borderRadius: SIZES.borderRadiusCard,
   },
   captureLabel: {
     color: COLORS.textPrimary,
@@ -431,8 +547,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  checkIcon: {
+  checkContainer: {
+    alignItems: 'center',
     marginTop: 12,
+  },
+  checkText: {
+    color: '#10B981',
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 4,
   },
   analyzeButton: {
     width: '100%',
@@ -443,18 +566,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
+  scanningIconContainer: {
+    marginBottom: 24,
+  },
   scanningText: {
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginTop: 24,
+    marginBottom: 8,
     textAlign: 'center',
   },
   scanningSubtext: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    marginTop: 8,
+    marginBottom: 32,
     textAlign: 'center',
+  },
+  progressBar: {
+    width: '100%',
+    marginTop: 24,
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 8,
+    backgroundColor: COLORS.card,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: COLORS.primary,
+    borderRadius: 4,
   },
   resultsContainer: {
     flex: 1,
@@ -463,24 +605,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
+  resultsHeader: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
   resultsTitle: {
     fontSize: 28,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 16,
+    marginBottom: 12,
     textAlign: 'center',
   },
   confidenceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 8,
-    marginBottom: 32,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   confidenceText: {
     color: '#10B981',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
   },
   resultCard: {
     backgroundColor: COLORS.card,
@@ -488,26 +636,44 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
   },
-  resultCardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  bodyTypeCard: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  bodyTypeGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 24,
+    gap: 20,
+  },
+  bodyTypeInfo: {
+    flex: 1,
+  },
+  bodyTypeLabel: {
+    fontSize: 14,
     color: COLORS.textSecondary,
-    marginBottom: 16,
+    marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  bodyTypeContainer: {
+  bodyTypeText: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
+    marginBottom: 16,
   },
-  bodyTypeText: {
-    fontSize: 24,
+  resultCardTitle: {
+    fontSize: 18,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
   measurementValue: {
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
@@ -523,39 +689,48 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(177, 76, 255, 0.1)',
   },
   measurementLabel: {
     fontSize: 16,
     color: COLORS.textSecondary,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  measurementRowValue: {
+    fontSize: 18,
+    color: COLORS.textPrimary,
+    fontWeight: '700',
   },
   sizesContainer: {
     flexDirection: 'row',
-    gap: 16,
+    alignItems: 'center',
   },
   sizeItem: {
     flex: 1,
     alignItems: 'center',
     padding: 20,
-    backgroundColor: 'rgba(177, 76, 255, 0.1)',
-    borderRadius: 12,
+  },
+  sizeDivider: {
+    width: 1,
+    height: '60%',
+    backgroundColor: 'rgba(177, 76, 255, 0.2)',
   },
   sizeLabel: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    marginBottom: 8,
+    marginVertical: 8,
+    fontWeight: '600',
   },
   sizeValue: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '700',
     color: COLORS.primary,
   },
   saveButton: {
     width: '100%',
-    marginTop: 16,
+    marginTop: 8,
   },
   newScanButton: {
     padding: 16,
