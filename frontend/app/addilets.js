@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useFavorites } from '../contexts/FavoritesContext';
+import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 
@@ -19,16 +19,7 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 40;
 
 export default function AddiletsScreen() {
-  const { favoriteOutfits, favoriteBeauty } = useFavorites();
-  const [styleProfile, setStyleProfile] = useState(null);
-  const [dailyRecommendations, setDailyRecommendations] = useState([]);
-  const [makeupRecommendations, setMakeupRecommendations] = useState([]);
-  const [seasonalCapsule, setSeasonalCapsule] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    generatePersonalization();
-  }, [favoriteOutfits, favoriteBeauty]);
+  const { personalization, loading, refreshPersonalization } = useAddilets();
 
   const generatePersonalization = () => {
     // Mock AI Logic - Analyze user's favorites and generate profile
