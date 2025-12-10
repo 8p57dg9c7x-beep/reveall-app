@@ -279,20 +279,21 @@ export default function DiscoverScreen() {
   }, []);
 
   const renderExploreCard = useCallback((category) => (
-    <AnimatedPressable
+    <TouchableOpacity
       key={category.id}
       style={styles.exploreCard}
       onPress={() => handleExplorePress(category.id)}
+      activeOpacity={0.7}
     >
       <MaterialCommunityIcons name={category.icon} size={32} color={category.color} />
       <Text style={styles.exploreTitle}>{category.title}</Text>
       <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
-    </AnimatedPressable>
+    </TouchableOpacity>
   ), [handleExplorePress]);
 
   return (
     <LinearGradient
-      colors={[COLORS.backgroundGradientStart, COLORS.backgroundGradientEnd]}
+      colors={GRADIENTS.background}
       style={styles.container}
     >
       <ScrollView 
@@ -302,6 +303,19 @@ export default function DiscoverScreen() {
         removeClippedSubviews
         showsVerticalScrollIndicator={false}
       >
+        {/* Search Bar */}
+        <View style={styles.searchBarContainer}>
+          <View style={styles.searchBar}>
+            <MaterialCommunityIcons name="magnify" size={20} color={COLORS.textMuted} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search movies, songs, styles..."
+              placeholderTextColor={COLORS.textMuted}
+              onFocus={() => router.push('/universal-search')}
+            />
+          </View>
+        </View>
+
         <FadeInView style={styles.header}>
           <MaterialCommunityIcons name="compass" size={32} color={COLORS.primary} />
           <Text style={styles.headerTitle}>Discover</Text>
