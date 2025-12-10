@@ -266,7 +266,7 @@ export default function BeautyScreen() {
           windowSize={5}
         />
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
