@@ -430,8 +430,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 20,
+    paddingTop: 80,
     paddingBottom: 120,
+  },
+  searchBarContainer: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    right: 20,
+    zIndex: 100,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: SIZES.borderRadiusInput,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.2)',
+  },
+  searchInput: {
+    flex: 1,
+    color: COLORS.textPrimary,
+    fontSize: 16,
   },
   loadingContainer: {
     paddingVertical: 40,
@@ -439,7 +462,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   header: {
-    paddingTop: 60,
+    paddingTop: 40,
     paddingHorizontal: 20,
     paddingBottom: 24,
     alignItems: 'center',
