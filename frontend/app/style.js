@@ -302,20 +302,20 @@ export default function StyleDiscovery() {
             <Text style={styles.headerSubtitle}>Find your perfect look</Text>
           </View>
           <View style={{ flexDirection: 'row' }}>
-            <AnimatedPressable 
+            <TouchableOpacity 
               style={styles.searchButton}
               onPress={() => router.push('/universal-search')}
-              scaleValue={0.9}
+              activeOpacity={0.7}
             >
               <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
-            </AnimatedPressable>
-            <AnimatedPressable 
+            </TouchableOpacity>
+            <TouchableOpacity 
               style={styles.favoritesButton}
               onPress={() => router.push('/saved-outfits')}
-              scaleValue={0.9}
+              activeOpacity={0.7}
             >
               <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
-            </AnimatedPressable>
+            </TouchableOpacity>
           </View>
         </FadeInView>
 
