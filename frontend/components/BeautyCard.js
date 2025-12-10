@@ -1,16 +1,16 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
-import { COLORS } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
-import AnimatedPressable from './AnimatedPressable';
 import { asCardItem } from '../utils/helpers';
 
 const BeautyCard = memo(({ item, onPress, isLeft }) => {
   const { toggleBeautyFavorite, isBeautyFavorite } = useFavorites();
   
-  // Normalize the card (should already be normalized but double-check)
+  // Normalize the card
   const card = asCardItem(item);
   const isFavorite = isBeautyFavorite(card.id);
 
@@ -21,27 +21,36 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
     toggleBeautyFavorite(card);
   };
 
+  const handleTryOn = (e) => {
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+    // TODO: Navigate to try-on feature when implemented
+    alert('Try On feature coming soon!');
+  };
+
   return (
-    <AnimatedPressable
+    <TouchableOpacity
       style={[styles.lookCard, isLeft ? styles.cardLeft : styles.cardRight]}
       onPress={onPress}
+      activeOpacity={0.9}
     >
       <View style={styles.imageContainer}>
         <OptimizedImage source={{ uri: card.imageToUse }} style={styles.lookImage} />
         <View style={styles.gradientOverlay} />
         
         {/* Favorite Heart Button */}
-        <AnimatedPressable 
+        <TouchableOpacity 
           style={styles.favoriteButton}
           onPress={handleFavoritePress}
-          scaleValue={0.85}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={22}
             color={isFavorite ? '#ff4444' : '#fff'}
           />
-        </AnimatedPressable>
+        </TouchableOpacity>
         
         {item.category && (
           <View style={styles.categoryBadge}>
@@ -49,6 +58,21 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
             <Text style={styles.categoryText}>{item.category}</Text>
           </View>
         )}
+
+        {/* Try On Button */}
+        <TouchableOpacity
+          style={styles.tryOnButton}
+          onPress={handleTryOn}
+          activeOpacity={0.7}
+        >
+          <LinearGradient
+            colors={GRADIENTS.chip}
+            style={styles.tryOnGradient}
+          >
+            <MaterialCommunityIcons name="camera" size={14} color="#fff" />
+            <Text style={styles.tryOnText}>Try On</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
       <View style={styles.lookInfo}>
         <Text style={styles.lookTitle} numberOfLines={2}>{item.title}</Text>
@@ -60,7 +84,7 @@ const BeautyCard = memo(({ item, onPress, isLeft }) => {
         )}
         <Text style={styles.priceRange}>{item.priceRange || 'View Details'}</Text>
       </View>
-    </AnimatedPressable>
+    </TouchableOpacity>
   );
 }, (prevProps, nextProps) => {
   return prevProps.item.id === nextProps.item.id && 
@@ -71,7 +95,7 @@ const styles = StyleSheet.create({
   lookCard: {
     width: '48%',
     backgroundColor: COLORS.card,
-    borderRadius: 16,
+    borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
     marginBottom: 20,
     height: 320,
@@ -151,6 +175,27 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     textTransform: 'capitalize',
+    letterSpacing: 0.5,
+  },
+  tryOnButton: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    right: 12,
+  },
+  tryOnGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: SIZES.borderRadiusPill,
+    gap: 6,
+  },
+  tryOnText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
     letterSpacing: 0.5,
   },
   lookInfo: {
