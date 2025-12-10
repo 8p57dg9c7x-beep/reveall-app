@@ -360,7 +360,7 @@ export default function StyleDiscovery() {
           windowSize={5}
         />
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
