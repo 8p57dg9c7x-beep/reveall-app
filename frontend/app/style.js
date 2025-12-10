@@ -7,7 +7,6 @@ import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
 import OutfitCard from '../components/OutfitCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
-import AnimatedPressable from '../components/AnimatedPressable';
 import GradientChip from '../components/GradientChip';
 import FadeInView from '../components/FadeInView';
 import { trackCategoryView } from '../services/analytics';
