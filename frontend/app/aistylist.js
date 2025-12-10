@@ -7,13 +7,19 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Dimensions,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import GradientChip from '../components/GradientChip';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.85;
 
 export default function AIStylistScreen() {
   const [step, setStep] = useState(1); // 1: Upload, 2: Preferences, 3: Results
@@ -22,6 +28,8 @@ export default function AIStylistScreen() {
   const [selectedStyles, setSelectedStyles] = useState([]);
   const [generatedLooks, setGeneratedLooks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentLookIndex, setCurrentLookIndex] = useState(0);
+  const scrollX = new Animated.Value(0);
 
   const stylePreferences = [
     'Streetwear', 'Luxury', 'Casual', 'Formal', 'Sporty', 'Bohemian', 
@@ -36,10 +44,11 @@ export default function AIStylistScreen() {
       const mockResults = [
         {
           id: 1,
-          image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80',
+          image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80',
           confidence: 0.95,
           tags: ['streetwear', 'casual', 'denim'],
           title: 'Urban Streetwear Look',
+          description: 'Perfect for casual weekend outings',
           buyLinks: [
             { item: 'Denim Jacket', price: '$89', url: '#' },
             { item: 'White Tee', price: '$24', url: '#' },
@@ -48,10 +57,11 @@ export default function AIStylistScreen() {
         },
         {
           id: 2,
-          image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80',
+          image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80',
           confidence: 0.92,
           tags: ['luxury', 'elegant', 'formal'],
           title: 'Elegant Luxury Ensemble',
+          description: 'Sophisticated style for special occasions',
           buyLinks: [
             { item: 'Blazer', price: '$299', url: '#' },
             { item: 'Silk Blouse', price: '$149', url: '#' },
@@ -60,14 +70,28 @@ export default function AIStylistScreen() {
         },
         {
           id: 3,
-          image: 'https://images.unsplash.com/photo-1445384763658-0400939829cd?w=400&q=80',
+          image: 'https://images.unsplash.com/photo-1445384763658-0400939829cd?w=600&q=80',
           confidence: 0.88,
           tags: ['casual', 'minimal', 'comfortable'],
           title: 'Minimalist Casual Style',
+          description: 'Effortless everyday comfort',
           buyLinks: [
             { item: 'Cotton Tee', price: '$34', url: '#' },
             { item: 'Chinos', price: '$69', url: '#' },
             { item: 'Sneakers', price: '$99', url: '#' },
+          ]
+        },
+        {
+          id: 4,
+          image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80',
+          confidence: 0.90,
+          tags: ['sporty', 'athleisure', 'active'],
+          title: 'Sporty Athleisure',
+          description: 'Active lifestyle meets street style',
+          buyLinks: [
+            { item: 'Track Jacket', price: '$79', url: '#' },
+            { item: 'Performance Tee', price: '$45', url: '#' },
+            { item: 'Joggers', price: '$65', url: '#' },
           ]
         },
       ];
@@ -78,27 +102,39 @@ export default function AIStylistScreen() {
     }, 2000);
   };
 
-  const handlePhotoUpload = (type) => {
-    // Mock photo upload
-    Alert.alert('Photo Upload', `${type} photo would be uploaded here`, [
-      {
-        text: 'OK',
-        onPress: () => {
-          if (type === 'Front') {
-            setFrontPhoto('https://via.placeholder.com/150');
-          } else {
-            setSidePhoto('https://via.placeholder.com/150');
-          }
-        }
+  const pickImage = async (type) => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Please allow access to your photo library');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      if (type === 'Front') {
+        setFrontPhoto(result.assets[0].uri);
+      } else {
+        setSidePhoto(result.assets[0].uri);
       }
-    ]);
+    }
   };
 
   const toggleStyle = (style) => {
     if (selectedStyles.includes(style)) {
       setSelectedStyles(selectedStyles.filter(s => s !== style));
     } else {
-      setSelectedStyles([...selectedStyles, style]);
+      if (selectedStyles.length < 3) {
+        setSelectedStyles([...selectedStyles, style]);
+      } else {
+        Alert.alert('Maximum Reached', 'You can select up to 3 style preferences');
+      }
     }
   };
 
@@ -110,28 +146,32 @@ export default function AIStylistScreen() {
       <View style={styles.photosRow}>
         <TouchableOpacity 
           style={styles.photoUpload}
-          onPress={() => handlePhotoUpload('Front')}
+          onPress={() => pickImage('Front')}
+          activeOpacity={0.8}
         >
           {frontPhoto ? (
             <Image source={{ uri: frontPhoto }} style={styles.photoPreview} />
           ) : (
             <>
-              <MaterialCommunityIcons name="camera" size={48} color={COLORS.textMuted} />
+              <MaterialCommunityIcons name="camera-plus" size={48} color={COLORS.primary} />
               <Text style={styles.photoLabel}>Front Photo</Text>
+              <Text style={styles.photoHint}>Tap to upload</Text>
             </>
           )}
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={styles.photoUpload}
-          onPress={() => handlePhotoUpload('Side')}
+          onPress={() => pickImage('Side')}
+          activeOpacity={0.8}
         >
           {sidePhoto ? (
             <Image source={{ uri: sidePhoto }} style={styles.photoPreview} />
           ) : (
             <>
-              <MaterialCommunityIcons name="camera" size={48} color={COLORS.textMuted} />
+              <MaterialCommunityIcons name="camera-plus" size={48} color={COLORS.primary} />
               <Text style={styles.photoLabel}>Side Photo</Text>
+              <Text style={styles.photoHint}>Tap to upload</Text>
             </>
           )}
         </TouchableOpacity>
@@ -162,6 +202,12 @@ export default function AIStylistScreen() {
           />
         ))}
       </View>
+
+      <View style={styles.selectedCount}>
+        <Text style={styles.selectedCountText}>
+          {selectedStyles.length} / 3 selected
+        </Text>
+      </View>
       
       <GradientButton
         title="Generate Looks"
@@ -178,16 +224,37 @@ export default function AIStylistScreen() {
       <Text style={styles.stepTitle}>Your AI-Generated Looks</Text>
       <Text style={styles.stepSubtitle}>{generatedLooks.length} personalized outfits</Text>
       
-      <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
-        {generatedLooks.map((look) => (
-          <View key={look.id} style={styles.resultCard}>
+      {/* Swipeable Cards */}
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={CARD_WIDTH + 20}
+        decelerationRate="fast"
+        contentContainerStyle={styles.cardsContainer}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
+        {generatedLooks.map((look, index) => (
+          <View key={look.id} style={[styles.resultCard, { width: CARD_WIDTH }]}>
             <Image source={{ uri: look.image }} style={styles.resultImage} />
-            <View style={styles.resultInfo}>
-              <Text style={styles.resultTitle}>{look.title}</Text>
+            
+            {/* Overlay Info */}
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.8)']}
+              style={styles.cardOverlay}
+            >
               <View style={styles.confidenceBadge}>
-                <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
+                <MaterialCommunityIcons name="star" size={16} color={COLORS.accent} />
                 <Text style={styles.confidenceText}>{Math.round(look.confidence * 100)}% Match</Text>
               </View>
+              
+              <Text style={styles.resultTitle}>{look.title}</Text>
+              <Text style={styles.resultDescription}>{look.description}</Text>
+              
               <View style={styles.tagsRow}>
                 {look.tags.map((tag, idx) => (
                   <View key={idx} style={styles.tag}>
@@ -195,14 +262,37 @@ export default function AIStylistScreen() {
                   </View>
                 ))}
               </View>
-              <TouchableOpacity style={styles.shopButton}>
-                <Text style={styles.shopButtonText}>Shop This Look</Text>
-                <MaterialCommunityIcons name="arrow-right" size={16} color="#fff" />
-              </TouchableOpacity>
-            </View>
+
+              {/* Shopping Section */}
+              <View style={styles.shoppingSection}>
+                <Text style={styles.shoppingSectionTitle}>Shop This Look:</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.buyLinks}>
+                  {look.buyLinks.map((link, idx) => (
+                    <TouchableOpacity key={idx} style={styles.buyLinkCard} activeOpacity={0.8}>
+                      <Text style={styles.buyLinkItem}>{link.item}</Text>
+                      <Text style={styles.buyLinkPrice}>{link.price}</Text>
+                      <MaterialCommunityIcons name="cart-outline" size={18} color={COLORS.primary} />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </LinearGradient>
           </View>
         ))}
       </ScrollView>
+
+      {/* Pagination Dots */}
+      <View style={styles.pagination}>
+        {generatedLooks.map((_, index) => (
+          <View 
+            key={index} 
+            style={[
+              styles.paginationDot,
+              currentLookIndex === index && styles.paginationDotActive
+            ]} 
+          />
+        ))}
+      </View>
       
       <GradientButton
         title="Start New Session"
@@ -212,6 +302,7 @@ export default function AIStylistScreen() {
           setSidePhoto(null);
           setSelectedStyles([]);
           setGeneratedLooks([]);
+          setCurrentLookIndex(0);
         }}
         style={styles.newSessionButton}
       />
@@ -239,14 +330,17 @@ export default function AIStylistScreen() {
             <View style={[styles.progressDot, step >= 1 && styles.progressDotActive]} />
             <View style={[styles.progressLine, step >= 2 && styles.progressLineActive]} />
             <View style={[styles.progressDot, step >= 2 && styles.progressDotActive]} />
+            <View style={[styles.progressLine, step >= 3 && styles.progressLineActive]} />
+            <View style={[styles.progressDot, step >= 3 && styles.progressDotActive]} />
           </View>
         )}
 
         {/* Content */}
         {loading ? (
           <View style={styles.loadingContainer}>
-            <MaterialCommunityIcons name="loading" size={64} color={COLORS.primary} />
-            <Text style={styles.loadingText}>Generating your perfect looks...</Text>
+            <MaterialCommunityIcons name="shimmer" size={64} color={COLORS.primary} />
+            <Text style={styles.loadingText}>Analyzing your style...</Text>
+            <Text style={styles.loadingSubtext}>Generating perfect looks for you</Text>
           </View>
         ) : (
           <>
@@ -298,7 +392,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 80,
+    paddingHorizontal: 60,
     marginBottom: 40,
   },
   progressDot: {
@@ -351,7 +445,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(177, 76, 255, 0.2)',
+    borderColor: 'rgba(177, 76, 255, 0.3)',
     borderStyle: 'dashed',
   },
   photoPreview: {
@@ -360,10 +454,15 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.borderRadiusCard,
   },
   photoLabel: {
-    color: COLORS.textMuted,
-    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontSize: 16,
     fontWeight: '600',
     marginTop: 12,
+  },
+  photoHint: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    marginTop: 4,
   },
   continueButton: {
     width: '100%',
@@ -372,10 +471,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   styleChip: {
     marginRight: 0,
+  },
+  selectedCount: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  selectedCountText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
   },
   generateButton: {
     width: '100%',
@@ -385,46 +493,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    color: COLORS.textSecondary,
-    fontSize: 16,
+    color: COLORS.textPrimary,
+    fontSize: 20,
+    fontWeight: '700',
     marginTop: 24,
   },
-  resultsContainer: {
-    paddingHorizontal: 20,
+  loadingSubtext: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    marginTop: 8,
   },
-  resultsList: {
-    marginBottom: 24,
+  resultsContainer: {
+    paddingTop: 20,
+  },
+  cardsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   resultCard: {
-    backgroundColor: COLORS.card,
+    height: 550,
     borderRadius: SIZES.borderRadiusCard,
-    marginBottom: 20,
     overflow: 'hidden',
+    marginRight: 20,
+    backgroundColor: COLORS.card,
   },
   resultImage: {
     width: '100%',
-    height: 300,
+    height: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
-  resultInfo: {
-    padding: 16,
-  },
-  resultTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: 8,
+  cardOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingBottom: 24,
   },
   confidenceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
     marginBottom: 12,
   },
   confidenceText: {
     color: COLORS.accent,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+  },
+  resultTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  resultDescription: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 12,
   },
   tagsRow: {
     flexDirection: 'row',
@@ -433,31 +564,66 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tag: {
-    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    backgroundColor: 'rgba(177, 76, 255, 0.3)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
   },
   tagText: {
-    color: COLORS.primary,
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  shoppingSection: {
+    marginTop: 8,
+  },
+  shoppingSectionTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  buyLinks: {
+    flexDirection: 'row',
+  },
+  buyLinkCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginRight: 12,
+    alignItems: 'center',
+    minWidth: 100,
+  },
+  buyLinkItem: {
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
+    marginBottom: 4,
   },
-  shopButton: {
+  buyLinkPrice: {
+    color: COLORS.accent,
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  pagination: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: 'rgba(177, 76, 255, 0.2)',
+    marginVertical: 24,
   },
-  shopButtonText: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.card,
+  },
+  paginationDotActive: {
+    backgroundColor: COLORS.primary,
+    width: 24,
   },
   newSessionButton: {
-    width: '100%',
+    marginHorizontal: 20,
   },
 });
