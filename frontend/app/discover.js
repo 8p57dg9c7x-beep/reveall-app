@@ -430,15 +430,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 80,
+    paddingTop: 20,
     paddingBottom: 120,
   },
   searchBarContainer: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    right: 20,
-    zIndex: 100,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 16,
   },
   searchBar: {
     flexDirection: 'row',
