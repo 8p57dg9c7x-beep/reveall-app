@@ -10,11 +10,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import { API_BASE_URL } from '../config';
 
 export default function HomeScreen() {
+  const { personalization, getRecommendedOutfits } = useAddilets();
   const [trendingStyles, setTrendingStyles] = useState([]);
   const [trendingSongs, setTrendingSongs] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
