@@ -289,7 +289,10 @@ export default function StyleDiscovery() {
   );
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={GRADIENTS.background}
+      style={styles.container}
+    >
       {/* Fixed Header - Outside FlatList */}
       <View style={styles.fixedHeader}>
         <FadeInView style={styles.header}>
