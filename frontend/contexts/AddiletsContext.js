@@ -186,10 +186,12 @@ export const AddiletsProvider = ({ children }) => {
     };
 
     setPersonalization(newPersonalization);
+    persistData(newPersonalization);
     setLoading(false);
   };
 
   const refreshPersonalization = () => {
+    setLoading(true);
     generatePersonalization();
   };
 
