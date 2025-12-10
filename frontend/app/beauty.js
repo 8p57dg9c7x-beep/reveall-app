@@ -130,29 +130,15 @@ export default function BeautyScreen() {
     });
   }, []);
 
-  const renderCategoryButton = useCallback(({ item }) => (
-    <TouchableOpacity
+  const renderCategoryChip = useCallback((item) => (
+    <GradientChip
       key={item.id}
-      style={[
-        styles.categoryButton,
-        selectedCategory === item.id && styles.categoryButtonActive,
-      ]}
+      label={item.name}
+      icon={item.icon}
+      active={selectedCategory === item.id}
       onPress={() => handleCategoryPress(item.id)}
-    >
-      <MaterialCommunityIcons
-        name={item.icon}
-        size={20}
-        color={selectedCategory === item.id ? COLORS.textPrimary : COLORS.textSecondary}
-      />
-      <Text
-        style={[
-          styles.categoryText,
-          selectedCategory === item.id && styles.categoryTextActive,
-        ]}
-      >
-        {item.name}
-      </Text>
-    </TouchableOpacity>
+      style={{ marginRight: 12 }}
+    />
   ), [selectedCategory, handleCategoryPress]);
 
   const renderBeautyRow = useCallback(({ item, index }) => {
