@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFavorites } from './FavoritesContext';
 
 const AddiletsContext = createContext();
+const STORAGE_KEY = '@addilets_personalization';
 
 export const useAddilets = () => {
   const context = useContext(AddiletsContext);
