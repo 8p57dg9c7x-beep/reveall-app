@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
+import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
 import OutfitCard from '../components/OutfitCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
