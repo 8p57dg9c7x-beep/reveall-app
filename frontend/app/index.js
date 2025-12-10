@@ -116,17 +116,17 @@ export default function HomeScreen() {
               </View>
               <View style={styles.forYouStats}>
                 <View style={styles.forYouStat}>
-                  <Text style={styles.forYouStatNumber}>3</Text>
+                  <Text style={styles.forYouStatNumber}>{personalization?.recommendations?.outfits?.length || 3}</Text>
                   <Text style={styles.forYouStatLabel}>Outfits Today</Text>
                 </View>
                 <View style={styles.forYouStatDivider} />
                 <View style={styles.forYouStat}>
-                  <Text style={styles.forYouStatNumber}>2</Text>
+                  <Text style={styles.forYouStatNumber}>{personalization?.recommendations?.makeup?.length || 2}</Text>
                   <Text style={styles.forYouStatLabel}>Makeup Looks</Text>
                 </View>
                 <View style={styles.forYouStatDivider} />
                 <View style={styles.forYouStat}>
-                  <Text style={styles.forYouStatNumber}>92%</Text>
+                  <Text style={styles.forYouStatNumber}>{personalization?.styleProfile?.celebrityMatches?.[0]?.match || 92}%</Text>
                   <Text style={styles.forYouStatLabel}>Match Score</Text>
                 </View>
               </View>
