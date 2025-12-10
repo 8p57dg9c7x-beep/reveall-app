@@ -82,6 +82,60 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* For You Section - Powered by Addilets */}
+        <View style={styles.forYouSection}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.forYouHeader}>
+              <MaterialCommunityIcons name="sparkles" size={24} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>For You</Text>
+            </View>
+            <TouchableOpacity onPress={() => router.push('/addilets')}>
+              <Text style={styles.seeAll}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.forYouCard}
+            onPress={() => router.push('/addilets')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['rgba(177, 76, 255, 0.3)', 'rgba(177, 76, 255, 0.1)']}
+              style={styles.forYouGradient}
+            >
+              <View style={styles.forYouContent}>
+                <View style={styles.forYouIcon}>
+                  <MaterialCommunityIcons name="account-star" size={32} color={COLORS.primary} />
+                </View>
+                <View style={styles.forYouText}>
+                  <Text style={styles.forYouTitle}>Your Personalized Style Profile</Text>
+                  <Text style={styles.forYouSubtitle}>AI-powered recommendations just for you</Text>
+                </View>
+              </View>
+              <View style={styles.forYouStats}>
+                <View style={styles.forYouStat}>
+                  <Text style={styles.forYouStatNumber}>3</Text>
+                  <Text style={styles.forYouStatLabel}>Outfits Today</Text>
+                </View>
+                <View style={styles.forYouStatDivider} />
+                <View style={styles.forYouStat}>
+                  <Text style={styles.forYouStatNumber}>2</Text>
+                  <Text style={styles.forYouStatLabel}>Makeup Looks</Text>
+                </View>
+                <View style={styles.forYouStatDivider} />
+                <View style={styles.forYouStat}>
+                  <Text style={styles.forYouStatNumber}>92%</Text>
+                  <Text style={styles.forYouStatLabel}>Match Score</Text>
+                </View>
+              </View>
+              <View style={styles.forYouCTA}>
+                <Text style={styles.forYouCTAText}>Explore Addilets</Text>
+                <MaterialCommunityIcons name="arrow-right" size={20} color={COLORS.primary} />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
         {/* Trending Styles Section */}
         <View style={styles.trendingSection}>
           <View style={styles.sectionHeader}>
