@@ -269,6 +269,48 @@ export default function StyleDiscovery() {
 
   const ListHeaderComponent = () => (
     <View>
+      {/* Addilets For You Section */}
+      {addiletsRecommendations.length > 0 && (
+        <View style={styles.forYouSection}>
+          <View style={styles.forYouHeader}>
+            <View style={styles.forYouTitleRow}>
+              <MaterialCommunityIcons name="star-four-points" size={20} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>Picked For You</Text>
+            </View>
+            <TouchableOpacity onPress={() => router.push('/addilets')}>
+              <Text style={styles.seeAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.forYouSubtitle}>Based on your style profile</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.forYouScrollContent}
+          >
+            {addiletsRecommendations.map((rec) => (
+              <TouchableOpacity
+                key={rec.id}
+                style={styles.forYouCard}
+                activeOpacity={0.8}
+              >
+                <Image source={{ uri: rec.image }} style={styles.forYouImage} />
+                <LinearGradient
+                  colors={['transparent', 'rgba(0,0,0,0.9)']}
+                  style={styles.forYouOverlay}
+                >
+                  <View style={styles.forYouBadge}>
+                    <MaterialCommunityIcons name="star" size={12} color={COLORS.accent} />
+                    <Text style={styles.forYouConfidence}>{rec.confidence}%</Text>
+                  </View>
+                  <Text style={styles.forYouTitle}>{rec.title}</Text>
+                  <Text style={styles.forYouOccasion}>{rec.occasion}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+      
       {celebrityOutfits.length > 0 && (
         <View style={styles.celebritySection}>
           <Text style={styles.sectionTitle}>Dress Like Your Icon</Text>
