@@ -596,4 +596,79 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Addilets For You Section
+  forYouSection: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  forYouHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  forYouTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  forYouSubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    marginBottom: 16,
+  },
+  seeAllText: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  forYouScrollContent: {
+    paddingRight: 20,
+  },
+  forYouCard: {
+    width: 160,
+    height: 220,
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    marginRight: 12,
+    backgroundColor: COLORS.card,
+  },
+  forYouImage: {
+    width: '100%',
+    height: '100%',
+  },
+  forYouOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+  },
+  forYouBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  forYouConfidence: {
+    color: COLORS.accent,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  forYouTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  forYouOccasion: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 11,
+    fontWeight: '600',
+  },
 });
