@@ -331,4 +331,85 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  forYouSection: {
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  forYouHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  forYouCard: {
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+  },
+  forYouGradient: {
+    padding: 24,
+  },
+  forYouContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  forYouIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(177, 76, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  forYouText: {
+    flex: 1,
+  },
+  forYouTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+  },
+  forYouSubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
+  forYouStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  forYouStat: {
+    alignItems: 'center',
+  },
+  forYouStatNumber: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  forYouStatLabel: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginTop: 4,
+  },
+  forYouStatDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: 'rgba(177, 76, 255, 0.3)',
+  },
+  forYouCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  forYouCTAText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
 });
