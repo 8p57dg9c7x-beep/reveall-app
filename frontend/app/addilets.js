@@ -191,7 +191,7 @@ export default function AddiletsScreen() {
         {/* Refresh Button */}
         <GradientButton
           title="Generate New Recommendations"
-          onPress={handleRefresh}
+          onPress={refreshPersonalization}
           icon={<MaterialCommunityIcons name="autorenew" size={20} color="#fff" />}
           style={styles.refreshMainButton}
         />
