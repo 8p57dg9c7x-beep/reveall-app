@@ -1,36 +1,33 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated } from 'react-native';
-import { ANIMATIONS } from '../constants/theme';
+import { Animated, ViewStyle } from 'react-native';
 
 /**
- * FadeInView - Fade in animation for screen content
- * Creates a smooth entrance effect when screens load
+ * FadeInView Component
+ * Provides smooth fade-in animation for any child component
+ * 
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Child components to animate
+ * @param {number} props.duration - Animation duration in ms (default: 500)
+ * @param {number} props.delay - Delay before animation starts (default: 0)
+ * @param {ViewStyle} props.style - Additional styles
  */
 const FadeInView = ({ 
   children, 
-  style, 
-  delay = 0,
-  duration = ANIMATIONS.duration.normal,
+  duration = 500, 
+  delay = 0, 
+  style = {},
+  ...props 
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: duration,
-        delay: delay,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: duration,
-        delay: delay,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [fadeAnim, translateY, delay, duration]);
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration,
+      delay,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim, duration, delay]);
 
   return (
     <Animated.View
@@ -38,9 +35,9 @@ const FadeInView = ({
         style,
         {
           opacity: fadeAnim,
-          transform: [{ translateY }],
         },
       ]}
+      {...props}
     >
       {children}
     </Animated.View>
