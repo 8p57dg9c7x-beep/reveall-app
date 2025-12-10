@@ -52,7 +52,7 @@ const OutfitCard = memo(({ item, onPress, isLeft }) => {
         <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
         <Text style={styles.outfitPrice}>{item.priceRange || 'View Details'}</Text>
       </View>
-    </AnimatedPressable>
+    </TouchableOpacity>
   );
 }, (prevProps, nextProps) => {
   return prevProps.item.id === nextProps.item.id && 
