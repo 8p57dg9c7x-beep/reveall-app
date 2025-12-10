@@ -209,47 +209,49 @@ export default function DiscoverScreen() {
   }, []);
 
   const renderSongCard = useCallback((song) => (
-    <AnimatedPressable 
+    <TouchableOpacity 
       key={song.id} 
       style={styles.trendingCard}
       onPress={() => handleSongTap(song)}
-      onLongPress={() => alert(`Song: ${song.title}\nImage URL: ${song.image?.substring(0, 60)}...`)}
+      activeOpacity={0.7}
     >
       <OptimizedImage source={{ uri: song.image }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{song.title}</Text>
       <Text style={styles.trendingSubtitle} numberOfLines={1}>{song.artist}</Text>
-    </AnimatedPressable>
+    </TouchableOpacity>
   ), [handleSongTap]);
 
   const renderStyleCard = useCallback((style) => (
-    <AnimatedPressable
+    <TouchableOpacity
       key={style.id}
       style={styles.trendingCard}
       onPress={() => router.push({
         pathname: '/outfitdetail',
         params: { outfitData: JSON.stringify(style) }
       })}
+      activeOpacity={0.7}
     >
       <OptimizedImage source={{ uri: style.imageToUse }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{style.title}</Text>
-    </AnimatedPressable>
+    </TouchableOpacity>
   ), []);
 
   const renderBeautyCard = useCallback((look) => (
-    <AnimatedPressable
+    <TouchableOpacity
       key={look.id}
       style={styles.trendingCard}
       onPress={() => router.push({
         pathname: '/beautydetail',
         params: { lookData: JSON.stringify(look) }
       })}
+      activeOpacity={0.7}
     >
       <OptimizedImage source={{ uri: look.imageToUse }} style={styles.trendingImage} />
       <Text style={styles.trendingTitle} numberOfLines={2}>{look.title}</Text>
       {look.celebrity && (
         <Text style={styles.trendingSubtitle} numberOfLines={1}>{look.celebrity}</Text>
       )}
-    </AnimatedPressable>
+    </TouchableOpacity>
   ), []);
 
   const handleExplorePress = useCallback((categoryId) => {
