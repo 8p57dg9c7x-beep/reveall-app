@@ -35,11 +35,13 @@ const CATEGORIES = [
 
 export default function BeautyScreen() {
   const navigation = useNavigation();
+  const { personalization } = useAddilets();
   const [selectedCategory, setSelectedCategory] = useState('natural');
   const [looks, setLooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const makeupRecommendations = personalization?.recommendations?.makeup || [];
   const flatListRef = React.useRef(null);
   const categoryScrollRef = React.useRef(null);
 
