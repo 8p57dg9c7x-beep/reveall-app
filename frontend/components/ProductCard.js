@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, Linking, Alert, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
-import AnimatedPressable from './AnimatedPressable';
 import { COLORS } from '../constants/theme';
 import { trackProductClick } from '../services/analytics';
 
