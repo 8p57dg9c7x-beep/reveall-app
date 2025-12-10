@@ -199,29 +199,14 @@ export default function StyleDiscovery() {
   }, []);
 
   const renderCategoryButton = useCallback((category) => (
-    <AnimatedPressable
+    <GradientChip
       key={category.id}
-      style={[
-        styles.categoryButton,
-        selectedCategory === category.id && styles.categoryButtonActive,
-      ]}
+      label={category.name}
+      icon={category.icon}
+      active={selectedCategory === category.id}
       onPress={() => handleCategorySelect(category.id)}
-      scaleValue={0.95}
-    >
-      <MaterialCommunityIcons
-        name={category.icon}
-        size={20}
-        color={selectedCategory === category.id ? COLORS.textPrimary : COLORS.textSecondary}
-      />
-      <Text
-        style={[
-          styles.categoryText,
-          selectedCategory === category.id && styles.categoryTextActive,
-        ]}
-      >
-        {category.name}
-      </Text>
-    </AnimatedPressable>
+      style={{ marginRight: 12 }}
+    />
   ), [selectedCategory, handleCategorySelect]);
 
   const renderOutfitRow = useCallback(({ item, index }) => {
