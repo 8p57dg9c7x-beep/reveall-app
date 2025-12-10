@@ -333,10 +333,10 @@ The complete redesign is finished and tested! All screens now match the futurist
 **Accessibility**: High contrast maintained  
 
 **Test URLs**:
-- Home: https://bugfix-champs.preview.emergentagent.com/
-- Scan: https://bugfix-champs.preview.emergentagent.com/scan
-- Identify: https://bugfix-champs.preview.emergentagent.com/identify
-- Watchlist: https://bugfix-champs.preview.emergentagent.com/watchlist
+- Home: https://trendsetter-revamp.preview.emergentagent.com/
+- Scan: https://trendsetter-revamp.preview.emergentagent.com/scan
+- Identify: https://trendsetter-revamp.preview.emergentagent.com/identify
+- Watchlist: https://trendsetter-revamp.preview.emergentagent.com/watchlist
 
 ---
 

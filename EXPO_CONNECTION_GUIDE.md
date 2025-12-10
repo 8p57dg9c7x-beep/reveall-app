@@ -14,7 +14,7 @@
 ### Method 2: Web Preview URL
 Visit this URL on your phone's browser, then click "Open in Expo Go":
 ```
-https://bugfix-champs.preview.emergentagent.com
+https://trendsetter-revamp.preview.emergentagent.com
 ```
 
 ### Method 3: Development Server
