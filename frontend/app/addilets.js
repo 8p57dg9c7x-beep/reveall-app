@@ -48,12 +48,12 @@ export default function AddiletsScreen() {
           <MaterialCommunityIcons name="star-four-points" size={32} color={COLORS.primary} />
           <Text style={styles.headerTitle}>Addilets</Text>
         </View>
-        <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
+        <TouchableOpacity onPress={refreshPersonalization} style={styles.refreshButton}>
           <MaterialCommunityIcons 
             name="refresh" 
             size={24} 
             color={COLORS.textPrimary} 
-            style={refreshing && styles.spinning}
+            style={loading && styles.spinning}
           />
         </TouchableOpacity>
       </View>
