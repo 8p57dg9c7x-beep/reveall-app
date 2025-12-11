@@ -8,7 +8,7 @@ const aiJobSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['upload', 'stylist', 'wardrobe', 'bodyscan'],
+    enum: ['upload', 'stylist', 'wardrobe', 'bodyscan', 'body-scan', 'general'],
     required: true
   },
   status: {
@@ -26,21 +26,9 @@ const aiJobSchema = new mongoose.Schema({
   },
   error: {
     type: String
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
   }
-});
-
-// Update timestamp on save
-aiJobSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
+}, {
+  timestamps: true // Automatically manages createdAt and updatedAt
 });
 
 module.exports = mongoose.model('AIJob', aiJobSchema);
