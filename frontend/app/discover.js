@@ -92,7 +92,8 @@ export default function DiscoverScreen() {
       subtitle: 'Identify any song',
       icon: 'music-circle', 
       color: '#4ECDC4',
-      route: '/musicscan'
+      route: '/musicscan',
+      params: { returnPath: '/discover' }
     },
     { 
       id: 'movies', 
