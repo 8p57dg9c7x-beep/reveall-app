@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
 
-// Bundle Version: 3.0.0 - Navigation Fix: Only 5 bottom tabs
+// Bundle Version: 4.0.0 - REVEAL Rebrand + New Navigation
 export default function RootLayout() {
   return (
     <FavoritesProvider>
@@ -30,13 +30,15 @@ export default function RootLayout() {
           tabBarActiveTintColor: COLORS.tabBarActive,
           tabBarInactiveTintColor: COLORS.tabBarInactive,
           tabBarLabelStyle: {
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: '600',
             marginTop: -4,
           },
         }}
       >
-        {/* ===== VISIBLE TABS (Only 5) ===== */}
+        {/* ===== NEW REVEAL TABS (5) ===== */}
+        
+        {/* 1. Home - Personalized feed, Addilets, Recommendations */}
         <Tabs.Screen
           name="index"
           options={{
@@ -46,6 +48,8 @@ export default function RootLayout() {
             ),
           }}
         />
+        
+        {/* 2. Discover - Movies, Music, MusicScan */}
         <Tabs.Screen
           name="discover"
           options={{
@@ -55,15 +59,19 @@ export default function RootLayout() {
             ),
           }}
         />
+        
+        {/* 3. Style Lab - All AI Style Features */}
         <Tabs.Screen
-          name="style"
+          name="stylelab"
           options={{
-            title: 'Style',
+            title: 'Style Lab',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="hanger" size={26} color={color} />
+              <MaterialCommunityIcons name="flask" size={26} color={color} />
             ),
           }}
         />
+        
+        {/* 4. Beauty Hub - Makeup, Dupes, Celebrity Looks */}
         <Tabs.Screen
           name="beauty"
           options={{
@@ -73,77 +81,39 @@ export default function RootLayout() {
             ),
           }}
         />
+        
+        {/* 5. Profile - Favorites, Wardrobe, Settings */}
         <Tabs.Screen
-          name="favorites"
+          name="profile"
           options={{
-            title: 'Favorites',
+            title: 'Profile',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="heart" size={26} color={color} />
+              <MaterialCommunityIcons name="account" size={26} color={color} />
             ),
           }}
         />
 
-        {/* ===== HIDDEN STACK SCREENS - AI Tools ===== */}
-        <Tabs.Screen
-          name="addilets"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="aistylist"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="aiwardrobe"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="bodyscanner"
-          options={{ href: null }}
-        />
+        {/* ===== HIDDEN STACK SCREENS - Style Lab Features ===== */}
+        <Tabs.Screen name="aistylist" options={{ href: null }} />
+        <Tabs.Screen name="aiwardrobe" options={{ href: null }} />
+        <Tabs.Screen name="bodyscanner" options={{ href: null }} />
+        <Tabs.Screen name="addilets" options={{ href: null }} />
+        <Tabs.Screen name="style" options={{ href: null }} />
 
-        {/* ===== HIDDEN STACK SCREENS - Detail/Result Pages ===== */}
-        <Tabs.Screen
-          name="result"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="outfitdetail"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="beautydetail"
-          options={{ href: null }}
-        />
+        {/* ===== HIDDEN STACK SCREENS - Detail Pages ===== */}
+        <Tabs.Screen name="result" options={{ href: null }} />
+        <Tabs.Screen name="outfitdetail" options={{ href: null }} />
+        <Tabs.Screen name="beautydetail" options={{ href: null }} />
 
-        {/* ===== HIDDEN STACK SCREENS - Other Pages ===== */}
-        <Tabs.Screen
-          name="watchlist"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="analytics"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="comingsoon"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="trendingsongs"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="saved-outfits"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="saved-beauty"
-          options={{ href: null }}
-        />
-        <Tabs.Screen
-          name="universal-search"
-          options={{ href: null }}
-        />
+        {/* ===== HIDDEN STACK SCREENS - Other ===== */}
+        <Tabs.Screen name="favorites" options={{ href: null }} />
+        <Tabs.Screen name="watchlist" options={{ href: null }} />
+        <Tabs.Screen name="analytics" options={{ href: null }} />
+        <Tabs.Screen name="comingsoon" options={{ href: null }} />
+        <Tabs.Screen name="trendingsongs" options={{ href: null }} />
+        <Tabs.Screen name="saved-outfits" options={{ href: null }} />
+        <Tabs.Screen name="saved-beauty" options={{ href: null }} />
+        <Tabs.Screen name="universal-search" options={{ href: null }} />
       </Tabs>
       </GestureHandlerRootView>
       </AddiletsProvider>
