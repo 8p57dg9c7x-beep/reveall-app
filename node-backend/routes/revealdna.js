@@ -55,12 +55,12 @@ router.post('/generate', optionalAuth, async (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    console.log('✅ Addilets profile generated');
+    console.log('✅ Reveal DNA profile generated');
 
     res.json(profile);
   } catch (error) {
-    console.error('❌ Addilets generation error:', error);
-    res.status(500).json({ error: 'Failed to generate Addilets profile' });
+    console.error('❌ Reveal DNA generation error:', error);
+    res.status(500).json({ error: 'Failed to generate Reveal DNA profile' });
   }
 });
 
