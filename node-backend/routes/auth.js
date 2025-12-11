@@ -1,14 +1,14 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const User = require('../models/User');
 const router = express.Router();
-
-// In-memory user store (for local dev)
-const users = new Map();
 
 /**
  * POST /api/auth/register
  * Register a new user
+ * Request: { "email": "", "password": "", "name": "" }
+ * Response: { "user": { "id": "", "email": "" }, "accessToken": "", "refreshToken": "" }
  */
 router.post('/register', async (req, res) => {
   try {
@@ -18,41 +18,44 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    if (users.has(email)) {
+    // Check if user exists in MongoDB
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
       return res.status(409).json({ error: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = {
-      id: Date.now().toString(),
-      email,
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Create user in MongoDB
+    const user = new User({
+      email: email.toLowerCase(),
+      passwordHash,
       name: name || email.split('@')[0],
-      password: hashedPassword,
-      createdAt: new Date().toISOString()
-    };
+      createdAt: new Date()
+    });
+    await user.save();
 
-    users.set(email, user);
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
+    // Generate tokens
+    const accessToken = jwt.sign(
+      { userId: user._id.toString(), email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     const refreshToken = jwt.sign(
-      { userId: user.id, email: user.email, type: 'refresh' },
+      { userId: user._id.toString(), email: user.email, type: 'refresh' },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 
     res.status(201).json({
-      token,
-      refreshToken,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
+        id: user._id.toString(),
+        email: user.email
+      },
+      accessToken,
+      refreshToken
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -63,6 +66,8 @@ router.post('/register', async (req, res) => {
 /**
  * POST /api/auth/login
  * Login existing user
+ * Request: { "email": "", "password": "" }
+ * Response: { "user": { "id": "", "email": "" }, "accessToken": "", "refreshToken": "" }
  */
 router.post('/login', async (req, res) => {
   try {
@@ -72,36 +77,38 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const user = users.get(email);
+    // Find user in MongoDB
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    // Verify password
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
+    // Generate tokens
+    const accessToken = jwt.sign(
+      { userId: user._id.toString(), email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     const refreshToken = jwt.sign(
-      { userId: user.id, email: user.email, type: 'refresh' },
+      { userId: user._id.toString(), email: user.email, type: 'refresh' },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 
     res.json({
-      token,
-      refreshToken,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
+        id: user._id.toString(),
+        email: user.email
+      },
+      accessToken,
+      refreshToken
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -112,8 +119,10 @@ router.post('/login', async (req, res) => {
 /**
  * POST /api/auth/refresh
  * Refresh JWT token
+ * Request: { "refreshToken": "" }
+ * Response: { "accessToken": "" }
  */
-router.post('/refresh', (req, res) => {
+router.post('/refresh', async (req, res) => {
   try {
     const { refreshToken } = req.body;
 
@@ -128,15 +137,14 @@ router.post('/refresh', (req, res) => {
       return res.status(401).json({ error: 'Invalid refresh token' });
     }
     
-    const newToken = jwt.sign(
+    // Generate new access token
+    const accessToken = jwt.sign(
       { userId: decoded.userId, email: decoded.email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    res.json({
-      token: newToken
-    });
+    res.json({ accessToken });
   } catch (error) {
     console.error('Refresh error:', error);
     res.status(401).json({ error: 'Invalid or expired refresh token' });
