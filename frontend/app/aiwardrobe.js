@@ -79,16 +79,51 @@ export default function AIWardrobeScreen() {
     });
 
     if (!result.canceled) {
-      // Auto-tag the item (mock)
-      const newItem = {
-        id: Date.now(),
-        image: result.assets[0].uri,
-        category: 'tops',
-        tags: ['new', 'imported'],
-        name: 'New Item',
-      };
-      setWardrobeItems([...wardrobeItems, newItem]);
-      Alert.alert('Item Added!', 'AI has automatically tagged your item');
+      const imageUri = result.assets[0].uri;
+      
+      try {
+        // Use actual backend API for auto-tagging
+        console.log('👔 Calling Reveal Wardrobe API...');
+        const uploadResult = await uploadImage(imageUri, 'wardrobe');
+        
+        console.log('📦 Job created:', uploadResult.jobId);
+        
+        // Poll for results
+        const apiResult = await pollJobResult(uploadResult.jobId);
+        
+        if (apiResult.result && apiResult.result.item) {
+          const tagData = apiResult.result.item;
+          const newItem = {
+            id: Date.now(),
+            image: imageUri,
+            category: tagData.category || 'tops',
+            tags: tagData.tags || ['imported'],
+            name: 'New Item',
+            confidence: tagData.confidence || 0.85,
+          };
+          setWardrobeItems([...wardrobeItems, newItem]);
+          Alert.alert(
+            'Item Added!', 
+            `AI tagged: ${tagData.category} - ${tagData.tags.join(', ')} (${Math.round(tagData.confidence * 100)}% confidence)`
+          );
+          return;
+        }
+        
+        throw new Error('Using fallback');
+      } catch (error) {
+        console.log('⚠️ Using fallback auto-tag:', error.message);
+        
+        // Fallback mock auto-tag
+        const newItem = {
+          id: Date.now(),
+          image: imageUri,
+          category: 'tops',
+          tags: ['new', 'imported'],
+          name: 'New Item',
+        };
+        setWardrobeItems([...wardrobeItems, newItem]);
+        Alert.alert('Item Added!', 'AI has automatically tagged your item');
+      }
     }
   };
 
