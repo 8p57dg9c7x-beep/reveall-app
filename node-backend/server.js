@@ -29,7 +29,7 @@ if (!fs.existsSync(uploadDir)) {
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
-    service: 'CINESCAN AI Engine',
+    service: 'Reveal AI Engine',
     version: '1.0.0',
     mode: 'local-development',
     timestamp: new Date().toISOString()
