@@ -100,6 +100,10 @@ export default function RootLayout() {
         <Tabs.Screen name="addilets" options={{ href: null }} />
         <Tabs.Screen name="style" options={{ href: null }} />
 
+        {/* ===== HIDDEN STACK SCREENS - Discover Features ===== */}
+        <Tabs.Screen name="musicscan" options={{ href: null }} />
+        <Tabs.Screen name="trendingsongs" options={{ href: null }} />
+
         {/* ===== HIDDEN STACK SCREENS - Detail Pages ===== */}
         <Tabs.Screen name="result" options={{ href: null }} />
         <Tabs.Screen name="outfitdetail" options={{ href: null }} />
