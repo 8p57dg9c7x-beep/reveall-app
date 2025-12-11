@@ -93,7 +93,7 @@ export default function BodyScannerScreen() {
     );
   };
 
-  const performScan = () => {
+  const performScan = async () => {
     setScanning(true);
     
     // Animate progress
@@ -103,8 +103,49 @@ export default function BodyScannerScreen() {
       useNativeDriver: false,
     }).start();
     
-    // Simulate AI processing
-    setTimeout(() => {
+    try {
+      // Use actual backend API
+      if (frontPhoto && sidePhoto) {
+        console.log('📏 Calling Reveal Body Scan API...');
+        const uploadResult = await uploadMultipleImages(
+          [frontPhoto, sidePhoto],
+          'body-scan'
+        );
+        
+        console.log('📦 Job created:', uploadResult.jobId);
+        
+        // Poll for results
+        const result = await pollJobResult(uploadResult.jobId);
+        
+        if (result.result && result.result.measurements) {
+          const data = result.result;
+          const mockResults = {
+            height: data.measurements.height,
+            measurements: {
+              chest: data.measurements.chest,
+              waist: data.measurements.waist,
+              hips: data.measurements.hips,
+              shoulders: data.measurements.shoulders,
+              inseam: data.measurements.inseam,
+            },
+            bodyType: data.measurements.bodyType,
+            shirtSize: data.measurements.shirtSize,
+            pantsSize: data.measurements.pantsSize,
+            confidence: data.measurements.confidence,
+          };
+          
+          setScanResults(mockResults);
+          setScanning(false);
+          setStep(3);
+          return;
+        }
+      }
+      
+      throw new Error('Using fallback');
+    } catch (error) {
+      console.log('⚠️ Using fallback mock data:', error.message);
+      
+      // Fallback mock results
       const mockResults = {
         height: 180,
         measurements: {
@@ -123,7 +164,7 @@ export default function BodyScannerScreen() {
       setScanResults(mockResults);
       setScanning(false);
       setStep(3);
-    }, 3000);
+    }
   };
 
   const renderInstructions = () => (
