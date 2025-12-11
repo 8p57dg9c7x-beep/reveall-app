@@ -4,7 +4,7 @@
 
 ### Option 1: Web Preview (Instant)
 Access the app directly in your browser:
-- **URL**: https://trendsetter-revamp.preview.emergentagent.com
+- **URL**: https://fashion-ai-48.preview.emergentagent.com
 - Works on desktop and mobile browsers
 - No installation required
 
@@ -174,10 +174,10 @@ tail -100 /var/log/supervisor/expo.out.log | grep -A 10 "Tunnel ready"
 
 ## 🔗 Useful Links
 
-- **Web Preview**: https://trendsetter-revamp.preview.emergentagent.com
-- **Home Screen**: https://trendsetter-revamp.preview.emergentagent.com/
-- **Identify Screen**: https://trendsetter-revamp.preview.emergentagent.com/identify
-- **Watchlist Screen**: https://trendsetter-revamp.preview.emergentagent.com/watchlist
+- **Web Preview**: https://fashion-ai-48.preview.emergentagent.com
+- **Home Screen**: https://fashion-ai-48.preview.emergentagent.com/
+- **Identify Screen**: https://fashion-ai-48.preview.emergentagent.com/identify
+- **Watchlist Screen**: https://fashion-ai-48.preview.emergentagent.com/watchlist
 
 ## 📝 Testing Notes
 
