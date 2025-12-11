@@ -8,7 +8,7 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const uploadRoutes = require('./routes/upload');
 const jobRoutes = require('./routes/jobs');
-const revealDNARoutes = require('./routes/revealdna');
+const addiletsRoutes = require('./routes/addilets');
 const bodyScanRoutes = require('./routes/bodyscan');
 
 const app = express();
