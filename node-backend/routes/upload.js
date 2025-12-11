@@ -44,7 +44,7 @@ const upload = multer({
  * - type: string (optional) - 'stylist', 'wardrobe', 'body-scan'
  * - metadata: JSON string (optional)
  */
-router.post('/image', upload.single('image'), async (req, res) => {
+router.post('/image', optionalAuth, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
