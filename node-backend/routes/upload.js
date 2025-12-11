@@ -2,103 +2,109 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const router = express.Router();
+const AIJob = require('../models/AIJob');
 const { createJob } = require('../services/jobQueue');
-const { optionalAuth } = require('../middleware/auth');
+const router = express.Router();
 
-// Configure multer for file uploads
+// Configure multer for local storage (mock S3)
+const uploadDir = process.env.UPLOAD_DIR || '/app/node-backend/uploads';
+
+// Ensure upload directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = process.env.UPLOAD_DIR || '/tmp/uploads';
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
 const upload = multer({
   storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|webp/;
+    const allowedTypes = /jpeg|jpg|png|webp|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
+    if (extname && mimetype) {
       return cb(null, true);
     }
-    cb(new Error('Only image files are allowed (jpeg, jpg, png, webp)'));
+    cb(new Error('Only image files are allowed'));
   }
 });
 
 /**
  * POST /api/uploads/image
- * Upload image and create AI processing job
- * 
- * Body (multipart/form-data):
- * - image: File (required)
- * - type: string (optional) - 'stylist', 'wardrobe', 'body-scan'
- * - metadata: JSON string (optional)
+ * Upload image, store in S3 (mock: local), create AIJob, push to Bull queue
+ * Returns: { "jobId": "", "status": "queued" }
  */
-router.post('/image', optionalAuth, upload.single('image'), async (req, res) => {
+router.post('/image', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    const { type = 'general', metadata } = req.body;
+    // Get job type from request (default: 'style')
+    const jobType = req.body.type || 'style';
     
-    // Parse metadata if provided
-    let parsedMetadata = {};
-    if (metadata) {
-      try {
-        parsedMetadata = JSON.parse(metadata);
-      } catch (e) {
-        console.warn('Invalid metadata JSON, using empty object');
-      }
-    }
+    // Validate job type matches schema
+    const validTypes = ['style', 'wardrobe', 'body-scan'];
+    const normalizedType = validTypes.includes(jobType) ? jobType : 'style';
+
+    // Mock S3 URL (local file path for now)
+    const inputImage = `file://${req.file.path}`;
+
+    // Create AIJob in MongoDB
+    const aiJob = new AIJob({
+      userId: req.userId || null, // From auth middleware if present
+      type: normalizedType,
+      inputImage: inputImage,
+      status: 'queued',
+      output: {},
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    await aiJob.save();
 
     // Create job in queue
-    const job = await createJob({
-      type,
+    const queueJob = await createJob({
+      mongoJobId: aiJob._id.toString(),
+      type: normalizedType,
+      inputImage: inputImage,
       imagePath: req.file.path,
       filename: req.file.filename,
       originalName: req.file.originalname,
       size: req.file.size,
       mimetype: req.file.mimetype,
-      metadata: parsedMetadata,
       uploadedAt: new Date().toISOString()
     });
 
-    console.log(`✅ Image uploaded: ${req.file.filename}`);
-    console.log(`📦 Job created: ${job.id}`);
+    // Link queue job ID to MongoDB job
+    aiJob.queueJobId = queueJob.id;
+    await aiJob.save();
+
+    console.log(`📤 Image uploaded: ${req.file.filename}`);
+    console.log(`📦 AIJob created: ${aiJob._id}`);
+    console.log(`🔄 Queue job: ${queueJob.id}`);
 
     res.status(201).json({
-      message: 'Image uploaded successfully',
-      jobId: job.id,
-      filename: req.file.filename,
-      status: 'queued',
-      estimatedProcessingTime: '2-5 seconds'
+      jobId: aiJob._id.toString(),
+      status: 'queued'
     });
   } catch (error) {
-    console.error('❌ Upload error:', error);
-    
-    // Clean up file if upload failed
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-    
-    res.status(500).json({ error: 'Upload failed: ' + error.message });
+    console.error('Upload error:', error);
+    res.status(500).json({ error: error.message || 'Upload failed' });
   }
 });
 
 /**
- * POST /api/uploads/images
- * Upload multiple images (for body scanner: front + side)
+ * POST /api/uploads/images (multiple)
+ * For body-scan which requires front + side photos
  */
 router.post('/images', upload.array('images', 2), async (req, res) => {
   try {
@@ -106,54 +112,47 @@ router.post('/images', upload.array('images', 2), async (req, res) => {
       return res.status(400).json({ error: 'No image files provided' });
     }
 
-    const { type = 'body-scan', metadata } = req.body;
-    
-    let parsedMetadata = {};
-    if (metadata) {
-      try {
-        parsedMetadata = JSON.parse(metadata);
-      } catch (e) {
-        console.warn('Invalid metadata JSON');
-      }
-    }
+    const jobType = req.body.type || 'body-scan';
+    const inputImages = req.files.map(f => `file://${f.path}`);
 
-    // Create job with multiple images
-    const job = await createJob({
-      type,
-      images: req.files.map(file => ({
-        path: file.path,
-        filename: file.filename,
-        originalName: file.originalname,
-        size: file.size,
-        mimetype: file.mimetype
+    // Create AIJob in MongoDB
+    const aiJob = new AIJob({
+      userId: req.userId || null,
+      type: 'body-scan',
+      inputImage: inputImages.join(','), // Store multiple as comma-separated
+      status: 'queued',
+      output: {},
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    await aiJob.save();
+
+    // Create job in queue
+    const queueJob = await createJob({
+      mongoJobId: aiJob._id.toString(),
+      type: 'body-scan',
+      inputImages: inputImages,
+      files: req.files.map(f => ({
+        path: f.path,
+        filename: f.filename,
+        originalName: f.originalname
       })),
-      metadata: parsedMetadata,
       uploadedAt: new Date().toISOString()
     });
 
-    console.log(`✅ ${req.files.length} images uploaded`);
-    console.log(`📦 Job created: ${job.id}`);
+    aiJob.queueJobId = queueJob.id;
+    await aiJob.save();
+
+    console.log(`📤 ${req.files.length} images uploaded for body-scan`);
+    console.log(`📦 AIJob created: ${aiJob._id}`);
 
     res.status(201).json({
-      message: `${req.files.length} images uploaded successfully`,
-      jobId: job.id,
-      fileCount: req.files.length,
-      status: 'queued',
-      estimatedProcessingTime: '3-7 seconds'
+      jobId: aiJob._id.toString(),
+      status: 'queued'
     });
   } catch (error) {
-    console.error('❌ Multi-upload error:', error);
-    
-    // Clean up files if upload failed
-    if (req.files) {
-      req.files.forEach(file => {
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      });
-    }
-    
-    res.status(500).json({ error: 'Upload failed: ' + error.message });
+    console.error('Multi-upload error:', error);
+    res.status(500).json({ error: error.message || 'Upload failed' });
   }
 });
 
