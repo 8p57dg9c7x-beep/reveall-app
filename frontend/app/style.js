@@ -407,8 +407,15 @@ export default function StyleDiscovery() {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
           }
           removeClippedSubviews={true}
-          maxToRenderPerBatch={6}
+          maxToRenderPerBatch={5}
           windowSize={5}
+          initialNumToRender={5}
+          updateCellsBatchingPeriod={50}
+          getItemLayout={(data, index) => ({
+            length: 260,
+            offset: 260 * Math.floor(index / 2),
+            index,
+          })}
         />
       )}
     </LinearGradient>
