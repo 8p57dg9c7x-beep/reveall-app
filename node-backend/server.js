@@ -46,7 +46,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/jobs', jobRoutes);
-app.use('/api/reveal-dna', revealDNARoutes);
+app.use('/api/addilets', addiletsRoutes);
 app.use('/api/body-scan', bodyScanRoutes);
 
 // Error handling middleware
