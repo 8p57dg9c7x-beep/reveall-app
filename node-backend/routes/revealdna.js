@@ -65,10 +65,10 @@ router.post('/generate', optionalAuth, async (req, res) => {
 });
 
 /**
- * GET /api/addilets/profile
- * Get user's Addilets profile
+ * GET /api/reveal-dna/profile
+ * Get user's Reveal DNA profile
  * 
- * Returns: AddiletsProfile
+ * Returns: RevealDNAProfile
  */
 router.get('/profile', optionalAuth, (req, res) => {
   try {
