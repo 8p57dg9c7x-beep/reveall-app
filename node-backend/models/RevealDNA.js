@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const addiletsSchema = new mongoose.Schema({
+const revealDNASchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -26,9 +26,9 @@ const addiletsSchema = new mongoose.Schema({
 });
 
 // Update timestamp on save
-addiletsSchema.pre('save', function(next) {
+revealDNASchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
 
-module.exports = mongoose.model('Addilets', addiletsSchema);
+module.exports = mongoose.model('RevealDNA', revealDNASchema);
