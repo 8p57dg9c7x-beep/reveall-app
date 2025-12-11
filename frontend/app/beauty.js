@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   FlatList,
   TouchableOpacity,
-  Platform,
   RefreshControl,
   Image,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -18,8 +17,6 @@ import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import BeautyCard from '../components/BeautyCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
-import GradientChip from '../components/GradientChip';
-import FadeInView from '../components/FadeInView';
 import { trackCategoryView } from '../services/analytics';
 import { asCardItem } from '../utils/helpers';
 
@@ -30,8 +27,11 @@ const CATEGORIES = [
   { id: 'smokey', name: 'Smokey Eye', icon: 'eye' },
   { id: 'bold', name: 'Bold', icon: 'lightning-bolt' },
   { id: 'everyday', name: 'Everyday', icon: 'calendar-today' },
-  { id: 'festival', name: 'Festival', icon: 'party-popper' },
 ];
+
+const HEADER_MAX_HEIGHT = 140;
+const HEADER_MIN_HEIGHT = 60;
+const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 export default function BeautyScreen() {
   const navigation = useNavigation();
@@ -42,8 +42,35 @@ export default function BeautyScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const makeupRecommendations = personalization?.recommendations?.makeup || [];
-  const flatListRef = React.useRef(null);
-  const categoryScrollRef = React.useRef(null);
+  const flatListRef = useRef(null);
+  
+  // Animated value for scroll
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Header animations
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const categoryOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const categoryTranslateY = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, -40],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.85],
+    extrapolate: 'clamp',
+  });
 
   // Load looks with cleanup
   useEffect(() => {
@@ -58,7 +85,6 @@ export default function BeautyScreen() {
         const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
         const data = await response.json();
         if (isMounted) {
-          // 🔥 NORMALIZE all beauty looks before setting state
           const normalizedLooks = (data.looks || []).map(asCardItem);
           setLooks(normalizedLooks);
         }
@@ -74,10 +100,7 @@ export default function BeautyScreen() {
     };
 
     fetchLooks();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [selectedCategory]);
 
   // Fix back button freeze
@@ -86,227 +109,181 @@ export default function BeautyScreen() {
       setRefreshing(true);
       setTimeout(() => setRefreshing(false), 50);
     });
-
     return unsubscribe;
   }, [navigation]);
 
-  const loadLooks = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    // Track category view
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
     trackCategoryView(selectedCategory, 'beauty');
     
     try {
       const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
       const data = await response.json();
-      // 🔥 NORMALIZE all beauty looks
       const normalizedLooks = (data.looks || []).map(asCardItem);
       setLooks(normalizedLooks);
     } catch (error) {
-      console.error('Error loading beauty looks:', error);
-      setError('Unable to load beauty looks. Please try again.');
-      setLooks([]);
+      console.error('Error refreshing looks:', error);
     } finally {
-      setLoading(false);
+      setRefreshing(false);
     }
   }, [selectedCategory]);
 
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadLooks();
-    setRefreshing(false);
-  }, [loadLooks]);
-
   const handleCategoryPress = useCallback((categoryId) => {
-    if (categoryId === selectedCategory) return;
     setSelectedCategory(categoryId);
-    // Don't scroll - let user maintain their position
-  }, [selectedCategory]);
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, []);
 
-  const handleLookPress = useCallback((item) => {
+  const handleLookPress = useCallback((look) => {
     router.push({
       pathname: '/beautydetail',
-      params: { 
-        lookData: JSON.stringify(item),
-        returnPath: '/beauty'
-      }
+      params: { lookData: JSON.stringify(look) }
     });
   }, []);
 
   const renderCategoryChip = useCallback((item) => (
-    <GradientChip
+    <TouchableOpacity
       key={item.id}
-      label={item.name}
-      icon={item.icon}
-      active={selectedCategory === item.id}
+      style={[
+        styles.categoryChip,
+        selectedCategory === item.id && styles.categoryChipActive
+      ]}
       onPress={() => handleCategoryPress(item.id)}
-      style={{ marginRight: 12 }}
-    />
+      activeOpacity={0.7}
+    >
+      <MaterialCommunityIcons 
+        name={item.icon} 
+        size={16} 
+        color={selectedCategory === item.id ? '#FFFFFF' : COLORS.textSecondary} 
+      />
+      <Text style={[
+        styles.categoryChipText,
+        selectedCategory === item.id && styles.categoryChipTextActive
+      ]}>
+        {item.name}
+      </Text>
+    </TouchableOpacity>
   ), [selectedCategory, handleCategoryPress]);
 
-  const renderBeautyRow = useCallback(({ item, index }) => {
-    const isLeft = index % 2 === 0;
-    const nextItem = index < looks.length - 1 ? looks[index + 1] : null;
+  const renderBeautyItem = useCallback(({ item }) => (
+    <BeautyCard
+      look={item}
+      onPress={() => handleLookPress(item)}
+      style={styles.beautyCard}
+    />
+  ), [handleLookPress]);
 
-    if (!isLeft) return null;
-
-    return (
-      <View style={styles.row}>
-        <BeautyCard
-          item={item}
-          onPress={() => handleLookPress(item)}
-          isLeft={true}
-        />
-        {nextItem && (
-          <BeautyCard
-            item={nextItem}
-            onPress={() => handleLookPress(nextItem)}
-            isLeft={false}
-          />
-        )}
-      </View>
-    );
-  }, [looks, handleLookPress]);
-
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <MaterialCommunityIcons name="lipstick" size={64} color={COLORS.textSecondary} />
-      <Text style={styles.emptyTitle}>No Beauty Looks Found</Text>
-      <Text style={styles.emptySubtitle}>
-        We're working on adding more {selectedCategory} looks
-      </Text>
-      <TouchableOpacity style={styles.retryButton} onPress={loadLooks}>
-        <Text style={styles.retryText}>Try Again</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderErrorState = () => (
-    <View style={styles.errorState}>
-      <MaterialCommunityIcons name="alert-circle-outline" size={64} color={COLORS.error || '#ff4444'} />
-      <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
-      <Text style={styles.errorSubtitle}>{error}</Text>
-      <TouchableOpacity style={styles.retryButton} onPress={loadLooks}>
-        <MaterialCommunityIcons name="refresh" size={20} color="#fff" />
-        <Text style={styles.retryText}>Retry</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const ListHeaderComponent = () => (
-    <View>
+  const ListHeaderComponent = useCallback(() => (
+    <View style={styles.listHeader}>
       {/* Addilets Makeup Recommendations */}
       {makeupRecommendations.length > 0 && (
         <View style={styles.addiletsSection}>
           <View style={styles.addiletsSectionHeader}>
             <View style={styles.addiletsTitleRow}>
               <MaterialCommunityIcons name="star-four-points" size={18} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Recommended For You</Text>
+              <Text style={styles.sectionTitle}>For You</Text>
             </View>
             <TouchableOpacity onPress={() => router.push('/addilets')}>
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.addiletsSubtitle}>Based on your beauty preferences</Text>
           <FlatList
             horizontal
             data={makeupRecommendations}
             keyExtractor={(item) => item.id?.toString()}
             renderItem={({ item: makeup }) => (
-              <TouchableOpacity
-                style={styles.addiletsCard}
-                activeOpacity={0.8}
-              >
+              <TouchableOpacity style={styles.addiletsCard} activeOpacity={0.8}>
                 <Image source={{ uri: makeup.image }} style={styles.addiletsImage} />
-                <LinearGradient
-                  colors={['transparent', 'rgba(0,0,0,0.9)']}
-                  style={styles.addiletsOverlay}
-                >
+                <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} style={styles.addiletsOverlay}>
                   <Text style={styles.addiletsTitle}>{makeup.title}</Text>
-                  <Text style={styles.addiletsVibe}>{makeup.vibe}</Text>
                   <View style={styles.addiletsMatch}>
                     <MaterialCommunityIcons name="heart" size={12} color="#FF6EC7" />
-                    <Text style={styles.addiletsMatchText}>{makeup.match}% Match</Text>
+                    <Text style={styles.addiletsMatchText}>{makeup.match}%</Text>
                   </View>
                 </LinearGradient>
               </TouchableOpacity>
             )}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.addiletsScroll}
-            initialNumToRender={3}
-            maxToRenderPerBatch={3}
-            windowSize={3}
-            removeClippedSubviews={true}
-            getItemLayout={(data, index) => ({
-              length: 172,
-              offset: 172 * index,
-              index,
-            })}
           />
         </View>
       )}
+
+      {/* Section Title */}
+      <View style={styles.browseSectionHeader}>
+        <Text style={styles.browseTitle}>
+          {CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Browse'} Looks
+        </Text>
+        <Text style={styles.browseCount}>{looks.length} looks</Text>
+      </View>
     </View>
-  );
+  ), [makeupRecommendations, selectedCategory, looks.length]);
+
+  const renderEmptyState = useCallback(() => (
+    <View style={styles.emptyState}>
+      <MaterialCommunityIcons name="lipstick" size={64} color={COLORS.textSecondary} />
+      <Text style={styles.emptyTitle}>No looks found</Text>
+      <Text style={styles.emptySubtitle}>Try a different category</Text>
+    </View>
+  ), []);
 
   return (
-    <LinearGradient
-      colors={GRADIENTS.background}
-      style={styles.container}
-    >
-      {/* Fixed Header - Outside FlatList */}
-      <View style={styles.fixedHeader}>
-        <FadeInView style={styles.header}>
-          <View>
+    <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+      {/* Animated Collapsible Header */}
+      <Animated.View style={[styles.animatedHeader, { height: headerHeight }]}>
+        {/* Title Row - Always visible */}
+        <View style={styles.titleRow}>
+          <Animated.View style={{ transform: [{ scale: titleScale }] }}>
             <Text style={styles.headerTitle}>Beauty Hub</Text>
-            <Text style={styles.headerSubtitle}>Discover celebrity-inspired makeup</Text>
-          </View>
-          <View style={{ flexDirection: 'row' }}>
+          </Animated.View>
+          <View style={styles.headerActions}>
             <TouchableOpacity 
-              style={styles.searchButton}
+              style={styles.headerButton}
               onPress={() => router.push('/universal-search')}
-              activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
+              <MaterialCommunityIcons name="magnify" size={22} color={COLORS.textPrimary} />
             </TouchableOpacity>
             <TouchableOpacity 
-              style={styles.favoritesButton}
+              style={styles.headerButton}
               onPress={() => router.push('/saved-beauty')}
-              activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+              <MaterialCommunityIcons name="heart" size={22} color={COLORS.primary} />
             </TouchableOpacity>
-          </View>
-        </FadeInView>
-
-        {/* Fixed Category Filter Bar */}
-        <View style={styles.categoriesContainer}>
-          <View style={styles.categoriesWrapper}>
-            {CATEGORIES.map((item) => renderCategoryChip(item))}
           </View>
         </View>
-      </View>
 
-      {/* Scrollable Content */}
-      {loading && looks.length === 0 ? (
-        <ScrollView style={styles.scrollView}>
-          <SkeletonGrid />
-        </ScrollView>
-      ) : error ? (
-        <ScrollView
-          style={styles.scrollView}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
-          }
+        {/* Category Chips - Collapsible */}
+        <Animated.View 
+          style={[
+            styles.categoriesContainer,
+            { 
+              opacity: categoryOpacity,
+              transform: [{ translateY: categoryTranslateY }]
+            }
+          ]}
         >
-          {renderErrorState()}
-        </ScrollView>
+          <FlatList
+            horizontal
+            data={CATEGORIES}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => renderCategoryChip(item)}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesContent}
+          />
+        </Animated.View>
+      </Animated.View>
+
+      {/* Content */}
+      {loading && looks.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <SkeletonGrid />
+        </View>
       ) : (
-        <FlatList
+        <Animated.FlatList
           ref={flatListRef}
           data={looks}
-          renderItem={renderBeautyRow}
+          renderItem={renderBeautyItem}
           keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+          numColumns={2}
           ListHeaderComponent={ListHeaderComponent}
           ListEmptyComponent={renderEmptyState}
           contentContainerStyle={styles.listContent}
@@ -314,16 +291,15 @@ export default function BeautyScreen() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
           }
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          scrollEventThrottle={16}
           removeClippedSubviews={true}
-          maxToRenderPerBatch={5}
+          maxToRenderPerBatch={6}
           windowSize={5}
-          initialNumToRender={5}
-          updateCellsBatchingPeriod={50}
-          getItemLayout={(data, index) => ({
-            length: 260,
-            offset: 260 * Math.floor(index / 2),
-            index,
-          })}
+          initialNumToRender={6}
         />
       )}
     </LinearGradient>
@@ -333,185 +309,107 @@ export default function BeautyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  fixedHeader: {
+  animatedHeader: {
     backgroundColor: COLORS.background,
-    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingHorizontal: 20,
     zIndex: 100,
+    overflow: 'hidden',
   },
-  scrollView: {
-    flex: 1,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 160,
-  },
-  header: {
+  titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 24,
-    paddingBottom: 20,
+    height: 44,
   },
-  searchButton: {
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: COLORS.card,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  favoritesButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: COLORS.card,
   },
   categoriesContainer: {
-    marginBottom: 24,
-  },
-  categoriesWrapper: {
-    flexDirection: 'row',
-    gap: 12,
-    flexWrap: 'wrap',
+    marginTop: 12,
   },
   categoriesContent: {
-    gap: 12,
-    paddingRight: 16,
+    gap: 8,
   },
-  categoryButton: {
+  categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
     backgroundColor: COLORS.card,
-    height: 44,
-    minHeight: 44,
-    maxHeight: 44,
+    gap: 6,
   },
-  categoryButtonActive: {
+  categoryChipActive: {
     backgroundColor: COLORS.primary,
   },
-  categoryText: {
-    fontSize: 15,
+  categoryChipText: {
+    fontSize: 13,
     fontWeight: '600',
     color: COLORS.textSecondary,
   },
-  categoryTextActive: {
-    color: COLORS.textPrimary,
+  categoryChipTextActive: {
+    color: '#FFFFFF',
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
+  loadingContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 32,
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 120,
   },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginTop: 20,
-    marginBottom: 8,
+  listHeader: {
+    paddingTop: 8,
   },
-  emptySubtitle: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  errorState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 32,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  errorSubtitle: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 16,
-  },
-  retryText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  // Addilets Section
   addiletsSection: {
-    paddingHorizontal: 20,
     marginBottom: 24,
-    marginTop: 8,
   },
   addiletsSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   addiletsTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  addiletsSubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginBottom: 16,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   viewAllText: {
-    fontSize: 13,
-    color: COLORS.primary,
+    fontSize: 14,
     fontWeight: '600',
+    color: COLORS.primary,
   },
   addiletsScroll: {
-    paddingRight: 20,
+    gap: 12,
   },
   addiletsCard: {
     width: 140,
-    height: 190,
-    borderRadius: SIZES.borderRadiusCard,
+    height: 180,
+    borderRadius: 12,
     overflow: 'hidden',
     marginRight: 12,
-    backgroundColor: COLORS.card,
   },
   addiletsImage: {
     width: '100%',
@@ -525,15 +423,10 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   addiletsTitle: {
-    color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
+    color: '#FFFFFF',
     marginBottom: 4,
-  },
-  addiletsVibe: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 11,
-    marginBottom: 6,
   },
   addiletsMatch: {
     flexDirection: 'row',
@@ -541,8 +434,43 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   addiletsMatchText: {
-    color: '#FF6EC7',
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
+    color: '#FF6EC7',
+  },
+  browseSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  browseTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  browseCount: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
+  beautyCard: {
+    flex: 1,
+    margin: 6,
+    maxWidth: '48%',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginTop: 4,
   },
 });
