@@ -279,8 +279,31 @@ export default function DiscoverScreen() {
       <FadeInView style={styles.header}>
         <MaterialCommunityIcons name="compass" size={32} color={COLORS.primary} />
         <Text style={styles.headerTitle}>Discover</Text>
-        <Text style={styles.headerSubtitle}>Trending content across movies, music & style</Text>
+        <Text style={styles.headerSubtitle}>Movies, music & cultural content</Text>
       </FadeInView>
+
+      {/* MusicScan Feature Card */}
+      <View style={styles.section}>
+        <TouchableOpacity 
+          style={styles.musicScanCard}
+          onPress={() => router.push('/trendingsongs')}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={['#4ECDC430', '#4ECDC410']}
+            style={styles.musicScanGradient}
+          >
+            <View style={styles.musicScanIcon}>
+              <MaterialCommunityIcons name="music-circle" size={40} color="#4ECDC4" />
+            </View>
+            <View style={styles.musicScanContent}>
+              <Text style={styles.musicScanTitle}>MusicScan</Text>
+              <Text style={styles.musicScanSubtitle}>Identify any song playing around you</Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
 
       {/* Trending Movies */}
       <View style={styles.section}>
