@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -14,31 +15,28 @@ import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 
 // Fixed heights for getItemLayout optimization
-const HERO_HEIGHT = 180;
-const CTA_HEIGHT = 80;
-const QUICK_ACTIONS_HEIGHT = 200;
-const FOR_YOU_HEIGHT = 220;
-const TRENDING_SECTION_HEIGHT = 200;
 const HORIZONTAL_CARD_WIDTH = 140;
-const HORIZONTAL_CARD_HEIGHT = 180;
 
 export default function HomeScreen() {
   const { personalization } = useAddilets();
 
-  // Quick action buttons - memoized to prevent re-renders
+  // Quick action buttons - memoized
   const quickActions = useMemo(() => [
-    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist' },
-    { id: 'ai-wardrobe', label: 'AI Wardrobe', icon: 'hanger', route: '/aiwardrobe' },
-    { id: 'body-scanner', label: 'Body Scanner', icon: 'tape-measure', route: '/bodyscanner' },
-    { id: 'favorites', label: 'Favorites', icon: 'heart', route: '/favorites' },
+    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist', color: '#B14CFF' },
+    { id: 'style-lab', label: 'Style Lab', icon: 'flask', route: '/stylelab', color: '#4ECDC4' },
+    { id: 'body-scanner', label: 'Body Scan', icon: 'human', route: '/bodyscanner', color: '#95E1D3' },
+    { id: 'style-dna', label: 'Style DNA', icon: 'dna', route: '/addilets', color: '#FF6EC7' },
   ], []);
 
-  // Memoized trending data
-  const trendingStyles = useMemo(() => [1, 2, 3, 4, 5], []);
-  const trendingSongs = useMemo(() => [1, 2, 3, 4, 5], []);
-  const trendingMovies = useMemo(() => [1, 2, 3, 4, 5], []);
+  // Trending styles data
+  const trendingStyles = useMemo(() => [
+    { id: 1, title: 'Street Style', image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&q=80' },
+    { id: 2, title: 'Minimalist', image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=300&q=80' },
+    { id: 3, title: 'Casual Chic', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&q=80' },
+    { id: 4, title: 'Athleisure', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&q=80' },
+  ], []);
 
-  // Memoized render functions
+  // Render functions
   const renderQuickAction = useCallback((action) => (
     <TouchableOpacity
       key={action.id}
@@ -47,67 +45,61 @@ export default function HomeScreen() {
       activeOpacity={0.8}
     >
       <LinearGradient
-        colors={GRADIENTS.chip}
+        colors={[`${action.color}30`, `${action.color}10`]}
         style={styles.quickActionGradient}
       >
-        <MaterialCommunityIcons 
-          name={action.icon} 
-          size={28} 
-          color={COLORS.textPrimary} 
-        />
+        <View style={[styles.quickActionIcon, { backgroundColor: `${action.color}40` }]}>
+          <MaterialCommunityIcons name={action.icon} size={24} color={action.color} />
+        </View>
         <Text style={styles.quickActionLabel}>{action.label}</Text>
       </LinearGradient>
     </TouchableOpacity>
   ), []);
 
-  const renderHorizontalItem = useCallback(({ item, icon, route }) => (
+  const renderStyleCard = useCallback(({ item }) => (
     <TouchableOpacity
-      key={item}
-      style={styles.trendingCard}
-      onPress={() => router.push(route)}
+      style={styles.styleCard}
+      onPress={() => router.push('/style')}
       activeOpacity={0.8}
     >
-      <View style={styles.trendingImagePlaceholder}>
-        <MaterialCommunityIcons name={icon} size={32} color={COLORS.textMuted} />
-      </View>
-      <Text style={styles.trendingCardTitle}>{icon === 'hanger' ? 'Style' : icon === 'music-note' ? 'Song' : 'Movie'} {item}</Text>
+      <Image source={{ uri: item.image }} style={styles.styleImage} />
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.8)']}
+        style={styles.styleOverlay}
+      >
+        <Text style={styles.styleTitle}>{item.title}</Text>
+      </LinearGradient>
     </TouchableOpacity>
   ), []);
 
-  // List header component - contains all header content
+  // List header component
   const ListHeaderComponent = useCallback(() => (
     <View>
       {/* Hero Section */}
       <View style={styles.heroSection}>
-        <MaterialCommunityIcons name="movie-open" size={48} color={COLORS.primary} />
-        <Text style={styles.heroTitle}>CINESCAN</Text>
-        <Text style={styles.heroSubtitle}>Discover • Identify • Explore</Text>
-      </View>
-
-      {/* Main CTA Button */}
-      <View style={styles.ctaSection}>
-        <GradientButton
-          title="Tap to Identify"
-          onPress={() => router.push('/comingsoon')}
-          size="large"
-          icon={<MaterialCommunityIcons name="movie-search" size={24} color="#FFFFFF" />}
-          style={styles.mainCTA}
-        />
+        <LinearGradient
+          colors={['rgba(177, 76, 255, 0.3)', 'rgba(177, 76, 255, 0.05)']}
+          style={styles.heroGradient}
+        >
+          <MaterialCommunityIcons name="eye" size={56} color={COLORS.primary} />
+          <Text style={styles.heroTitle}>REVEAL</Text>
+          <Text style={styles.heroSubtitle}>Your Personal Style Intelligence</Text>
+        </LinearGradient>
       </View>
 
       {/* Quick Actions */}
-      <View style={styles.quickActionsSection}>
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.quickActionsGrid}>
           {quickActions.map(renderQuickAction)}
         </View>
       </View>
 
-      {/* For You Section - Powered by Addilets */}
-      <View style={styles.forYouSection}>
+      {/* For You - Addilets Powered */}
+      <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <View style={styles.forYouHeader}>
-            <MaterialCommunityIcons name="star-four-points" size={24} color={COLORS.primary} />
+          <View style={styles.sectionTitleRow}>
+            <MaterialCommunityIcons name="star-four-points" size={20} color={COLORS.primary} />
             <Text style={styles.sectionTitle}>For You</Text>
           </View>
           <TouchableOpacity onPress={() => router.push('/addilets')}>
@@ -121,7 +113,7 @@ export default function HomeScreen() {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={['rgba(177, 76, 255, 0.3)', 'rgba(177, 76, 255, 0.1)']}
+            colors={['rgba(177, 76, 255, 0.25)', 'rgba(255, 110, 199, 0.15)']}
             style={styles.forYouGradient}
           >
             <View style={styles.forYouContent}>
@@ -129,19 +121,16 @@ export default function HomeScreen() {
                 <MaterialCommunityIcons name="account-star" size={32} color={COLORS.primary} />
               </View>
               <View style={styles.forYouText}>
-                <Text style={styles.forYouTitle}>Your Personalized Style Profile</Text>
-                <Text style={styles.forYouSubtitle}>AI-powered recommendations just for you</Text>
+                <Text style={styles.forYouTitle}>Your Style DNA</Text>
+                <Text style={styles.forYouSubtitle}>
+                  {personalization?.styleProfile?.personalities?.join(' • ') || 'Discover your unique style'}
+                </Text>
               </View>
             </View>
             <View style={styles.forYouStats}>
               <View style={styles.forYouStat}>
-                <Text style={styles.forYouStatNumber}>{personalization?.recommendations?.outfits?.length || 3}</Text>
-                <Text style={styles.forYouStatLabel}>Outfits Today</Text>
-              </View>
-              <View style={styles.forYouStatDivider} />
-              <View style={styles.forYouStat}>
-                <Text style={styles.forYouStatNumber}>{personalization?.recommendations?.makeup?.length || 2}</Text>
-                <Text style={styles.forYouStatLabel}>Makeup Looks</Text>
+                <Text style={styles.forYouStatNumber}>{personalization?.recommendations?.outfits?.length || 4}</Text>
+                <Text style={styles.forYouStatLabel}>Daily Picks</Text>
               </View>
               <View style={styles.forYouStatDivider} />
               <View style={styles.forYouStat}>
@@ -149,16 +138,12 @@ export default function HomeScreen() {
                 <Text style={styles.forYouStatLabel}>Match Score</Text>
               </View>
             </View>
-            <View style={styles.forYouCTA}>
-              <Text style={styles.forYouCTAText}>Explore Addilets</Text>
-              <MaterialCommunityIcons name="arrow-right" size={20} color={COLORS.primary} />
-            </View>
           </LinearGradient>
         </TouchableOpacity>
       </View>
 
-      {/* Trending Styles Section */}
-      <View style={styles.trendingSection}>
+      {/* Trending Styles */}
+      <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Trending Styles</Text>
           <TouchableOpacity onPress={() => router.push('/style')}>
@@ -168,13 +153,11 @@ export default function HomeScreen() {
         <FlatList
           horizontal
           data={trendingStyles}
-          keyExtractor={(item) => `style-${item}`}
-          renderItem={({ item }) => renderHorizontalItem({ item, icon: 'hanger', route: '/style' })}
+          keyExtractor={(item) => `style-${item.id}`}
+          renderItem={renderStyleCard}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.horizontalScroll}
-          initialNumToRender={3}
-          maxToRenderPerBatch={3}
-          windowSize={3}
+          initialNumToRender={4}
           removeClippedSubviews={true}
           getItemLayout={(data, index) => ({
             length: HORIZONTAL_CARD_WIDTH + 12,
@@ -184,81 +167,47 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* Trending Songs Section */}
-      <View style={styles.trendingSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Songs</Text>
-          <TouchableOpacity onPress={() => router.push('/trendingsongs')}>
-            <Text style={styles.seeAll}>See All</Text>
+      {/* Explore More */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Explore</Text>
+        <View style={styles.exploreGrid}>
+          <TouchableOpacity 
+            style={styles.exploreCard}
+            onPress={() => router.push('/discover')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient colors={['#4ECDC420', '#4ECDC410']} style={styles.exploreGradient}>
+              <MaterialCommunityIcons name="compass" size={28} color="#4ECDC4" />
+              <Text style={styles.exploreText}>Discover</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.exploreCard}
+            onPress={() => router.push('/beauty')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient colors={['#FF6EC720', '#FF6EC710']} style={styles.exploreGradient}>
+              <MaterialCommunityIcons name="lipstick" size={28} color="#FF6EC7" />
+              <Text style={styles.exploreText}>Beauty Hub</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
-        <FlatList
-          horizontal
-          data={trendingSongs}
-          keyExtractor={(item) => `song-${item}`}
-          renderItem={({ item }) => renderHorizontalItem({ item, icon: 'music-note', route: '/trendingsongs' })}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalScroll}
-          initialNumToRender={3}
-          maxToRenderPerBatch={3}
-          windowSize={3}
-          removeClippedSubviews={true}
-          getItemLayout={(data, index) => ({
-            length: HORIZONTAL_CARD_WIDTH + 12,
-            offset: (HORIZONTAL_CARD_WIDTH + 12) * index,
-            index,
-          })}
-        />
-      </View>
-
-      {/* Trending Movies Section */}
-      <View style={styles.trendingSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Movies</Text>
-          <TouchableOpacity onPress={() => router.push('/discover')}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          horizontal
-          data={trendingMovies}
-          keyExtractor={(item) => `movie-${item}`}
-          renderItem={({ item }) => renderHorizontalItem({ item, icon: 'movie', route: '/discover' })}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalScroll}
-          initialNumToRender={3}
-          maxToRenderPerBatch={3}
-          windowSize={3}
-          removeClippedSubviews={true}
-          getItemLayout={(data, index) => ({
-            length: HORIZONTAL_CARD_WIDTH + 12,
-            offset: (HORIZONTAL_CARD_WIDTH + 12) * index,
-            index,
-          })}
-        />
       </View>
     </View>
-  ), [personalization, quickActions, trendingStyles, trendingSongs, trendingMovies, renderQuickAction, renderHorizontalItem]);
+  ), [personalization, quickActions, trendingStyles, renderQuickAction, renderStyleCard]);
 
-  // Main data for parent FlatList (empty - all content is in header)
-  const mainData = useMemo(() => [], []);
+  const emptyData = useMemo(() => [], []);
 
   return (
-    <LinearGradient
-      colors={GRADIENTS.background}
-      style={styles.container}
-    >
+    <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <FlatList
-        data={mainData}
+        data={emptyData}
         renderItem={() => null}
         ListHeaderComponent={ListHeaderComponent}
         keyExtractor={() => 'main'}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
         removeClippedSubviews={true}
-        windowSize={5}
-        initialNumToRender={1}
-        maxToRenderPerBatch={1}
       />
     </LinearGradient>
   );
@@ -272,67 +221,29 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   heroSection: {
-    alignItems: 'center',
-    paddingTop: 80,
-    paddingBottom: 32,
     paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 24,
+  },
+  heroGradient: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    borderRadius: SIZES.borderRadiusCard,
   },
   heroTitle: {
-    fontSize: 40,
-    fontWeight: '800',
+    fontSize: 48,
+    fontWeight: '900',
     color: COLORS.textPrimary,
     marginTop: 16,
-    letterSpacing: 2,
+    letterSpacing: 4,
   },
   heroSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.textSecondary,
     marginTop: 8,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
-  ctaSection: {
-    paddingHorizontal: 20,
-    marginBottom: 40,
-  },
-  mainCTA: {
-    width: '100%',
-  },
-  quickActionsSection: {
-    paddingHorizontal: 20,
-    marginBottom: 40,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: 20,
-    letterSpacing: -0.5,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  quickActionButton: {
-    width: '47%',
-    aspectRatio: 1.5,
-  },
-  quickActionGradient: {
-    flex: 1,
-    borderRadius: SIZES.borderRadiusCard,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    ...SHADOWS.card,
-  },
-  quickActionLabel: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  forYouSection: {
+  section: {
     paddingHorizontal: 20,
     marginBottom: 32,
   },
@@ -342,15 +253,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  forYouHeader: {
+  sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 16,
   },
   seeAll: {
     color: COLORS.primary,
     fontSize: 14,
     fontWeight: '600',
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  quickActionButton: {
+    width: '47%',
+  },
+  quickActionGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: SIZES.borderRadiusCard,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.1)',
+  },
+  quickActionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quickActionLabel: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '600',
+    marginLeft: 12,
+    flex: 1,
   },
   forYouCard: {
     borderRadius: SIZES.borderRadiusCard,
@@ -380,23 +327,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 4,
   },
   forYouSubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
+    marginTop: 4,
   },
   forYouStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 16,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 16,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   forYouStat: {
     alignItems: 'center',
+    flex: 1,
   },
   forYouStatNumber: {
     fontSize: 24,
@@ -410,44 +356,52 @@ const styles = StyleSheet.create({
   },
   forYouStatDivider: {
     width: 1,
-    height: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  forYouCTA: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  forYouCTAText: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  trendingSection: {
-    marginBottom: 32,
-    paddingHorizontal: 20,
   },
   horizontalScroll: {
     paddingRight: 20,
   },
-  trendingCard: {
+  styleCard: {
     width: HORIZONTAL_CARD_WIDTH,
+    height: 180,
     marginRight: 12,
-  },
-  trendingImagePlaceholder: {
-    width: HORIZONTAL_CARD_WIDTH,
-    height: 120,
     borderRadius: 12,
-    backgroundColor: COLORS.card,
-    justifyContent: 'center',
-    alignItems: 'center',
+    overflow: 'hidden',
   },
-  trendingCardTitle: {
+  styleImage: {
+    width: '100%',
+    height: '100%',
+  },
+  styleOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+  },
+  styleTitle: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  exploreGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  exploreCard: {
+    flex: 1,
+  },
+  exploreGradient: {
+    alignItems: 'center',
+    padding: 24,
+    borderRadius: SIZES.borderRadiusCard,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.1)',
+  },
+  exploreText: {
     color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
     marginTop: 8,
-    textAlign: 'center',
   },
 });
