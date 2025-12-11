@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const router = express.Router();
 const { createJob } = require('../services/jobQueue');
+const { optionalAuth } = require('../middleware/auth');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
