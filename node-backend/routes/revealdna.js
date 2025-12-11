@@ -85,8 +85,8 @@ router.get('/profile', optionalAuth, (req, res) => {
 
     res.json(profile);
   } catch (error) {
-    console.error('❌ Addilets profile error:', error);
-    res.status(500).json({ error: 'Failed to get Addilets profile' });
+    console.error('❌ Reveal DNA profile error:', error);
+    res.status(500).json({ error: 'Failed to get Reveal DNA profile' });
   }
 });
 
