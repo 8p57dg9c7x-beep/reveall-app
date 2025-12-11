@@ -286,7 +286,7 @@ export default function DiscoverScreen() {
       <View style={styles.section}>
         <TouchableOpacity 
           style={styles.musicScanCard}
-          onPress={() => router.push('/trendingsongs')}
+          onPress={() => router.push('/musicscan')}
           activeOpacity={0.8}
         >
           <LinearGradient
