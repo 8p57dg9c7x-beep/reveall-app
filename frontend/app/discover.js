@@ -6,303 +6,199 @@ import {
   TouchableOpacity,
   TextInput,
   FlatList,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router, useNavigation } from 'expo-router';
+import { router } from 'expo-router';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import { API_BASE_URL } from '../config';
-import { searchMusic } from '../services/api';
 import OptimizedImage from '../components/OptimizedImage';
 import { SkeletonHorizontalScroll } from '../components/SkeletonLoader';
 import FadeInView from '../components/FadeInView';
-import { asCardItem } from '../utils/helpers';
 
-// Constants for virtualization
-const HORIZONTAL_CARD_WIDTH = 140;
-const HORIZONTAL_CARD_HEIGHT = 140;
+// Constants
+const CARD_WIDTH = 160;
+const CARD_HEIGHT = 200;
 
-// Memoized card components
-const MovieCard = memo(({ movie, onPress }) => (
+// Memoized components
+const CategoryCard = memo(({ category, onPress }) => (
   <TouchableOpacity
-    style={styles.trendingCard}
+    style={styles.categoryCard}
     onPress={onPress}
-    activeOpacity={0.7}
+    activeOpacity={0.8}
   >
+    <LinearGradient
+      colors={[`${category.color}30`, `${category.color}10`]}
+      style={styles.categoryGradient}
+    >
+      <View style={[styles.categoryIcon, { backgroundColor: `${category.color}40` }]}>
+        <MaterialCommunityIcons name={category.icon} size={28} color={category.color} />
+      </View>
+      <View style={styles.categoryContent}>
+        <Text style={styles.categoryTitle}>{category.title}</Text>
+        <Text style={styles.categorySubtitle}>{category.subtitle}</Text>
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+    </LinearGradient>
+  </TouchableOpacity>
+));
+
+const MovieCard = memo(({ movie, onPress }) => (
+  <TouchableOpacity style={styles.contentCard} onPress={onPress} activeOpacity={0.8}>
     <OptimizedImage
       source={{ uri: `https://image.tmdb.org/t/p/w185${movie.poster_path}` }}
-      style={styles.trendingImage}
+      style={styles.contentImage}
     />
-    <Text style={styles.trendingTitle} numberOfLines={2}>{movie.title}</Text>
-    {movie.vote_average > 0 && (
-      <View style={styles.movieRatingRow}>
-        <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
-        <Text style={styles.movieRating}>{movie.vote_average.toFixed(1)}</Text>
-      </View>
-    )}
+    <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} style={styles.contentOverlay}>
+      <Text style={styles.contentTitle} numberOfLines={2}>{movie.title}</Text>
+      {movie.vote_average > 0 && (
+        <View style={styles.ratingRow}>
+          <MaterialCommunityIcons name="star" size={12} color={COLORS.accent} />
+          <Text style={styles.ratingText}>{movie.vote_average.toFixed(1)}</Text>
+        </View>
+      )}
+    </LinearGradient>
   </TouchableOpacity>
 ));
 
-const SongCard = memo(({ song, onPress, isLoading }) => (
-  <TouchableOpacity 
-    style={styles.trendingCard}
-    onPress={onPress}
-    activeOpacity={0.7}
-    disabled={isLoading}
-  >
-    <OptimizedImage source={{ uri: song.image }} style={styles.trendingImage} />
-    <Text style={styles.trendingTitle} numberOfLines={2}>{song.title}</Text>
-    <Text style={styles.trendingSubtitle} numberOfLines={1}>{song.artist}</Text>
+const SongCard = memo(({ song, onPress }) => (
+  <TouchableOpacity style={styles.contentCard} onPress={onPress} activeOpacity={0.8}>
+    <Image source={{ uri: song.image }} style={styles.contentImage} />
+    <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} style={styles.contentOverlay}>
+      <Text style={styles.contentTitle} numberOfLines={1}>{song.title}</Text>
+      <Text style={styles.contentSubtitle} numberOfLines={1}>{song.artist}</Text>
+    </LinearGradient>
   </TouchableOpacity>
 ));
-
-const StyleCard = memo(({ style, onPress }) => (
-  <TouchableOpacity
-    style={styles.trendingCard}
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <OptimizedImage source={{ uri: style.imageToUse }} style={styles.trendingImage} />
-    <Text style={styles.trendingTitle} numberOfLines={2}>{style.title}</Text>
-  </TouchableOpacity>
-));
-
-const BeautyCard = memo(({ look, onPress }) => (
-  <TouchableOpacity
-    style={styles.trendingCard}
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <OptimizedImage source={{ uri: look.imageToUse }} style={styles.trendingImage} />
-    <Text style={styles.trendingTitle} numberOfLines={2}>{look.title}</Text>
-    {look.celebrity && (
-      <Text style={styles.trendingSubtitle} numberOfLines={1}>{look.celebrity}</Text>
-    )}
-  </TouchableOpacity>
-));
-
-const ExploreCard = memo(({ category, onPress }) => (
-  <TouchableOpacity
-    style={styles.exploreCard}
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <MaterialCommunityIcons name={category.icon} size={32} color={category.color} />
-    <Text style={styles.exploreTitle}>{category.title}</Text>
-    <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
-  </TouchableOpacity>
-));
-
-// Optimized horizontal list with getItemLayout
-const HorizontalList = memo(({ data, renderItem, keyPrefix }) => {
-  const getItemLayout = useCallback((data, index) => ({
-    length: HORIZONTAL_CARD_WIDTH + 16,
-    offset: (HORIZONTAL_CARD_WIDTH + 16) * index,
-    index,
-  }), []);
-
-  return (
-    <FlatList
-      horizontal
-      data={data}
-      renderItem={renderItem}
-      keyExtractor={(item, index) => `${keyPrefix}-${item.id || index}`}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.horizontalScroll}
-      initialNumToRender={4}
-      maxToRenderPerBatch={4}
-      windowSize={3}
-      removeClippedSubviews={true}
-      getItemLayout={getItemLayout}
-    />
-  );
-});
 
 export default function DiscoverScreen() {
-  const navigation = useNavigation();
   const [trendingMovies, setTrendingMovies] = useState([]);
-  const [trendingStyles, setTrendingStyles] = useState([]);
-  const [trendingBeauty, setTrendingBeauty] = useState([]);
   const [loadingMovies, setLoadingMovies] = useState(true);
-  const [loadingStyles, setLoadingStyles] = useState(true);
-  const [loadingBeauty, setLoadingBeauty] = useState(true);
-  const [loadingSongId, setLoadingSongId] = useState(null);
 
-  // Static data - memoized
+  // Trending songs - static
   const TRENDING_SONGS = useMemo(() => [
     { id: 1, title: 'SOAK CITY', artist: '310babii', image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80' },
     { id: 2, title: 'Die With A Smile', artist: 'Lady Gaga, Bruno Mars', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80' },
     { id: 3, title: 'Beautiful Things', artist: 'Benson Boone', image: 'https://images.unsplash.com/photo-1445985543470-41fba5c3144a?w=400&q=80' },
     { id: 4, title: 'Too Sweet', artist: 'Hozier', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80' },
-    { id: 5, title: 'Espresso', artist: 'Sabrina Carpenter', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80' },
   ], []);
 
-  const EXPLORE_CATEGORIES = useMemo(() => [
-    { id: 'styles', title: 'Discover New Styles', icon: 'hanger', color: COLORS.accent },
-    { id: 'brands', title: 'Discover New Brands', icon: 'tag', color: '#FF6B6B' },
-    { id: 'music', title: 'Discover New Music', icon: 'music', color: '#4ECDC4' },
-    { id: 'genres', title: 'Movie Genres', icon: 'movie', color: '#95E1D3' },
+  // Discover categories
+  const CATEGORIES = useMemo(() => [
+    { 
+      id: 'musicscan', 
+      title: 'MusicScan', 
+      subtitle: 'Identify any song',
+      icon: 'music-circle', 
+      color: '#4ECDC4',
+      route: '/musicscan'
+    },
+    { 
+      id: 'movies', 
+      title: 'Movies & TV', 
+      subtitle: 'Browse trending movies',
+      icon: 'movie', 
+      color: '#FF6B6B',
+      route: '/comingsoon'
+    },
+    { 
+      id: 'music', 
+      title: 'Music', 
+      subtitle: 'Trending songs & artists',
+      icon: 'music', 
+      color: '#B14CFF',
+      route: '/trendingsongs'
+    },
   ], []);
 
-  // Load data with cleanup
+  // Load data
   useEffect(() => {
     let isMounted = true;
 
-    const loadData = async () => {
+    const loadMovies = async () => {
       try {
-        const [moviesRes, stylesRes, beautyRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/discover/trending`),
-          fetch(`${API_BASE_URL}/api/outfits/trending`),
-          fetch(`${API_BASE_URL}/api/beauty/trending`)
-        ]);
-        
-        const [moviesData, stylesData, beautyData] = await Promise.all([
-          moviesRes.json(),
-          stylesRes.json(),
-          beautyRes.json()
-        ]);
-        
+        const response = await fetch(`${API_BASE_URL}/api/discover/trending`);
+        const data = await response.json();
         if (isMounted) {
-          setTrendingMovies(moviesData.results?.slice(0, 10) || []);
-          setTrendingStyles((stylesData.outfits || []).slice(0, 10).map(asCardItem));
-          setTrendingBeauty((beautyData.looks || []).slice(0, 10).map(asCardItem));
+          setTrendingMovies(data.results?.slice(0, 6) || []);
           setLoadingMovies(false);
-          setLoadingStyles(false);
-          setLoadingBeauty(false);
         }
       } catch (error) {
-        console.error('❌ Error loading discover data:', error);
-        if (isMounted) {
-          setLoadingMovies(false);
-          setLoadingStyles(false);
-          setLoadingBeauty(false);
-        }
+        console.error('Error loading movies:', error);
+        if (isMounted) setLoadingMovies(false);
       }
     };
 
-    loadData();
+    loadMovies();
     return () => { isMounted = false; };
   }, []);
 
-  // Handlers - memoized
-  const handleSongTap = useCallback(async (song) => {
-    try {
-      setLoadingSongId(song.id);
-      const response = await searchMusic(song.title, song.artist);
-      setLoadingSongId(null);
-      
-      const songData = response.success && response.song 
-        ? response.song 
-        : { title: song.title, artist: song.artist, album_art: song.image };
-      
-      router.push({
-        pathname: '/result',
-        params: { songData: JSON.stringify(songData), returnPath: '/discover' }
-      });
-    } catch (error) {
-      setLoadingSongId(null);
-      router.push({
-        pathname: '/result',
-        params: { 
-          songData: JSON.stringify({ title: song.title, artist: song.artist, album_art: song.image }),
-          returnPath: '/discover'
-        }
-      });
-    }
+  // Handlers
+  const handleCategoryPress = useCallback((category) => {
+    router.push(category.route);
   }, []);
 
-  const handleExplorePress = useCallback((categoryId) => {
-    const routes = {
-      styles: '/style',
-      brands: '/style',
-      music: '/trendingsongs',
-      genres: '/comingsoon'
-    };
-    router.push(routes[categoryId] || '/comingsoon');
+  const handleMoviePress = useCallback((movie) => {
+    router.push({
+      pathname: '/result',
+      params: { movieId: movie.id.toString(), returnPath: '/discover' }
+    });
   }, []);
 
-  // Render functions - memoized
+  const handleSongPress = useCallback((song) => {
+    router.push({
+      pathname: '/result',
+      params: { 
+        songData: JSON.stringify({ title: song.title, artist: song.artist, album_art: song.image }),
+        returnPath: '/discover'
+      }
+    });
+  }, []);
+
+  // Render functions
+  const renderCategoryItem = useCallback(({ item }) => (
+    <CategoryCard category={item} onPress={() => handleCategoryPress(item)} />
+  ), [handleCategoryPress]);
+
   const renderMovieItem = useCallback(({ item }) => (
-    <MovieCard 
-      movie={item} 
-      onPress={() => router.push({
-        pathname: '/result',
-        params: { movieId: item.id.toString(), returnPath: '/discover' }
-      })}
-    />
-  ), []);
+    <MovieCard movie={item} onPress={() => handleMoviePress(item)} />
+  ), [handleMoviePress]);
 
   const renderSongItem = useCallback(({ item }) => (
-    <SongCard 
-      song={item} 
-      onPress={() => handleSongTap(item)}
-      isLoading={loadingSongId === item.id}
-    />
-  ), [handleSongTap, loadingSongId]);
+    <SongCard song={item} onPress={() => handleSongPress(item)} />
+  ), [handleSongPress]);
 
-  const renderStyleItem = useCallback(({ item }) => (
-    <StyleCard 
-      style={item} 
-      onPress={() => router.push({
-        pathname: '/outfitdetail',
-        params: { outfitData: JSON.stringify(item) }
-      })}
-    />
-  ), []);
-
-  const renderBeautyItem = useCallback(({ item }) => (
-    <BeautyCard 
-      look={item} 
-      onPress={() => router.push({
-        pathname: '/beautydetail',
-        params: { lookData: JSON.stringify(item) }
-      })}
-    />
-  ), []);
-
-  // Main list header component
+  // List header
   const ListHeaderComponent = useCallback(() => (
     <View>
       {/* Search Bar */}
-      <View style={styles.searchBarContainer}>
-        <View style={styles.searchBar}>
-          <MaterialCommunityIcons name="magnify" size={20} color={COLORS.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search movies, songs, styles..."
-            placeholderTextColor={COLORS.textMuted}
-            onFocus={() => router.push('/universal-search')}
-          />
-        </View>
-      </View>
+      <TouchableOpacity 
+        style={styles.searchBar}
+        onPress={() => router.push('/universal-search')}
+        activeOpacity={0.8}
+      >
+        <MaterialCommunityIcons name="magnify" size={20} color={COLORS.textMuted} />
+        <Text style={styles.searchPlaceholder}>Search movies, songs...</Text>
+      </TouchableOpacity>
 
+      {/* Header */}
       <FadeInView style={styles.header}>
         <MaterialCommunityIcons name="compass" size={32} color={COLORS.primary} />
         <Text style={styles.headerTitle}>Discover</Text>
-        <Text style={styles.headerSubtitle}>Movies, music & cultural content</Text>
+        <Text style={styles.headerSubtitle}>Movies, music & more</Text>
       </FadeInView>
 
-      {/* MusicScan Feature Card */}
+      {/* Categories */}
       <View style={styles.section}>
-        <TouchableOpacity 
-          style={styles.musicScanCard}
-          onPress={() => router.push('/musicscan')}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={['#4ECDC430', '#4ECDC410']}
-            style={styles.musicScanGradient}
-          >
-            <View style={styles.musicScanIcon}>
-              <MaterialCommunityIcons name="music-circle" size={40} color="#4ECDC4" />
-            </View>
-            <View style={styles.musicScanContent}>
-              <Text style={styles.musicScanTitle}>MusicScan</Text>
-              <Text style={styles.musicScanSubtitle}>Identify any song playing around you</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
-          </LinearGradient>
-        </TouchableOpacity>
+        <Text style={styles.sectionTitle}>Explore</Text>
+        {CATEGORIES.map((category) => (
+          <CategoryCard 
+            key={category.id} 
+            category={category} 
+            onPress={() => handleCategoryPress(category)} 
+          />
+        ))}
       </View>
 
       {/* Trending Movies */}
@@ -316,11 +212,19 @@ export default function DiscoverScreen() {
         {loadingMovies ? (
           <SkeletonHorizontalScroll />
         ) : trendingMovies.length > 0 ? (
-          <HorizontalList data={trendingMovies} renderItem={renderMovieItem} keyPrefix="movie" />
+          <FlatList
+            horizontal
+            data={trendingMovies}
+            keyExtractor={(item) => `movie-${item.id}`}
+            renderItem={renderMovieItem}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalScroll}
+            initialNumToRender={4}
+            removeClippedSubviews={true}
+          />
         ) : (
           <View style={styles.emptySection}>
-            <MaterialCommunityIcons name="movie" size={40} color={COLORS.textSecondary} />
-            <Text style={styles.emptyText}>No trending movies yet</Text>
+            <Text style={styles.emptyText}>No movies available</Text>
           </View>
         )}
       </View>
@@ -333,66 +237,19 @@ export default function DiscoverScreen() {
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
-        <HorizontalList data={TRENDING_SONGS} renderItem={renderSongItem} keyPrefix="song" />
-      </View>
-
-      {/* Trending Styles */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Styles</Text>
-          <TouchableOpacity onPress={() => router.push('/style')}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        {loadingStyles ? (
-          <SkeletonHorizontalScroll />
-        ) : trendingStyles.length > 0 ? (
-          <HorizontalList data={trendingStyles} renderItem={renderStyleItem} keyPrefix="style" />
-        ) : (
-          <View style={styles.emptySection}>
-            <MaterialCommunityIcons name="hanger" size={40} color={COLORS.textSecondary} />
-            <Text style={styles.emptyText}>No trending styles yet</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Trending Beauty */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Beauty</Text>
-          <TouchableOpacity onPress={() => router.push('/beauty')}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        {loadingBeauty ? (
-          <SkeletonHorizontalScroll />
-        ) : trendingBeauty.length > 0 ? (
-          <HorizontalList data={trendingBeauty} renderItem={renderBeautyItem} keyPrefix="beauty" />
-        ) : (
-          <View style={styles.emptySection}>
-            <MaterialCommunityIcons name="shimmer" size={40} color={COLORS.textSecondary} />
-            <Text style={styles.emptyText}>No trending beauty looks yet</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Explore Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { paddingHorizontal: 20, marginBottom: 16 }]}>Explore</Text>
-        {EXPLORE_CATEGORIES.map((category) => (
-          <ExploreCard 
-            key={category.id} 
-            category={category} 
-            onPress={() => handleExplorePress(category.id)} 
-          />
-        ))}
+        <FlatList
+          horizontal
+          data={TRENDING_SONGS}
+          keyExtractor={(item) => `song-${item.id}`}
+          renderItem={renderSongItem}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalScroll}
+          initialNumToRender={4}
+          removeClippedSubviews={true}
+        />
       </View>
     </View>
-  ), [
-    loadingMovies, loadingStyles, loadingBeauty, loadingSongId,
-    trendingMovies, trendingStyles, trendingBeauty, TRENDING_SONGS, EXPLORE_CATEGORIES,
-    renderMovieItem, renderSongItem, renderStyleItem, renderBeautyItem, handleExplorePress
-  ]);
+  ), [CATEGORIES, TRENDING_SONGS, loadingMovies, trendingMovies, handleCategoryPress, renderMovieItem, renderSongItem]);
 
   // Empty data for parent FlatList
   const emptyData = useMemo(() => [], []);
@@ -407,9 +264,6 @@ export default function DiscoverScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         removeClippedSubviews={true}
-        windowSize={5}
-        initialNumToRender={1}
-        maxToRenderPerBatch={1}
       />
     </LinearGradient>
   );
@@ -422,36 +276,30 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 120,
   },
-  searchBarContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 16,
-  },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.card,
-    borderRadius: SIZES.borderRadiusInput,
+    marginHorizontal: 20,
+    marginTop: 60,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    borderRadius: SIZES.borderRadiusCard,
     gap: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(177, 76, 255, 0.2)',
   },
-  searchInput: {
-    flex: 1,
-    color: COLORS.textPrimary,
+  searchPlaceholder: {
+    color: COLORS.textMuted,
     fontSize: 16,
   },
   header: {
-    paddingTop: 20,
+    paddingTop: 24,
     paddingHorizontal: 20,
     paddingBottom: 24,
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: COLORS.textPrimary,
     marginTop: 12,
   },
@@ -459,121 +307,112 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     marginTop: 4,
-    textAlign: 'center',
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 28,
+    paddingHorizontal: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     color: COLORS.textPrimary,
+    marginBottom: 16,
   },
   seeAll: {
     fontSize: 14,
     color: COLORS.primary,
     fontWeight: '600',
   },
-  horizontalScroll: {
-    paddingLeft: 20,
-    paddingRight: 8,
+  categoryCard: {
+    marginBottom: 12,
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
   },
-  trendingCard: {
-    marginRight: 16,
-    width: HORIZONTAL_CARD_WIDTH,
-  },
-  trendingImage: {
-    width: HORIZONTAL_CARD_WIDTH,
-    height: HORIZONTAL_CARD_HEIGHT,
-    borderRadius: 12,
-    backgroundColor: COLORS.card,
-  },
-  trendingTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    marginTop: 8,
-    fontWeight: '600',
-  },
-  trendingSubtitle: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  movieRatingRow: {
+  categoryGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
-  },
-  movieRating: {
-    color: COLORS.accent,
-    fontSize: 13,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  musicScanCard: {
-    marginBottom: 8,
-  },
-  musicScanGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
+    padding: 16,
     borderRadius: SIZES.borderRadiusCard,
     borderWidth: 1,
-    borderColor: 'rgba(78, 205, 196, 0.2)',
+    borderColor: 'rgba(177, 76, 255, 0.1)',
   },
-  musicScanIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-    backgroundColor: 'rgba(78, 205, 196, 0.2)',
+  categoryIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  musicScanContent: {
+  categoryContent: {
     flex: 1,
     marginLeft: 16,
   },
-  musicScanTitle: {
-    fontSize: 18,
+  categoryTitle: {
+    fontSize: 17,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
-  musicScanSubtitle: {
+  categorySubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 4,
+    marginTop: 2,
   },
-  exploreCard: {
+  horizontalScroll: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  contentCard: {
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginRight: 12,
+  },
+  contentImage: {
+    width: '100%',
+    height: '100%',
+  },
+  contentOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+  },
+  contentTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  contentSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 2,
+  },
+  ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.card,
-    marginHorizontal: 20,
-    marginBottom: 12,
-    padding: 20,
-    borderRadius: 12,
+    marginTop: 4,
+    gap: 4,
   },
-  exploreTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 16,
-    flex: 1,
-    marginLeft: 16,
+  ratingText: {
+    fontSize: 12,
     fontWeight: '600',
+    color: COLORS.accent,
   },
   emptySection: {
+    paddingVertical: 40,
     alignItems: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
   },
   emptyText: {
     color: COLORS.textSecondary,
     fontSize: 14,
-    marginTop: 8,
   },
 });
