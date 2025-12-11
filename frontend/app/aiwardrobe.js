@@ -15,6 +15,7 @@ import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
+import { uploadImage, pollJobResult } from '../services/revealAPI';
 
 export default function AIWardrobeScreen() {
   const [wardrobeItems, setWardrobeItems] = useState([
