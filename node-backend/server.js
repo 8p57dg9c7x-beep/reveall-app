@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const uploadRoutes = require('./routes/upload');
 const jobRoutes = require('./routes/jobs');
 const addiletsRoutes = require('./routes/addilets');
+const bodyScanRoutes = require('./routes/bodyscan');
 
 const app = express();
 const PORT = process.env.PORT || 8002;
