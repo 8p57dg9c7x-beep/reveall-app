@@ -3,15 +3,15 @@ const router = express.Router();
 const { optionalAuth } = require('../middleware/auth');
 
 /**
- * POST /api/addilets/generate
- * Generate Addilets profile from user data
+ * POST /api/reveal-dna/generate
+ * Generate Reveal DNA profile from user data
  * 
  * Body: {
  *   favorites: Array,
  *   wardrobe: Array
  * }
  * 
- * Returns: AddiletsProfile {
+ * Returns: RevealDNAProfile {
  *   styleDNA: [String],
  *   colorPalette: [String],
  *   celebrityMatches: [Object]
@@ -21,7 +21,7 @@ router.post('/generate', optionalAuth, async (req, res) => {
   try {
     const { favorites = [], wardrobe = [] } = req.body;
 
-    console.log('🎨 Generating Addilets profile...');
+    console.log('🎨 Generating Reveal DNA profile...');
     console.log(`Favorites: ${favorites.length}, Wardrobe: ${wardrobe.length}`);
 
     // Simulate AI processing
