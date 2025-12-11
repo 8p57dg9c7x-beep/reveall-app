@@ -1,5 +1,5 @@
 /**
- * AI Orchestrator
+ * Reveal AI Orchestrator
  * Processes AI jobs with mock responses (local development)
  * Future: Replace with real OpenAI/Vision API calls
  */
@@ -13,7 +13,7 @@ async function processJob(job) {
   const type = job.data.type || 'general';
   const data = job.data;
 
-  console.log(`🤖 AI Orchestrator processing ${type} job...`);
+  console.log(`🤖 Reveal AI Orchestrator processing ${type} job...`);
 
   // Simulate processing time
   await simulateProcessing(type);
@@ -45,11 +45,11 @@ function simulateProcessing(type) {
 }
 
 /**
- * Process AI Stylist job
+ * Process Reveal Stylist job
  * Mock: Returns style recommendations
  */
 async function processStylistJob(data) {
-  console.log('🎨 Generating style recommendations...');
+  console.log('🎨 Reveal Stylist generating recommendations...');
 
   const mockResults = [
     {
@@ -99,17 +99,17 @@ async function processStylistJob(data) {
     metadata: {
       preferences: data.metadata?.preferences || [],
       processedAt: new Date().toISOString(),
-      model: 'mock-ai-v1'
+      model: 'reveal-mock-ai-v1'
     }
   };
 }
 
 /**
- * Process AI Wardrobe job
+ * Process Reveal Wardrobe job
  * Mock: Auto-tags clothing items
  */
 async function processWardrobeJob(data) {
-  console.log('👔 Auto-tagging wardrobe item...');
+  console.log('👔 Reveal Wardrobe auto-tagging...');
 
   const categories = ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories'];
   const colors = ['black', 'white', 'blue', 'red', 'gray', 'navy', 'beige'];
@@ -130,17 +130,17 @@ async function processWardrobeJob(data) {
     },
     metadata: {
       processedAt: new Date().toISOString(),
-      model: 'mock-classifier-v1'
+      model: 'reveal-classifier-v1'
     }
   };
 }
 
 /**
- * Process Body Scan job
+ * Process Reveal Body Scan job
  * Mock: Returns body measurements
  */
 async function processBodyScanJob(data) {
-  console.log('📏 Analyzing body measurements...');
+  console.log('📏 Reveal Body Scan analyzing measurements...');
 
   const height = 175 + Math.floor(Math.random() * 15);
   const chest = 90 + Math.floor(Math.random() * 15);
@@ -178,7 +178,7 @@ async function processBodyScanJob(data) {
     },
     metadata: {
       processedAt: new Date().toISOString(),
-      model: 'mock-body-analyzer-v1',
+      model: 'reveal-body-analyzer-v1',
       unit: 'cm'
     }
   };
@@ -189,7 +189,7 @@ async function processBodyScanJob(data) {
  * Default handler
  */
 async function processGeneralJob(data) {
-  console.log('🔍 Processing general image analysis...');
+  console.log('🔍 Reveal processing general image analysis...');
 
   return {
     type: 'general',
