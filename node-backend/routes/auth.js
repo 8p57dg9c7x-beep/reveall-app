@@ -39,9 +39,15 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    const refreshToken = jwt.sign(
+      { userId: user.id, email: user.email, type: 'refresh' },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
     res.status(201).json({
-      message: 'User registered successfully',
       token,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
