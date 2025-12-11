@@ -114,7 +114,6 @@ export default function RootLayout() {
         <Tabs.Screen name="watchlist" options={{ href: null }} />
         <Tabs.Screen name="analytics" options={{ href: null }} />
         <Tabs.Screen name="comingsoon" options={{ href: null }} />
-        <Tabs.Screen name="trendingsongs" options={{ href: null }} />
         <Tabs.Screen name="saved-outfits" options={{ href: null }} />
         <Tabs.Screen name="saved-beauty" options={{ href: null }} />
         <Tabs.Screen name="universal-search" options={{ href: null }} />
