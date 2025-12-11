@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   },
   resultsContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   resultsHeader: {
     alignItems: 'center',
