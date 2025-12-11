@@ -115,13 +115,18 @@ router.post('/login', async (req, res) => {
  */
 router.post('/refresh', (req, res) => {
   try {
-    const { token } = req.body;
+    const { refreshToken } = req.body;
 
-    if (!token) {
-      return res.status(400).json({ error: 'Token required' });
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token required' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    
+    // Verify it's a refresh token
+    if (decoded.type !== 'refresh') {
+      return res.status(401).json({ error: 'Invalid refresh token' });
+    }
     
     const newToken = jwt.sign(
       { userId: decoded.userId, email: decoded.email },
@@ -130,12 +135,11 @@ router.post('/refresh', (req, res) => {
     );
 
     res.json({
-      message: 'Token refreshed',
       token: newToken
     });
   } catch (error) {
     console.error('Refresh error:', error);
-    res.status(401).json({ error: 'Invalid or expired token' });
+    res.status(401).json({ error: 'Invalid or expired refresh token' });
   }
 });
 
