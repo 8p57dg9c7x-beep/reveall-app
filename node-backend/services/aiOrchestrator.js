@@ -10,7 +10,8 @@
  * @returns {Promise<Object>} Processing result
  */
 async function processJob(job) {
-  const { type, data } = job;
+  const type = job.data.type || 'general';
+  const data = job.data;
 
   console.log(`🤖 AI Orchestrator processing ${type} job...`);
 
