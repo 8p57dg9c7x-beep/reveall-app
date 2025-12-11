@@ -517,6 +517,39 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 4,
   },
+  musicScanCard: {
+    marginBottom: 8,
+  },
+  musicScanGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    borderRadius: SIZES.borderRadiusCard,
+    borderWidth: 1,
+    borderColor: 'rgba(78, 205, 196, 0.2)',
+  },
+  musicScanIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: 'rgba(78, 205, 196, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  musicScanContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  musicScanTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  musicScanSubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    marginTop: 4,
+  },
   exploreCard: {
     flexDirection: 'row',
     alignItems: 'center',
