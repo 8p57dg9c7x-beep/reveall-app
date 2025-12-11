@@ -58,11 +58,51 @@ export default function AIStylistScreen() {
     'Minimalist', 'Vintage', 'Edgy', 'Preppy'
   ];
 
-  const mockGenerateLooks = () => {
+  const mockGenerateLooks = async () => {
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Use actual backend API if we have a photo
+      if (frontPhoto) {
+        console.log('🎨 Calling Reveal AI Stylist API...');
+        const uploadResult = await uploadImage(frontPhoto, 'stylist', {
+          preferences: selectedStyles,
+        });
+        
+        console.log('📦 Job created:', uploadResult.jobId);
+        
+        // Poll for results
+        const result = await pollJobResult(uploadResult.jobId);
+        
+        if (result.result && result.result.results) {
+          // Transform backend response to match UI format
+          const looks = result.result.results.map((item, index) => ({
+            id: item.id || index + 1,
+            image: item.image,
+            confidence: item.confidence,
+            tags: item.tags,
+            title: item.title,
+            description: item.description,
+            buyLinks: item.items ? item.items.map(i => ({
+              item: i.name,
+              price: i.price,
+              url: '#'
+            })) : [],
+          }));
+          
+          setGeneratedLooks(looks);
+          setLoading(false);
+          setStep(3);
+          return;
+        }
+      }
+      
+      // Fallback to mock if API fails or no photo
+      throw new Error('Using fallback');
+    } catch (error) {
+      console.log('⚠️ Using fallback mock data:', error.message);
+      
+      // Fallback mock results
       const mockResults = [
         {
           id: 1,
@@ -121,7 +161,7 @@ export default function AIStylistScreen() {
       setGeneratedLooks(mockResults);
       setLoading(false);
       setStep(3);
-    }, 2000);
+    }
   };
 
   const pickImage = async (type) => {
