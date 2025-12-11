@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Image,
   Dimensions,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -16,11 +16,108 @@ import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width - 40;
+
+// Fixed heights for virtualization
+const CELEB_CARD_WIDTH = 140;
+const CELEB_CARD_HEIGHT = 200;
+const MAKEUP_CARD_WIDTH = 160;
+const MAKEUP_CARD_HEIGHT = 220;
+const CAPSULE_ITEM_WIDTH = (width - 60) / 2;
+
+// Memoized components
+const CelebCard = memo(({ celeb }) => (
+  <View style={styles.celebCard}>
+    <Image source={{ uri: celeb.image }} style={styles.celebImage} />
+    <LinearGradient
+      colors={['transparent', 'rgba(0,0,0,0.8)']}
+      style={styles.celebOverlay}
+    >
+      <Text style={styles.celebName}>{celeb.name}</Text>
+      <View style={styles.matchBadge}>
+        <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
+        <Text style={styles.matchText}>{celeb.match}% Match</Text>
+      </View>
+    </LinearGradient>
+  </View>
+));
+
+const MakeupCard = memo(({ makeup }) => (
+  <TouchableOpacity style={styles.makeupCard} activeOpacity={0.8}>
+    <Image source={{ uri: makeup.image }} style={styles.makeupImage} />
+    <LinearGradient
+      colors={['transparent', 'rgba(0,0,0,0.9)']}
+      style={styles.makeupOverlay}
+    >
+      <Text style={styles.makeupTitle}>{makeup.title}</Text>
+      <Text style={styles.makeupVibe}>{makeup.vibe}</Text>
+      <View style={styles.makeupMatch}>
+        <MaterialCommunityIcons name="heart" size={14} color="#FF6EC7" />
+        <Text style={styles.makeupMatchText}>{makeup.match}% Match</Text>
+      </View>
+    </LinearGradient>
+  </TouchableOpacity>
+));
+
+const OutfitRecCard = memo(({ rec }) => (
+  <TouchableOpacity style={styles.recCard} activeOpacity={0.8}>
+    <Image source={{ uri: rec.image }} style={styles.recImage} />
+    <View style={styles.recContent}>
+      <Text style={styles.recTitle}>{rec.title}</Text>
+      <View style={styles.recMeta}>
+        <View style={styles.recMetaItem}>
+          <MaterialCommunityIcons name="tag" size={14} color={COLORS.textSecondary} />
+          <Text style={styles.recMetaText}>{rec.occasion}</Text>
+        </View>
+        <View style={styles.recMetaItem}>
+          <MaterialCommunityIcons name="weather-cloudy" size={14} color={COLORS.textSecondary} />
+          <Text style={styles.recMetaText}>{rec.weather}</Text>
+        </View>
+      </View>
+      <Text style={styles.recReason}>{rec.reason}</Text>
+      <View style={styles.confidenceBadge}>
+        <View style={[styles.confidenceBar, { width: `${rec.confidence}%` }]} />
+        <Text style={styles.confidenceText}>{rec.confidence}% Confidence</Text>
+      </View>
+    </View>
+  </TouchableOpacity>
+));
+
+const CapsuleItem = memo(({ item }) => (
+  <View style={styles.capsuleItem}>
+    <Image source={{ uri: item.image }} style={styles.capsuleImage} />
+    <Text style={styles.capsuleName}>{item.name}</Text>
+  </View>
+));
+
+// Horizontal FlatList wrapper with optimization
+const HorizontalList = memo(({ data, renderItem, keyPrefix, itemWidth }) => {
+  const getItemLayout = useCallback((data, index) => ({
+    length: itemWidth + 16,
+    offset: (itemWidth + 16) * index,
+    index,
+  }), [itemWidth]);
+
+  return (
+    <FlatList
+      horizontal
+      data={data}
+      renderItem={renderItem}
+      keyExtractor={(item, index) => `${keyPrefix}-${item.id || item.name || index}`}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.horizontalScroll}
+      initialNumToRender={3}
+      maxToRenderPerBatch={3}
+      windowSize={3}
+      removeClippedSubviews={true}
+      getItemLayout={getItemLayout}
+    />
+  );
+});
 
 export default function AddiletsScreen() {
   const { personalization, loading, refreshPersonalization } = useAddilets();
 
+  // Render empty loading state
   if (!personalization || loading) {
     return (
       <LinearGradient colors={GRADIENTS.background} style={styles.container}>
@@ -37,6 +134,114 @@ export default function AddiletsScreen() {
   const makeupRecommendations = personalization.recommendations.makeup;
   const seasonalCapsule = personalization.recommendations.capsule;
 
+  // Memoized render functions
+  const renderCelebItem = useCallback(({ item }) => <CelebCard celeb={item} />, []);
+  const renderMakeupItem = useCallback(({ item }) => <MakeupCard makeup={item} />, []);
+  const renderOutfitItem = useCallback(({ item }) => <OutfitRecCard rec={item} />, []);
+
+  // List header component containing all sections
+  const ListHeaderComponent = useCallback(() => (
+    <View>
+      {/* Style Profile Card */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Your Style Profile</Text>
+        <LinearGradient
+          colors={['rgba(177, 76, 255, 0.2)', 'rgba(177, 76, 255, 0.05)']}
+          style={styles.profileCard}
+        >
+          <View style={styles.profileHeader}>
+            <MaterialCommunityIcons name="account-star" size={48} color={COLORS.primary} />
+            <View style={styles.profileInfo}>
+              <Text style={styles.profileTitle}>Style DNA</Text>
+              <Text style={styles.profileSubtitle}>AI-Generated Profile</Text>
+            </View>
+          </View>
+
+          {/* Personality Tags */}
+          <View style={styles.tagsContainer}>
+            {styleProfile.personalities.map((tag, idx) => (
+              <View key={idx} style={styles.personalityTag}>
+                <Text style={styles.personalityTagText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Color Palette */}
+          <View style={styles.colorSection}>
+            <Text style={styles.colorSectionTitle}>Your Color Palette</Text>
+            <View style={styles.colorPalette}>
+              {styleProfile.colorPalette.map((color, idx) => (
+                <View key={idx} style={styles.colorItem}>
+                  <View style={[styles.colorCircle, { backgroundColor: color.color }]} />
+                  <Text style={styles.colorName}>{color.desc}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </LinearGradient>
+      </View>
+
+      {/* Celebrity Matches */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Celebrity Style Matches</Text>
+        <HorizontalList 
+          data={styleProfile.celebrityMatches} 
+          renderItem={renderCelebItem} 
+          keyPrefix="celeb"
+          itemWidth={CELEB_CARD_WIDTH}
+        />
+      </View>
+
+      {/* Daily Outfit Recommendations */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Today's Outfit Picks</Text>
+          <MaterialCommunityIcons name="weather-sunny" size={20} color={COLORS.accent} />
+        </View>
+        {dailyRecommendations.map((rec) => (
+          <OutfitRecCard key={rec.id} rec={rec} />
+        ))}
+      </View>
+
+      {/* Makeup Recommendations */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Makeup Look Suggestions</Text>
+        <HorizontalList 
+          data={makeupRecommendations} 
+          renderItem={renderMakeupItem} 
+          keyPrefix="makeup"
+          itemWidth={MAKEUP_CARD_WIDTH}
+        />
+      </View>
+
+      {/* Seasonal Capsule */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Your Seasonal Capsule</Text>
+        <Text style={styles.sectionSubtitle}>Essential items for your wardrobe</Text>
+        <View style={styles.capsuleGrid}>
+          {seasonalCapsule.map((item) => (
+            <CapsuleItem key={item.id} item={item} />
+          ))}
+        </View>
+      </View>
+
+      {/* Refresh Button */}
+      <View style={styles.section}>
+        <GradientButton
+          title="Generate New Recommendations"
+          onPress={refreshPersonalization}
+          icon={<MaterialCommunityIcons name="autorenew" size={20} color="#fff" />}
+          style={styles.refreshMainButton}
+        />
+      </View>
+
+      <View style={styles.bottomPadding} />
+    </View>
+  ), [styleProfile, dailyRecommendations, makeupRecommendations, seasonalCapsule, renderCelebItem, renderMakeupItem, refreshPersonalization]);
+
+  // Empty data for parent FlatList
+  const emptyData = useMemo(() => [], []);
+
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       {/* Header */}
@@ -49,155 +254,22 @@ export default function AddiletsScreen() {
           <Text style={styles.headerTitle}>Addilets</Text>
         </View>
         <TouchableOpacity onPress={refreshPersonalization} style={styles.refreshButton}>
-          <MaterialCommunityIcons 
-            name="refresh" 
-            size={24} 
-            color={COLORS.textPrimary} 
-            style={loading && styles.spinning}
-          />
+          <MaterialCommunityIcons name="refresh" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Style Profile Card */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Style Profile</Text>
-          <LinearGradient
-            colors={['rgba(177, 76, 255, 0.2)', 'rgba(177, 76, 255, 0.05)']}
-            style={styles.profileCard}
-          >
-            <View style={styles.profileHeader}>
-              <MaterialCommunityIcons name="account-star" size={48} color={COLORS.primary} />
-              <View style={styles.profileInfo}>
-                <Text style={styles.profileTitle}>Style DNA</Text>
-                <Text style={styles.profileSubtitle}>AI-Generated Profile</Text>
-              </View>
-            </View>
-
-            {/* Personality Tags */}
-            <View style={styles.tagsContainer}>
-              {styleProfile.personalities.map((tag, idx) => (
-                <View key={idx} style={styles.personalityTag}>
-                  <Text style={styles.personalityTagText}>{tag}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Color Palette */}
-            <View style={styles.colorSection}>
-              <Text style={styles.colorSectionTitle}>Your Color Palette</Text>
-              <View style={styles.colorPalette}>
-                {styleProfile.colorPalette.map((color, idx) => (
-                  <View key={idx} style={styles.colorItem}>
-                    <View style={[styles.colorCircle, { backgroundColor: color.color }]} />
-                    <Text style={styles.colorName}>{color.desc}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-
-        {/* Celebrity Matches */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Celebrity Style Matches</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {styleProfile.celebrityMatches.map((celeb) => (
-              <View key={celeb.name} style={styles.celebCard}>
-                <Image source={{ uri: celeb.image }} style={styles.celebImage} />
-                <LinearGradient
-                  colors={['transparent', 'rgba(0,0,0,0.8)']}
-                  style={styles.celebOverlay}
-                >
-                  <Text style={styles.celebName}>{celeb.name}</Text>
-                  <View style={styles.matchBadge}>
-                    <MaterialCommunityIcons name="star" size={14} color={COLORS.accent} />
-                    <Text style={styles.matchText}>{celeb.match}% Match</Text>
-                  </View>
-                </LinearGradient>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Daily Outfit Recommendations */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Outfit Picks</Text>
-            <MaterialCommunityIcons name="weather-sunny" size={20} color={COLORS.accent} />
-          </View>
-          {dailyRecommendations.map((rec) => (
-            <TouchableOpacity key={rec.id} style={styles.recCard} activeOpacity={0.8}>
-              <Image source={{ uri: rec.image }} style={styles.recImage} />
-              <View style={styles.recContent}>
-                <Text style={styles.recTitle}>{rec.title}</Text>
-                <View style={styles.recMeta}>
-                  <View style={styles.recMetaItem}>
-                    <MaterialCommunityIcons name="tag" size={14} color={COLORS.textSecondary} />
-                    <Text style={styles.recMetaText}>{rec.occasion}</Text>
-                  </View>
-                  <View style={styles.recMetaItem}>
-                    <MaterialCommunityIcons name="weather-cloudy" size={14} color={COLORS.textSecondary} />
-                    <Text style={styles.recMetaText}>{rec.weather}</Text>
-                  </View>
-                </View>
-                <Text style={styles.recReason}>{rec.reason}</Text>
-                <View style={styles.confidenceBadge}>
-                  <View style={[styles.confidenceBar, { width: `${rec.confidence}%` }]} />
-                  <Text style={styles.confidenceText}>{rec.confidence}% Confidence</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Makeup Recommendations */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Makeup Look Suggestions</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {makeupRecommendations.map((makeup) => (
-              <TouchableOpacity key={makeup.id} style={styles.makeupCard} activeOpacity={0.8}>
-                <Image source={{ uri: makeup.image }} style={styles.makeupImage} />
-                <LinearGradient
-                  colors={['transparent', 'rgba(0,0,0,0.9)']}
-                  style={styles.makeupOverlay}
-                >
-                  <Text style={styles.makeupTitle}>{makeup.title}</Text>
-                  <Text style={styles.makeupVibe}>{makeup.vibe}</Text>
-                  <View style={styles.makeupMatch}>
-                    <MaterialCommunityIcons name="heart" size={14} color="#FF6EC7" />
-                    <Text style={styles.makeupMatchText}>{makeup.match}% Match</Text>
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Seasonal Capsule */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Seasonal Capsule</Text>
-          <Text style={styles.sectionSubtitle}>Essential items for your wardrobe</Text>
-          <View style={styles.capsuleGrid}>
-            {seasonalCapsule.map((item) => (
-              <View key={item.id} style={styles.capsuleItem}>
-                <Image source={{ uri: item.image }} style={styles.capsuleImage} />
-                <Text style={styles.capsuleName}>{item.name}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Refresh Button */}
-        <GradientButton
-          title="Generate New Recommendations"
-          onPress={refreshPersonalization}
-          icon={<MaterialCommunityIcons name="autorenew" size={20} color="#fff" />}
-          style={styles.refreshMainButton}
-        />
-
-        <View style={styles.bottomPadding} />
-      </ScrollView>
+      <FlatList
+        data={emptyData}
+        renderItem={() => null}
+        ListHeaderComponent={ListHeaderComponent}
+        keyExtractor={() => 'main'}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+        removeClippedSubviews={true}
+        windowSize={5}
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+      />
     </LinearGradient>
   );
 }
@@ -205,6 +277,9 @@ export default function AddiletsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',
@@ -235,12 +310,6 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  spinning: {
-    // Animation would be added here
-  },
-  scrollView: {
-    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -348,8 +417,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   celebCard: {
-    width: 140,
-    height: 200,
+    width: CELEB_CARD_WIDTH,
+    height: CELEB_CARD_HEIGHT,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
     marginRight: 16,
@@ -404,7 +473,7 @@ const styles = StyleSheet.create({
   },
   recMeta: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
     marginBottom: 8,
   },
   recMetaItem: {
@@ -417,18 +486,15 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   recReason: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
+    fontSize: 12,
+    color: COLORS.textMuted,
     marginBottom: 12,
-    fontStyle: 'italic',
   },
   confidenceBadge: {
-    position: 'relative',
     height: 20,
-    backgroundColor: 'rgba(177, 76, 255, 0.1)',
+    backgroundColor: 'rgba(177, 76, 255, 0.2)',
     borderRadius: 10,
     overflow: 'hidden',
-    justifyContent: 'center',
   },
   confidenceBar: {
     position: 'absolute',
@@ -439,15 +505,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   confidenceText: {
-    fontSize: 11,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
     textAlign: 'center',
-    zIndex: 1,
+    lineHeight: 20,
   },
   makeupCard: {
-    width: 180,
-    height: 240,
+    width: MAKEUP_CARD_WIDTH,
+    height: MAKEUP_CARD_HEIGHT,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
     marginRight: 16,
@@ -461,7 +527,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 16,
+    padding: 12,
   },
   makeupTitle: {
     fontSize: 16,
@@ -470,8 +536,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   makeupVibe: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.7)',
     marginBottom: 8,
   },
   makeupMatch: {
@@ -487,29 +553,28 @@ const styles = StyleSheet.create({
   capsuleGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 16,
   },
   capsuleItem: {
-    width: '48%',
-    backgroundColor: COLORS.card,
-    borderRadius: SIZES.borderRadiusCard,
-    overflow: 'hidden',
+    width: CAPSULE_ITEM_WIDTH,
+    alignItems: 'center',
   },
   capsuleImage: {
-    width: '100%',
-    height: 140,
+    width: CAPSULE_ITEM_WIDTH,
+    height: CAPSULE_ITEM_WIDTH,
+    borderRadius: SIZES.borderRadiusCard,
+    marginBottom: 8,
   },
   capsuleName: {
-    padding: 12,
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textPrimary,
+    textAlign: 'center',
   },
   refreshMainButton: {
-    marginHorizontal: 20,
-    marginTop: 16,
+    width: '100%',
   },
   bottomPadding: {
-    height: 40,
+    height: 80,
   },
 });
