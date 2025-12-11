@@ -10,16 +10,23 @@ import { asCardItem } from '../utils/helpers';
 const BeautyCard = memo(({ item, onPress, isLeft }) => {
   const { toggleBeautyFavorite, isBeautyFavorite } = useFavorites();
   
+  // Early return if item is invalid
+  if (!item) {
+    return null;
+  }
+  
   // Normalize the card with fallback
-  const card = asCardItem(item) || { id: Date.now().toString(), imageToUse: null };
-  const cardId = card.id || `temp-${Date.now()}`;
-  const isFavorite = isBeautyFavorite(cardId);
+  const card = asCardItem(item) || {};
+  const cardId = card.id || card._id || `temp-${Date.now()}`;
+  const isFavorite = cardId ? isBeautyFavorite(cardId) : false;
 
   const handleFavoritePress = (e) => {
     if (e && e.stopPropagation) {
       e.stopPropagation();
     }
-    toggleBeautyFavorite(card);
+    if (card && cardId) {
+      toggleBeautyFavorite({ ...card, id: cardId });
+    }
   };
 
   const handleTryOn = (e) => {
