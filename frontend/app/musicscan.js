@@ -6,16 +6,21 @@ import {
   TouchableOpacity,
   Animated,
   Alert,
-  Platform,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import { recognizeMusic } from '../services/api';
 
 export default function MusicScanScreen() {
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams();
+  const returnPath = params.returnPath || '/discover';
+  
   const [isListening, setIsListening] = useState(false);
   const [recording, setRecording] = useState(null);
   const [status, setStatus] = useState('idle'); // idle, listening, processing, error
@@ -76,6 +81,16 @@ export default function MusicScanScreen() {
       ringAnim3.setValue(0);
     }
   }, [isListening]);
+
+  const handleBack = () => {
+    // Use router.back() for proper stack navigation
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      // Fallback to discover if no history
+      router.replace('/discover');
+    }
+  };
 
   const startListening = async () => {
     try {
@@ -221,11 +236,11 @@ export default function MusicScanScreen() {
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Header with Safe Area */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
@@ -233,91 +248,116 @@ export default function MusicScanScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      {/* Main Content */}
-      <View style={styles.content}>
-        <Text style={styles.title}>Identify Any Song</Text>
-        <Text style={styles.subtitle}>
-          Play a song nearby and tap the button to identify it
-        </Text>
-
-        {/* Listening Animation Area */}
-        <View style={styles.animationContainer}>
-          {isListening && (
-            <>
-              {renderRing(ringAnim1, 200)}
-              {renderRing(ringAnim2, 200)}
-              {renderRing(ringAnim3, 200)}
-            </>
-          )}
-          
-          <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-            <TouchableOpacity
-              style={[
-                styles.scanButton,
-                isListening && styles.scanButtonActive,
-                { borderColor: getStatusColor() }
-              ]}
-              onPress={handlePress}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={isListening 
-                  ? ['rgba(78, 205, 196, 0.3)', 'rgba(78, 205, 196, 0.1)']
-                  : ['rgba(177, 76, 255, 0.3)', 'rgba(177, 76, 255, 0.1)']}
-                style={styles.scanButtonGradient}
-              >
-                <MaterialCommunityIcons
-                  name={isListening ? 'waveform' : 'music-circle'}
-                  size={64}
-                  color={getStatusColor()}
-                />
-              </LinearGradient>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-
-        {/* Status Text */}
-        <View style={styles.statusContainer}>
-          <Text style={[styles.statusText, { color: getStatusColor() }]}>
-            {statusText}
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 40 }
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Main Content */}
+        <View style={styles.content}>
+          <Text style={styles.title}>Identify Any Song</Text>
+          <Text style={styles.subtitle}>
+            Play a song nearby and tap the button to identify it
           </Text>
-          {status === 'processing' && (
-            <MaterialCommunityIcons 
-              name="loading" 
-              size={20} 
-              color={COLORS.primary} 
-              style={styles.loadingIcon}
-            />
-          )}
-        </View>
 
-        {/* Instructions */}
-        <View style={styles.instructions}>
-          <View style={styles.instructionItem}>
-            <MaterialCommunityIcons name="numeric-1-circle" size={24} color={COLORS.primary} />
-            <Text style={styles.instructionText}>Play a song on any device</Text>
+          {/* Listening Animation Area */}
+          <View style={styles.animationContainer}>
+            {isListening && (
+              <>
+                {renderRing(ringAnim1, 200)}
+                {renderRing(ringAnim2, 200)}
+                {renderRing(ringAnim3, 200)}
+              </>
+            )}
+            
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <TouchableOpacity
+                style={[
+                  styles.scanButton,
+                  isListening && styles.scanButtonActive,
+                  { borderColor: getStatusColor() }
+                ]}
+                onPress={handlePress}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={isListening 
+                    ? ['rgba(78, 205, 196, 0.3)', 'rgba(78, 205, 196, 0.1)']
+                    : ['rgba(177, 76, 255, 0.3)', 'rgba(177, 76, 255, 0.1)']}
+                  style={styles.scanButtonGradient}
+                >
+                  <MaterialCommunityIcons
+                    name={isListening ? 'waveform' : 'music-circle'}
+                    size={64}
+                    color={getStatusColor()}
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
           </View>
-          <View style={styles.instructionItem}>
-            <MaterialCommunityIcons name="numeric-2-circle" size={24} color={COLORS.primary} />
-            <Text style={styles.instructionText}>Tap the button above</Text>
+
+          {/* Status Text */}
+          <View style={styles.statusContainer}>
+            <Text style={[styles.statusText, { color: getStatusColor() }]}>
+              {statusText}
+            </Text>
+            {status === 'processing' && (
+              <MaterialCommunityIcons 
+                name="loading" 
+                size={20} 
+                color={COLORS.primary} 
+                style={styles.loadingIcon}
+              />
+            )}
           </View>
-          <View style={styles.instructionItem}>
-            <MaterialCommunityIcons name="numeric-3-circle" size={24} color={COLORS.primary} />
-            <Text style={styles.instructionText}>Get song details instantly</Text>
+
+          {/* Instructions */}
+          <View style={styles.instructions}>
+            <Text style={styles.instructionsTitle}>How it works</Text>
+            <View style={styles.instructionItem}>
+              <View style={styles.stepCircle}>
+                <Text style={styles.stepNumber}>1</Text>
+              </View>
+              <Text style={styles.instructionText}>Play a song on any device near you</Text>
+            </View>
+            <View style={styles.instructionItem}>
+              <View style={styles.stepCircle}>
+                <Text style={styles.stepNumber}>2</Text>
+              </View>
+              <Text style={styles.instructionText}>Tap the scan button above to start listening</Text>
+            </View>
+            <View style={styles.instructionItem}>
+              <View style={styles.stepCircle}>
+                <Text style={styles.stepNumber}>3</Text>
+              </View>
+              <Text style={styles.instructionText}>Get song details, lyrics, and more instantly</Text>
+            </View>
+          </View>
+
+          {/* Browse Trending */}
+          <TouchableOpacity
+            style={styles.browseButton}
+            onPress={() => router.push('/trendingsongs')}
+            activeOpacity={0.8}
+          >
+            <MaterialCommunityIcons name="trending-up" size={20} color={COLORS.textPrimary} />
+            <Text style={styles.browseButtonText}>Browse Trending Songs</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textSecondary} />
+          </TouchableOpacity>
+
+          {/* Tip Section */}
+          <View style={styles.tipCard}>
+            <MaterialCommunityIcons name="lightbulb-outline" size={20} color={COLORS.accent} />
+            <Text style={styles.tipText}>
+              Tip: For best results, hold your phone closer to the audio source and reduce background noise.
+            </Text>
           </View>
         </View>
-
-        {/* Browse Trending */}
-        <TouchableOpacity
-          style={styles.browseButton}
-          onPress={() => router.push('/trendingsongs')}
-          activeOpacity={0.8}
-        >
-          <MaterialCommunityIcons name="trending-up" size={20} color={COLORS.textPrimary} />
-          <Text style={styles.browseButtonText}>Browse Trending Songs</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textSecondary} />
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -331,12 +371,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 16,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -346,18 +387,23 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   placeholder: {
-    width: 40,
+    width: 44,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
-    flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    marginTop: 20,
+    marginTop: 16,
     textAlign: 'center',
   },
   subtitle: {
@@ -366,14 +412,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     lineHeight: 22,
+    paddingHorizontal: 20,
   },
   animationContainer: {
     width: 200,
     height: 200,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 20,
+    marginTop: 32,
+    marginBottom: 16,
   },
   ring: {
     position: 'absolute',
@@ -399,7 +446,7 @@ const styles = StyleSheet.create({
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 16,
     gap: 8,
   },
   statusText: {
@@ -411,18 +458,42 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   instructions: {
-    marginTop: 40,
+    marginTop: 32,
     width: '100%',
+    backgroundColor: COLORS.card,
+    borderRadius: SIZES.borderRadiusCard,
+    padding: 20,
+  },
+  instructionsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 16,
   },
   instructionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    gap: 16,
+    paddingVertical: 10,
+    gap: 14,
+  },
+  stepCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stepNumber: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   instructionText: {
-    fontSize: 15,
+    flex: 1,
+    fontSize: 14,
     color: COLORS.textSecondary,
+    lineHeight: 20,
   },
   browseButton: {
     flexDirection: 'row',
@@ -431,7 +502,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: SIZES.borderRadiusCard,
-    marginTop: 32,
+    marginTop: 24,
     width: '100%',
     gap: 12,
   },
@@ -440,5 +511,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.textPrimary,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(255, 183, 77, 0.1)',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginTop: 20,
+    width: '100%',
+    gap: 12,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
   },
 });
