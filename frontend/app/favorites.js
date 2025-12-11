@@ -152,6 +152,15 @@ export default function FavoritesScreen() {
             numColumns={2}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={5}
+            windowSize={5}
+            initialNumToRender={6}
+            getItemLayout={(data, index) => ({
+              length: 260,
+              offset: 260 * Math.floor(index / 2),
+              index,
+            })}
           />
         ) : (
           renderEmptyState('outfits')
@@ -165,6 +174,15 @@ export default function FavoritesScreen() {
             numColumns={2}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={5}
+            windowSize={5}
+            initialNumToRender={6}
+            getItemLayout={(data, index) => ({
+              length: 260,
+              offset: 260 * Math.floor(index / 2),
+              index,
+            })}
           />
         ) : (
           renderEmptyState('beauty')
