@@ -282,12 +282,11 @@ export default function StyleDiscovery() {
             </TouchableOpacity>
           </View>
           <Text style={styles.forYouSubtitle}>Based on your style profile</Text>
-          <ScrollView
+          <FlatList
             horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.forYouScrollContent}
-          >
-            {addiletsRecommendations.map((rec) => (
+            data={addiletsRecommendations}
+            keyExtractor={(item) => item.id?.toString()}
+            renderItem={({ item: rec }) => (
               <TouchableOpacity
                 key={rec.id}
                 style={styles.forYouCard}
@@ -306,22 +305,31 @@ export default function StyleDiscovery() {
                   <Text style={styles.forYouOccasion}>{rec.occasion}</Text>
                 </LinearGradient>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.forYouScrollContent}
+            initialNumToRender={3}
+            maxToRenderPerBatch={3}
+            windowSize={3}
+            removeClippedSubviews={true}
+            getItemLayout={(data, index) => ({
+              length: 172,
+              offset: 172 * index,
+              index,
+            })}
+          />
         </View>
       )}
       
       {celebrityOutfits.length > 0 && (
         <View style={styles.celebritySection}>
           <Text style={styles.sectionTitle}>Dress Like Your Icon</Text>
-          <ScrollView
+          <FlatList
             horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.celebrityScrollContent}
-          >
-            {celebrityOutfits.map((outfit) => (
+            data={celebrityOutfits}
+            keyExtractor={(item) => item.id?.toString()}
+            renderItem={({ item: outfit }) => (
               <TouchableOpacity
-                key={outfit.id}
                 style={styles.celebrityCard}
                 onPress={() => handleCelebrityPress(outfit)}
               >
@@ -332,8 +340,19 @@ export default function StyleDiscovery() {
                   {outfit.title}
                 </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.celebrityScrollContent}
+            initialNumToRender={4}
+            maxToRenderPerBatch={4}
+            windowSize={3}
+            removeClippedSubviews={true}
+            getItemLayout={(data, index) => ({
+              length: 136,
+              offset: 136 * index,
+              index,
+            })}
+          />
         </View>
       )}
     </View>
