@@ -41,6 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/addilets', addiletsRoutes);
+app.use('/api/body-scan', bodyScanRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
