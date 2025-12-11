@@ -18,6 +18,7 @@ import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import GradientChip from '../components/GradientChip';
+import { uploadImage, pollJobResult } from '../services/revealAPI';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.85;
