@@ -55,10 +55,48 @@ export const AddiletsProvider = ({ children }) => {
     }
   };
 
-  const generatePersonalization = () => {
+  const generatePersonalization = async () => {
     setLoading(true);
 
-    // Mock AI Logic - Analyze user's favorites
+    try {
+      // Try to use backend API for Reveal DNA generation
+      console.log('🧬 Calling Reveal DNA API...');
+      const response = await fetch(`${API_BASE_URL}/api/reveal-dna/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          favorites: favoriteOutfits,
+          wardrobe: [],
+        }),
+      });
+
+      if (response.ok) {
+        const profile = await response.json();
+        console.log('✅ Reveal DNA profile from API:', profile);
+
+        // Build personalization from API response
+        const stylePersonalities = profile.styleDNA || ['Minimalist', 'Casual', 'Versatile'];
+        const colorPalette = (profile.colorPalette || ['#1A1A1A', '#FFFFFF', '#B14CFF', '#FF6EC7']).map((color, idx) => {
+          const descs = ['Black', 'White', 'Purple', 'Pink'];
+          return { name: `Color ${idx + 1}`, color, desc: descs[idx] || color };
+        });
+        const celebrityMatches = profile.celebrityMatches || [];
+
+        const newPersonalization = buildPersonalization(stylePersonalities, colorPalette, celebrityMatches);
+        setPersonalization(newPersonalization);
+        persistData(newPersonalization);
+        setLoading(false);
+        return;
+      }
+      
+      throw new Error('API failed');
+    } catch (error) {
+      console.log('⚠️ Using local Reveal DNA generation:', error.message);
+    }
+
+    // Fallback to local mock generation
     const allTags = [];
     favoriteOutfits.forEach(item => {
       if (item.tags) allTags.push(...item.tags);
@@ -95,6 +133,13 @@ export const AddiletsProvider = ({ children }) => {
       { name: 'Hailey Bieber', match: 85, image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80' },
     ];
 
+    const newPersonalization = buildPersonalization(stylePersonalities, colorPalette, celebrityMatches);
+    setPersonalization(newPersonalization);
+    persistData(newPersonalization);
+    setLoading(false);
+  };
+
+  const buildPersonalization = (stylePersonalities, colorPalette, celebrityMatches) => {
     // Generate daily outfit recommendations
     const outfitRecommendations = [
       {
@@ -167,8 +212,7 @@ export const AddiletsProvider = ({ children }) => {
       { id: 4, name: 'Blazer', category: 'outerwear', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200&q=80' },
     ];
 
-    // Set personalization data
-    const newPersonalization = {
+    return {
       styleProfile: {
         personalities: stylePersonalities,
         colorPalette,
@@ -185,10 +229,6 @@ export const AddiletsProvider = ({ children }) => {
         occasions: ['Casual', 'Business Casual', 'Smart Casual'],
       },
     };
-
-    setPersonalization(newPersonalization);
-    persistData(newPersonalization);
-    setLoading(false);
   };
 
   const refreshPersonalization = () => {
