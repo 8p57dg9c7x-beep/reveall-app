@@ -1,7 +1,7 @@
 /**
  * Reveal Job Queue
- * In-Memory Job Queue with MongoDB persistence
- * Simulates Bull/Redis queue for local development
+ * In-Memory Queue with MongoDB persistence (Bull-like interface)
+ * Uses local storage for S3 mock
  */
 
 const { processJob } = require('./aiOrchestrator');
@@ -19,7 +19,7 @@ let jobIdCounter = 1;
  * @returns {Object} Created job
  */
 async function createJob(data) {
-  const jobId = `job_${Date.now()}_${jobIdCounter++}`;
+  const jobId = `queue_${Date.now()}_${jobIdCounter++}`;
   
   const job = {
     id: jobId,
@@ -32,28 +32,9 @@ async function createJob(data) {
 
   jobs.set(jobId, job);
   
-  // Persist to MongoDB
-  try {
-    const dbJob = new AIJob({
-      type: data.type || 'upload',
-      status: 'pending',
-      input: {
-        jobId,
-        ...data
-      },
-      output: {}
-    });
-    await dbJob.save();
-    job.mongoId = dbJob._id.toString();
-    console.log(`💾 Job ${jobId} persisted to MongoDB (${job.mongoId})`);
-  } catch (err) {
-    console.warn(`⚠️ MongoDB persistence failed for ${jobId}:`, err.message);
-    // Continue anyway - in-memory queue will handle it
-  }
+  console.log(`📦 Queue job ${jobId} created`);
   
-  console.log(`📦 Job ${jobId} created and queued`);
-  
-  // Process job asynchronously (simulate queue processing)
+  // Process job asynchronously (simulate Bull queue processing)
   setTimeout(() => processJobAsync(jobId), 100);
   
   return job;
@@ -89,24 +70,6 @@ async function updateJob(jobId, updates) {
       updatedAt: new Date().toISOString()
     });
     jobs.set(jobId, job);
-    
-    // Update MongoDB if we have a mongoId
-    if (job.mongoId) {
-      try {
-        const dbStatus = updates.status === 'completed' ? 'completed' 
-          : updates.status === 'failed' ? 'failed' 
-          : updates.status === 'processing' ? 'processing' 
-          : 'pending';
-        
-        await AIJob.findByIdAndUpdate(job.mongoId, {
-          status: dbStatus,
-          ...(updates.error && { error: updates.error }),
-          updatedAt: new Date()
-        });
-      } catch (err) {
-        console.warn(`⚠️ MongoDB update failed for ${jobId}`);
-      }
-    }
   }
 }
 
@@ -115,15 +78,25 @@ async function updateJob(jobId, updates) {
  * @param {string} jobId
  */
 async function processJobAsync(jobId) {
-  try {
-    const job = getJob(jobId);
-    if (!job) {
-      console.error(`❌ Job ${jobId} not found`);
-      return;
-    }
+  const job = getJob(jobId);
+  if (!job) {
+    console.error(`❌ Queue job ${jobId} not found`);
+    return;
+  }
 
-    console.log(`⚙️  Processing job ${jobId}...`);
+  const mongoJobId = job.data.mongoJobId;
+
+  try {
+    console.log(`⚙️  Processing queue job ${jobId}...`);
     await updateJob(jobId, { status: 'processing', progress: 25 });
+
+    // Update MongoDB job status
+    if (mongoJobId) {
+      await AIJob.findByIdAndUpdate(mongoJobId, {
+        status: 'processing',
+        updatedAt: new Date()
+      });
+    }
 
     // Call AI orchestrator to process the job
     const result = await processJob(job);
@@ -132,17 +105,13 @@ async function processJobAsync(jobId) {
     jobResults.set(jobId, result);
     
     // Update MongoDB with result
-    if (job.mongoId) {
-      try {
-        await AIJob.findByIdAndUpdate(job.mongoId, {
-          status: 'completed',
-          output: result,
-          updatedAt: new Date()
-        });
-        console.log(`💾 Job ${jobId} result persisted to MongoDB`);
-      } catch (err) {
-        console.warn(`⚠️ MongoDB result save failed for ${jobId}`);
-      }
+    if (mongoJobId) {
+      await AIJob.findByIdAndUpdate(mongoJobId, {
+        status: 'completed',
+        output: result,
+        updatedAt: new Date()
+      });
+      console.log(`💾 MongoDB job ${mongoJobId} completed with results`);
     }
     
     await updateJob(jobId, {
@@ -151,15 +120,24 @@ async function processJobAsync(jobId) {
       completedAt: new Date().toISOString()
     });
 
-    console.log(`✅ Job ${jobId} completed successfully`);
+    console.log(`✅ Queue job ${jobId} completed successfully`);
   } catch (error) {
-    console.error(`❌ Job ${jobId} failed:`, error.message);
+    console.error(`❌ Queue job ${jobId} failed:`, error.message);
     
     await updateJob(jobId, {
       status: 'failed',
       error: error.message,
       failedAt: new Date().toISOString()
     });
+
+    // Update MongoDB with error
+    if (mongoJobId) {
+      await AIJob.findByIdAndUpdate(mongoJobId, {
+        status: 'failed',
+        error: error.message,
+        updatedAt: new Date()
+      });
+    }
   }
 }
 
@@ -178,7 +156,7 @@ function clearAllJobs() {
   jobs.clear();
   jobResults.clear();
   jobIdCounter = 1;
-  console.log('🗑️  All jobs cleared');
+  console.log('🗑️  All queue jobs cleared');
 }
 
 module.exports = {
