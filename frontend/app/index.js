@@ -166,33 +166,6 @@ export default function HomeScreen() {
           })}
         />
       </View>
-
-      {/* Explore More */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Explore</Text>
-        <View style={styles.exploreGrid}>
-          <TouchableOpacity 
-            style={styles.exploreCard}
-            onPress={() => router.push('/discover')}
-            activeOpacity={0.8}
-          >
-            <LinearGradient colors={['#4ECDC420', '#4ECDC410']} style={styles.exploreGradient}>
-              <MaterialCommunityIcons name="compass" size={28} color="#4ECDC4" />
-              <Text style={styles.exploreText}>Discover</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.exploreCard}
-            onPress={() => router.push('/beauty')}
-            activeOpacity={0.8}
-          >
-            <LinearGradient colors={['#FF6EC720', '#FF6EC710']} style={styles.exploreGradient}>
-              <MaterialCommunityIcons name="lipstick" size={28} color="#FF6EC7" />
-              <Text style={styles.exploreText}>Beauty Hub</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      </View>
     </View>
   ), [personalization, quickActions, trendingStyles, renderQuickAction, renderStyleCard]);
 
