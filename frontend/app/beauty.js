@@ -209,14 +209,12 @@ export default function BeautyScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.addiletsSubtitle}>Based on your beauty preferences</Text>
-          <ScrollView
+          <FlatList
             horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.addiletsScroll}
-          >
-            {makeupRecommendations.map((makeup) => (
+            data={makeupRecommendations}
+            keyExtractor={(item) => item.id?.toString()}
+            renderItem={({ item: makeup }) => (
               <TouchableOpacity
-                key={makeup.id}
                 style={styles.addiletsCard}
                 activeOpacity={0.8}
               >
@@ -233,8 +231,19 @@ export default function BeautyScreen() {
                   </View>
                 </LinearGradient>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.addiletsScroll}
+            initialNumToRender={3}
+            maxToRenderPerBatch={3}
+            windowSize={3}
+            removeClippedSubviews={true}
+            getItemLayout={(data, index) => ({
+              length: 172,
+              offset: 172 * index,
+              index,
+            })}
+          />
         </View>
       )}
     </View>
