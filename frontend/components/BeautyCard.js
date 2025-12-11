@@ -10,9 +10,10 @@ import { asCardItem } from '../utils/helpers';
 const BeautyCard = memo(({ item, onPress, isLeft }) => {
   const { toggleBeautyFavorite, isBeautyFavorite } = useFavorites();
   
-  // Normalize the card
-  const card = asCardItem(item);
-  const isFavorite = isBeautyFavorite(card.id);
+  // Normalize the card with fallback
+  const card = asCardItem(item) || { id: Date.now().toString(), imageToUse: null };
+  const cardId = card.id || `temp-${Date.now()}`;
+  const isFavorite = isBeautyFavorite(cardId);
 
   const handleFavoritePress = (e) => {
     if (e && e.stopPropagation) {
