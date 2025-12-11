@@ -166,7 +166,7 @@ export default function BeautyScreen() {
 
   const renderBeautyItem = useCallback(({ item }) => (
     <BeautyCard
-      look={item}
+      item={item}
       onPress={() => handleLookPress(item)}
       style={styles.beautyCard}
     />
