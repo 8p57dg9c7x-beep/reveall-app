@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFavorites } from './FavoritesContext';
+import { API_BASE_URL } from '../config';
 
 const AddiletsContext = createContext();
 const STORAGE_KEY = '@addilets_personalization';
