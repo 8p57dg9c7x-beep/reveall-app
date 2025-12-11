@@ -15,6 +15,7 @@ import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
+import { uploadMultipleImages, pollJobResult } from '../services/revealAPI';
 
 export default function BodyScannerScreen() {
   const [step, setStep] = useState(1); // 1: Instructions, 2: Capture, 3: Results
