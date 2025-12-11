@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
 
-// Bundle Version: 2.3.0 - Addilets personalization system
+// Bundle Version: 3.0.0 - Navigation Fix: Only 5 bottom tabs
 export default function RootLayout() {
   return (
     <FavoritesProvider>
@@ -33,10 +33,10 @@ export default function RootLayout() {
             fontSize: 11,
             fontWeight: '600',
             marginTop: -4,
-            fontFamily: 'Inter',
           },
         }}
       >
+        {/* ===== VISIBLE TABS (Only 5) ===== */}
         <Tabs.Screen
           name="index"
           options={{
@@ -52,24 +52,6 @@ export default function RootLayout() {
             title: 'Discover',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="compass" size={26} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="watchlist"
-          options={{
-            title: 'Watchlist',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="bookmark" size={26} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="search"
-          options={{
-            title: 'Search',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="magnify" size={26} color={color} />
             ),
           }}
         />
@@ -100,59 +82,67 @@ export default function RootLayout() {
             ),
           }}
         />
+
+        {/* ===== HIDDEN STACK SCREENS - AI Tools ===== */}
         <Tabs.Screen
-          name="analytics"
-          options={{
-            href: null, // Hide from tabs - accessed via settings/admin
-          }}
+          name="addilets"
+          options={{ href: null }}
         />
         <Tabs.Screen
-          name="comingsoon"
-          options={{
-            href: null, // Hide from tabs
-          }}
+          name="aistylist"
+          options={{ href: null }}
         />
+        <Tabs.Screen
+          name="aiwardrobe"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="bodyscanner"
+          options={{ href: null }}
+        />
+
+        {/* ===== HIDDEN STACK SCREENS - Detail/Result Pages ===== */}
         <Tabs.Screen
           name="result"
-          options={{
-            href: null, // Hide from tabs
-          }}
+          options={{ href: null }}
         />
         <Tabs.Screen
           name="outfitdetail"
-          options={{
-            href: null, // Hide from tabs
-          }}
+          options={{ href: null }}
         />
         <Tabs.Screen
           name="beautydetail"
-          options={{
-            href: null, // Hide from tabs
-          }}
+          options={{ href: null }}
+        />
+
+        {/* ===== HIDDEN STACK SCREENS - Other Pages ===== */}
+        <Tabs.Screen
+          name="watchlist"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="analytics"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="comingsoon"
+          options={{ href: null }}
         />
         <Tabs.Screen
           name="trendingsongs"
-          options={{
-            href: null, // Hide from tabs
-          }}
+          options={{ href: null }}
         />
         <Tabs.Screen
           name="saved-outfits"
-          options={{
-            href: null, // Hide from tabs
-          }}
+          options={{ href: null }}
         />
         <Tabs.Screen
           name="saved-beauty"
-          options={{
-            href: null, // Hide from tabs
-          }}
+          options={{ href: null }}
         />
         <Tabs.Screen
           name="universal-search"
-          options={{
-            href: null, // Hide from tabs - accessed via header buttons
-          }}
+          options={{ href: null }}
         />
       </Tabs>
       </GestureHandlerRootView>
