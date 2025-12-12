@@ -600,6 +600,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    ...CARD_SHADOW,
   },
   celebrityPlaceholder: {
     color: COLORS.textSecondary,
