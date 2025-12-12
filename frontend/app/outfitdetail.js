@@ -139,7 +139,7 @@ export default function OutfitDetail() {
   return (
     <ScrollView ref={scrollRef} style={{ flex: 1, backgroundColor: "#0D001A" }}>
 
-      {/* Hero Image with Share Button */}
+      {/* Hero Image with Share Button and Back Button */}
       <View style={{ position: 'relative' }}>
         <Image
           source={{ uri: outfit.imageToUse }}
@@ -151,6 +151,24 @@ export default function OutfitDetail() {
           }}
           resizeMode="cover"
         />
+        
+        {/* Back Button */}
+        <TouchableOpacity
+          onPress={() => router.push(backPath)}
+          style={{
+            position: 'absolute',
+            top: 50,
+            left: 20,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
         
         {/* Share Button */}
         <TouchableOpacity
