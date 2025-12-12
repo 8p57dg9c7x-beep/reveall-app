@@ -137,7 +137,11 @@ export default function DiscoverScreen() {
 
   // Handlers
   const handleCategoryPress = useCallback((category) => {
-    router.push(category.route);
+    if (category.params) {
+      router.push({ pathname: category.route, params: category.params });
+    } else {
+      router.push(category.route);
+    }
   }, []);
 
   const handleMoviePress = useCallback((movie) => {
