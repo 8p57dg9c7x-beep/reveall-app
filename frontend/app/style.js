@@ -619,10 +619,12 @@ const styles = StyleSheet.create({
   categoriesWrapper: {
     flexDirection: 'row',
     gap: SPACING.chipGap,
+    rowGap: SPACING.chipRowGap,
     flexWrap: 'wrap',
   },
   categoriesContent: {
     gap: SPACING.chipGap,
+    rowGap: SPACING.chipRowGap,
     paddingRight: 16,
   },
   categoryButton: {
