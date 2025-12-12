@@ -389,9 +389,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 24,
+    paddingHorizontal: SPACING.screenHorizontal,
+    paddingTop: SPACING.headerPaddingTop,
+    paddingBottom: SPACING.headerPaddingBottom,
   },
   backButton: {
     width: 40,
