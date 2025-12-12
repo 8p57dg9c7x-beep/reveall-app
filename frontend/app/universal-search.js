@@ -50,6 +50,11 @@ export default function UniversalSearchScreen() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
+  
+  // Handle back navigation explicitly
+  const handleBack = () => {
+    router.push('/style');
+  };
 
   const performSearch = useCallback(async (query, tab, filter) => {
     if (!query || query.length < 2) {
