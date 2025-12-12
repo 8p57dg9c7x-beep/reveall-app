@@ -9,14 +9,14 @@ import time
 import os
 import json
 
-BACKEND_URL = "https://reveal-ux-fix.preview.emergentagent.com"
+BACKEND_URL = "https://reveal-polish.preview.emergentagent.com"
 
 def test_audio_endpoint_comprehensive():
     """Comprehensive test of audio recognition endpoint"""
     print("🎵 COMPREHENSIVE AUDIO RECOGNITION TESTING")
     print("=" * 70)
     print("**USER REQUIREMENT**: 8/10 minimum accuracy for movie soundtracks")
-    print("**Backend URL**: https://reveal-ux-fix.preview.emergentagent.com")
+    print("**Backend URL**: https://reveal-polish.preview.emergentagent.com")
     print("=" * 70)
     
     # Test 1: API Health Check
