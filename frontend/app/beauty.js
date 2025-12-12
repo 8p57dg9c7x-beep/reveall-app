@@ -374,19 +374,19 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 120,
+    paddingBottom: SPACING.bottomPadding,
   },
   listHeader: {
-    paddingTop: 8,
+    paddingTop: SPACING.chipsToContent,
   },
   addiletsSection: {
-    marginBottom: 24,
+    marginBottom: SPACING.sectionGap,
   },
   addiletsSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.sectionTitleToContent,
   },
   addiletsTitleRow: {
     flexDirection: 'row',
