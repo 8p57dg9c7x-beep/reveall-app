@@ -494,13 +494,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
   },
   celebritySection: {
-    marginBottom: 24,
+    marginBottom: SPACING.sectionGap,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 16,
+    marginBottom: SPACING.sectionTitleToContent,
     letterSpacing: -0.3,
   },
   celebrityScrollContent: {
