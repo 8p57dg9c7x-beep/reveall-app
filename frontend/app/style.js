@@ -365,52 +365,97 @@ export default function StyleDiscovery() {
       colors={GRADIENTS.background}
       style={styles.container}
     >
-      {/* Fixed Header - Outside FlatList */}
-      <View style={styles.fixedHeader}>
-        <FadeInView style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>Style Discovery</Text>
-            <Text style={styles.headerSubtitle}>Find your perfect look</Text>
-          </View>
-          <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity 
-              style={styles.searchButton}
-              onPress={() => router.push('/universal-search')}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.favoritesButton}
-              onPress={() => router.push('/saved-outfits')}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
-        </FadeInView>
-
-        {/* Fixed Category Filter Bar */}
-        <View style={styles.categoriesContainer}>
-          <View style={styles.categoriesWrapper}>
-            {STYLE_CATEGORIES.map(renderCategoryButton)}
-          </View>
-        </View>
-      </View>
-
-      {/* Scrollable Content */}
+      {/* Single ScrollView containing ALL content including header */}
       {loading && outfits.length === 0 ? (
-        <ScrollView style={styles.scrollView}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + SPACING.topPadding }
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header Section */}
+          <View style={styles.headerSection}>
+            <FadeInView style={styles.header}>
+              <View>
+                <Text style={styles.headerTitle}>Style Discovery</Text>
+                <Text style={styles.headerSubtitle}>Find your perfect look</Text>
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity 
+                  style={styles.searchButton}
+                  onPress={() => router.push('/universal-search')}
+                  activeOpacity={0.7}
+                >
+                  <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.favoritesButton}
+                  onPress={() => router.push('/saved-outfits')}
+                  activeOpacity={0.7}
+                >
+                  <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+                </TouchableOpacity>
+              </View>
+            </FadeInView>
+
+            {/* Category Filter */}
+            <View style={styles.categoriesContainer}>
+              <View style={styles.categoriesWrapper}>
+                {STYLE_CATEGORIES.map(renderCategoryButton)}
+              </View>
+            </View>
+          </View>
+
           <ListHeaderComponent />
           <SkeletonGrid />
         </ScrollView>
       ) : error ? (
         <ScrollView
           style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + SPACING.topPadding }
+          ]}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />
           }
         >
+          {/* Header Section */}
+          <View style={styles.headerSection}>
+            <FadeInView style={styles.header}>
+              <View>
+                <Text style={styles.headerTitle}>Style Discovery</Text>
+                <Text style={styles.headerSubtitle}>Find your perfect look</Text>
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity 
+                  style={styles.searchButton}
+                  onPress={() => router.push('/universal-search')}
+                  activeOpacity={0.7}
+                >
+                  <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.favoritesButton}
+                  onPress={() => router.push('/saved-outfits')}
+                  activeOpacity={0.7}
+                >
+                  <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+                </TouchableOpacity>
+              </View>
+            </FadeInView>
+
+            {/* Category Filter */}
+            <View style={styles.categoriesContainer}>
+              <View style={styles.categoriesWrapper}>
+                {STYLE_CATEGORIES.map(renderCategoryButton)}
+              </View>
+            </View>
+          </View>
+
           <ListHeaderComponent />
           {renderErrorState()}
         </ScrollView>
@@ -420,7 +465,44 @@ export default function StyleDiscovery() {
           data={outfits}
           renderItem={renderOutfitRow}
           keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-          ListHeaderComponent={ListHeaderComponent}
+          ListHeaderComponent={() => (
+            <View style={{ paddingTop: insets.top + SPACING.topPadding }}>
+              {/* Header Section */}
+              <View style={styles.headerSection}>
+                <FadeInView style={styles.header}>
+                  <View>
+                    <Text style={styles.headerTitle}>Style Discovery</Text>
+                    <Text style={styles.headerSubtitle}>Find your perfect look</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity 
+                      style={styles.searchButton}
+                      onPress={() => router.push('/universal-search')}
+                      activeOpacity={0.7}
+                    >
+                      <MaterialCommunityIcons name="magnify" size={24} color={COLORS.textPrimary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.favoritesButton}
+                      onPress={() => router.push('/saved-outfits')}
+                      activeOpacity={0.7}
+                    >
+                      <MaterialCommunityIcons name="heart" size={24} color={COLORS.primary} />
+                    </TouchableOpacity>
+                  </View>
+                </FadeInView>
+
+                {/* Category Filter */}
+                <View style={styles.categoriesContainer}>
+                  <View style={styles.categoriesWrapper}>
+                    {STYLE_CATEGORIES.map(renderCategoryButton)}
+                  </View>
+                </View>
+              </View>
+
+              <ListHeaderComponent />
+            </View>
+          )}
           ListEmptyComponent={renderEmptyState}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
