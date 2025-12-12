@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   instructionsContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.screenHorizontal,
     alignItems: 'center',
   },
   iconCircle: {
