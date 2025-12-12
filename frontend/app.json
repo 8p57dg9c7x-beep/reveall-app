@@ -1,32 +1,32 @@
 {
   "expo": {
-    "name": "CINESCAN",
-    "slug": "cinescan",
-    "version": "1.0.1",
+    "name": "REVEAL",
+    "slug": "reveal",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "cinescan",
-    "userInterfaceStyle": "automatic",
+    "scheme": "reveal",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#667eea"
+      "backgroundColor": "#0B0812"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cinescan.app",
+      "bundleIdentifier": "com.reveal.style",
       "infoPlist": {
-        "NSCameraUsageDescription": "CINESCAN needs camera access to identify movies from posters and scenes",
-        "NSMicrophoneUsageDescription": "CINESCAN needs microphone access to record movie dialogue for identification",
-        "NSPhotoLibraryUsageDescription": "CINESCAN needs photo access to identify movies from your images"
+        "NSCameraUsageDescription": "REVEAL needs camera access to scan your body measurements and capture outfit photos",
+        "NSMicrophoneUsageDescription": "REVEAL needs microphone access to identify songs playing around you",
+        "NSPhotoLibraryUsageDescription": "REVEAL needs photo access to analyze your style and wardrobe"
       }
     },
     "android": {
-      "package": "com.cinescan.app",
+      "package": "com.reveal.style",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#667eea"
+        "backgroundColor": "#0B0812"
       },
       "permissions": [
         "CAMERA",
@@ -52,20 +52,20 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#667eea"
+          "backgroundColor": "#0B0812"
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "CINESCAN needs photo access to identify movies from your images",
-          "cameraPermission": "CINESCAN needs camera access to identify movies from posters and scenes"
+          "photosPermission": "REVEAL needs photo access to analyze your style and wardrobe",
+          "cameraPermission": "REVEAL needs camera access to scan your body measurements and capture outfit photos"
         }
       ],
       [
         "expo-av",
         {
-          "microphonePermission": "CINESCAN needs microphone access to record movie dialogue for identification"
+          "microphonePermission": "REVEAL needs microphone access to identify songs playing around you"
         }
       ]
     ],
