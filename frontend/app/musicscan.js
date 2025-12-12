@@ -414,8 +414,8 @@ const styles = StyleSheet.create({
     height: 200,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 32,
-    marginBottom: 16,
+    marginTop: SPACING.sectionGap,
+    marginBottom: SPACING.sectionTitleToContent,
   },
   ring: {
     position: 'absolute',
