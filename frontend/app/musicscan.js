@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   instructions: {
-    marginTop: 32,
+    marginTop: SPACING.sectionGap,
     width: '100%',
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 16,
+    marginBottom: SPACING.sectionTitleToContent,
   },
   instructionItem: {
     flexDirection: 'row',
