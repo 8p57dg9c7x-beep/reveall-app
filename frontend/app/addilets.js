@@ -526,7 +526,8 @@ const styles = StyleSheet.create({
     height: MAKEUP_CARD_HEIGHT,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
-    marginRight: 16,
+    marginRight: SPACING.cardGap,
+    ...CARD_SHADOW,
   },
   makeupImage: {
     width: '100%',
