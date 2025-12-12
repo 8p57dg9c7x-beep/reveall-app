@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
 import { useAddilets } from '../contexts/AddiletsContext';
-import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SHADOWS, SPACING } from '../constants/theme';
 import OutfitCard from '../components/OutfitCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
