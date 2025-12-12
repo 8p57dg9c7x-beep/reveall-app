@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
   forYouSubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    marginBottom: 16,
+    marginBottom: SPACING.sectionTitleToContent,
   },
   seeAllText: {
     fontSize: 13,
