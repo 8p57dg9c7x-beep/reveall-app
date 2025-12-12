@@ -683,8 +683,9 @@ const styles = StyleSheet.create({
   resultCard: {
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
-    padding: 20,
-    marginBottom: 16,
+    padding: SPACING.cardPadding + 4,
+    marginBottom: SPACING.cardGap,
+    ...CARD_SHADOW,
   },
   bodyTypeCard: {
     padding: 0,
