@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   outfitInfo: {
-    padding: 14,
+    padding: SPACING.cardPadding,
     gap: 4,
   },
   outfitTitle: {
