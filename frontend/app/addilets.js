@@ -12,7 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAddilets } from '../contexts/AddiletsContext';
-import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 
 const { width } = Dimensions.get('window');
