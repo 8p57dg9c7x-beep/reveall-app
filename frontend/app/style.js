@@ -568,6 +568,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textSecondary,
     marginTop: SPACING.titleToSubtitle,
+    marginBottom: SPACING.subtitleToChips,
     fontWeight: '500',
   },
   favoritesButton: {
