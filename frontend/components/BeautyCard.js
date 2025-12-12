@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   lookInfo: {
-    padding: 14,
+    padding: SPACING.cardPadding,
     gap: 6,
   },
   lookTitle: {
