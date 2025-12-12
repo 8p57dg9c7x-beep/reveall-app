@@ -147,14 +147,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.cardGap,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
+    ...CARD_SHADOW,
   },
   categoryGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    padding: SPACING.cardPadding + 4,
     borderRadius: SIZES.borderRadiusCard,
     borderWidth: 1,
-    borderColor: 'rgba(177, 76, 255, 0.1)',
+    borderColor: 'rgba(177, 76, 255, 0.15)',
   },
   iconContainer: {
     width: 60,
