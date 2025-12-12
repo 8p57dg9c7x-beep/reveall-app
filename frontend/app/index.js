@@ -41,7 +41,7 @@ export default function HomeScreen() {
     <TouchableOpacity
       key={action.id}
       style={styles.quickActionButton}
-      onPress={() => router.push(action.route)}
+      onPress={() => router.push({ pathname: action.route, params: action.params })}
       activeOpacity={0.8}
     >
       <LinearGradient
