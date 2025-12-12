@@ -24,6 +24,7 @@ const STYLE_CATEGORIES = [
 ];
 
 export default function StyleDiscovery() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { getRecommendedOutfits } = useAddilets();
   const flatListRef = useRef(null);
