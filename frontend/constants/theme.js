@@ -121,37 +121,38 @@ export const SIZES = {
   spacing: 20,
 };
 
-// 🎯 GLOBAL SPACING SYSTEM - Premium UI Standards
+// 🎯 GLOBAL SPACING SYSTEM - Calibrated for real devices
 export const SPACING = {
   // Screen safe area additions
-  topPadding: 36,           // Added to insets.top for breathing room
-  bottomPadding: 100,       // Bottom padding for scroll content (above tab bar)
+  topPadding: 40,           // Increased for real device calibration
+  bottomPadding: 130,       // Increased to prevent tab bar overlap on real devices
   
   // Horizontal padding
   screenHorizontal: 20,     // Standard screen horizontal padding
   
   // Section spacing (vertical gaps)
-  sectionGap: 32,           // Gap between major sections
+  sectionGap: 36,           // Gap between major sections (increased)
   
   // Title hierarchy
-  titleToSubtitle: 6,       // Title → Subtitle gap
-  subtitleToChips: 18,      // Subtitle → Chips gap
-  chipsToContent: 18,       // Chips → Content grid gap
-  sectionTitleToContent: 14, // Section title → Content gap
+  titleToSubtitle: 8,       // Title → Subtitle gap (increased)
+  subtitleToChips: 24,      // Subtitle → Chips gap (increased +12px)
+  chipsToContent: 24,       // Chips → Content grid gap (increased)
+  chipRowGap: 16,           // Gap between chip rows (new)
+  sectionTitleToContent: 16, // Section title → Content gap (increased)
   
   // Card and item spacing
   cardGap: 16,              // Gap between cards
   cardPadding: 16,          // Internal card padding
-  chipGap: 12,              // Gap between chips
+  chipGap: 14,              // Gap between chips (increased +2px)
   itemGap: 12,              // Gap between list items
   
   // Header spacing
-  headerPaddingTop: 60,     // Top padding for headers with back button
-  headerPaddingBottom: 20,  // Bottom padding for headers
+  headerPaddingTop: 64,     // Top padding for headers with back button (increased)
+  headerPaddingBottom: 24,  // Bottom padding for headers (increased)
   
   // Content padding
-  contentPaddingTop: 24,    // Top padding inside content areas
-  contentPaddingBottom: 24, // Bottom padding inside content areas
+  contentPaddingTop: 28,    // Top padding inside content areas (increased)
+  contentPaddingBottom: 28, // Bottom padding inside content areas (increased)
 };
 
 export const TYPOGRAPHY = {
