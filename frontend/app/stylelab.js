@@ -9,10 +9,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 
 // Style Lab - All AI Style Features Hub
 export default function StyleLabScreen() {
+  const insets = useSafeAreaInsets();
+
   // Feature cards data with returnPath for each
   const features = useMemo(() => [
     {
@@ -102,12 +105,14 @@ export default function StyleLabScreen() {
   ), []);
 
   const ListHeaderComponent = useCallback(() => (
-    <View style={styles.header}>
-      <MaterialCommunityIcons name="flask" size={40} color={COLORS.primary} />
-      <Text style={styles.headerTitle}>Style Lab</Text>
-      <Text style={styles.headerSubtitle}>AI-powered tools for your perfect look</Text>
+    <View style={{ paddingTop: insets.top + SPACING.topPadding }}>
+      <View style={styles.header}>
+        <MaterialCommunityIcons name="flask" size={40} color={COLORS.primary} />
+        <Text style={styles.headerTitle}>Style Lab</Text>
+        <Text style={styles.headerSubtitle}>AI-powered tools for your perfect look</Text>
+      </View>
     </View>
-  ), []);
+  ), [insets.top]);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
@@ -130,13 +135,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingBottom: 120,
+    paddingBottom: SPACING.bottomPadding,
   },
   header: {
     alignItems: 'center',
-    paddingTop: 70,
-    paddingBottom: 32,
-    paddingHorizontal: 20,
+    paddingBottom: SPACING.sectionGap,
+    paddingHorizontal: SPACING.screenHorizontal,
   },
   headerTitle: {
     fontSize: 32,
@@ -148,12 +152,12 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 8,
+    marginTop: SPACING.titleToSubtitle,
     textAlign: 'center',
   },
   featureCard: {
-    marginHorizontal: 20,
-    marginBottom: 16,
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.cardGap,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
   },
@@ -189,7 +193,7 @@ const styles = StyleSheet.create({
   featureSubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 4,
+    marginTop: SPACING.titleToSubtitle,
   },
   badge: {
     backgroundColor: COLORS.primary,

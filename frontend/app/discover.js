@@ -1,139 +1,61 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   FlatList,
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
-import { API_BASE_URL } from '../config';
-import OptimizedImage from '../components/OptimizedImage';
-import { SkeletonHorizontalScroll } from '../components/SkeletonLoader';
-import FadeInView from '../components/FadeInView';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 
-// Constants
-const CARD_WIDTH = 160;
-const CARD_HEIGHT = 200;
-
-// Memoized components
-const CategoryCard = memo(({ category, onPress }) => (
-  <TouchableOpacity
-    style={styles.categoryCard}
-    onPress={onPress}
-    activeOpacity={0.8}
-  >
-    <LinearGradient
-      colors={[`${category.color}30`, `${category.color}10`]}
-      style={styles.categoryGradient}
-    >
-      <View style={[styles.categoryIcon, { backgroundColor: `${category.color}40` }]}>
-        <MaterialCommunityIcons name={category.icon} size={28} color={category.color} />
-      </View>
-      <View style={styles.categoryContent}>
-        <Text style={styles.categoryTitle}>{category.title}</Text>
-        <Text style={styles.categorySubtitle}>{category.subtitle}</Text>
-      </View>
-      <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
-    </LinearGradient>
-  </TouchableOpacity>
-));
-
-const MovieCard = memo(({ movie, onPress }) => (
-  <TouchableOpacity style={styles.contentCard} onPress={onPress} activeOpacity={0.8}>
-    <OptimizedImage
-      source={{ uri: `https://image.tmdb.org/t/p/w185${movie.poster_path}` }}
-      style={styles.contentImage}
-    />
-    <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} style={styles.contentOverlay}>
-      <Text style={styles.contentTitle} numberOfLines={2}>{movie.title}</Text>
-      {movie.vote_average > 0 && (
-        <View style={styles.ratingRow}>
-          <MaterialCommunityIcons name="star" size={12} color={COLORS.accent} />
-          <Text style={styles.ratingText}>{movie.vote_average.toFixed(1)}</Text>
-        </View>
-      )}
-    </LinearGradient>
-  </TouchableOpacity>
-));
-
-const SongCard = memo(({ song, onPress }) => (
-  <TouchableOpacity style={styles.contentCard} onPress={onPress} activeOpacity={0.8}>
-    <Image source={{ uri: song.image }} style={styles.contentImage} />
-    <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} style={styles.contentOverlay}>
-      <Text style={styles.contentTitle} numberOfLines={1}>{song.title}</Text>
-      <Text style={styles.contentSubtitle} numberOfLines={1}>{song.artist}</Text>
-    </LinearGradient>
-  </TouchableOpacity>
-));
-
+// Discover - Exploration Hub
 export default function DiscoverScreen() {
-  const [trendingMovies, setTrendingMovies] = useState([]);
-  const [loadingMovies, setLoadingMovies] = useState(true);
+  const insets = useSafeAreaInsets();
 
-  // Trending songs - static
-  const TRENDING_SONGS = useMemo(() => [
-    { id: 1, title: 'SOAK CITY', artist: '310babii', image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80' },
-    { id: 2, title: 'Die With A Smile', artist: 'Lady Gaga, Bruno Mars', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80' },
-    { id: 3, title: 'Beautiful Things', artist: 'Benson Boone', image: 'https://images.unsplash.com/photo-1445985543470-41fba5c3144a?w=400&q=80' },
-    { id: 4, title: 'Too Sweet', artist: 'Hozier', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80' },
-  ], []);
-
-  // Discover categories
+  // Categories data with icons
   const CATEGORIES = useMemo(() => [
-    { 
-      id: 'musicscan', 
-      title: 'MusicScan', 
-      subtitle: 'Identify any song',
-      icon: 'music-circle', 
-      color: '#4ECDC4',
+    {
+      id: 'musicscan',
+      title: 'MusicScan',
+      subtitle: 'Identify any song instantly',
+      icon: 'music-circle',
+      color: '#1DB954',
       route: '/musicscan',
-      params: { returnPath: '/discover' }
+      params: { returnPath: '/discover' },
     },
-    { 
-      id: 'movies', 
-      title: 'Movies & TV', 
-      subtitle: 'Browse trending movies',
-      icon: 'movie', 
+    {
+      id: 'trending',
+      title: 'Trending Songs',
+      subtitle: 'See what\'s hot right now',
+      icon: 'trending-up',
       color: '#FF6B6B',
-      route: '/comingsoon'
+      route: '/trendingsongs',
+      params: { returnPath: '/discover' },
     },
-    { 
-      id: 'music', 
-      title: 'Music', 
-      subtitle: 'Trending songs & artists',
-      icon: 'music', 
+    {
+      id: 'style-discovery',
+      title: 'Style Discovery',
+      subtitle: 'Explore trending outfits',
+      icon: 'hanger',
       color: '#B14CFF',
-      route: '/trendingsongs'
+      route: '/style',
+      params: { returnPath: '/discover' },
+    },
+    {
+      id: 'coming-soon',
+      title: 'Coming Soon',
+      subtitle: 'New features on the way',
+      icon: 'rocket-launch',
+      color: '#FF9500',
+      route: '/comingsoon',
+      params: { returnPath: '/discover' },
     },
   ], []);
-
-  // Load data
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadMovies = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/discover/trending`);
-        const data = await response.json();
-        if (isMounted) {
-          setTrendingMovies(data.results?.slice(0, 6) || []);
-          setLoadingMovies(false);
-        }
-      } catch (error) {
-        console.error('Error loading movies:', error);
-        if (isMounted) setLoadingMovies(false);
-      }
-    };
-
-    loadMovies();
-    return () => { isMounted = false; };
-  }, []);
 
   // Handlers
   const handleCategoryPress = useCallback((category) => {
@@ -144,131 +66,52 @@ export default function DiscoverScreen() {
     }
   }, []);
 
-  const handleMoviePress = useCallback((movie) => {
-    router.push({
-      pathname: '/result',
-      params: { movieId: movie.id.toString(), returnPath: '/discover' }
-    });
-  }, []);
-
-  const handleSongPress = useCallback((song) => {
-    router.push({
-      pathname: '/result',
-      params: { 
-        songData: JSON.stringify({ title: song.title, artist: song.artist, album_art: song.image }),
-        returnPath: '/discover'
-      }
-    });
-  }, []);
-
-  // Render functions
-  const renderCategoryItem = useCallback(({ item }) => (
-    <CategoryCard category={item} onPress={() => handleCategoryPress(item)} />
+  // Render category card
+  const renderCategoryCard = useCallback(({ item }) => (
+    <TouchableOpacity
+      style={styles.categoryCard}
+      onPress={() => handleCategoryPress(item)}
+      activeOpacity={0.8}
+    >
+      <LinearGradient
+        colors={[`${item.color}25`, `${item.color}08`]}
+        style={styles.categoryGradient}
+      >
+        <View style={[styles.iconContainer, { backgroundColor: `${item.color}30` }]}>
+          <MaterialCommunityIcons name={item.icon} size={32} color={item.color} />
+        </View>
+        <View style={styles.categoryContent}>
+          <Text style={styles.categoryTitle}>{item.title}</Text>
+          <Text style={styles.categorySubtitle}>{item.subtitle}</Text>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+      </LinearGradient>
+    </TouchableOpacity>
   ), [handleCategoryPress]);
 
-  const renderMovieItem = useCallback(({ item }) => (
-    <MovieCard movie={item} onPress={() => handleMoviePress(item)} />
-  ), [handleMoviePress]);
-
-  const renderSongItem = useCallback(({ item }) => (
-    <SongCard song={item} onPress={() => handleSongPress(item)} />
-  ), [handleSongPress]);
-
-  // List header
+  // List header component
   const ListHeaderComponent = useCallback(() => (
-    <View>
-      {/* Search Bar */}
-      <TouchableOpacity 
-        style={styles.searchBar}
-        onPress={() => router.push('/universal-search')}
-        activeOpacity={0.8}
-      >
-        <MaterialCommunityIcons name="magnify" size={20} color={COLORS.textMuted} />
-        <Text style={styles.searchPlaceholder}>Search movies, songs...</Text>
-      </TouchableOpacity>
-
+    <View style={{ paddingTop: insets.top + SPACING.topPadding }}>
       {/* Header */}
-      <FadeInView style={styles.header}>
-        <MaterialCommunityIcons name="compass" size={32} color={COLORS.primary} />
+      <View style={styles.header}>
+        <MaterialCommunityIcons name="compass" size={40} color={COLORS.primary} />
         <Text style={styles.headerTitle}>Discover</Text>
-        <Text style={styles.headerSubtitle}>Movies, music & more</Text>
-      </FadeInView>
-
-      {/* Categories */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Explore</Text>
-        {CATEGORIES.map((category) => (
-          <CategoryCard 
-            key={category.id} 
-            category={category} 
-            onPress={() => handleCategoryPress(category)} 
-          />
-        ))}
-      </View>
-
-      {/* Trending Movies */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Movies</Text>
-          <TouchableOpacity onPress={() => router.push('/comingsoon')}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        {loadingMovies ? (
-          <SkeletonHorizontalScroll />
-        ) : trendingMovies.length > 0 ? (
-          <FlatList
-            horizontal
-            data={trendingMovies}
-            keyExtractor={(item) => `movie-${item.id}`}
-            renderItem={renderMovieItem}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScroll}
-            initialNumToRender={4}
-            removeClippedSubviews={true}
-          />
-        ) : (
-          <View style={styles.emptySection}>
-            <Text style={styles.emptyText}>No movies available</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Trending Songs */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Songs</Text>
-          <TouchableOpacity onPress={() => router.push('/trendingsongs')}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          horizontal
-          data={TRENDING_SONGS}
-          keyExtractor={(item) => `song-${item.id}`}
-          renderItem={renderSongItem}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalScroll}
-          initialNumToRender={4}
-          removeClippedSubviews={true}
-        />
+        <Text style={styles.headerSubtitle}>Explore music, style & more</Text>
       </View>
     </View>
-  ), [CATEGORIES, TRENDING_SONGS, loadingMovies, trendingMovies, handleCategoryPress, renderMovieItem, renderSongItem]);
-
-  // Empty data for parent FlatList
-  const emptyData = useMemo(() => [], []);
+  ), [insets.top]);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <FlatList
-        data={emptyData}
-        renderItem={() => null}
+        data={CATEGORIES}
+        renderItem={renderCategoryCard}
+        keyExtractor={(item) => item.id}
         ListHeaderComponent={ListHeaderComponent}
-        keyExtractor={() => 'main'}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
         removeClippedSubviews={true}
+        initialNumToRender={4}
       />
     </LinearGradient>
   );
@@ -278,79 +121,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 120,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.card,
-    marginHorizontal: 20,
-    marginTop: 60,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: SIZES.borderRadiusCard,
-    gap: 12,
-  },
-  searchPlaceholder: {
-    color: COLORS.textMuted,
-    fontSize: 16,
+  listContent: {
+    paddingBottom: SPACING.bottomPadding,
   },
   header: {
-    paddingTop: 24,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
     alignItems: 'center',
+    paddingBottom: SPACING.sectionGap,
+    paddingHorizontal: SPACING.screenHorizontal,
   },
   headerTitle: {
     fontSize: 32,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    marginTop: 12,
+    marginTop: 16,
+    letterSpacing: -0.5,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  section: {
-    marginBottom: 28,
-    paddingHorizontal: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: 16,
-  },
-  seeAll: {
-    fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: '600',
+    marginTop: SPACING.titleToSubtitle,
+    textAlign: 'center',
   },
   categoryCard: {
-    marginBottom: 12,
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.cardGap,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
   },
   categoryGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
     borderRadius: SIZES.borderRadiusCard,
     borderWidth: 1,
     borderColor: 'rgba(177, 76, 255, 0.1)',
   },
-  categoryIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+  iconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -359,65 +168,13 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   categoryTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
   categorySubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  horizontalScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  contentCard: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginRight: 12,
-  },
-  contentImage: {
-    width: '100%',
-    height: '100%',
-  },
-  contentOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 12,
-  },
-  contentTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  contentSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 2,
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.accent,
-  },
-  emptySection: {
-    paddingVertical: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
+    marginTop: SPACING.titleToSubtitle,
   },
 });

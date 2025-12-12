@@ -10,14 +10,15 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAddilets } from '../contexts/AddiletsContext';
-import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
-import GradientButton from '../components/GradientButton';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 
 // Fixed heights for getItemLayout optimization
 const HORIZONTAL_CARD_WIDTH = 140;
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const { personalization } = useAddilets();
 
   // Quick action buttons - memoized
@@ -74,7 +75,7 @@ export default function HomeScreen() {
 
   // List header component
   const ListHeaderComponent = useCallback(() => (
-    <View>
+    <View style={{ paddingTop: insets.top + SPACING.topPadding }}>
       {/* Hero Section */}
       <View style={styles.heroSection}>
         <LinearGradient
@@ -100,7 +101,7 @@ export default function HomeScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
             <MaterialCommunityIcons name="star-four-points" size={20} color={COLORS.primary} />
-            <Text style={styles.sectionTitle}>For You</Text>
+            <Text style={styles.sectionTitleInline}>For You</Text>
           </View>
           <TouchableOpacity onPress={() => router.push('/addilets')}>
             <Text style={styles.seeAll}>View All</Text>
@@ -145,7 +146,7 @@ export default function HomeScreen() {
       {/* Trending Styles */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Styles</Text>
+          <Text style={styles.sectionTitleInline}>Trending Styles</Text>
           <TouchableOpacity onPress={() => router.push('/style')}>
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
@@ -167,7 +168,7 @@ export default function HomeScreen() {
         />
       </View>
     </View>
-  ), [personalization, quickActions, trendingStyles, renderQuickAction, renderStyleCard]);
+  ), [insets.top, personalization, quickActions, trendingStyles, renderQuickAction, renderStyleCard]);
 
   const emptyData = useMemo(() => [], []);
 
@@ -191,12 +192,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 120,
+    paddingBottom: SPACING.bottomPadding,
   },
   heroSection: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 24,
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.sectionGap,
   },
   heroGradient: {
     alignItems: 'center',
@@ -213,18 +213,18 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 8,
+    marginTop: SPACING.titleToSubtitle,
     letterSpacing: 0.5,
   },
   section: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.sectionGap,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: SPACING.sectionTitleToContent,
   },
   sectionTitleRow: {
     flexDirection: 'row',
@@ -235,7 +235,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 16,
+    marginBottom: SPACING.sectionTitleToContent,
+  },
+  sectionTitleInline: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   seeAll: {
     color: COLORS.primary,
@@ -245,7 +250,7 @@ const styles = StyleSheet.create({
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: SPACING.cardGap,
   },
   quickActionButton: {
     width: '47%',
@@ -337,7 +342,7 @@ const styles = StyleSheet.create({
   styleCard: {
     width: HORIZONTAL_CARD_WIDTH,
     height: 180,
-    marginRight: 12,
+    marginRight: SPACING.itemGap,
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -356,25 +361,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
-  },
-  exploreGrid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  exploreCard: {
-    flex: 1,
-  },
-  exploreGradient: {
-    alignItems: 'center',
-    padding: 24,
-    borderRadius: SIZES.borderRadiusCard,
-    borderWidth: 1,
-    borderColor: 'rgba(177, 76, 255, 0.1)',
-  },
-  exploreText: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 8,
   },
 });
