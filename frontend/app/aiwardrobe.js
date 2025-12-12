@@ -489,6 +489,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 3,
     borderColor: 'transparent',
+    ...CARD_SHADOW,
   },
   wardrobeItemSelected: {
     borderColor: COLORS.primary,
