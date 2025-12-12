@@ -136,7 +136,7 @@ export default function BeautyScreen() {
   const handleLookPress = useCallback((look) => {
     router.push({
       pathname: '/beautydetail',
-      params: { lookData: JSON.stringify(look) }
+      params: { lookData: JSON.stringify(look), returnPath: '/beauty' }
     });
   }, []);
 
