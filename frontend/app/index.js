@@ -254,14 +254,15 @@ const styles = StyleSheet.create({
   },
   quickActionButton: {
     width: '47%',
+    ...CARD_SHADOW,
   },
   quickActionGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: SPACING.cardPadding,
     borderRadius: SIZES.borderRadiusCard,
     borderWidth: 1,
-    borderColor: 'rgba(177, 76, 255, 0.1)',
+    borderColor: 'rgba(177, 76, 255, 0.15)',
   },
   quickActionIcon: {
     width: 44,
