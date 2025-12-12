@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
 
-// Bundle Version: 5.0.0 - BRICK 5 Navigation Restructure
+// Bundle Version: 6.0.0 - BRICK 6 Stability & Polish
 export default function RootLayout() {
   return (
     <FavoritesProvider>
@@ -19,9 +19,9 @@ export default function RootLayout() {
             borderTopWidth: 1,
             borderTopColor: 'rgba(177, 76, 255, 0.1)',
             elevation: 0,
-            height: 88,
-            paddingBottom: 32,
-            paddingTop: 10,
+            height: 82,
+            paddingBottom: 28,
+            paddingTop: 8,
             shadowColor: COLORS.primary,
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
@@ -30,9 +30,13 @@ export default function RootLayout() {
           tabBarActiveTintColor: COLORS.tabBarActive,
           tabBarInactiveTintColor: COLORS.tabBarInactive,
           tabBarLabelStyle: {
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: '600',
-            marginTop: -2,
+            lineHeight: 14,
+            marginTop: 2,
+          },
+          tabBarIconStyle: {
+            marginBottom: 0,
           },
         }}
       >
