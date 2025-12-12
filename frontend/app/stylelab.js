@@ -19,31 +19,12 @@ export default function StyleLabScreen() {
   // Feature cards data with returnPath for each
   const features = useMemo(() => [
     {
-      id: 'outfit-identifier',
-      title: 'Outfit Identifier',
-      subtitle: 'Scan & identify any outfit',
-      icon: 'camera-iris',
-      color: '#FF6B6B',
-      route: '/comingsoon',
-      params: { returnPath: '/stylelab' },
-      badge: 'Coming Soon',
-    },
-    {
       id: 'ai-stylist',
       title: 'AI Stylist',
       subtitle: 'Get personalized look recommendations',
       icon: 'robot',
       color: '#B14CFF',
       route: '/aistylist',
-      params: { returnPath: '/stylelab' },
-    },
-    {
-      id: 'ai-wardrobe',
-      title: 'AI Wardrobe',
-      subtitle: 'Organize & manage your closet',
-      icon: 'hanger',
-      color: '#4ECDC4',
-      route: '/aiwardrobe',
       params: { returnPath: '/stylelab' },
     },
     {
@@ -63,6 +44,25 @@ export default function StyleLabScreen() {
       color: '#FF6EC7',
       route: '/addilets',
       params: { returnPath: '/stylelab' },
+    },
+    {
+      id: 'ai-wardrobe',
+      title: 'Closet Manager',
+      subtitle: 'Organize & manage your wardrobe',
+      icon: 'hanger',
+      color: '#4ECDC4',
+      route: '/aiwardrobe',
+      params: { returnPath: '/stylelab' },
+    },
+    {
+      id: 'outfit-identifier',
+      title: 'Outfit Identifier',
+      subtitle: 'Scan & identify any outfit',
+      icon: 'camera-iris',
+      color: '#FF6B6B',
+      route: '/comingsoon',
+      params: { returnPath: '/stylelab' },
+      badge: 'Coming Soon',
     },
     {
       id: 'browse-styles',
