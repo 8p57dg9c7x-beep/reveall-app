@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 import BeautyCard from '../components/BeautyCard';
