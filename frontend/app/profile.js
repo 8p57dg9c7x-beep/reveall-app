@@ -90,7 +90,7 @@ export default function ProfileScreen() {
   ), []);
 
   const ListHeaderComponent = useCallback(() => (
-    <View>
+    <View style={{ paddingTop: insets.top + SPACING.headerPaddingTop }}>
       {/* Profile Header */}
       <View style={styles.profileHeader}>
         <View style={styles.avatarContainer}>
@@ -128,7 +128,7 @@ export default function ProfileScreen() {
       {/* Menu Section Title */}
       <Text style={styles.sectionTitle}>Your Collection</Text>
     </View>
-  ), [favoriteOutfits.length, favoriteBeauty.length, personalization]);
+  ), [insets.top, favoriteOutfits.length, favoriteBeauty.length, personalization]);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
