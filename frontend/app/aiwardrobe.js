@@ -418,9 +418,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   categoryTabs: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    gap: 12,
+    paddingHorizontal: SPACING.screenHorizontal,
+    paddingBottom: SPACING.subtitleToChips,
+    gap: SPACING.chipGap,
   },
   categoryTab: {
     flexDirection: 'row',
