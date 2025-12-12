@@ -14,7 +14,8 @@ import { asCardItem } from '../utils/helpers';
 export default function OutfitDetail() {
   const navigation = useNavigation();
   const scrollRef = useRef(null);
-  const { outfitData, id } = useLocalSearchParams();
+  const { outfitData, id, returnPath } = useLocalSearchParams();
+  const backPath = returnPath || '/style';
   
   const [outfit, setOutfit] = useState(outfitData ? asCardItem(JSON.parse(outfitData)) : null);
   const [loading, setLoading] = useState(!outfitData && id ? true : false);
