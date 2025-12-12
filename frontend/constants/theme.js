@@ -87,8 +87,8 @@ export const SHADOWS = {
   card: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
     elevation: 6,
   },
   cardHover: {
@@ -98,6 +98,15 @@ export const SHADOWS = {
     shadowRadius: 16,
     elevation: 8,
   },
+};
+
+// 🎯 PREMIUM CARD SHADOW - For consistent premium look
+export const CARD_SHADOW = {
+  shadowColor: '#000',
+  shadowOpacity: 0.18,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 6,
 };
 
 export const SIZES = {
