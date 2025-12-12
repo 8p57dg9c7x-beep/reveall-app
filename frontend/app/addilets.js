@@ -464,7 +464,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: SPACING.cardGap,
+    ...CARD_SHADOW,
   },
   recImage: {
     width: 120,
