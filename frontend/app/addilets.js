@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 40,
+    paddingBottom: SPACING.bottomPadding,
   },
   header: {
     flexDirection: 'row',
@@ -586,6 +586,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   bottomPadding: {
-    height: 80,
+    height: 40,
   },
 });
