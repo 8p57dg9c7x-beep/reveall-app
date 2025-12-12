@@ -121,38 +121,41 @@ export const SIZES = {
   spacing: 20,
 };
 
-// 🎯 GLOBAL SPACING SYSTEM - Calibrated for real devices
+// 🎯 GLOBAL SPACING SYSTEM - BRICK 5 FINAL STANDARDS
 export const SPACING = {
   // Screen safe area additions
-  topPadding: 40,           // Increased for real device calibration
-  bottomPadding: 130,       // Increased to prevent tab bar overlap on real devices
+  topPadding: 48,           // Standard header top padding (after insets.top)
+  bottomPadding: 140,       // Tab bar clearance (MANDATORY on all scrollable screens)
   
   // Horizontal padding
   screenHorizontal: 20,     // Standard screen horizontal padding
   
+  // Header spacing
+  headerPaddingTop: 48,     // Header top padding (use with insets.top)
+  headerPaddingBottom: 24,  // Header bottom padding
+  
   // Section spacing (vertical gaps)
-  sectionGap: 36,           // Gap between major sections (increased)
+  sectionGap: 36,           // Gap between major sections
+  sectionTitleTop: 24,      // Space above section titles
+  sectionTitleBottom: 12,   // Space below section titles
   
   // Title hierarchy
-  titleToSubtitle: 8,       // Title → Subtitle gap (increased)
-  subtitleToChips: 24,      // Subtitle → Chips gap (increased +12px)
-  chipsToContent: 24,       // Chips → Content grid gap (increased)
-  chipRowGap: 16,           // Gap between chip rows (new)
-  sectionTitleToContent: 16, // Section title → Content gap (increased)
+  titleToSubtitle: 8,       // Title → Subtitle gap
+  subtitleToChips: 24,      // Subtitle → Chips gap
+  chipsToContent: 24,       // Chips → Content grid gap
+  chipRowGap: 16,           // Gap between chip rows
+  sectionTitleToContent: 12, // Section title → Content gap (updated)
   
   // Card and item spacing
-  cardGap: 16,              // Gap between cards
+  cardGap: 20,              // Vertical gap between cards (updated)
+  cardHorizontalGap: 16,    // Horizontal gap between cards
   cardPadding: 16,          // Internal card padding
-  chipGap: 14,              // Gap between chips (increased +2px)
+  chipGap: 14,              // Gap between chips
   itemGap: 12,              // Gap between list items
   
-  // Header spacing
-  headerPaddingTop: 64,     // Top padding for headers with back button (increased)
-  headerPaddingBottom: 24,  // Bottom padding for headers (increased)
-  
   // Content padding
-  contentPaddingTop: 28,    // Top padding inside content areas (increased)
-  contentPaddingBottom: 28, // Bottom padding inside content areas (increased)
+  contentPaddingTop: 28,    // Top padding inside content areas
+  contentPaddingBottom: 28, // Bottom padding inside content areas
 };
 
 export const TYPOGRAPHY = {
