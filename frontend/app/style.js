@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 4,
+    marginTop: SPACING.titleToSubtitle,
     fontWeight: '500',
   },
   favoritesButton: {
