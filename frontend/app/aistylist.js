@@ -540,8 +540,8 @@ const styles = StyleSheet.create({
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
+    gap: SPACING.chipGap,
+    marginBottom: SPACING.subtitleToChips,
   },
   styleChip: {
     marginRight: 0,
