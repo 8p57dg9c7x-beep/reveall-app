@@ -35,6 +35,7 @@ const HEADER_MIN_HEIGHT = 60;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 export default function BeautyScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { personalization } = useAddilets();
   const [selectedCategory, setSelectedCategory] = useState('natural');
