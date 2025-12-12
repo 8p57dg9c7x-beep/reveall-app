@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Refresh
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES, SHADOWS, SPACING } from '../constants/theme';
 import OutfitCard from '../components/OutfitCard';
