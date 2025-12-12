@@ -463,8 +463,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.sectionTitleToContent,
   },
   sectionTitle: {
     fontSize: 20,
