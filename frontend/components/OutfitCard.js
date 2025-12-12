@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
-import { COLORS } from '../constants/theme';
+import { COLORS, CARD_SHADOW, SIZES, SPACING } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { asCardItem } from '../utils/helpers';
 
