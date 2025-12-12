@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
 
-// Bundle Version: 6.0.0 - BRICK 6 Stability & Polish
+// Bundle Version: 6.1.0 - BRICK 6 Tab Bar Polish Fix
 export default function RootLayout() {
   return (
     <FavoritesProvider>
@@ -19,9 +19,9 @@ export default function RootLayout() {
             borderTopWidth: 1,
             borderTopColor: 'rgba(177, 76, 255, 0.1)',
             elevation: 0,
-            height: 82,
-            paddingBottom: 28,
-            paddingTop: 8,
+            height: 88,
+            paddingBottom: 30,
+            paddingTop: 10,
             shadowColor: COLORS.primary,
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
@@ -30,13 +30,13 @@ export default function RootLayout() {
           tabBarActiveTintColor: COLORS.tabBarActive,
           tabBarInactiveTintColor: COLORS.tabBarInactive,
           tabBarLabelStyle: {
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: '600',
-            lineHeight: 14,
-            marginTop: 2,
+            marginTop: 4,
+            paddingBottom: 2,
           },
           tabBarIconStyle: {
-            marginBottom: 0,
+            marginTop: 0,
           },
         }}
       >
@@ -48,7 +48,7 @@ export default function RootLayout() {
           options={{
             title: 'Home',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="home" size={26} color={color} />
+              <MaterialCommunityIcons name="home" size={24} color={color} />
             ),
           }}
         />
@@ -59,7 +59,7 @@ export default function RootLayout() {
           options={{
             title: 'Discover',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="compass" size={26} color={color} />
+              <MaterialCommunityIcons name="compass" size={24} color={color} />
             ),
           }}
         />
@@ -70,7 +70,7 @@ export default function RootLayout() {
           options={{
             title: 'Style Lab',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="flask" size={26} color={color} />
+              <MaterialCommunityIcons name="flask" size={24} color={color} />
             ),
           }}
         />
@@ -81,7 +81,7 @@ export default function RootLayout() {
           options={{
             title: 'Fitness',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="dumbbell" size={26} color={color} />
+              <MaterialCommunityIcons name="dumbbell" size={24} color={color} />
             ),
           }}
         />
@@ -92,7 +92,7 @@ export default function RootLayout() {
           options={{
             title: 'Profile',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="account" size={26} color={color} />
+              <MaterialCommunityIcons name="account" size={24} color={color} />
             ),
           }}
         />

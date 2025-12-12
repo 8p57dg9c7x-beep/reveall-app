@@ -1,17 +1,21 @@
-// BRICK UPDATE: Outfit Detail Page with Similar Styles Section & Affiliate Products & Analytics & Deep Linking
+// BRICK 6: Outfit Detail Page - Polished with consistent back button, scrolling, and spacing
 
-import { View, Text, Image, ScrollView, TouchableOpacity, Share, Alert } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity, Share, Alert, StyleSheet } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useEffect, useState } from "react";
 import * as Linking from 'expo-linking';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import ProductCard from "../components/ProductCard";
 import { trackOutfitView } from "../services/analytics";
 import { API_BASE_URL } from '../config';
 import { asCardItem } from '../utils/helpers';
+import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 
 export default function OutfitDetail() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const scrollRef = useRef(null);
   const { outfitData, id, returnPath } = useLocalSearchParams();
@@ -32,7 +36,6 @@ export default function OutfitDetail() {
           const data = await response.json();
           
           if (data.success) {
-            // 🔥 NORMALIZE the fetched outfit
             const normalizedOutfit = asCardItem(data.outfit);
             setOutfit(normalizedOutfit);
             trackOutfitView(normalizedOutfit);
@@ -58,7 +61,6 @@ export default function OutfitDetail() {
     if (outfit) {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
       
-      // Track outfit view (only if not from deep link, already tracked above)
       if (!id) {
         trackOutfitView(outfit);
       }
@@ -75,8 +77,6 @@ export default function OutfitDetail() {
         const response = await fetch(`${API_BASE_URL}/api/outfits/${outfit.category}`);
         const data = await response.json();
         
-        // Filter out the current outfit and limit to 10 items
-        // 🔥 NORMALIZE similar outfits
         const filtered = (data.outfits || [])
           .filter(item => item.id !== outfit.id && item._id?.toString() !== outfit.id)
           .slice(0, 10)
@@ -93,10 +93,14 @@ export default function OutfitDetail() {
     fetchSimilarOutfits();
   }, [outfit?.category, outfit?.id]);
 
+  const handleBack = () => {
+    router.push(backPath);
+  };
+
   const handleSimilarOutfitPress = (similarOutfit) => {
     router.push({
       pathname: '/outfitdetail',
-      params: { outfitData: JSON.stringify(similarOutfit) }
+      params: { outfitData: JSON.stringify(similarOutfit), returnPath: backPath }
     });
   };
 
@@ -120,213 +124,280 @@ export default function OutfitDetail() {
     }
   };
 
+  const handleShopPress = () => {
+    Alert.alert(
+      'Shop This Look',
+      'Opening shopping link...',
+      [{ text: 'OK' }]
+    );
+  };
+
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: '#FFFFFF', fontSize: 16 }}>Loading outfit...</Text>
-      </View>
+      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <MaterialCommunityIcons name="shimmer" size={48} color={COLORS.primary} />
+          <Text style={styles.loadingText}>Loading outfit...</Text>
+        </View>
+      </LinearGradient>
     );
   }
 
   if (!outfit) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#0D001A", justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: '#FFFFFF', fontSize: 16 }}>Outfit not found</Text>
-      </View>
+      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <MaterialCommunityIcons name="alert-circle-outline" size={48} color={COLORS.error} />
+          <Text style={styles.loadingText}>Outfit not found</Text>
+        </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <ScrollView ref={scrollRef} style={{ flex: 1, backgroundColor: "#0D001A" }}>
-
-      {/* Hero Image with Share Button and Back Button */}
-      <View style={{ position: 'relative' }}>
-        <Image
-          source={{ uri: outfit.imageToUse }}
-          style={{
-            width: "100%",
-            height: 400,
-            borderBottomLeftRadius: 40,
-            borderBottomRightRadius: 40,
-          }}
-          resizeMode="cover"
-        />
-        
-        {/* Back Button */}
-        <TouchableOpacity
-          onPress={() => router.push(backPath)}
-          style={{
-            position: 'absolute',
-            top: 50,
-            left: 20,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            width: 44,
-            height: 44,
-            borderRadius: 22,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        
-        {/* Share Button */}
-        <TouchableOpacity
-          onPress={handleShare}
-          style={{
-            position: 'absolute',
-            top: 50,
-            right: 20,
-            backgroundColor: 'rgba(163, 76, 255, 0.9)',
-            width: 50,
-            height: 50,
-            borderRadius: 25,
-            justifyContent: 'center',
-            alignItems: 'center',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-            elevation: 5,
-          }}
-        >
-          <MaterialCommunityIcons name="share-variant" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={{ padding: 20 }}>
-
-        {/* Title */}
-        <Text style={{ fontSize: 28, fontWeight: "bold", color: "#FFFFFF" }}>
-          {outfit.title}
-        </Text>
-
-        {/* Category + Gender */}
-        <Text style={{ fontSize: 16, marginVertical: 8, color: "#CFCFCF" }}>
-          {outfit.category} • {outfit.gender?.toUpperCase()}
-        </Text>
-
-        {/* Price Range */}
-        <Text style={{ fontSize: 18, color: "#A390FF", marginBottom: 15 }}>
-          {outfit.price_range || "Price unavailable"}
-        </Text>
-
-        {/* Shop Button (Affiliate placeholder) */}
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#A34CFF",
-            padding: 15,
-            borderRadius: 12,
-            marginTop: 10,
-            alignItems: "center",
-          }}
-          onPress={() => {
-            navigation.navigate("webview", {
-              url:
-                outfit.affiliate_url ||
-                "https://www.google.com/search?q=" + outfit.title + " outfit",
-            });
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600" }}>
-            Shop This Look
-          </Text>
-        </TouchableOpacity>
-
-      </View>
-
-      {/* Shop The Look - Affiliate Products */}
-      {outfit.products && outfit.products.length > 0 && (
-        <View style={{ marginTop: 30, marginBottom: 10 }}>
-          <Text style={{ 
-            fontSize: 22, 
-            fontWeight: "bold", 
-            color: "#FFFFFF",
-            paddingHorizontal: 20,
-            marginBottom: 15
-          }}>
-            🛍️ Shop The Look
-          </Text>
+    <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+      <ScrollView 
+        ref={scrollRef} 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero Image with Share Button and Back Button */}
+        <View style={styles.heroContainer}>
+          <Image
+            source={{ uri: outfit.imageToUse }}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
           
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
+          {/* Back Button */}
+          <TouchableOpacity
+            onPress={handleBack}
+            style={[styles.backButton, { top: insets.top + 10 }]}
+            activeOpacity={0.8}
           >
-            {outfit.products.map((product, index) => (
-              <ProductCard 
-                key={index} 
-                product={product} 
-                itemContext={{
-                  item_id: outfit.id?.toString(),
-                  item_title: outfit.title,
-                  category: outfit.category
-                }}
-              />
-            ))}
-          </ScrollView>
+            <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          
+          {/* Share Button */}
+          <TouchableOpacity
+            onPress={handleShare}
+            style={[styles.shareButton, { top: insets.top + 10 }]}
+            activeOpacity={0.8}
+          >
+            <MaterialCommunityIcons name="share-variant" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
-      )}
 
-      {/* Similar Styles Section */}
-      {similarOutfits.length > 0 && (
-        <View style={{ marginTop: 20, paddingBottom: 40 }}>
-          <Text style={{ 
-            fontSize: 22, 
-            fontWeight: "bold", 
-            color: "#FFFFFF",
-            paddingHorizontal: 20,
-            marginBottom: 15
-          }}>
-            Similar Styles
+        <View style={styles.contentContainer}>
+          {/* Title */}
+          <Text style={styles.title}>{outfit.title}</Text>
+
+          {/* Category + Gender */}
+          <Text style={styles.category}>
+            {outfit.category} • {outfit.gender?.toUpperCase()}
           </Text>
-          
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
+
+          {/* Price Range */}
+          <Text style={styles.price}>
+            {outfit.price_range || "Price unavailable"}
+          </Text>
+
+          {/* Shop Button */}
+          <TouchableOpacity
+            style={styles.shopButton}
+            onPress={handleShopPress}
+            activeOpacity={0.8}
           >
-            {similarOutfits.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => handleSimilarOutfitPress(item)}
-                style={{
-                  marginRight: 15,
-                  width: 160,
-                }}
-              >
-                <Image
-                  source={{ uri: item.imageToUse }}
-                  style={{
-                    width: 160,
-                    height: 200,
-                    borderRadius: 16,
-                    backgroundColor: "#1A0D2E",
+            <MaterialCommunityIcons name="shopping" size={20} color="#FFFFFF" />
+            <Text style={styles.shopButtonText}>Shop This Look</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Shop The Look - Affiliate Products */}
+        {outfit.products && outfit.products.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>🛍️ Shop The Look</Text>
+            
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productsScroll}
+            >
+              {outfit.products.map((product, index) => (
+                <ProductCard 
+                  key={index} 
+                  product={product} 
+                  itemContext={{
+                    item_id: outfit.id?.toString(),
+                    item_title: outfit.title,
+                    category: outfit.category
                   }}
-                  resizeMode="cover"
                 />
-                <Text 
-                  style={{ 
-                    color: "#FFFFFF", 
-                    fontSize: 14, 
-                    marginTop: 8,
-                    fontWeight: "500"
-                  }}
-                  numberOfLines={2}
-                >
-                  {item.title}
-                </Text>
-                {item.price_range && (
-                  <Text style={{ color: "#A390FF", fontSize: 12, marginTop: 4 }}>
-                    {item.price_range}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
-    </ScrollView>
+        {/* Similar Styles Section */}
+        {similarOutfits.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Similar Styles</Text>
+            
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.similarScroll}
+            >
+              {similarOutfits.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() => handleSimilarOutfitPress(item)}
+                  style={styles.similarCard}
+                  activeOpacity={0.8}
+                >
+                  <Image
+                    source={{ uri: item.imageToUse }}
+                    style={styles.similarImage}
+                    resizeMode="cover"
+                  />
+                  <Text style={styles.similarTitle} numberOfLines={2}>
+                    {item.title}
+                  </Text>
+                  {item.price_range && (
+                    <Text style={styles.similarPrice}>{item.price_range}</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </ScrollView>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: SPACING.bottomPadding,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    marginTop: 16,
+  },
+  heroContainer: {
+    position: 'relative',
+  },
+  heroImage: {
+    width: '100%',
+    height: 400,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  backButton: {
+    position: 'absolute',
+    left: SPACING.screenHorizontal,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareButton: {
+    position: 'absolute',
+    right: SPACING.screenHorizontal,
+    backgroundColor: COLORS.primary,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...CARD_SHADOW,
+  },
+  contentContainer: {
+    paddingHorizontal: SPACING.screenHorizontal,
+    paddingTop: SPACING.contentPaddingTop,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  category: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.titleToSubtitle,
+  },
+  price: {
+    fontSize: 18,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginTop: SPACING.sectionTitleToContent,
+  },
+  shopButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: SIZES.borderRadiusButton,
+    marginTop: SPACING.cardGap,
+    gap: 8,
+    ...CARD_SHADOW,
+  },
+  shopButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  section: {
+    marginTop: SPACING.sectionGap,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.sectionTitleToContent,
+  },
+  productsScroll: {
+    paddingHorizontal: SPACING.screenHorizontal,
+  },
+  similarScroll: {
+    paddingHorizontal: SPACING.screenHorizontal,
+  },
+  similarCard: {
+    marginRight: SPACING.cardHorizontalGap,
+    width: 160,
+  },
+  similarImage: {
+    width: 160,
+    height: 200,
+    borderRadius: SIZES.borderRadiusCard,
+    backgroundColor: COLORS.card,
+  },
+  similarTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: SPACING.titleToSubtitle,
+  },
+  similarPrice: {
+    color: COLORS.primary,
+    fontSize: 12,
+    marginTop: 4,
+  },
+});
