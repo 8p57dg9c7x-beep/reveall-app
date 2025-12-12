@@ -586,6 +586,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginRight: 20,
     backgroundColor: COLORS.card,
+    ...CARD_SHADOW,
   },
   resultImage: {
     width: '100%',
