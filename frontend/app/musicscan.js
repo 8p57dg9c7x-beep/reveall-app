@@ -457,7 +457,8 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
-    padding: 20,
+    padding: SPACING.cardPadding + 4,
+    ...CARD_SHADOW,
   },
   instructionsTitle: {
     fontSize: 16,
