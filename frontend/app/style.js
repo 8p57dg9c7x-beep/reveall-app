@@ -626,14 +626,14 @@ const styles = StyleSheet.create({
   },
   // Addilets For You Section
   forYouSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.sectionGap,
   },
   forYouHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: SPACING.titleToSubtitle,
   },
   forYouTitleRow: {
     flexDirection: 'row',
