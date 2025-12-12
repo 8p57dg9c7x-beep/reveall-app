@@ -83,13 +83,8 @@ export default function MusicScanScreen() {
   }, [isListening]);
 
   const handleBack = () => {
-    // Use router.back() for proper stack navigation
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      // Fallback to discover if no history
-      router.replace('/discover');
-    }
+    // Use explicit navigation to returnPath for reliable back navigation
+    router.push(returnPath);
   };
 
   const startListening = async () => {
