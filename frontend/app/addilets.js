@@ -329,14 +329,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   section: {
-    marginBottom: 32,
-    paddingHorizontal: 20,
+    marginBottom: SPACING.sectionGap,
+    paddingHorizontal: SPACING.screenHorizontal,
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 16,
+    marginBottom: SPACING.sectionTitleToContent,
   },
   sectionSubtitle: {
     fontSize: 14,
