@@ -11,7 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 
 // Discover - Exploration Hub
 export default function DiscoverScreen() {
