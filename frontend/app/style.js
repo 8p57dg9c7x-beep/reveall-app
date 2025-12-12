@@ -196,14 +196,14 @@ export default function StyleDiscovery() {
   const handleCelebrityPress = useCallback((outfit) => {
     router.push({
       pathname: '/outfitdetail',
-      params: { outfitData: JSON.stringify(outfit) },
+      params: { outfitData: JSON.stringify(outfit), returnPath: '/style' },
     });
   }, []);
 
   const handleOutfitPress = useCallback((outfit) => {
     router.push({
       pathname: '/outfitdetail',
-      params: { outfitData: JSON.stringify(outfit) },
+      params: { outfitData: JSON.stringify(outfit), returnPath: '/style' },
     });
   }, []);
 
