@@ -100,13 +100,13 @@ export const SHADOWS = {
   },
 };
 
-// 🎯 PREMIUM CARD SHADOW - For consistent premium look
+// 🎯 PREMIUM CARD SHADOW - Calibrated for real devices
 export const CARD_SHADOW = {
   shadowColor: '#000',
-  shadowOpacity: 0.18,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 6,
+  shadowOpacity: 0.25,
+  shadowRadius: 14,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 8,
 };
 
 export const SIZES = {
