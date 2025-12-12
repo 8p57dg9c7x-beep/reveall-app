@@ -392,22 +392,22 @@ const styles = StyleSheet.create({
   },
   content: {
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: SPACING.screenHorizontal + 4,
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    marginTop: 16,
+    marginTop: SPACING.sectionTitleToContent,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 8,
+    marginTop: SPACING.titleToSubtitle,
     textAlign: 'center',
     lineHeight: 22,
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.screenHorizontal,
   },
   animationContainer: {
     width: 200,
