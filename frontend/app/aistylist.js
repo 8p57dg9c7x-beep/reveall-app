@@ -15,7 +15,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAddilets } from '../contexts/AddiletsContext';
-import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import GradientChip from '../components/GradientChip';
 import { uploadImage, pollJobResult } from '../services/revealAPI';
