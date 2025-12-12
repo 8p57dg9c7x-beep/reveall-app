@@ -14,7 +14,8 @@ import { asCardItem } from '../utils/helpers';
 export default function BeautyDetail() {
   const navigation = useNavigation();
   const scrollRef = useRef(null);
-  const { lookData, id } = useLocalSearchParams();
+  const { lookData, id, returnPath } = useLocalSearchParams();
+  const backPath = returnPath || '/beauty';
   
   const [look, setLook] = useState(lookData ? asCardItem(JSON.parse(lookData)) : null);
   const [loading, setLoading] = useState(!lookData && id ? true : false);
