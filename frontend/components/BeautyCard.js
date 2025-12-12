@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OptimizedImage from './OptimizedImage';
-import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, CARD_SHADOW, SPACING } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { asCardItem } from '../utils/helpers';
 
