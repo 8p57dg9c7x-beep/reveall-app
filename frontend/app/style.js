@@ -530,15 +530,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   categoriesContainer: {
-    marginBottom: 24,
+    marginBottom: SPACING.chipsToContent,
   },
   categoriesWrapper: {
     flexDirection: 'row',
-    gap: 12,
+    gap: SPACING.chipGap,
     flexWrap: 'wrap',
   },
   categoriesContent: {
-    gap: 12,
+    gap: SPACING.chipGap,
     paddingRight: 16,
   },
   categoryButton: {
