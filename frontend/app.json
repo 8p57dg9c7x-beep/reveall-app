@@ -16,6 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.reveal.style",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSCameraUsageDescription": "REVEAL needs camera access to scan your body measurements and capture outfit photos",
         "NSMicrophoneUsageDescription": "REVEAL needs microphone access to identify songs playing around you",
@@ -46,6 +47,8 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-firebase/analytics",
       [
         "expo-splash-screen",
         {
