@@ -11,19 +11,27 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import { uploadMultipleImages, pollJobResult } from '../services/revealAPI';
 
 export default function BodyScannerScreen() {
+  const params = useLocalSearchParams();
+  const returnPath = params.returnPath || '/stylelab';
+  
   const [step, setStep] = useState(1); // 1: Instructions, 2: Capture, 3: Results
   const [frontPhoto, setFrontPhoto] = useState(null);
   const [sidePhoto, setSidePhoto] = useState(null);
   const [scanResults, setScanResults] = useState(null);
   const [scanning, setScanning] = useState(false);
   const scanProgress = new Animated.Value(0);
+
+  // Handle back navigation
+  const handleBack = () => {
+    router.push(returnPath);
+  };
 
   const pickImage = async (type) => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -368,7 +376,7 @@ export default function BodyScannerScreen() {
           Alert.alert('Success!', 'Measurements saved to your profile', [
             {
               text: 'OK',
-              onPress: () => router.back(),
+              onPress: () => router.push(returnPath),
             }
           ]);
         }}
@@ -395,7 +403,7 @@ export default function BodyScannerScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>

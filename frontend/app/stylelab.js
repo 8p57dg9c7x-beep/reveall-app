@@ -13,7 +13,7 @@ import { COLORS, GRADIENTS, SIZES, SHADOWS } from '../constants/theme';
 
 // Style Lab - All AI Style Features Hub
 export default function StyleLabScreen() {
-  // Feature cards data
+  // Feature cards data with returnPath for each
   const features = useMemo(() => [
     {
       id: 'outfit-identifier',
@@ -22,6 +22,7 @@ export default function StyleLabScreen() {
       icon: 'camera-iris',
       color: '#FF6B6B',
       route: '/comingsoon',
+      params: { returnPath: '/stylelab' },
       badge: 'Coming Soon',
     },
     {
@@ -31,6 +32,7 @@ export default function StyleLabScreen() {
       icon: 'robot',
       color: '#B14CFF',
       route: '/aistylist',
+      params: { returnPath: '/stylelab' },
     },
     {
       id: 'ai-wardrobe',
@@ -39,6 +41,7 @@ export default function StyleLabScreen() {
       icon: 'hanger',
       color: '#4ECDC4',
       route: '/aiwardrobe',
+      params: { returnPath: '/stylelab' },
     },
     {
       id: 'body-scanner',
@@ -47,6 +50,7 @@ export default function StyleLabScreen() {
       icon: 'human',
       color: '#95E1D3',
       route: '/bodyscanner',
+      params: { returnPath: '/stylelab' },
     },
     {
       id: 'style-dna',
@@ -55,6 +59,7 @@ export default function StyleLabScreen() {
       icon: 'dna',
       color: '#FF6EC7',
       route: '/addilets',
+      params: { returnPath: '/stylelab' },
     },
     {
       id: 'browse-styles',
@@ -63,13 +68,14 @@ export default function StyleLabScreen() {
       icon: 'view-grid',
       color: '#FFD93D',
       route: '/style',
+      params: { returnPath: '/stylelab' },
     },
   ], []);
 
   const renderFeatureCard = useCallback(({ item }) => (
     <TouchableOpacity
       style={styles.featureCard}
-      onPress={() => router.push(item.route)}
+      onPress={() => router.push({ pathname: item.route, params: item.params })}
       activeOpacity={0.8}
     >
       <LinearGradient

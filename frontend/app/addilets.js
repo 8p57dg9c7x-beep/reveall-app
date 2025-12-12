@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
@@ -116,6 +116,13 @@ const HorizontalList = memo(({ data, renderItem, keyPrefix, itemWidth }) => {
 
 export default function AddiletsScreen() {
   const { personalization, loading, refreshPersonalization } = useAddilets();
+  const params = useLocalSearchParams();
+  const returnPath = params.returnPath || '/stylelab';
+
+  // Handle back navigation
+  const handleBack = () => {
+    router.push(returnPath);
+  };
 
   // Render empty loading state
   if (!personalization || loading) {
@@ -246,7 +253,7 @@ export default function AddiletsScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>

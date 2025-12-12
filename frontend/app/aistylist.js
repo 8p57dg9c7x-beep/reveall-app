@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
@@ -25,6 +25,9 @@ const CARD_WIDTH = width * 0.85;
 
 export default function AIStylistScreen() {
   const { getStylePreferences } = useAddilets();
+  const params = useLocalSearchParams();
+  const returnPath = params.returnPath || '/stylelab';
+  
   const [step, setStep] = useState(1); // 1: Upload, 2: Preferences, 3: Results
   const [frontPhoto, setFrontPhoto] = useState(null);
   const [sidePhoto, setSidePhoto] = useState(null);
@@ -33,6 +36,11 @@ export default function AIStylistScreen() {
   const [loading, setLoading] = useState(false);
   const [currentLookIndex, setCurrentLookIndex] = useState(0);
   const scrollX = new Animated.Value(0);
+
+  // Handle back navigation
+  const handleBack = () => {
+    router.push(returnPath);
+  };
 
   // Pre-fill style preferences from Addilets when user reaches step 2
   useEffect(() => {
@@ -376,7 +384,7 @@ export default function AIStylistScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>

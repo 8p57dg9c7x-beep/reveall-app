@@ -11,13 +11,16 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, GRADIENTS, SIZES } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import { uploadImage, pollJobResult } from '../services/revealAPI';
 
 export default function AIWardrobeScreen() {
+  const params = useLocalSearchParams();
+  const returnPath = params.returnPath || '/stylelab';
+  
   const [wardrobeItems, setWardrobeItems] = useState([
     {
       id: 1,
@@ -53,6 +56,11 @@ export default function AIWardrobeScreen() {
   const [generatedOutfits, setGeneratedOutfits] = useState([]);
   const [showOutfits, setShowOutfits] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+
+  // Handle back navigation
+  const handleBack = () => {
+    router.push(returnPath);
+  };
 
   const categories = [
     { id: 'all', name: 'All', icon: 'view-grid', count: wardrobeItems.length },
@@ -282,7 +290,7 @@ export default function AIWardrobeScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
