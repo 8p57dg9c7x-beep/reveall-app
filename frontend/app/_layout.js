@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
 
-// Bundle Version: 4.0.0 - REVEAL Rebrand + New Navigation
+// Bundle Version: 5.0.0 - BRICK 5 Navigation Restructure
 export default function RootLayout() {
   return (
     <FavoritesProvider>
@@ -19,9 +19,9 @@ export default function RootLayout() {
             borderTopWidth: 1,
             borderTopColor: 'rgba(177, 76, 255, 0.1)',
             elevation: 0,
-            height: 85,
-            paddingBottom: 30,
-            paddingTop: 8,
+            height: 88,
+            paddingBottom: 32,
+            paddingTop: 10,
             shadowColor: COLORS.primary,
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
@@ -32,13 +32,13 @@ export default function RootLayout() {
           tabBarLabelStyle: {
             fontSize: 10,
             fontWeight: '600',
-            marginTop: -4,
+            marginTop: -2,
           },
         }}
       >
-        {/* ===== NEW REVEAL TABS (5) ===== */}
+        {/* ===== NEW REVEAL TABS (5) - BRICK 5 STRUCTURE ===== */}
         
-        {/* 1. Home - Personalized feed, Addilets, Recommendations */}
+        {/* TAB 1: HOME - Personalized Dashboard */}
         <Tabs.Screen
           name="index"
           options={{
@@ -49,7 +49,7 @@ export default function RootLayout() {
           }}
         />
         
-        {/* 2. Discover - Movies, Music, MusicScan */}
+        {/* TAB 2: DISCOVER - Explore Everything */}
         <Tabs.Screen
           name="discover"
           options={{
@@ -60,7 +60,7 @@ export default function RootLayout() {
           }}
         />
         
-        {/* 3. Style Lab - All AI Style Features */}
+        {/* TAB 3: STYLE LAB - All AI Tools */}
         <Tabs.Screen
           name="stylelab"
           options={{
@@ -71,18 +71,18 @@ export default function RootLayout() {
           }}
         />
         
-        {/* 4. Beauty Hub - Makeup, Dupes, Celebrity Looks */}
+        {/* TAB 4: FITNESS - Coming Soon */}
         <Tabs.Screen
-          name="beauty"
+          name="fitness"
           options={{
-            title: 'Beauty',
+            title: 'Fitness',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="lipstick" size={26} color={color} />
+              <MaterialCommunityIcons name="dumbbell" size={26} color={color} />
             ),
           }}
         />
         
-        {/* 5. Profile - Favorites, Wardrobe, Settings */}
+        {/* TAB 5: PROFILE - Account & Settings */}
         <Tabs.Screen
           name="profile"
           options={{
@@ -101,6 +101,7 @@ export default function RootLayout() {
         <Tabs.Screen name="style" options={{ href: null }} />
 
         {/* ===== HIDDEN STACK SCREENS - Discover Features ===== */}
+        <Tabs.Screen name="beauty" options={{ href: null }} />
         <Tabs.Screen name="musicscan" options={{ href: null }} />
         <Tabs.Screen name="trendingsongs" options={{ href: null }} />
 
