@@ -111,13 +111,13 @@ export const CARD_SHADOW = {
 
 export const SIZES = {
   // Rounded corners
-  borderRadiusCard: 14,  // Cards
+  borderRadiusCard: 16,  // Cards - Premium rounded
   borderRadiusPill: 28,  // Pills/Chips
   borderRadiusButton: 14,  // Buttons
   borderRadiusInput: 12,  // Input fields
   
   // Legacy support
-  borderRadius: 14,
+  borderRadius: 16,
   spacing: 20,
 };
 
