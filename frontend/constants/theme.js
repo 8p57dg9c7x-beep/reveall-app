@@ -112,6 +112,38 @@ export const SIZES = {
   spacing: 20,
 };
 
+// 🎯 GLOBAL SPACING SYSTEM - Premium UI Standards
+export const SPACING = {
+  // Screen safe area additions
+  topPadding: 36,           // Added to insets.top for breathing room
+  bottomPadding: 100,       // Bottom padding for scroll content (above tab bar)
+  
+  // Horizontal padding
+  screenHorizontal: 20,     // Standard screen horizontal padding
+  
+  // Section spacing (vertical gaps)
+  sectionGap: 32,           // Gap between major sections
+  
+  // Title hierarchy
+  titleToSubtitle: 6,       // Title → Subtitle gap
+  subtitleToChips: 18,      // Subtitle → Chips gap
+  chipsToContent: 18,       // Chips → Content grid gap
+  sectionTitleToContent: 14, // Section title → Content gap
+  
+  // Card and item spacing
+  cardGap: 16,              // Gap between cards
+  chipGap: 12,              // Gap between chips
+  itemGap: 12,              // Gap between list items
+  
+  // Header spacing
+  headerPaddingTop: 60,     // Top padding for headers with back button
+  headerPaddingBottom: 20,  // Bottom padding for headers
+  
+  // Content padding
+  contentPaddingTop: 24,    // Top padding inside content areas
+  contentPaddingBottom: 24, // Bottom padding inside content areas
+};
+
 export const TYPOGRAPHY = {
   // Font families (Inter/Manrope fallback to system)
   fontFamily: {
