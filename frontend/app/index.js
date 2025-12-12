@@ -281,9 +281,10 @@ const styles = StyleSheet.create({
   forYouCard: {
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
+    ...CARD_SHADOW,
   },
   forYouGradient: {
-    padding: 20,
+    padding: SPACING.cardPadding + 4,
   },
   forYouContent: {
     flexDirection: 'row',
