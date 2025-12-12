@@ -115,6 +115,7 @@ export const SIZES = {
   borderRadiusPill: 28,  // Pills/Chips
   borderRadiusButton: 14,  // Buttons
   borderRadiusInput: 12,  // Input fields
+  cardRadius: 16,        // Alias for card radius (BRICK 6)
   
   // Legacy support
   borderRadius: 16,
