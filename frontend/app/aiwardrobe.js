@@ -569,9 +569,10 @@ const styles = StyleSheet.create({
   outfitCard: {
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
-    padding: 20,
-    marginHorizontal: 20,
-    marginBottom: 20,
+    padding: SPACING.cardPadding + 4,
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: SPACING.cardGap + 4,
+    ...CARD_SHADOW,
   },
   outfitHeader: {
     flexDirection: 'row',
