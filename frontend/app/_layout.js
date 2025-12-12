@@ -19,9 +19,9 @@ export default function RootLayout() {
             borderTopWidth: 1,
             borderTopColor: 'rgba(177, 76, 255, 0.1)',
             elevation: 0,
-            height: 88,
-            paddingBottom: 30,
-            paddingTop: 10,
+            height: 95,
+            paddingBottom: 34,
+            paddingTop: 8,
             shadowColor: COLORS.primary,
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
@@ -30,13 +30,14 @@ export default function RootLayout() {
           tabBarActiveTintColor: COLORS.tabBarActive,
           tabBarInactiveTintColor: COLORS.tabBarInactive,
           tabBarLabelStyle: {
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: '600',
-            marginTop: 4,
-            paddingBottom: 2,
+            marginTop: 2,
+            marginBottom: 0,
           },
           tabBarIconStyle: {
-            marginTop: 0,
+            marginTop: 4,
+            marginBottom: 0,
           },
         }}
       >
