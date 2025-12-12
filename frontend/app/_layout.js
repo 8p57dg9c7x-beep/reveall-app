@@ -1,12 +1,18 @@
+import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
+import { initializeFirebase } from '../services/firebase';
 
-// Bundle Version: 6.1.0 - BRICK 6 Tab Bar Polish Fix
+// Bundle Version: 7.0.0 - BRICK 7 + Firebase Integration
 export default function RootLayout() {
+  // Initialize Firebase on app launch
+  useEffect(() => {
+    initializeFirebase();
+  }, []);
   return (
     <FavoritesProvider>
       <AddiletsProvider>
