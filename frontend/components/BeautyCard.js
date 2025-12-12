@@ -105,19 +105,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: SPACING.cardGap,
     height: 320,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    ...CARD_SHADOW,
   },
   cardLeft: {
     marginRight: 8,
