@@ -30,8 +30,8 @@ const CATEGORIES = [
   { id: 'everyday', name: 'Everyday', icon: 'calendar-today' },
 ];
 
-const HEADER_MAX_HEIGHT = 160;
-const HEADER_MIN_HEIGHT = 70;
+const HEADER_MAX_HEIGHT = 180;
+const HEADER_MIN_HEIGHT = 76;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 export default function BeautyScreen() {
