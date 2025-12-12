@@ -353,6 +353,7 @@ const styles = StyleSheet.create({
   profileCard: {
     borderRadius: SIZES.borderRadiusCard,
     padding: 24,
+    ...CARD_SHADOW,
   },
   profileHeader: {
     flexDirection: 'row',
