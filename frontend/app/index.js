@@ -22,10 +22,10 @@ export default function HomeScreen() {
 
   // Quick action buttons - memoized
   const quickActions = useMemo(() => [
-    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist', color: '#B14CFF' },
-    { id: 'style-lab', label: 'Style Lab', icon: 'flask', route: '/stylelab', color: '#4ECDC4' },
-    { id: 'body-scanner', label: 'Body Scan', icon: 'human', route: '/bodyscanner', color: '#95E1D3' },
-    { id: 'style-dna', label: 'Style DNA', icon: 'dna', route: '/addilets', color: '#FF6EC7' },
+    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist', params: { returnPath: '/' }, color: '#B14CFF' },
+    { id: 'style-lab', label: 'Style Lab', icon: 'flask', route: '/stylelab', params: {}, color: '#4ECDC4' },
+    { id: 'body-scanner', label: 'Body Scan', icon: 'human', route: '/bodyscanner', params: { returnPath: '/' }, color: '#95E1D3' },
+    { id: 'style-dna', label: 'Style DNA', icon: 'dna', route: '/addilets', params: { returnPath: '/' }, color: '#FF6EC7' },
   ], []);
 
   // Trending styles data
