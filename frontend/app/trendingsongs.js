@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   albumArt: {
     width: 56,
     height: 56,
-    borderRadius: 8,
+    borderRadius: SIZES.borderRadiusCard,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     marginRight: 12,
   },
