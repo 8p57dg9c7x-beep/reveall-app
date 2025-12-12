@@ -429,7 +429,8 @@ const styles = StyleSheet.create({
     height: CELEB_CARD_HEIGHT,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
-    marginRight: 16,
+    marginRight: SPACING.cardGap,
+    ...CARD_SHADOW,
   },
   celebImage: {
     width: '100%',
