@@ -530,13 +530,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  fixedHeader: {
-    backgroundColor: COLORS.background,
-    paddingHorizontal: 16,
-    zIndex: 100,
-  },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: SPACING.bottomPadding,
+  },
+  headerSection: {
+    paddingHorizontal: 16,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -546,7 +547,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: SPACING.topPadding,
     paddingBottom: SPACING.headerPaddingBottom,
   },
   searchButton: {
