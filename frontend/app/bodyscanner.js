@@ -652,8 +652,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   resultsContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingHorizontal: SPACING.screenHorizontal,
+    paddingBottom: SPACING.bottomPadding,
   },
   resultsHeader: {
     alignItems: 'center',
