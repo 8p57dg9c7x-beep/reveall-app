@@ -150,12 +150,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingBottom: 120,
+    paddingBottom: SPACING.bottomPadding,
   },
   profileHeader: {
     alignItems: 'center',
-    paddingTop: 70,
-    paddingBottom: 24,
+    paddingBottom: SPACING.headerPaddingBottom,
   },
   avatarContainer: {
     marginBottom: 16,
