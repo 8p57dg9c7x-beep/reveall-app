@@ -345,8 +345,9 @@ const styles = StyleSheet.create({
     width: HORIZONTAL_CARD_WIDTH,
     height: 180,
     marginRight: SPACING.itemGap,
-    borderRadius: 12,
+    borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
+    ...CARD_SHADOW,
   },
   styleImage: {
     width: '100%',
