@@ -412,6 +412,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: 12,
+    ...CARD_SHADOW,
   },
   addiletsImage: {
     width: '100%',
