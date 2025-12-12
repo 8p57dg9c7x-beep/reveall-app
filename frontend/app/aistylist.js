@@ -487,19 +487,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   stepContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.screenHorizontal,
   },
   stepTitle: {
     fontSize: 28,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: 8,
+    marginBottom: SPACING.titleToSubtitle,
     textAlign: 'center',
   },
   stepSubtitle: {
     fontSize: 16,
     color: COLORS.textSecondary,
-    marginBottom: 32,
+    marginBottom: SPACING.sectionGap,
     textAlign: 'center',
   },
   photosRow: {
