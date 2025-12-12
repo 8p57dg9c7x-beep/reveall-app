@@ -477,9 +477,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   wardrobeRow: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.screenHorizontal,
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: SPACING.cardGap,
   },
   wardrobeItem: {
     width: '48%',
