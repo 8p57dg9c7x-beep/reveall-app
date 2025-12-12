@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   },
   animatedHeader: {
     backgroundColor: COLORS.background,
-    paddingTop: 60,
+    paddingTop: 64,
     paddingHorizontal: SPACING.screenHorizontal,
     zIndex: 100,
     overflow: 'hidden',
