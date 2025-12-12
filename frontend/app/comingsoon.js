@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { COLORS } from '../constants/theme';
+import { COLORS, SPACING } from '../constants/theme';
 import OptimizedImage from '../components/OptimizedImage';
 
 export default function ComingSoonScreen() {
