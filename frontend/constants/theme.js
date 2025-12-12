@@ -141,6 +141,7 @@ export const SPACING = {
   
   // Card and item spacing
   cardGap: 16,              // Gap between cards
+  cardPadding: 16,          // Internal card padding
   chipGap: 12,              // Gap between chips
   itemGap: 12,              // Gap between list items
   
