@@ -458,14 +458,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 160,
+    paddingBottom: SPACING.bottomPadding,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 24,
-    paddingBottom: 20,
+    paddingTop: SPACING.topPadding,
+    paddingBottom: SPACING.headerPaddingBottom,
   },
   searchButton: {
     width: 40,
