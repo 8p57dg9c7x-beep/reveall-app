@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAddilets } from '../contexts/AddiletsContext';
-import { COLORS, GRADIENTS, SIZES, SHADOWS, SPACING } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SHADOWS, SPACING, CARD_SHADOW } from '../constants/theme';
 import OutfitCard from '../components/OutfitCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
