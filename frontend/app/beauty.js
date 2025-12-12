@@ -343,10 +343,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   categoriesContainer: {
-    marginTop: 12,
+    marginTop: SPACING.subtitleToChips,
   },
   categoriesContent: {
-    gap: 8,
+    gap: SPACING.chipGap,
   },
   categoryChip: {
     flexDirection: 'row',
