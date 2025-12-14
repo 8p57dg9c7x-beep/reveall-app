@@ -6,13 +6,15 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
 import { initializeFirebase } from '../services/firebase';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 
-// Bundle Version: 7.0.0 - BRICK 7 + Firebase Integration
+// Bundle Version: 1.0.0 - v1 Launch (Focus: Style + Shopping)
 export default function RootLayout() {
   // Initialize Firebase on app launch
   useEffect(() => {
     initializeFirebase();
   }, []);
+
   return (
     <FavoritesProvider>
       <AddiletsProvider>
@@ -48,9 +50,9 @@ export default function RootLayout() {
           },
         }}
       >
-        {/* ===== NEW REVEAL TABS (5) - BRICK 5 STRUCTURE ===== */}
+        {/* ===== v1 TABS (4 Active) ===== */}
         
-        {/* TAB 1: HOME - Personalized Dashboard */}
+        {/* TAB 1: HOME - Weather Outfits + Daily Recommendations */}
         <Tabs.Screen
           name="index"
           options={{
@@ -61,7 +63,7 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 2: DISCOVER - Explore Everything */}
+        {/* TAB 2: DISCOVER - Style-only Inspiration */}
         <Tabs.Screen
           name="discover"
           options={{
@@ -72,7 +74,7 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 3: STYLE LAB - All AI Tools */}
+        {/* TAB 3: STYLE LAB - AI Stylist + Body Scanner */}
         <Tabs.Screen
           name="stylelab"
           options={{
@@ -83,10 +85,11 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 4: FITNESS - Coming Soon */}
+        {/* TAB 4: FITNESS - HIDDEN FOR v1 */}
         <Tabs.Screen
           name="fitness"
           options={{
+            href: FEATURE_FLAGS.TABS.FITNESS ? undefined : null,
             title: 'Fitness',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="dumbbell" size={24} color={color} />
@@ -94,7 +97,7 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 5: PROFILE - Account & Settings */}
+        {/* TAB 5: PROFILE - Saved Items & Settings */}
         <Tabs.Screen
           name="profile"
           options={{
@@ -105,24 +108,28 @@ export default function RootLayout() {
           }}
         />
 
-        {/* ===== HIDDEN STACK SCREENS - Style Lab Features ===== */}
+        {/* ===== ACTIVE STACK SCREENS - Style Lab Features ===== */}
         <Tabs.Screen name="aistylist" options={{ href: null }} />
         <Tabs.Screen name="aiwardrobe" options={{ href: null }} />
         <Tabs.Screen name="bodyscanner" options={{ href: null }} />
+        
+        {/* ===== HIDDEN FOR v1 - Style Lab Features ===== */}
         <Tabs.Screen name="addilets" options={{ href: null }} />
         <Tabs.Screen name="style" options={{ href: null }} />
 
-        {/* ===== HIDDEN STACK SCREENS - Discover Features ===== */}
+        {/* ===== ACTIVE STACK SCREENS - Discover Features ===== */}
         <Tabs.Screen name="beauty" options={{ href: null }} />
+        
+        {/* ===== HIDDEN FOR v1 - Music Features ===== */}
         <Tabs.Screen name="musicscan" options={{ href: null }} />
         <Tabs.Screen name="trendingsongs" options={{ href: null }} />
 
-        {/* ===== HIDDEN STACK SCREENS - Detail Pages ===== */}
+        {/* ===== DETAIL PAGES (Active) ===== */}
         <Tabs.Screen name="result" options={{ href: null }} />
         <Tabs.Screen name="outfitdetail" options={{ href: null }} />
         <Tabs.Screen name="beautydetail" options={{ href: null }} />
 
-        {/* ===== HIDDEN STACK SCREENS - Other ===== */}
+        {/* ===== OTHER SCREENS ===== */}
         <Tabs.Screen name="favorites" options={{ href: null }} />
         <Tabs.Screen name="watchlist" options={{ href: null }} />
         <Tabs.Screen name="analytics" options={{ href: null }} />
