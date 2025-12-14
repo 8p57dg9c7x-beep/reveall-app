@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,22 +11,41 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 
 // Fixed heights for getItemLayout optimization
 const HORIZONTAL_CARD_WIDTH = 140;
 
+// Mock weather data (will be replaced with real API)
+const MOCK_WEATHER = {
+  temp: 72,
+  condition: 'Sunny',
+  icon: 'weather-sunny',
+  location: 'Los Angeles',
+};
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { personalization } = useAddilets();
+  const [weather, setWeather] = useState(MOCK_WEATHER);
 
-  // Quick action buttons - memoized
-  const quickActions = useMemo(() => [
-    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist', params: { returnPath: '/' }, color: '#B14CFF' },
-    { id: 'style-lab', label: 'Style Lab', icon: 'flask', route: '/stylelab', params: {}, color: '#4ECDC4' },
-    { id: 'body-scanner', label: 'Body Scan', icon: 'human', route: '/bodyscanner', params: { returnPath: '/' }, color: '#95E1D3' },
-    { id: 'style-dna', label: 'Style DNA', icon: 'dna', route: '/addilets', params: { returnPath: '/' }, color: '#FF6EC7' },
+  // Quick action buttons - filtered by feature flags (v1 core)
+  const quickActions = useMemo(() => {
+    const allActions = [
+      { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist', params: { returnPath: '/' }, color: '#B14CFF', enabled: FEATURE_FLAGS.AI_STYLIST },
+      { id: 'style-lab', label: 'Style Lab', icon: 'flask', route: '/stylelab', params: {}, color: '#4ECDC4', enabled: true },
+      { id: 'body-scanner', label: 'Body Scan', icon: 'human', route: '/bodyscanner', params: { returnPath: '/' }, color: '#95E1D3', enabled: FEATURE_FLAGS.BODY_SCANNER },
+      { id: 'shop', label: 'Shop', icon: 'shopping', route: '/style', params: { returnPath: '/' }, color: '#FF6EC7', enabled: FEATURE_FLAGS.SHOP_THE_LOOK },
+    ];
+    return allActions.filter(a => a.enabled);
+  }, []);
+
+  // Weather-based outfit suggestions
+  const weatherOutfits = useMemo(() => [
+    { id: 1, title: 'Light & Breezy', temp: '70-80°F', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&q=80', tag: 'Perfect for today' },
+    { id: 2, title: 'Casual Cool', temp: '65-75°F', image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&q=80', tag: 'Light layers' },
+    { id: 3, title: 'Summer Ready', temp: '75-85°F', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&q=80', tag: 'Stay cool' },
+    { id: 4, title: 'Sunny Day', temp: '70-80°F', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&q=80', tag: 'UV protection' },
   ], []);
 
   // Trending styles data
@@ -57,10 +76,30 @@ export default function HomeScreen() {
     </TouchableOpacity>
   ), []);
 
+  const renderWeatherOutfit = useCallback(({ item }) => (
+    <TouchableOpacity
+      style={styles.weatherCard}
+      onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
+      activeOpacity={0.8}
+    >
+      <Image source={{ uri: item.image }} style={styles.weatherImage} />
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.85)']}
+        style={styles.weatherOverlay}
+      >
+        <View style={styles.weatherTag}>
+          <Text style={styles.weatherTagText}>{item.tag}</Text>
+        </View>
+        <Text style={styles.weatherTitle}>{item.title}</Text>
+        <Text style={styles.weatherTemp}>{item.temp}</Text>
+      </LinearGradient>
+    </TouchableOpacity>
+  ), []);
+
   const renderStyleCard = useCallback(({ item }) => (
     <TouchableOpacity
       style={styles.styleCard}
-      onPress={() => router.push('/style')}
+      onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
       activeOpacity={0.8}
     >
       <Image source={{ uri: item.image }} style={styles.styleImage} />
@@ -88,6 +127,36 @@ export default function HomeScreen() {
         </LinearGradient>
       </View>
 
+      {/* Weather Card (v1 Core Feature) */}
+      {FEATURE_FLAGS.WEATHER_OUTFITS && (
+        <View style={styles.section}>
+          <TouchableOpacity 
+            style={styles.weatherBanner}
+            onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={['#4ECDC4', '#44A08D']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.weatherBannerGradient}
+            >
+              <View style={styles.weatherBannerLeft}>
+                <MaterialCommunityIcons name={weather.icon} size={40} color="#FFFFFF" />
+                <View style={styles.weatherBannerText}>
+                  <Text style={styles.weatherBannerTemp}>{weather.temp}°F</Text>
+                  <Text style={styles.weatherBannerLocation}>{weather.location}</Text>
+                </View>
+              </View>
+              <View style={styles.weatherBannerRight}>
+                <Text style={styles.weatherBannerCTA}>Today's Outfits</Text>
+                <MaterialCommunityIcons name="arrow-right-circle" size={24} color="#FFFFFF" />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Quick Actions */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -96,58 +165,63 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* For You - Addilets Powered */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <MaterialCommunityIcons name="star-four-points" size={20} color={COLORS.primary} />
-            <Text style={styles.sectionTitleInline}>For You</Text>
+      {/* Weather-Based Outfits (v1 Core) */}
+      {FEATURE_FLAGS.WEATHER_OUTFITS && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleRow}>
+              <MaterialCommunityIcons name="weather-sunny" size={20} color="#FFD93D" />
+              <Text style={styles.sectionTitleInline}>Weather Picks</Text>
+            </View>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => router.push('/addilets')}>
-            <Text style={styles.seeAll}>View All</Text>
+          <FlatList
+            horizontal
+            data={weatherOutfits}
+            keyExtractor={(item) => `weather-${item.id}`}
+            renderItem={renderWeatherOutfit}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalScroll}
+            initialNumToRender={4}
+            removeClippedSubviews={true}
+          />
+        </View>
+      )}
+
+      {/* Shop The Look Banner (v1 Core) */}
+      {FEATURE_FLAGS.SHOP_THE_LOOK && (
+        <View style={styles.section}>
+          <TouchableOpacity 
+            style={styles.shopBanner}
+            onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={[COLORS.primary, '#8B5CF6']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.shopBannerGradient}
+            >
+              <View style={styles.shopBannerContent}>
+                <MaterialCommunityIcons name="shopping" size={32} color="#FFFFFF" />
+                <View style={styles.shopBannerText}>
+                  <Text style={styles.shopBannerTitle}>Shop The Look</Text>
+                  <Text style={styles.shopBannerSubtitle}>Find & buy pieces from any outfit</Text>
+                </View>
+              </View>
+              <MaterialCommunityIcons name="arrow-right-circle" size={32} color="#FFFFFF" />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
-        
-        <TouchableOpacity 
-          style={styles.forYouCard}
-          onPress={() => router.push('/addilets')}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={['rgba(177, 76, 255, 0.25)', 'rgba(255, 110, 199, 0.15)']}
-            style={styles.forYouGradient}
-          >
-            <View style={styles.forYouContent}>
-              <View style={styles.forYouIcon}>
-                <MaterialCommunityIcons name="account-star" size={32} color={COLORS.primary} />
-              </View>
-              <View style={styles.forYouText}>
-                <Text style={styles.forYouTitle}>Your Style DNA</Text>
-                <Text style={styles.forYouSubtitle}>
-                  {personalization?.styleProfile?.personalities?.join(' • ') || 'Discover your unique style'}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.forYouStats}>
-              <View style={styles.forYouStat}>
-                <Text style={styles.forYouStatNumber}>{personalization?.recommendations?.outfits?.length || 4}</Text>
-                <Text style={styles.forYouStatLabel}>Daily Picks</Text>
-              </View>
-              <View style={styles.forYouStatDivider} />
-              <View style={styles.forYouStat}>
-                <Text style={styles.forYouStatNumber}>{personalization?.styleProfile?.celebrityMatches?.[0]?.match || 92}%</Text>
-                <Text style={styles.forYouStatLabel}>Match Score</Text>
-              </View>
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
+      )}
 
       {/* Trending Styles */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitleInline}>Trending Styles</Text>
-          <TouchableOpacity onPress={() => router.push('/style')}>
+          <TouchableOpacity onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}>
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
@@ -168,7 +242,7 @@ export default function HomeScreen() {
         />
       </View>
     </View>
-  ), [insets.top, personalization, quickActions, trendingStyles, renderQuickAction, renderStyleCard]);
+  ), [insets.top, weather, quickActions, weatherOutfits, trendingStyles, renderQuickAction, renderWeatherOutfit, renderStyleCard]);
 
   const emptyData = useMemo(() => [], []);
 
@@ -247,6 +321,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  // Weather Banner
+  weatherBanner: {
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    ...CARD_SHADOW,
+  },
+  weatherBannerGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  weatherBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  weatherBannerText: {
+    marginLeft: 12,
+  },
+  weatherBannerTemp: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  weatherBannerLocation: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  weatherBannerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  weatherBannerCTA: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  // Quick Actions
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -278,66 +391,81 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     flex: 1,
   },
-  forYouCard: {
+  // Weather Outfit Cards
+  weatherCard: {
+    width: 160,
+    height: 220,
+    marginRight: SPACING.itemGap,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
     ...CARD_SHADOW,
   },
-  forYouGradient: {
-    padding: SPACING.cardPadding + 4,
+  weatherImage: {
+    width: '100%',
+    height: '100%',
   },
-  forYouContent: {
+  weatherOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 14,
+  },
+  weatherTag: {
+    backgroundColor: COLORS.primary,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  weatherTagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  weatherTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  weatherTemp: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 2,
+  },
+  // Shop Banner
+  shopBanner: {
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    ...CARD_SHADOW,
+  },
+  shopBannerGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    padding: 20,
   },
-  forYouIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(177, 76, 255, 0.2)',
-    justifyContent: 'center',
+  shopBannerContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  forYouText: {
     flex: 1,
-    marginLeft: 16,
   },
-  forYouTitle: {
+  shopBannerText: {
+    marginLeft: 14,
+    flex: 1,
+  },
+  shopBannerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
   },
-  forYouSubtitle: {
+  shopBannerSubtitle: {
     fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 4,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 2,
   },
-  forYouStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  forYouStat: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  forYouStatNumber: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: COLORS.primary,
-  },
-  forYouStatLabel: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  forYouStatDivider: {
-    width: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
+  // Style Cards
   horizontalScroll: {
     paddingRight: 20,
   },
