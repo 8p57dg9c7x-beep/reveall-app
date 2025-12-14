@@ -12,56 +12,65 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 
-// Discover - Explore Everything Hub
+// Discover - Style & Shopping Hub (v1 Focus)
 export default function DiscoverScreen() {
   const insets = useSafeAreaInsets();
 
-  // Main exploration categories
-  const EXPLORE_CATEGORIES = useMemo(() => [
-    {
-      id: 'style-discovery',
-      title: 'Style Discovery',
-      subtitle: 'Explore trending outfits',
-      icon: 'hanger',
-      color: '#B14CFF',
-      route: '/style',
-      params: { returnPath: '/discover' },
-    },
-    {
-      id: 'beauty-hub',
-      title: 'Beauty Hub',
-      subtitle: 'Makeup & beauty looks',
-      icon: 'lipstick',
-      color: '#FF6EC7',
-      route: '/beauty',
-      params: { returnPath: '/discover' },
-    },
-    {
-      id: 'musicscan',
-      title: 'MusicScan',
-      subtitle: 'Identify any song instantly',
-      icon: 'music-circle',
-      color: '#1DB954',
-      route: '/musicscan',
-      params: { returnPath: '/discover' },
-    },
-    {
-      id: 'trending-songs',
-      title: 'Trending Songs',
-      subtitle: 'See what\'s hot right now',
-      icon: 'trending-up',
-      color: '#FF6B6B',
-      route: '/trendingsongs',
-      params: { returnPath: '/discover' },
-    },
-  ], []);
+  // Main exploration categories - filtered by feature flags
+  const EXPLORE_CATEGORIES = useMemo(() => {
+    const allCategories = [
+      {
+        id: 'style-discovery',
+        title: 'Style Discovery',
+        subtitle: 'Explore trending outfits',
+        icon: 'hanger',
+        color: '#B14CFF',
+        route: '/style',
+        params: { returnPath: '/discover' },
+        enabled: FEATURE_FLAGS.STYLE_DISCOVERY,
+      },
+      {
+        id: 'beauty-hub',
+        title: 'Beauty Hub',
+        subtitle: 'Makeup looks & products',
+        icon: 'lipstick',
+        color: '#FF6EC7',
+        route: '/beauty',
+        params: { returnPath: '/discover' },
+        enabled: FEATURE_FLAGS.BEAUTY_HUB,
+      },
+      {
+        id: 'musicscan',
+        title: 'MusicScan',
+        subtitle: 'Identify any song instantly',
+        icon: 'music-circle',
+        color: '#1DB954',
+        route: '/musicscan',
+        params: { returnPath: '/discover' },
+        enabled: FEATURE_FLAGS.MUSIC_SCAN,  // Hidden for v1
+      },
+      {
+        id: 'trending-songs',
+        title: 'Trending Songs',
+        subtitle: 'See what\'s hot right now',
+        icon: 'trending-up',
+        color: '#FF6B6B',
+        route: '/trendingsongs',
+        params: { returnPath: '/discover' },
+        enabled: FEATURE_FLAGS.TRENDING_SONGS,  // Hidden for v1
+      },
+    ];
+    
+    return allCategories.filter(cat => cat.enabled);
+  }, []);
 
-  // Quick explore cards
+  // Quick explore cards - style & shopping focused
   const QUICK_EXPLORE = useMemo(() => [
     {
       id: 'celebrity-styles',
-      title: 'Celebrity Matches',
+      title: 'Celebrity Looks',
       image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&q=80',
       route: '/style',
       params: { returnPath: '/discover' },
@@ -74,15 +83,15 @@ export default function DiscoverScreen() {
       params: { returnPath: '/discover' },
     },
     {
-      id: 'beauty-trends',
-      title: 'Beauty Trends',
+      id: 'beauty-products',
+      title: 'Beauty Products',
       image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&q=80',
       route: '/beauty',
       params: { returnPath: '/discover' },
     },
     {
       id: 'outfit-inspo',
-      title: 'Outfit Inspo',
+      title: 'Daily Outfits',
       image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&q=80',
       route: '/style',
       params: { returnPath: '/discover' },
@@ -154,7 +163,7 @@ export default function DiscoverScreen() {
         <View style={styles.header}>
           <MaterialCommunityIcons name="compass" size={44} color={COLORS.primary} />
           <Text style={styles.headerTitle}>Discover</Text>
-          <Text style={styles.headerSubtitle}>Explore style, beauty & music</Text>
+          <Text style={styles.headerSubtitle}>Style inspiration & shopping</Text>
         </View>
 
         {/* Main Categories */}
@@ -171,23 +180,27 @@ export default function DiscoverScreen() {
           </View>
         </View>
 
-        {/* Coming Soon Teaser */}
+        {/* Shop Featured Banner */}
         <View style={styles.section}>
           <TouchableOpacity 
-            style={styles.comingSoonCard}
-            onPress={() => router.push({ pathname: '/comingsoon', params: { returnPath: '/discover' } })}
+            style={styles.shopBanner}
+            onPress={() => router.push({ pathname: '/style', params: { returnPath: '/discover' } })}
             activeOpacity={0.85}
           >
             <LinearGradient
-              colors={['rgba(255, 149, 0, 0.2)', 'rgba(255, 149, 0, 0.05)']}
-              style={styles.comingSoonGradient}
+              colors={[COLORS.primary, '#8B5CF6']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.shopBannerGradient}
             >
-              <MaterialCommunityIcons name="rocket-launch" size={32} color="#FF9500" />
-              <View style={styles.comingSoonContent}>
-                <Text style={styles.comingSoonTitle}>More Coming Soon</Text>
-                <Text style={styles.comingSoonSubtitle}>New features on the way</Text>
+              <View style={styles.shopBannerContent}>
+                <MaterialCommunityIcons name="shopping" size={28} color="#FFFFFF" />
+                <View style={styles.shopBannerText}>
+                  <Text style={styles.shopBannerTitle}>Shop The Look</Text>
+                  <Text style={styles.shopBannerSubtitle}>Get the exact pieces from any outfit</Text>
+                </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+              <MaterialCommunityIcons name="arrow-right-circle" size={32} color="#FFFFFF" />
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -299,31 +312,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  comingSoonCard: {
+  shopBanner: {
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
     ...CARD_SHADOW,
   },
-  comingSoonGradient: {
+  shopBannerGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.cardPadding + 4,
+    justifyContent: 'space-between',
+    padding: 20,
     borderRadius: SIZES.borderRadiusCard,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 149, 0, 0.2)',
   },
-  comingSoonContent: {
+  shopBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
-    marginLeft: 16,
   },
-  comingSoonTitle: {
-    fontSize: 17,
+  shopBannerText: {
+    marginLeft: 14,
+    flex: 1,
+  },
+  shopBannerTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
   },
-  comingSoonSubtitle: {
+  shopBannerSubtitle: {
     fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 4,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 2,
   },
 });
