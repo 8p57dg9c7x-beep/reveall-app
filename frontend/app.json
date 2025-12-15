@@ -37,7 +37,9 @@
         "WRITE_EXTERNAL_STORAGE",
         "READ_MEDIA_IMAGES",
         "READ_MEDIA_VIDEO",
-        "READ_MEDIA_AUDIO"
+        "READ_MEDIA_AUDIO",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
       ],
       "edgeToEdgeEnabled": true
     },
