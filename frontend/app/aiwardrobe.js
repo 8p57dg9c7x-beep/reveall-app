@@ -402,10 +402,12 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.headerPaddingBottom,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
   },
   headerCenter: {
     flexDirection: 'row',
