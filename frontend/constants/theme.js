@@ -122,41 +122,146 @@ export const SIZES = {
   spacing: 20,
 };
 
-// 🎯 GLOBAL SPACING SYSTEM - BRICK 5 FINAL STANDARDS
+// 🎯 GLOBAL SPACING SYSTEM - APP STORE READY
 export const SPACING = {
   // Screen safe area additions
-  topPadding: 48,           // Standard header top padding (after insets.top)
-  bottomPadding: 140,       // Tab bar clearance (MANDATORY on all scrollable screens)
+  topPadding: 16,             // Standard header top padding (after insets.top)
+  bottomPadding: 140,         // Tab bar clearance (MANDATORY on all scrollable screens)
   
   // Horizontal padding
-  screenHorizontal: 20,     // Standard screen horizontal padding
+  screenHorizontal: 20,       // Standard screen horizontal padding
   
   // Header spacing
-  headerPaddingTop: 48,     // Header top padding (use with insets.top)
-  headerPaddingBottom: 24,  // Header bottom padding
+  headerPaddingTop: 16,       // Header top padding (use with insets.top)
+  headerPaddingBottom: 20,    // Header bottom padding
   
   // Section spacing (vertical gaps)
-  sectionGap: 36,           // Gap between major sections
-  sectionTitleTop: 24,      // Space above section titles
-  sectionTitleBottom: 12,   // Space below section titles
+  sectionGap: 32,             // Gap between major sections
+  sectionTitleTop: 24,        // Space above section titles
+  sectionTitleBottom: 12,     // Space below section titles
   
   // Title hierarchy
-  titleToSubtitle: 8,       // Title → Subtitle gap
-  subtitleToChips: 24,      // Subtitle → Chips gap
-  chipsToContent: 24,       // Chips → Content grid gap
-  chipRowGap: 16,           // Gap between chip rows
-  sectionTitleToContent: 12, // Section title → Content gap (updated)
+  titleToSubtitle: 6,         // Title → Subtitle gap
+  subtitleToChips: 20,        // Subtitle → Chips gap
+  chipsToContent: 20,         // Chips → Content grid gap
+  chipRowGap: 12,             // Gap between chip rows
+  sectionTitleToContent: 14,  // Section title → Content gap
   
   // Card and item spacing
-  cardGap: 20,              // Vertical gap between cards (updated)
-  cardHorizontalGap: 16,    // Horizontal gap between cards
-  cardPadding: 16,          // Internal card padding
-  chipGap: 14,              // Gap between chips
-  itemGap: 12,              // Gap between list items
+  cardGap: 16,                // Vertical gap between cards
+  cardHorizontalGap: 12,      // Horizontal gap between cards
+  cardPadding: 16,            // Internal card padding
+  chipGap: 10,                // Gap between chips
+  itemGap: 12,                // Gap between list items
   
   // Content padding
-  contentPaddingTop: 28,    // Top padding inside content areas
-  contentPaddingBottom: 28, // Bottom padding inside content areas
+  contentPaddingTop: 24,      // Top padding inside content areas
+  contentPaddingBottom: 24,   // Bottom padding inside content areas
+  
+  // Button spacing
+  buttonMarginTop: 24,        // Top margin for CTA buttons
+  buttonPaddingVertical: 16,  // Vertical padding inside buttons
+  buttonPaddingHorizontal: 24, // Horizontal padding inside buttons
+};
+
+// 🎯 TEXT HIERARCHY - APP STORE READY
+export const TEXT_STYLES = {
+  // Page titles
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    color: '#FFFFFF',
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    color: '#FFFFFF',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  // Body text
+  bodyLarge: {
+    fontSize: 16,
+    fontWeight: '400',
+    lineHeight: 24,
+    color: '#DAD7DE',
+  },
+  body: {
+    fontSize: 15,
+    fontWeight: '400',
+    lineHeight: 22,
+    color: '#DAD7DE',
+  },
+  bodySmall: {
+    fontSize: 13,
+    fontWeight: '400',
+    lineHeight: 18,
+    color: '#A9A0B0',
+  },
+  // Labels
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  labelSmall: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#A9A0B0',
+  },
+  // Buttons
+  buttonLarge: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  button: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  buttonSmall: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+};
+
+// 🎯 BUTTON SIZES - 44px minimum touch targets
+export const BUTTON_SIZES = {
+  large: {
+    height: 56,
+    paddingHorizontal: 28,
+    borderRadius: 16,
+    fontSize: 17,
+  },
+  medium: {
+    height: 48,
+    paddingHorizontal: 24,
+    borderRadius: 14,
+    fontSize: 15,
+  },
+  small: {
+    height: 44,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    fontSize: 14,
+  },
+  icon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+  },
 };
 
 export const TYPOGRAPHY = {
