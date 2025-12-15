@@ -1,30 +1,53 @@
-// BRICK 6: Beauty Detail Page - Polished with consistent back button, scrolling, and spacing
-
-import { View, Text, Image, ScrollView, TouchableOpacity, Share, Alert, StyleSheet } from "react-native";
+// Beauty Detail Page - v1 with Shop The Look Affiliate Flow
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, Image, ScrollView, TouchableOpacity, Share, Alert, StyleSheet, Linking } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
-import { useRef, useEffect, useState } from "react";
-import * as Linking from 'expo-linking';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import ProductCard from "../components/ProductCard";
 import { trackBeautyView } from "../services/analytics";
 import { API_BASE_URL } from '../config';
 import { asCardItem } from '../utils/helpers';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
+import { ShopProductListItem, ShopThisLookButton } from '../components/ShopProduct';
+import { logEvent } from '../services/firebase';
+
+// Mock product data for beauty looks
+const generateMockBeautyProducts = (look) => {
+  const productTypes = ['Foundation', 'Lipstick', 'Eyeshadow', 'Mascara', 'Blush'];
+  const brands = ['Fenty Beauty', 'MAC', 'Charlotte Tilbury', 'NARS', 'Urban Decay', 'Too Faced', 'Rare Beauty'];
+  
+  return productTypes.slice(0, 3 + Math.floor(Math.random() * 2)).map((type, index) => ({
+    id: `${look?.id || 'mock'}-${index}`,
+    type,
+    name: `${type === 'Foundation' ? 'Pro Filt\'r' : type === 'Lipstick' ? 'Matte' : type === 'Eyeshadow' ? 'Palette' : 'Volume'} ${type}`,
+    brand: brands[Math.floor(Math.random() * brands.length)],
+    price: `$${Math.floor(Math.random() * 45) + 15}`,
+    shade: ['Rose', 'Nude', 'Berry', 'Coral', 'Bronze'][Math.floor(Math.random() * 5)],
+    affiliateUrl: null,
+  }));
+};
 
 export default function BeautyDetail() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
   const scrollRef = useRef(null);
   const { lookData, id, returnPath } = useLocalSearchParams();
   const backPath = returnPath || '/beauty';
   
   const [look, setLook] = useState(lookData ? asCardItem(JSON.parse(lookData)) : null);
   const [loading, setLoading] = useState(!lookData && id ? true : false);
+  const [products, setProducts] = useState([]);
   const [similarLooks, setSimilarLooks] = useState([]);
-  const [loadingSimilar, setLoadingSimilar] = useState(false);
+
+  // Initialize products when look loads
+  useEffect(() => {
+    if (look) {
+      const beautyProducts = look.products && look.products.length > 0 
+        ? look.products 
+        : generateMockBeautyProducts(look);
+      setProducts(beautyProducts);
+    }
+  }, [look]);
 
   // Fetch beauty look by ID if coming from deep link
   useEffect(() => {
@@ -56,7 +79,7 @@ export default function BeautyDetail() {
     fetchBeautyById();
   }, [id]);
 
-  // Auto-scroll to top when opening a new beauty look
+  // Auto-scroll to top when opening a new look
   useEffect(() => {
     if (look) {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
@@ -67,26 +90,23 @@ export default function BeautyDetail() {
     }
   }, [lookData]);
 
-  // Fetch similar beauty looks from the same category
+  // Fetch similar looks
   useEffect(() => {
     const fetchSimilarLooks = async () => {
       if (!look?.category) return;
       
-      setLoadingSimilar(true);
       try {
         const response = await fetch(`${API_BASE_URL}/api/beauty/${look.category}`);
         const data = await response.json();
         
         const filtered = (data.looks || [])
           .filter(item => item.id !== look.id && item._id?.toString() !== look.id)
-          .slice(0, 10)
+          .slice(0, 6)
           .map(asCardItem);
         
         setSimilarLooks(filtered);
       } catch (error) {
-        console.error('Error fetching similar beauty looks:', error);
-      } finally {
-        setLoadingSimilar(false);
+        console.error('Error fetching similar looks:', error);
       }
     };
 
@@ -97,6 +117,19 @@ export default function BeautyDetail() {
     router.push(backPath);
   };
 
+  const handleShare = async () => {
+    try {
+      await logEvent('beauty_shared', { look_id: look?.id, look_title: look?.title });
+      
+      const result = await Share.share({
+        message: `Check out this ${look.title} beauty look on REVEAL! 💄`,
+        title: look.title,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   const handleSimilarLookPress = (similarLook) => {
     router.push({
       pathname: '/beautydetail',
@@ -104,25 +137,10 @@ export default function BeautyDetail() {
     });
   };
 
-  const handleShare = async () => {
-    try {
-      const deepLink = Linking.createURL(`/beautydetail`, {
-        queryParams: { id: look.id }
-      });
-      
-      const result = await Share.share({
-        message: `Check out this ${look.title} beauty look on REVEAL! 💄\n\n${deepLink}`,
-        title: look.title,
-      });
-
-      if (result.action === Share.sharedAction) {
-        console.log('Shared successfully!');
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      Alert.alert('Error', 'Unable to share');
-    }
-  };
+  // Calculate total price
+  const totalPrice = products.length > 0 
+    ? `$${products.reduce((sum, p) => sum + parseInt(p.price?.replace('$', '') || 0), 0)}`
+    : null;
 
   if (loading) {
     return (
@@ -154,7 +172,7 @@ export default function BeautyDetail() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Image with Share Button and Back Button */}
+        {/* Hero Image */}
         <View style={styles.heroContainer}>
           <Image
             source={{ uri: look.imageToUse }}
@@ -179,50 +197,67 @@ export default function BeautyDetail() {
           >
             <MaterialCommunityIcons name="share-variant" size={24} color="#FFFFFF" />
           </TouchableOpacity>
+          
+          {/* Celebrity Badge */}
+          {look.celebrity && (
+            <View style={styles.celebrityBadge}>
+              <MaterialCommunityIcons name="star" size={14} color="#FFD700" />
+              <Text style={styles.celebrityBadgeText}>{look.celebrity}</Text>
+            </View>
+          )}
         </View>
 
+        {/* Content */}
         <View style={styles.contentContainer}>
-          {/* Title */}
+          {/* Title & Meta */}
           <Text style={styles.title}>{look.title}</Text>
-
-          {/* Category + Celebrity */}
           <Text style={styles.category}>
             {look.category}
             {look.celebrity && ` • Inspired by ${look.celebrity}`}
           </Text>
-
-          {/* Description (if available) */}
+          
+          {/* Description */}
           {look.description && (
             <Text style={styles.description}>{look.description}</Text>
           )}
-        </View>
 
-        {/* Shop The Look - Affiliate Products */}
-        {look.products && look.products.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>💄 Shop The Look</Text>
+          {/* Shop This Look Section */}
+          <View style={styles.shopSection}>
+            <View style={styles.shopHeader}>
+              <MaterialCommunityIcons name="lipstick" size={20} color="#FF6EC7" />
+              <Text style={styles.shopTitle}>Get The Products</Text>
+            </View>
             
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsScroll}
-            >
-              {look.products.map((product, index) => (
-                <ProductCard 
-                  key={index} 
-                  product={product} 
-                  itemContext={{
-                    item_id: look.id?.toString(),
-                    item_title: look.title,
-                    category: look.category
-                  }}
+            {/* Product List */}
+            <View style={styles.productList}>
+              {products.map((product, index) => (
+                <ShopProductListItem
+                  key={product.id || index}
+                  product={product}
+                  context={{ screen: 'beautydetail', itemTitle: look.title }}
                 />
               ))}
-            </ScrollView>
+            </View>
+            
+            {/* Shop All Button */}
+            <ShopThisLookButton
+              products={products}
+              totalPrice={totalPrice}
+              context={{ screen: 'beautydetail', itemTitle: look.title }}
+              style={styles.shopAllButton}
+            />
           </View>
-        )}
 
-        {/* Similar Beauty Looks Section */}
+          {/* Beauty Tip */}
+          <View style={styles.beautyTip}>
+            <MaterialCommunityIcons name="lightbulb" size={18} color="#FF6EC7" />
+            <Text style={styles.beautyTipText}>
+              Beauty tip: Start with a primer for longer-lasting results and blend well for a seamless finish!
+            </Text>
+          </View>
+        </View>
+
+        {/* Similar Looks */}
         {similarLooks.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Similar Beauty Looks</Text>
@@ -237,19 +272,24 @@ export default function BeautyDetail() {
                   key={item.id}
                   onPress={() => handleSimilarLookPress(item)}
                   style={styles.similarCard}
-                  activeOpacity={0.8}
+                  activeOpacity={0.85}
                 >
                   <Image
                     source={{ uri: item.imageToUse }}
                     style={styles.similarImage}
                     resizeMode="cover"
                   />
-                  <Text style={styles.similarTitle} numberOfLines={2}>
-                    {item.title}
-                  </Text>
-                  {item.celebrity && (
-                    <Text style={styles.similarCelebrity}>{item.celebrity}</Text>
-                  )}
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0,0,0,0.8)']}
+                    style={styles.similarOverlay}
+                  >
+                    <Text style={styles.similarTitle} numberOfLines={2}>
+                      {item.title}
+                    </Text>
+                    {item.celebrity && (
+                      <Text style={styles.similarCelebrity}>{item.celebrity}</Text>
+                    )}
+                  </LinearGradient>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -280,12 +320,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 16,
   },
+  // Hero
   heroContainer: {
     position: 'relative',
   },
   heroImage: {
     width: '100%',
-    height: 400,
+    height: 420,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
   },
@@ -302,7 +343,7 @@ const styles = StyleSheet.create({
   shareButton: {
     position: 'absolute',
     right: SPACING.screenHorizontal,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#FF6EC7',
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -310,17 +351,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...CARD_SHADOW,
   },
+  celebrityBadge: {
+    position: 'absolute',
+    bottom: 20,
+    right: SPACING.screenHorizontal,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  celebrityBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  // Content
   contentContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
     paddingTop: SPACING.contentPaddingTop,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
     color: COLORS.textPrimary,
+    letterSpacing: -0.3,
   },
   category: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.textSecondary,
     marginTop: SPACING.titleToSubtitle,
   },
@@ -330,41 +390,93 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sectionTitleToContent,
     lineHeight: 22,
   },
+  // Shop Section
+  shopSection: {
+    marginTop: SPACING.sectionGap,
+    backgroundColor: 'rgba(255, 110, 199, 0.05)',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 110, 199, 0.15)',
+  },
+  shopHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  shopTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  productList: {
+    marginBottom: 16,
+  },
+  shopAllButton: {
+    marginTop: 4,
+  },
+  // Beauty Tip
+  beautyTip: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginTop: SPACING.sectionGap,
+    padding: 16,
+    backgroundColor: 'rgba(255, 110, 199, 0.1)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 110, 199, 0.2)',
+  },
+  beautyTipText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  // Section
   section: {
     marginTop: SPACING.sectionGap,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: COLORS.textPrimary,
     paddingHorizontal: SPACING.screenHorizontal,
     marginBottom: SPACING.sectionTitleToContent,
   },
-  productsScroll: {
-    paddingHorizontal: SPACING.screenHorizontal,
-  },
   similarScroll: {
     paddingHorizontal: SPACING.screenHorizontal,
   },
   similarCard: {
+    width: 150,
+    height: 200,
     marginRight: SPACING.cardHorizontalGap,
-    width: 160,
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    ...CARD_SHADOW,
   },
   similarImage: {
-    width: 160,
-    height: 200,
-    borderRadius: SIZES.borderRadiusCard,
-    backgroundColor: COLORS.card,
+    width: '100%',
+    height: '100%',
+  },
+  similarOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
   },
   similarTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '600',
-    marginTop: SPACING.titleToSubtitle,
+    lineHeight: 16,
   },
   similarCelebrity: {
-    color: COLORS.primary,
+    color: '#FF6EC7',
     fontSize: 12,
+    fontWeight: '600',
     marginTop: 4,
   },
 });
