@@ -248,29 +248,6 @@ export default function HomeScreen() {
           />
         </View>
       )}
-
-      {/* Single Shop CTA */}
-      <View style={styles.section}>
-        <TouchableOpacity 
-          style={styles.shopCTA}
-          onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
-          activeOpacity={0.85}
-        >
-          <LinearGradient
-            colors={[COLORS.primary, '#8B5CF6']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.shopCTAGradient}
-          >
-            <MaterialCommunityIcons name="shopping" size={24} color="#FFFFFF" />
-            <View style={styles.shopCTAText}>
-              <Text style={styles.shopCTATitle}>Shop The Look</Text>
-              <Text style={styles.shopCTASubtitle}>Get exact pieces from any outfit</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.7)" />
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
     </View>
   ), [insets.top, weather, weatherOutfits, recommendedOutfits, styleRecommendation, quickActions, renderQuickAction, renderOutfitCard]);
 
