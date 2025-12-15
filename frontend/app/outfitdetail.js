@@ -12,22 +12,6 @@ import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/the
 import { FEATURE_FLAGS } from '../config/featureFlags';
 import { logEvent } from '../services/firebase';
 
-// Mock product data for outfits (will be replaced with real data from API)
-const generateMockProducts = (outfit) => {
-  const productTypes = ['Top', 'Bottom', 'Shoes', 'Accessory'];
-  const brands = ['Zara', 'H&M', 'Uniqlo', 'COS', 'Everlane', 'Madewell', 'ASOS', 'Nordstrom'];
-  
-  return productTypes.slice(0, 3 + Math.floor(Math.random() * 2)).map((type, index) => ({
-    id: `${outfit?.id || 'mock'}-${index}`,
-    type,
-    name: `${type === 'Top' ? 'Classic' : type === 'Bottom' ? 'Tailored' : type === 'Shoes' ? 'Leather' : 'Designer'} ${type}`,
-    brand: brands[Math.floor(Math.random() * brands.length)],
-    price: `$${Math.floor(Math.random() * 150) + 29}`,
-    color: ['Black', 'White', 'Navy', 'Beige', 'Gray'][Math.floor(Math.random() * 5)],
-    affiliateUrl: null, // Will be populated with real affiliate links
-  }));
-};
-
 export default function OutfitDetail() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef(null);
@@ -36,18 +20,7 @@ export default function OutfitDetail() {
   
   const [outfit, setOutfit] = useState(outfitData ? asCardItem(JSON.parse(outfitData)) : null);
   const [loading, setLoading] = useState(!outfitData && id ? true : false);
-  const [products, setProducts] = useState([]);
   const [similarOutfits, setSimilarOutfits] = useState([]);
-
-  // Initialize products when outfit loads
-  useEffect(() => {
-    if (outfit) {
-      // Use outfit's products if available, otherwise generate mock
-      const outfitProducts = outfit.products && outfit.products.length > 0 
-        ? outfit.products 
-        : generateMockProducts(outfit);
-      setProducts(outfitProducts);
-    }
   }, [outfit]);
 
   // Fetch outfit by ID if coming from deep link
