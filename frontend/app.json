@@ -53,6 +53,14 @@
       "@react-native-firebase/app",
       "@react-native-firebase/analytics",
       [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "REVEAL uses your location to show weather-appropriate outfit recommendations",
+          "locationAlwaysPermission": "REVEAL uses your location to show weather-appropriate outfit recommendations",
+          "locationWhenInUsePermission": "REVEAL uses your location to show weather-appropriate outfit recommendations"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
