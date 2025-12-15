@@ -21,7 +21,6 @@ export default function OutfitDetail() {
   const [outfit, setOutfit] = useState(outfitData ? asCardItem(JSON.parse(outfitData)) : null);
   const [loading, setLoading] = useState(!outfitData && id ? true : false);
   const [similarOutfits, setSimilarOutfits] = useState([]);
-  }, [outfit]);
 
   // Fetch outfit by ID if coming from deep link
   useEffect(() => {
