@@ -1619,6 +1619,186 @@ async def get_analytics_dashboard():
             "message": str(e)
         }
 
+# ============================================================================
+# WEATHER-BASED OUTFIT RECOMMENDATIONS
+# ============================================================================
+
+# Load OpenWeatherMap API key
+OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY')
+logger.info(f"OpenWeather API key loaded: {'Yes' if OPENWEATHER_API_KEY else 'No'}")
+
+# Temperature to outfit category mapping
+TEMP_CATEGORY_RULES = {
+    'hot': {'min_temp': 85, 'styles': ['light', 'summer', 'casual'], 'keywords': ['tank', 'shorts', 'sandals', 'linen', 'breathable']},
+    'warm': {'min_temp': 70, 'styles': ['casual', 'streetwear', 'summer'], 'keywords': ['t-shirt', 'light', 'sneakers', 'casual']},
+    'mild': {'min_temp': 55, 'styles': ['casual', 'smart-casual', 'minimal'], 'keywords': ['long sleeve', 'jeans', 'jacket', 'layers']},
+    'cool': {'min_temp': 40, 'styles': ['layered', 'elegant', 'autumn'], 'keywords': ['sweater', 'coat', 'boots', 'scarf']},
+    'cold': {'min_temp': -100, 'styles': ['winter', 'warm', 'layered'], 'keywords': ['heavy coat', 'layers', 'beanie', 'warm boots']},
+}
+
+def get_temp_category(temp_f: float) -> str:
+    """Get temperature category from Fahrenheit temperature"""
+    if temp_f >= 85:
+        return 'hot'
+    elif temp_f >= 70:
+        return 'warm'
+    elif temp_f >= 55:
+        return 'mild'
+    elif temp_f >= 40:
+        return 'cool'
+    return 'cold'
+
+def get_weather_style_recommendation(temp_f: float, condition: str) -> dict:
+    """Rule-based outfit style recommendation based on weather"""
+    category = get_temp_category(temp_f)
+    rules = TEMP_CATEGORY_RULES[category]
+    
+    # Adjust for weather conditions
+    condition_lower = condition.lower() if condition else 'clear'
+    
+    # Special adjustments for conditions
+    accessories = []
+    if 'rain' in condition_lower or 'drizzle' in condition_lower:
+        accessories = ['umbrella', 'waterproof jacket', 'rain boots']
+    elif 'snow' in condition_lower:
+        accessories = ['warm hat', 'gloves', 'snow boots']
+    elif 'wind' in condition_lower:
+        accessories = ['windbreaker', 'scarf']
+    elif 'sun' in condition_lower or 'clear' in condition_lower:
+        accessories = ['sunglasses', 'cap'] if temp_f >= 70 else []
+    
+    return {
+        'temp_category': category,
+        'preferred_styles': rules['styles'],
+        'keywords': rules['keywords'],
+        'accessories': accessories,
+        'condition_note': condition_lower
+    }
+
+@api_router.get("/recommendations/weather")
+async def get_weather_outfit_recommendations(
+    lat: float = None,
+    lon: float = None,
+    temp: float = None,
+    condition: str = None
+):
+    """
+    Get outfit recommendations based on weather.
+    - Uses real weather from OpenWeatherMap if lat/lon provided
+    - Falls back to provided temp/condition if no coords
+    - Prioritizes user wardrobe, falls back to outfit catalog
+    """
+    try:
+        weather_data = None
+        
+        # Step 1: Get real weather if coordinates provided
+        if lat is not None and lon is not None and OPENWEATHER_API_KEY:
+            try:
+                weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=imperial"
+                weather_response = requests.get(weather_url, timeout=5)
+                
+                if weather_response.status_code == 200:
+                    weather_json = weather_response.json()
+                    weather_data = {
+                        'temp': weather_json['main']['temp'],
+                        'condition': weather_json['weather'][0]['main'] if weather_json.get('weather') else 'Clear',
+                        'location': weather_json.get('name', 'Your Location'),
+                        'humidity': weather_json['main'].get('humidity', 50),
+                        'icon': weather_json['weather'][0].get('icon', '01d') if weather_json.get('weather') else '01d'
+                    }
+                    logger.info(f"Weather fetched: {weather_data['temp']}°F, {weather_data['condition']} in {weather_data['location']}")
+            except Exception as e:
+                logger.warning(f"Weather API error: {e}")
+        
+        # Fallback to provided values or defaults
+        if not weather_data:
+            weather_data = {
+                'temp': temp if temp is not None else 72,
+                'condition': condition if condition else 'Clear',
+                'location': 'Your Location',
+                'humidity': 50,
+                'icon': '01d'
+            }
+        
+        # Step 2: Get style recommendations based on weather
+        style_rec = get_weather_style_recommendation(weather_data['temp'], weather_data['condition'])
+        temp_category = style_rec['temp_category']
+        preferred_styles = style_rec['preferred_styles']
+        
+        logger.info(f"Weather category: {temp_category}, styles: {preferred_styles}")
+        
+        # Step 3: Try to get outfits from user's wardrobe first
+        # For v1, we'll check the outfits collection and prioritize based on style match
+        recommended_outfits = []
+        
+        # Query outfits matching the weather-appropriate styles
+        for style in preferred_styles:
+            style_outfits = list(outfits_collection.find({
+                "$or": [
+                    {"category": {"$regex": style, "$options": "i"}},
+                    {"title": {"$regex": style, "$options": "i"}},
+                    {"description": {"$regex": style, "$options": "i"}}
+                ]
+            }).limit(4))
+            
+            for outfit in style_outfits:
+                outfit['id'] = str(outfit['_id'])
+                del outfit['_id']
+                outfit['weather_match_reason'] = f"Perfect for {temp_category} weather"
+                recommended_outfits.append(outfit)
+        
+        # If no style matches, get trending outfits as fallback
+        if len(recommended_outfits) == 0:
+            fallback_outfits = list(outfits_collection.aggregate([
+                {"$sample": {"size": 6}}
+            ]))
+            for outfit in fallback_outfits:
+                outfit['id'] = str(outfit['_id'])
+                del outfit['_id']
+                outfit['weather_match_reason'] = "Trending pick"
+                recommended_outfits.append(outfit)
+        
+        # Remove duplicates and limit to 6
+        seen_ids = set()
+        unique_outfits = []
+        for outfit in recommended_outfits:
+            if outfit['id'] not in seen_ids:
+                seen_ids.add(outfit['id'])
+                unique_outfits.append(outfit)
+            if len(unique_outfits) >= 6:
+                break
+        
+        logger.info(f"Returning {len(unique_outfits)} weather-based outfit recommendations")
+        
+        return {
+            "success": True,
+            "weather": {
+                "temp": round(weather_data['temp']),
+                "tempF": f"{round(weather_data['temp'])}°F",
+                "condition": weather_data['condition'],
+                "location": weather_data['location'],
+                "humidity": weather_data['humidity'],
+                "category": temp_category
+            },
+            "style_recommendation": {
+                "category": temp_category,
+                "styles": preferred_styles,
+                "keywords": style_rec['keywords'],
+                "accessories": style_rec['accessories'],
+                "tip": f"Great weather for {', '.join(preferred_styles[:2])} styles"
+            },
+            "outfits": unique_outfits,
+            "count": len(unique_outfits)
+        }
+        
+    except Exception as e:
+        logger.error(f"Weather recommendations error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "outfits": []
+        }
+
 # Include router
 app.include_router(api_router)
 
