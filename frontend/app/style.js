@@ -5,10 +5,8 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
-  FlatList, 
   RefreshControl, 
   Image,
-  Dimensions 
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -20,11 +18,6 @@ import { API_BASE_URL } from '../config';
 import GradientChip from '../components/GradientChip';
 import { asCardItem } from '../utils/helpers';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HORIZONTAL_PADDING = 20;
-const CARD_GAP = 12;
-const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
-
 const STYLE_CATEGORIES = [
   { id: 'streetwear', name: 'Street', icon: 'tshirt-crew' },
   { id: 'luxury', name: 'Luxury', icon: 'diamond-stone' },
@@ -35,9 +28,9 @@ const STYLE_CATEGORIES = [
 ];
 
 // Individual Outfit Card Component
-const OutfitCardItem = React.memo(({ item, onPress }) => (
+const OutfitCardItem = React.memo(({ item, onPress, isLeft }) => (
   <TouchableOpacity
-    style={styles.outfitCard}
+    style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
     onPress={() => onPress(item)}
     activeOpacity={0.85}
   >
@@ -209,9 +202,9 @@ export default function StyleDiscovery() {
           <View style={styles.gridContainer}>
             {outfitRows.map((row) => (
               <View key={row.id} style={styles.row}>
-                <OutfitCardItem item={row.left} onPress={handleOutfitPress} />
+                <OutfitCardItem item={row.left} onPress={handleOutfitPress} isLeft={true} />
                 {row.right ? (
-                  <OutfitCardItem item={row.right} onPress={handleOutfitPress} />
+                  <OutfitCardItem item={row.right} onPress={handleOutfitPress} isLeft={false} />
                 ) : (
                   <View style={styles.emptyCard} />
                 )}
@@ -282,27 +275,32 @@ const styles = StyleSheet.create({
   loadingContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
   },
-  // Grid
+  // Grid - Using flex for reliable 2-column layout
   gridContainer: {
-    paddingHorizontal: HORIZONTAL_PADDING,
+    paddingHorizontal: SPACING.screenHorizontal,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 12,
   },
-  // Outfit Card
+  // Outfit Card - Using flex: 1 for equal width columns
   outfitCard: {
-    width: CARD_WIDTH,
+    flex: 1,
     height: 200,
     borderRadius: SIZES.borderRadiusCard,
     overflow: 'hidden',
     backgroundColor: COLORS.card,
     ...CARD_SHADOW,
   },
+  cardLeft: {
+    marginRight: 6,
+  },
+  cardRight: {
+    marginLeft: 6,
+  },
   emptyCard: {
-    width: CARD_WIDTH,
-    height: 200,
+    flex: 1,
+    marginLeft: 6,
   },
   outfitImage: {
     width: '100%',
