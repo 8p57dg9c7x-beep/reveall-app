@@ -32,11 +32,39 @@ const STYLE_CATEGORIES = [
   { id: 'elegant', name: 'Elegant', icon: 'shoe-heel' },
 ];
 
+// Individual Outfit Card Component
+const OutfitCardItem = React.memo(({ item, onPress }) => (
+  <TouchableOpacity
+    style={styles.outfitCard}
+    onPress={() => onPress(item)}
+    activeOpacity={0.85}
+  >
+    <Image source={{ uri: item.image }} style={styles.outfitImage} />
+    <LinearGradient
+      colors={['transparent', 'rgba(0,0,0,0.85)']}
+      style={styles.outfitOverlay}
+    >
+      {item.gender && (
+        <View style={styles.genderBadge}>
+          <Text style={styles.genderText}>{item.gender.toUpperCase()}</Text>
+        </View>
+      )}
+      <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
+      {item.priceRange && (
+        <Text style={styles.outfitPrice}>{item.priceRange}</Text>
+      )}
+    </LinearGradient>
+    <TouchableOpacity style={styles.favoriteButton} activeOpacity={0.7}>
+      <MaterialCommunityIcons name="heart-outline" size={20} color="#FFFFFF" />
+    </TouchableOpacity>
+  </TouchableOpacity>
+));
+
 export default function StyleDiscovery() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const returnPath = params.returnPath || '/discover';
-  const flatListRef = useRef(null);
+  const scrollRef = useRef(null);
   
   const [selectedCategory, setSelectedCategory] = useState('streetwear');
   const [outfits, setOutfits] = useState([]);
@@ -46,8 +74,7 @@ export default function StyleDiscovery() {
   // Load outfits when category changes
   const loadOutfits = useCallback(async (category) => {
     setLoading(true);
-    // Clear previous data immediately for clean transition
-    setOutfits([]);
+    setOutfits([]); // Clear immediately for clean transition
     
     try {
       const response = await fetch(`${API_BASE_URL}/api/outfits/${category}`);
@@ -79,9 +106,9 @@ export default function StyleDiscovery() {
 
   const handleCategorySelect = useCallback((categoryId) => {
     if (categoryId !== selectedCategory) {
-      // Reset scroll position first
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
-      // Then update category (which triggers data reload)
+      // Scroll to top first
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+      // Update category (triggers data reload)
       setSelectedCategory(categoryId);
     }
   }, [selectedCategory]);
@@ -93,97 +120,31 @@ export default function StyleDiscovery() {
     });
   }, []);
 
-  // Render individual outfit card
-  const renderOutfitCard = useCallback(({ item, index }) => (
-    <TouchableOpacity
-      style={[styles.outfitCard, index % 2 === 0 ? styles.cardLeft : styles.cardRight]}
-      onPress={() => handleOutfitPress(item)}
-      activeOpacity={0.85}
-    >
-      <Image source={{ uri: item.image }} style={styles.outfitImage} />
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.85)']}
-        style={styles.outfitOverlay}
-      >
-        {item.gender && (
-          <View style={styles.genderBadge}>
-            <Text style={styles.genderText}>{item.gender.toUpperCase()}</Text>
-          </View>
-        )}
-        <Text style={styles.outfitTitle} numberOfLines={2}>{item.title}</Text>
-        {item.priceRange && (
-          <Text style={styles.outfitPrice}>{item.priceRange}</Text>
-        )}
-      </LinearGradient>
-      <TouchableOpacity style={styles.favoriteButton} activeOpacity={0.7}>
-        <MaterialCommunityIcons name="heart-outline" size={20} color="#FFFFFF" />
-      </TouchableOpacity>
-    </TouchableOpacity>
-  ), [handleOutfitPress]);
+  // Pair outfits into rows for 2-column grid
+  const outfitRows = [];
+  for (let i = 0; i < outfits.length; i += 2) {
+    outfitRows.push({
+      id: `row-${i}`,
+      left: outfits[i],
+      right: outfits[i + 1] || null,
+    });
+  }
 
-  // Scrollable header that moves with content
-  const ListHeaderComponent = useCallback(() => (
-    <View style={styles.listHeader}>
-      {/* Back + Title Row */}
-      <View style={styles.titleRow}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.pageTitle}>Style Discovery</Text>
-        <TouchableOpacity 
-          onPress={() => router.push('/saved-outfits')}
-          style={styles.actionButton}
-        >
-          <MaterialCommunityIcons name="heart-outline" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Category Filters - Horizontal scroll */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesScroll}
-      >
-        {STYLE_CATEGORIES.map((category) => (
-          <GradientChip
-            key={category.id}
-            label={category.name}
-            icon={category.icon}
-            active={selectedCategory === category.id}
-            onPress={() => handleCategorySelect(category.id)}
-            style={styles.categoryChip}
-          />
-        ))}
-      </ScrollView>
-
-      {/* Results count */}
-      <Text style={styles.resultsCount}>
-        {loading ? 'Loading...' : `${outfits.length} ${STYLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || ''} outfits`}
-      </Text>
-    </View>
-  ), [handleBack, selectedCategory, handleCategorySelect, loading, outfits.length]);
-
-  const renderEmpty = useCallback(() => (
+  const renderEmpty = () => (
     <View style={styles.emptyState}>
       <MaterialCommunityIcons name="hanger" size={48} color={COLORS.textMuted} />
       <Text style={styles.emptyText}>No outfits found</Text>
       <Text style={styles.emptySubtext}>Try a different style category</Text>
     </View>
-  ), []);
+  );
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={outfits}
-        renderItem={renderOutfitCard}
-        keyExtractor={(item, index) => `${selectedCategory}-${item.id || index}`}
-        numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={loading ? <SkeletonGrid /> : renderEmpty}
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scrollView}
         contentContainerStyle={[
-          styles.listContent,
+          styles.scrollContent,
           { paddingTop: insets.top + 12 }
         ]}
         showsVerticalScrollIndicator={false}
@@ -194,19 +155,69 @@ export default function StyleDiscovery() {
             tintColor={COLORS.primary} 
           />
         }
-        // Force re-render when category changes
-        extraData={selectedCategory}
-        // Performance optimizations
-        initialNumToRender={6}
-        maxToRenderPerBatch={6}
-        windowSize={5}
-        removeClippedSubviews={true}
-        getItemLayout={(data, index) => ({
-          length: 220,
-          offset: 220 * Math.floor(index / 2),
-          index,
-        })}
-      />
+      >
+        {/* Header */}
+        <View style={styles.listHeader}>
+          {/* Back + Title Row */}
+          <View style={styles.titleRow}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.pageTitle}>Style Discovery</Text>
+            <TouchableOpacity 
+              onPress={() => router.push('/saved-outfits')}
+              style={styles.actionButton}
+            >
+              <MaterialCommunityIcons name="heart-outline" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Category Filters - Horizontal scroll */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesScroll}
+          >
+            {STYLE_CATEGORIES.map((category) => (
+              <GradientChip
+                key={category.id}
+                label={category.name}
+                icon={category.icon}
+                active={selectedCategory === category.id}
+                onPress={() => handleCategorySelect(category.id)}
+                style={styles.categoryChip}
+              />
+            ))}
+          </ScrollView>
+
+          {/* Results count */}
+          <Text style={styles.resultsCount}>
+            {loading ? 'Loading...' : `${outfits.length} ${STYLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || ''} outfits`}
+          </Text>
+        </View>
+
+        {/* Content */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <SkeletonGrid />
+          </View>
+        ) : outfits.length === 0 ? (
+          renderEmpty()
+        ) : (
+          <View style={styles.gridContainer}>
+            {outfitRows.map((row) => (
+              <View key={row.id} style={styles.row}>
+                <OutfitCardItem item={row.left} onPress={handleOutfitPress} />
+                {row.right ? (
+                  <OutfitCardItem item={row.right} onPress={handleOutfitPress} />
+                ) : (
+                  <View style={styles.emptyCard} />
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -215,9 +226,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  listContent: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingBottom: SPACING.bottomPadding,
-    flexGrow: 1,
   },
   // Header
   listHeader: {
@@ -263,9 +276,16 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginBottom: 12,
   },
-  // Grid
-  columnWrapper: {
+  // Loading
+  loadingContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
+  },
+  // Grid
+  gridContainer: {
+    paddingHorizontal: SPACING.screenHorizontal,
+  },
+  row: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 12,
   },
@@ -278,11 +298,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     ...CARD_SHADOW,
   },
-  cardLeft: {
-    marginRight: 6,
-  },
-  cardRight: {
-    marginLeft: 6,
+  emptyCard: {
+    width: CARD_WIDTH,
+    height: 200,
   },
   outfitImage: {
     width: '100%',
@@ -337,7 +355,6 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     paddingVertical: 60,
-    flex: 1,
   },
   emptyText: {
     fontSize: 16,
