@@ -110,11 +110,6 @@ export default function OutfitDetail() {
     });
   };
 
-  // Calculate total price
-  const totalPrice = products.length > 0 
-    ? `$${products.reduce((sum, p) => sum + parseInt(p.price?.replace('$', '') || 0), 0)}`
-    : null;
-
   if (loading) {
     return (
       <LinearGradient colors={GRADIENTS.background} style={styles.container}>
