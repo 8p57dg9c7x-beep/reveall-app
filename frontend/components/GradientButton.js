@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: SIZES.borderRadiusButton,
-    gap: 8,
+    gap: 10,
     ...Platform.select({
       ios: SHADOWS.button,
       android: {
@@ -82,17 +82,21 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  // 44px minimum touch target enforced
   buttonSmall: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    height: 44,
+    paddingHorizontal: 20,
+    borderRadius: 12,
   },
   buttonMedium: {
-    paddingVertical: 14,
+    height: 50,
     paddingHorizontal: 24,
+    borderRadius: 14,
   },
   buttonLarge: {
-    paddingVertical: 18,
-    paddingHorizontal: 32,
+    height: 56,
+    paddingHorizontal: 28,
+    borderRadius: 16,
   },
   text: {
     color: COLORS.textPrimary,
@@ -106,7 +110,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   textLarge: {
-    fontSize: 18,
+    fontSize: 17,
   },
   disabled: {
     opacity: ANIMATIONS.opacity.disabled,
