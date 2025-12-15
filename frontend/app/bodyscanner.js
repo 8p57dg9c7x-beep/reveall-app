@@ -403,50 +403,56 @@ export default function BodyScannerScreen() {
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <MaterialCommunityIcons name="tape-measure" size={32} color={COLORS.primary} />
-          <Text style={styles.headerTitle}>Body Scanner</Text>
-        </View>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {/* Content */}
-      {scanning ? (
-        <View style={styles.scanningContainer}>
-          <View style={styles.scanningIconContainer}>
-            <MaterialCommunityIcons name="scan-helper" size={80} color={COLORS.primary} />
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <MaterialCommunityIcons name="tape-measure" size={32} color={COLORS.primary} />
+            <Text style={styles.headerTitle}>Body Scanner</Text>
           </View>
-          <Text style={styles.scanningText}>Analyzing your measurements...</Text>
-          <Text style={styles.scanningSubtext}>AI is processing your body data</Text>
-          
-          <View style={styles.progressBar}>
-            <View style={styles.progressBarBg}>
-              <Animated.View 
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: scanProgress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0%', '100%'],
-                    }),
-                  }
-                ]} 
-              />
+          <View style={{ width: 40 }} />
+        </View>
+
+        {/* Content */}
+        {scanning ? (
+          <View style={styles.scanningContainer}>
+            <View style={styles.scanningIconContainer}>
+              <MaterialCommunityIcons name="scan-helper" size={80} color={COLORS.primary} />
+            </View>
+            <Text style={styles.scanningText}>Analyzing your measurements...</Text>
+            <Text style={styles.scanningSubtext}>AI is processing your body data</Text>
+            
+            <View style={styles.progressBar}>
+              <View style={styles.progressBarBg}>
+                <Animated.View 
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: scanProgress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    }
+                  ]} 
+                />
+              </View>
             </View>
           </View>
-        </View>
-      ) : (
-        <>
-          {step === 1 && renderInstructions()}
-          {step === 2 && renderCapture()}
-          {step === 3 && renderResults()}
-        </>
-      )}
+        ) : (
+          <>
+            {step === 1 && renderInstructions()}
+            {step === 2 && renderCapture()}
+            {step === 3 && renderResults()}
+          </>
+        )}
+      </ScrollView>
     </LinearGradient>
   );
 }
