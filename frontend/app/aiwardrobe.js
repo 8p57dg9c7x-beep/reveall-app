@@ -289,89 +289,96 @@ export default function AIWardrobeScreen() {
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
-          <Text style={styles.headerTitle}>AI Wardrobe</Text>
-        </View>
-        <TouchableOpacity onPress={pickImage} style={styles.addButton}>
-          <MaterialCommunityIcons name="plus" size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-      </View>
-
-      {!showOutfits ? (
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-          {/* Category Tabs */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryTabs}
-          >
-            {categories.map(renderCategoryTab)}
-          </ScrollView>
-
-          {/* Wardrobe Grid */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              {activeCategory === 'all' ? 'My Wardrobe' : categories.find(c => c.id === activeCategory)?.name} 
-              {' '}({filteredItems.length} items)
-            </Text>
-            {selectedItems.length > 0 && (
-              <TouchableOpacity onPress={() => setSelectedItems([])} activeOpacity={0.8}>
-                <Text style={styles.clearSelection}>Clear ({selectedItems.length})</Text>
-              </TouchableOpacity>
-            )}
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
+            <Text style={styles.headerTitle}>My Closet</Text>
           </View>
-          
-          <FlatList
-            data={filteredItems}
-            renderItem={renderWardrobeItem}
-            keyExtractor={(item) => item.id.toString()}
-            numColumns={2}
-            scrollEnabled={false}
-            columnWrapperStyle={styles.wardrobeRow}
-            ListEmptyComponent={
+          <TouchableOpacity onPress={pickImage} style={styles.addButton}>
+            <MaterialCommunityIcons name="plus" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+        </View>
+
+        {!showOutfits ? (
+          <>
+            {/* Category Tabs */}
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryTabs}
+            >
+              {categories.map(renderCategoryTab)}
+            </ScrollView>
+
+            {/* Wardrobe Grid */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>
+                {activeCategory === 'all' ? 'My Wardrobe' : categories.find(c => c.id === activeCategory)?.name} 
+                {' '}({filteredItems.length} items)
+              </Text>
+              {selectedItems.length > 0 && (
+                <TouchableOpacity onPress={() => setSelectedItems([])} activeOpacity={0.8}>
+                  <Text style={styles.clearSelection}>Clear ({selectedItems.length})</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            {/* Wardrobe Grid - Using View instead of FlatList for scrolling */}
+            {filteredItems.length === 0 ? (
               <View style={styles.emptyState}>
                 <MaterialCommunityIcons name="tshirt-crew-outline" size={64} color={COLORS.textMuted} />
                 <Text style={styles.emptyStateText}>No items in this category</Text>
               </View>
-            }
-          />
+            ) : (
+              <View style={styles.wardrobeGrid}>
+                {filteredItems.map((item) => (
+                  <View key={item.id} style={styles.wardrobeItemWrapper}>
+                    {renderWardrobeItem({ item })}
+                  </View>
+                ))}
+              </View>
+            )}
 
-          {/* Create Outfit Button */}
-          <GradientButton
-            title={`Create Outfit (${selectedItems.length} selected)`}
-            onPress={generateOutfits}
-            disabled={selectedItems.length < 2}
-            icon={<MaterialCommunityIcons name="sparkles" size={20} color="#fff" />}
-            style={styles.createButton}
-          />
-        </ScrollView>
-      ) : (
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-          <View style={styles.outfitsHeader}>
-            <View>
-              <Text style={styles.outfitsTitle}>Generated Outfits</Text>
-              <Text style={styles.outfitsSubtitle}>{generatedOutfits.length} unique combinations</Text>
+            {/* Create Outfit Button */}
+            <GradientButton
+              title={`Create Outfit (${selectedItems.length} selected)`}
+              onPress={generateOutfits}
+              disabled={selectedItems.length < 2}
+              icon={<MaterialCommunityIcons name="sparkles" size={20} color="#fff" />}
+              style={styles.createButton}
+            />
+          </>
+        ) : (
+          <>
+            <View style={styles.outfitsHeader}>
+              <View>
+                <Text style={styles.outfitsTitle}>Generated Outfits</Text>
+                <Text style={styles.outfitsSubtitle}>{generatedOutfits.length} unique combinations</Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => {
+                  setShowOutfits(false);
+                  setSelectedItems([]);
+                }}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons name="close-circle" size={32} color={COLORS.primary} />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity 
-              onPress={() => {
-                setShowOutfits(false);
-                setSelectedItems([]);
-              }}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons name="close-circle" size={32} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
-          
-          {generatedOutfits.map(renderOutfit)}
-        </ScrollView>
-      )}
+            
+            {generatedOutfits.map(renderOutfit)}
+          </>
+        )}
+      </ScrollView>
     </LinearGradient>
   );
 }
