@@ -132,10 +132,13 @@ export default function AIStylistScreen() {
   const [loading, setLoading] = useState(false);
   const [currentLookIndex, setCurrentLookIndex] = useState(0);
 
-  // Load weather on mount
+  // Load real weather on mount (with silent fallback)
   useEffect(() => {
-    const data = getMockWeather('Los Angeles');
-    setWeather(data);
+    const loadWeather = async () => {
+      const data = await fetchRealWeather();
+      setWeather(data);
+    };
+    loadWeather();
   }, []);
 
   const handleBack = () => {
