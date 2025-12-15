@@ -37,19 +37,20 @@ export default function HomeScreen() {
         const weatherData = await fetchRealWeather();
         setWeather(weatherData);
         
-        // Step 2: Get weather-based outfit recommendations from backend
-        // If we have real location, use it
-        if (!weatherData.isDefault) {
-          // Use the existing weather data to get recommendations
+        // Step 2: ALWAYS get weather-based outfit recommendations from backend
+        // Works with both real location and default weather
+        try {
           const recResponse = await fetch(
             `${API_BASE_URL}/api/recommendations/weather?temp=${weatherData.temp}&condition=${weatherData.condition}`
           );
           const recData = await recResponse.json();
           
-          if (recData.success && recData.outfits) {
+          if (recData.success && recData.outfits && recData.outfits.length > 0) {
             setRecommendedOutfits(recData.outfits.slice(0, 3)); // Top 3 for the card
             setStyleRecommendation(recData.style_recommendation);
           }
+        } catch (recError) {
+          console.log('Recommendations fetch error, using fallback:', recError);
         }
         
         // Fallback: use static weather outfit images
