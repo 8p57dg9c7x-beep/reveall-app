@@ -18,6 +18,7 @@ import GradientButton from '../components/GradientButton';
 import { uploadImage, pollJobResult } from '../services/revealAPI';
 
 export default function AIWardrobeScreen() {
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const returnPath = params.returnPath || '/stylelab';
   
