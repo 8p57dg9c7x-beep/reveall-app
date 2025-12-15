@@ -4,7 +4,7 @@
 import * as Location from 'expo-location';
 
 // OpenWeatherMap API (free tier - 1000 calls/day)
-const WEATHER_API_KEY = '4d8fb5b93d4af21d66a2948710284366'; // Free tier key
+const WEATHER_API_KEY = '0c4fde9fab4de5bec9ae45330a257380'; // User's API key
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
 // Default fallback data (Los Angeles)
