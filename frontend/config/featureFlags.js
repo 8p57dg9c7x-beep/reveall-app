@@ -1,38 +1,38 @@
 // REVEAL v1 Feature Flags
-// Strategic scope control for launch — all features preserved, visibility controlled
-// To re-enable any feature, simply set the flag to true
+// LOCKED v1 SCOPE — Focused on "What to Wear Today"
+// Core: Weather outfits, AI Stylist, Wardrobe, Style Discovery, Favorites
 
 export const FEATURE_FLAGS = {
   // ===== v1 CORE FEATURES (ACTIVE) =====
-  AI_STYLIST: true,
-  SHOP_THE_LOOK: true,
-  WEATHER_OUTFITS: true,
-  STYLE_DISCOVERY: true,
-  BODY_SCANNER: true,
-  BEAUTY_HUB: true,  // Keep for affiliate shopping flow
-  AI_WARDROBE: true,
+  AI_STYLIST: true,          // Core - AI styling with user wardrobe
+  WEATHER_OUTFITS: true,     // Core - Weather-based recommendations
+  STYLE_DISCOVERY: true,     // Core - Browse outfit inspiration
+  AI_WARDROBE: true,         // Core - User's closet management
+  BODY_SCANNER: true,        // Core - Body measurements
   
-  // ===== HIDDEN FOR v1 (Infrastructure preserved) =====
-  MUSIC_SCAN: false,
-  TRENDING_SONGS: false,
-  FITNESS_TAB: false,
-  ADDILETS: false,
-  STYLE_DNA: false,
+  // ===== HIDDEN FOR v1 (Post-launch features) =====
+  SHOP_THE_LOOK: false,      // v2 - Affiliate shopping flow
+  BEAUTY_HUB: false,         // v2 - Makeup & beauty looks
+  MUSIC_SCAN: false,         // v3 - Music discovery
+  TRENDING_SONGS: false,     // v3 - Music charts
+  FITNESS_TAB: false,        // v3 - Fitness tracking
+  ADDILETS: false,           // v2 - AI personalization engine
+  STYLE_DNA: false,          // v2 - Style profile
   
   // ===== TAB VISIBILITY =====
   TABS: {
     HOME: true,
     DISCOVER: true,
     STYLE_LAB: true,
-    FITNESS: false,  // Hidden for v1
+    FITNESS: false,
     PROFILE: true,
   },
   
   // ===== DISCOVER SECTIONS =====
   DISCOVER_SECTIONS: {
-    STYLE: true,
-    BEAUTY: true,
-    MUSIC: false,  // Hidden for v1
+    STYLE: true,       // Style Discovery only
+    BEAUTY: false,     // Hidden for v1
+    MUSIC: false,      // Hidden for v1
   },
   
   // ===== STYLE LAB TOOLS =====
@@ -40,15 +40,16 @@ export const FEATURE_FLAGS = {
     AI_STYLIST: true,
     BODY_SCANNER: true,
     AI_WARDROBE: true,
-    ADDILETS: false,  // Hidden for v1
+    ADDILETS: false,
   },
   
   // ===== HOME SECTIONS =====
   HOME_SECTIONS: {
     WEATHER_OUTFITS: true,
-    STYLE_DNA_CARD: false,  // Hidden for v1
+    STYLE_DNA_CARD: false,
     QUICK_ACTIONS: true,
     FOR_YOU: true,
+    SHOP_CTA: false,    // Hidden for v1
   },
 };
 
@@ -66,7 +67,7 @@ export const isSectionEnabled = (category, section) => {
 export const APP_VERSION = {
   version: '1.0.0',
   codename: 'Focus',
-  scope: 'v1 Launch - Style + Shopping Core',
+  scope: 'v1 Launch — What to Wear Today',
   launchDate: null,
 };
 
