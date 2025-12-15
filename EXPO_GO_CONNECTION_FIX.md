@@ -44,7 +44,7 @@ exps://exp.host/@anonymous/reveal-22dc64e7-a772-41bf-8cf5-76280e5dd0f3
 
 Open this in your phone's browser, then click "Open in Expo Go":
 ```
-https://reveal-polish.preview.emergentagent.com
+https://reveal-makeover.preview.emergentagent.com
 ```
 
 ---

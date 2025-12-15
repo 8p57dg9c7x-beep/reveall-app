@@ -4,7 +4,7 @@
 
 ### Option 1: Web Preview (Instant)
 Access the app directly in your browser:
-- **URL**: https://reveal-polish.preview.emergentagent.com
+- **URL**: https://reveal-makeover.preview.emergentagent.com
 - Works on desktop and mobile browsers
 - No installation required
 
@@ -174,10 +174,10 @@ tail -100 /var/log/supervisor/expo.out.log | grep -A 10 "Tunnel ready"
 
 ## 🔗 Useful Links
 
-- **Web Preview**: https://reveal-polish.preview.emergentagent.com
-- **Home Screen**: https://reveal-polish.preview.emergentagent.com/
-- **Identify Screen**: https://reveal-polish.preview.emergentagent.com/identify
-- **Watchlist Screen**: https://reveal-polish.preview.emergentagent.com/watchlist
+- **Web Preview**: https://reveal-makeover.preview.emergentagent.com
+- **Home Screen**: https://reveal-makeover.preview.emergentagent.com/
+- **Identify Screen**: https://reveal-makeover.preview.emergentagent.com/identify
+- **Watchlist Screen**: https://reveal-makeover.preview.emergentagent.com/watchlist
 
 ## 📝 Testing Notes
 

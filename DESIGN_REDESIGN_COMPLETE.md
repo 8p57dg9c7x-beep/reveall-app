@@ -333,10 +333,10 @@ The complete redesign is finished and tested! All screens now match the futurist
 **Accessibility**: High contrast maintained  
 
 **Test URLs**:
-- Home: https://reveal-polish.preview.emergentagent.com/
-- Scan: https://reveal-polish.preview.emergentagent.com/scan
-- Identify: https://reveal-polish.preview.emergentagent.com/identify
-- Watchlist: https://reveal-polish.preview.emergentagent.com/watchlist
+- Home: https://reveal-makeover.preview.emergentagent.com/
+- Scan: https://reveal-makeover.preview.emergentagent.com/scan
+- Identify: https://reveal-makeover.preview.emergentagent.com/identify
+- Watchlist: https://reveal-makeover.preview.emergentagent.com/watchlist
 
 ---
 
