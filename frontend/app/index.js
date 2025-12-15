@@ -24,10 +24,10 @@ export default function HomeScreen() {
   const [weather, setWeather] = useState(null);
   const [weatherOutfits, setWeatherOutfits] = useState([]);
 
-  // Load weather data on mount
+  // Load real weather data on mount (with silent fallback)
   useEffect(() => {
     const loadWeather = async () => {
-      const data = getMockWeather('Los Angeles');
+      const data = await fetchRealWeather();
       setWeather(data);
       setWeatherOutfits(getWeatherOutfitImages(data.tempCategory));
     };
