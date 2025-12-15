@@ -371,6 +371,24 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 20,
   },
+  // Save CTA
+  saveCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: SPACING.sectionGap,
+    padding: 16,
+    backgroundColor: 'rgba(177, 76, 255, 0.1)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.2)',
+  },
+  saveCTAText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
   // Section
   section: {
     marginTop: SPACING.sectionGap,
