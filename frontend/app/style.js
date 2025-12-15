@@ -278,6 +278,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     ...CARD_SHADOW,
   },
+  cardLeft: {
+    marginRight: 6,
+  },
+  cardRight: {
+    marginLeft: 6,
+  },
   outfitImage: {
     width: '100%',
     height: '100%',
