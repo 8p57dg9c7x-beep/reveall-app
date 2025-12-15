@@ -1,4 +1,4 @@
-// Outfit Detail Page - v1 with Shop The Look Affiliate Flow
+// Outfit Detail Page - v1 Inspiration Only (Shop hidden)
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity, Share, Alert, StyleSheet, Linking } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
@@ -9,7 +9,7 @@ import { trackOutfitView } from "../services/analytics";
 import { API_BASE_URL } from '../config';
 import { asCardItem } from '../utils/helpers';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
-import { ShopProductListItem, ShopThisLookButton } from '../components/ShopProduct';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 import { logEvent } from '../services/firebase';
 
 // Mock product data for outfits (will be replaced with real data from API)
