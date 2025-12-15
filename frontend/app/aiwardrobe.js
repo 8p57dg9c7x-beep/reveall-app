@@ -484,13 +484,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  wardrobeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: SPACING.screenHorizontal,
+    justifyContent: 'space-between',
+  },
+  wardrobeItemWrapper: {
+    width: '48%',
+    marginBottom: SPACING.cardGap,
+  },
   wardrobeRow: {
     paddingHorizontal: SPACING.screenHorizontal,
     justifyContent: 'space-between',
     marginBottom: SPACING.cardGap,
   },
   wardrobeItem: {
-    width: '48%',
+    width: '100%',
     height: 240,
     backgroundColor: COLORS.card,
     borderRadius: SIZES.borderRadiusCard,
