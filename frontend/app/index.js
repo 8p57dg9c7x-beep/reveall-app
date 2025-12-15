@@ -14,7 +14,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import { FEATURE_FLAGS } from '../config/featureFlags';
-import { getMockWeather, getWeatherOutfitImages } from '../services/weatherService';
+import { fetchRealWeather, getWeatherOutfitImages } from '../services/weatherService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HORIZONTAL_CARD_WIDTH = 160;
