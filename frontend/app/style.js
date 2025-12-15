@@ -96,7 +96,7 @@ export default function StyleDiscovery() {
   // Render individual outfit card
   const renderOutfitCard = useCallback(({ item, index }) => (
     <TouchableOpacity
-      style={styles.outfitCard}
+      style={[styles.outfitCard, index % 2 === 0 ? styles.cardLeft : styles.cardRight]}
       onPress={() => handleOutfitPress(item)}
       activeOpacity={0.85}
     >
