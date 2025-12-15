@@ -21,7 +21,9 @@ import GradientChip from '../components/GradientChip';
 import { asCardItem } from '../utils/helpers';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = (SCREEN_WIDTH - SPACING.screenHorizontal * 2 - 12) / 2;
+const HORIZONTAL_PADDING = 20;
+const CARD_GAP = 12;
+const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 
 const STYLE_CATEGORIES = [
   { id: 'streetwear', name: 'Street', icon: 'tshirt-crew' },
