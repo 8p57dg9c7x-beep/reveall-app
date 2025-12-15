@@ -14,196 +14,104 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import { FEATURE_FLAGS } from '../config/featureFlags';
 
-// Discover - Style & Shopping Hub (v1 Focus)
+// Discover - Clean Browse Hub (Simplified)
 export default function DiscoverScreen() {
   const insets = useSafeAreaInsets();
 
-  // Main exploration categories - filtered by feature flags
-  const EXPLORE_CATEGORIES = useMemo(() => {
+  // Main categories - only active ones based on feature flags
+  const categories = useMemo(() => {
     const allCategories = [
       {
-        id: 'style-discovery',
+        id: 'style',
         title: 'Style Discovery',
-        subtitle: 'Explore trending outfits',
+        subtitle: 'Browse trending outfits',
         icon: 'hanger',
         color: '#B14CFF',
+        gradient: ['#B14CFF', '#8B5CF6'],
         route: '/style',
-        params: { returnPath: '/discover' },
+        image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80',
         enabled: FEATURE_FLAGS.STYLE_DISCOVERY,
       },
       {
-        id: 'beauty-hub',
+        id: 'beauty',
         title: 'Beauty Hub',
         subtitle: 'Makeup looks & products',
         icon: 'lipstick',
         color: '#FF6EC7',
+        gradient: ['#FF6EC7', '#FF8FAB'],
         route: '/beauty',
-        params: { returnPath: '/discover' },
+        image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80',
         enabled: FEATURE_FLAGS.BEAUTY_HUB,
       },
       {
-        id: 'musicscan',
-        title: 'MusicScan',
-        subtitle: 'Identify any song instantly',
-        icon: 'music-circle',
+        id: 'music',
+        title: 'Music',
+        subtitle: 'Discover trending songs',
+        icon: 'music',
         color: '#1DB954',
+        gradient: ['#1DB954', '#1ED760'],
         route: '/musicscan',
-        params: { returnPath: '/discover' },
-        enabled: FEATURE_FLAGS.MUSIC_SCAN,  // Hidden for v1
-      },
-      {
-        id: 'trending-songs',
-        title: 'Trending Songs',
-        subtitle: 'See what\'s hot right now',
-        icon: 'trending-up',
-        color: '#FF6B6B',
-        route: '/trendingsongs',
-        params: { returnPath: '/discover' },
-        enabled: FEATURE_FLAGS.TRENDING_SONGS,  // Hidden for v1
+        image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80',
+        enabled: FEATURE_FLAGS.MUSIC_SCAN,
       },
     ];
     
     return allCategories.filter(cat => cat.enabled);
   }, []);
 
-  // Quick explore cards - style & shopping focused
-  const QUICK_EXPLORE = useMemo(() => [
-    {
-      id: 'celebrity-styles',
-      title: 'Celebrity Looks',
-      image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&q=80',
-      route: '/style',
-      params: { returnPath: '/discover' },
-    },
-    {
-      id: 'shop-look',
-      title: 'Shop The Look',
-      image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&q=80',
-      route: '/style',
-      params: { returnPath: '/discover' },
-    },
-    {
-      id: 'beauty-products',
-      title: 'Beauty Products',
-      image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&q=80',
-      route: '/beauty',
-      params: { returnPath: '/discover' },
-    },
-    {
-      id: 'outfit-inspo',
-      title: 'Daily Outfits',
-      image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&q=80',
-      route: '/style',
-      params: { returnPath: '/discover' },
-    },
-  ], []);
-
-  // Handlers
   const handleCategoryPress = useCallback((category) => {
-    router.push({ pathname: category.route, params: category.params });
+    router.push({ pathname: category.route, params: { returnPath: '/discover' } });
   }, []);
 
-  const handleQuickExplorePress = useCallback((item) => {
-    router.push({ pathname: item.route, params: item.params });
-  }, []);
-
-  // Render category card
-  const renderCategoryCard = useCallback((item) => (
+  const renderCategoryCard = useCallback((category, index) => (
     <TouchableOpacity
-      key={item.id}
-      style={styles.categoryCard}
-      onPress={() => handleCategoryPress(item)}
-      activeOpacity={0.85}
+      key={category.id}
+      style={[styles.categoryCard, index === 0 && styles.categoryCardFirst]}
+      onPress={() => handleCategoryPress(category)}
+      activeOpacity={0.9}
     >
+      <Image source={{ uri: category.image }} style={styles.categoryImage} />
       <LinearGradient
-        colors={[`${item.color}25`, `${item.color}08`]}
-        style={styles.categoryGradient}
+        colors={['transparent', 'rgba(0,0,0,0.85)']}
+        style={styles.categoryOverlay}
       >
-        <View style={[styles.iconContainer, { backgroundColor: `${item.color}30` }]}>
-          <MaterialCommunityIcons name={item.icon} size={32} color={item.color} />
+        <View style={[styles.categoryIcon, { backgroundColor: `${category.color}40` }]}>
+          <MaterialCommunityIcons name={category.icon} size={24} color={category.color} />
         </View>
-        <View style={styles.categoryContent}>
-          <Text style={styles.categoryTitle}>{item.title}</Text>
-          <Text style={styles.categorySubtitle}>{item.subtitle}</Text>
-        </View>
-        <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+        <Text style={styles.categoryTitle}>{category.title}</Text>
+        <Text style={styles.categorySubtitle}>{category.subtitle}</Text>
       </LinearGradient>
+      <View style={styles.categoryArrow}>
+        <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
+      </View>
     </TouchableOpacity>
   ), [handleCategoryPress]);
-
-  // Render quick explore card
-  const renderQuickExploreCard = useCallback((item) => (
-    <TouchableOpacity
-      key={item.id}
-      style={styles.quickExploreCard}
-      onPress={() => handleQuickExplorePress(item)}
-      activeOpacity={0.85}
-    >
-      <Image source={{ uri: item.image }} style={styles.quickExploreImage} />
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.8)']}
-        style={styles.quickExploreOverlay}
-      >
-        <Text style={styles.quickExploreTitle}>{item.title}</Text>
-      </LinearGradient>
-    </TouchableOpacity>
-  ), [handleQuickExplorePress]);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + SPACING.headerPaddingTop }
-        ]}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={styles.header}>
-          <MaterialCommunityIcons name="compass" size={44} color={COLORS.primary} />
           <Text style={styles.headerTitle}>Discover</Text>
-          <Text style={styles.headerSubtitle}>Style inspiration & shopping</Text>
+          <Text style={styles.headerSubtitle}>Explore styles, beauty & more</Text>
         </View>
 
-        {/* Main Categories */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Browse</Text>
-          {EXPLORE_CATEGORIES.map(renderCategoryCard)}
+        {/* Category Cards */}
+        <View style={styles.categoriesContainer}>
+          {categories.map((category, index) => renderCategoryCard(category, index))}
         </View>
 
-        {/* Quick Explore Grid */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Explore</Text>
-          <View style={styles.quickExploreGrid}>
-            {QUICK_EXPLORE.map(renderQuickExploreCard)}
+        {/* Coming Soon Teaser (if music is hidden) */}
+        {!FEATURE_FLAGS.MUSIC_SCAN && (
+          <View style={styles.comingSoon}>
+            <MaterialCommunityIcons name="music-note" size={24} color={COLORS.textMuted} />
+            <Text style={styles.comingSoonText}>Music discovery coming soon</Text>
           </View>
-        </View>
-
-        {/* Shop Featured Banner */}
-        <View style={styles.section}>
-          <TouchableOpacity 
-            style={styles.shopBanner}
-            onPress={() => router.push({ pathname: '/style', params: { returnPath: '/discover' } })}
-            activeOpacity={0.85}
-          >
-            <LinearGradient
-              colors={[COLORS.primary, '#8B5CF6']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.shopBannerGradient}
-            >
-              <View style={styles.shopBannerContent}>
-                <MaterialCommunityIcons name="shopping" size={28} color="#FFFFFF" />
-                <View style={styles.shopBannerText}>
-                  <Text style={styles.shopBannerTitle}>Shop The Look</Text>
-                  <Text style={styles.shopBannerSubtitle}>Get the exact pieces from any outfit</Text>
-                </View>
-              </View>
-              <MaterialCommunityIcons name="arrow-right-circle" size={32} color="#FFFFFF" />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+        )}
       </ScrollView>
     </LinearGradient>
   );
@@ -216,131 +124,89 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
+  content: {
     paddingBottom: SPACING.bottomPadding,
   },
+  // Header
   header: {
-    alignItems: 'center',
     paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: SPACING.sectionGap,
+    marginBottom: 28,
   },
   headerTitle: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    marginTop: 16,
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: 16,
     color: COLORS.textSecondary,
-    marginTop: SPACING.titleToSubtitle,
-    textAlign: 'center',
+    marginTop: 6,
   },
-  section: {
+  // Categories
+  categoriesContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: SPACING.sectionGap,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sectionTitleBottom,
   },
   categoryCard: {
-    marginBottom: SPACING.cardGap,
-    borderRadius: SIZES.borderRadiusCard,
+    height: 180,
+    borderRadius: 20,
     overflow: 'hidden',
+    marginBottom: 16,
     ...CARD_SHADOW,
   },
-  categoryGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.cardPadding + 4,
-    borderRadius: SIZES.borderRadiusCard,
-    borderWidth: 1,
-    borderColor: 'rgba(177, 76, 255, 0.15)',
+  categoryCardFirst: {
+    height: 200,
   },
-  iconContainer: {
-    width: 60,
-    height: 60,
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  categoryOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 20,
+  },
+  categoryIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  categoryTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  categorySubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  categoryArrow: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    width: 32,
+    height: 32,
     borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  categoryContent: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  categoryTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  categorySubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  quickExploreGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: SPACING.cardHorizontalGap,
-  },
-  quickExploreCard: {
-    width: '47%',
-    height: 140,
-    borderRadius: SIZES.borderRadiusCard,
-    overflow: 'hidden',
-    marginBottom: SPACING.cardGap,
-    ...CARD_SHADOW,
-  },
-  quickExploreImage: {
-    width: '100%',
-    height: '100%',
-  },
-  quickExploreOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 14,
-  },
-  quickExploreTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  shopBanner: {
-    borderRadius: SIZES.borderRadiusCard,
-    overflow: 'hidden',
-    ...CARD_SHADOW,
-  },
-  shopBannerGradient: {
+  // Coming Soon
+  comingSoon: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    borderRadius: SIZES.borderRadiusCard,
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 20,
+    marginTop: 8,
   },
-  shopBannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  shopBannerText: {
-    marginLeft: 14,
-    flex: 1,
-  },
-  shopBannerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  shopBannerSubtitle: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginTop: 2,
+  comingSoonText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
   },
 });
