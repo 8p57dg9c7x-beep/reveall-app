@@ -1,30 +1,54 @@
-// BRICK 6: Outfit Detail Page - Polished with consistent back button, scrolling, and spacing
-
-import { View, Text, Image, ScrollView, TouchableOpacity, Share, Alert, StyleSheet } from "react-native";
+// Outfit Detail Page - v1 with Shop The Look Affiliate Flow
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, Image, ScrollView, TouchableOpacity, Share, Alert, StyleSheet, Linking } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
-import { useRef, useEffect, useState } from "react";
-import * as Linking from 'expo-linking';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import ProductCard from "../components/ProductCard";
 import { trackOutfitView } from "../services/analytics";
 import { API_BASE_URL } from '../config';
 import { asCardItem } from '../utils/helpers';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
+import { ShopProductListItem, ShopThisLookButton } from '../components/ShopProduct';
+import { logEvent } from '../services/firebase';
+
+// Mock product data for outfits (will be replaced with real data from API)
+const generateMockProducts = (outfit) => {
+  const productTypes = ['Top', 'Bottom', 'Shoes', 'Accessory'];
+  const brands = ['Zara', 'H&M', 'Uniqlo', 'COS', 'Everlane', 'Madewell', 'ASOS', 'Nordstrom'];
+  
+  return productTypes.slice(0, 3 + Math.floor(Math.random() * 2)).map((type, index) => ({
+    id: `${outfit?.id || 'mock'}-${index}`,
+    type,
+    name: `${type === 'Top' ? 'Classic' : type === 'Bottom' ? 'Tailored' : type === 'Shoes' ? 'Leather' : 'Designer'} ${type}`,
+    brand: brands[Math.floor(Math.random() * brands.length)],
+    price: `$${Math.floor(Math.random() * 150) + 29}`,
+    color: ['Black', 'White', 'Navy', 'Beige', 'Gray'][Math.floor(Math.random() * 5)],
+    affiliateUrl: null, // Will be populated with real affiliate links
+  }));
+};
 
 export default function OutfitDetail() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
   const scrollRef = useRef(null);
   const { outfitData, id, returnPath } = useLocalSearchParams();
   const backPath = returnPath || '/style';
   
   const [outfit, setOutfit] = useState(outfitData ? asCardItem(JSON.parse(outfitData)) : null);
   const [loading, setLoading] = useState(!outfitData && id ? true : false);
+  const [products, setProducts] = useState([]);
   const [similarOutfits, setSimilarOutfits] = useState([]);
-  const [loadingSimilar, setLoadingSimilar] = useState(false);
+
+  // Initialize products when outfit loads
+  useEffect(() => {
+    if (outfit) {
+      // Use outfit's products if available, otherwise generate mock
+      const outfitProducts = outfit.products && outfit.products.length > 0 
+        ? outfit.products 
+        : generateMockProducts(outfit);
+      setProducts(outfitProducts);
+    }
+  }, [outfit]);
 
   // Fetch outfit by ID if coming from deep link
   useEffect(() => {
@@ -67,26 +91,23 @@ export default function OutfitDetail() {
     }
   }, [outfitData]);
 
-  // Fetch similar outfits from the same category
+  // Fetch similar outfits
   useEffect(() => {
     const fetchSimilarOutfits = async () => {
       if (!outfit?.category) return;
       
-      setLoadingSimilar(true);
       try {
         const response = await fetch(`${API_BASE_URL}/api/outfits/${outfit.category}`);
         const data = await response.json();
         
         const filtered = (data.outfits || [])
           .filter(item => item.id !== outfit.id && item._id?.toString() !== outfit.id)
-          .slice(0, 10)
+          .slice(0, 6)
           .map(asCardItem);
         
         setSimilarOutfits(filtered);
       } catch (error) {
         console.error('Error fetching similar outfits:', error);
-      } finally {
-        setLoadingSimilar(false);
       }
     };
 
@@ -97,6 +118,19 @@ export default function OutfitDetail() {
     router.push(backPath);
   };
 
+  const handleShare = async () => {
+    try {
+      await logEvent('outfit_shared', { outfit_id: outfit?.id, outfit_title: outfit?.title });
+      
+      const result = await Share.share({
+        message: `Check out this ${outfit.title} outfit on REVEAL! 🔥`,
+        title: outfit.title,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   const handleSimilarOutfitPress = (similarOutfit) => {
     router.push({
       pathname: '/outfitdetail',
@@ -104,33 +138,10 @@ export default function OutfitDetail() {
     });
   };
 
-  const handleShare = async () => {
-    try {
-      const deepLink = Linking.createURL(`/outfitdetail`, {
-        queryParams: { id: outfit.id }
-      });
-      
-      const result = await Share.share({
-        message: `Check out this ${outfit.title} outfit on REVEAL! 🔥\n\n${deepLink}`,
-        title: outfit.title,
-      });
-
-      if (result.action === Share.sharedAction) {
-        console.log('Shared successfully!');
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      Alert.alert('Error', 'Unable to share');
-    }
-  };
-
-  const handleShopPress = () => {
-    Alert.alert(
-      'Shop This Look',
-      'Opening shopping link...',
-      [{ text: 'OK' }]
-    );
-  };
+  // Calculate total price
+  const totalPrice = products.length > 0 
+    ? `$${products.reduce((sum, p) => sum + parseInt(p.price?.replace('$', '') || 0), 0)}`
+    : null;
 
   if (loading) {
     return (
@@ -162,7 +173,7 @@ export default function OutfitDetail() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Image with Share Button and Back Button */}
+        {/* Hero Image */}
         <View style={styles.heroContainer}>
           <Image
             source={{ uri: outfit.imageToUse }}
@@ -187,59 +198,60 @@ export default function OutfitDetail() {
           >
             <MaterialCommunityIcons name="share-variant" size={24} color="#FFFFFF" />
           </TouchableOpacity>
+          
+          {/* Price Badge */}
+          {outfit.price_range && (
+            <View style={styles.priceBadge}>
+              <Text style={styles.priceBadgeText}>{outfit.price_range}</Text>
+            </View>
+          )}
         </View>
 
+        {/* Content */}
         <View style={styles.contentContainer}>
-          {/* Title */}
+          {/* Title & Meta */}
           <Text style={styles.title}>{outfit.title}</Text>
-
-          {/* Category + Gender */}
           <Text style={styles.category}>
             {outfit.category} • {outfit.gender?.toUpperCase()}
           </Text>
 
-          {/* Price Range */}
-          <Text style={styles.price}>
-            {outfit.price_range || "Price unavailable"}
-          </Text>
-
-          {/* Shop Button */}
-          <TouchableOpacity
-            style={styles.shopButton}
-            onPress={handleShopPress}
-            activeOpacity={0.8}
-          >
-            <MaterialCommunityIcons name="shopping" size={20} color="#FFFFFF" />
-            <Text style={styles.shopButtonText}>Shop This Look</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Shop The Look - Affiliate Products */}
-        {outfit.products && outfit.products.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🛍️ Shop The Look</Text>
+          {/* Shop This Look Section */}
+          <View style={styles.shopSection}>
+            <View style={styles.shopHeader}>
+              <MaterialCommunityIcons name="shopping" size={20} color={COLORS.primary} />
+              <Text style={styles.shopTitle}>Shop This Look</Text>
+            </View>
             
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsScroll}
-            >
-              {outfit.products.map((product, index) => (
-                <ProductCard 
-                  key={index} 
-                  product={product} 
-                  itemContext={{
-                    item_id: outfit.id?.toString(),
-                    item_title: outfit.title,
-                    category: outfit.category
-                  }}
+            {/* Product List */}
+            <View style={styles.productList}>
+              {products.map((product, index) => (
+                <ShopProductListItem
+                  key={product.id || index}
+                  product={product}
+                  context={{ screen: 'outfitdetail', itemTitle: outfit.title }}
                 />
               ))}
-            </ScrollView>
+            </View>
+            
+            {/* Shop All Button */}
+            <ShopThisLookButton
+              products={products}
+              totalPrice={totalPrice}
+              context={{ screen: 'outfitdetail', itemTitle: outfit.title }}
+              style={styles.shopAllButton}
+            />
           </View>
-        )}
 
-        {/* Similar Styles Section */}
+          {/* Stylist Tip */}
+          <View style={styles.stylistTip}>
+            <MaterialCommunityIcons name="lightbulb" size={18} color="#FFD93D" />
+            <Text style={styles.stylistTipText}>
+              Pro tip: Mix and match pieces from this look with your existing wardrobe for endless outfit combinations!
+            </Text>
+          </View>
+        </View>
+
+        {/* Similar Styles */}
         {similarOutfits.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Similar Styles</Text>
@@ -254,19 +266,24 @@ export default function OutfitDetail() {
                   key={item.id}
                   onPress={() => handleSimilarOutfitPress(item)}
                   style={styles.similarCard}
-                  activeOpacity={0.8}
+                  activeOpacity={0.85}
                 >
                   <Image
                     source={{ uri: item.imageToUse }}
                     style={styles.similarImage}
                     resizeMode="cover"
                   />
-                  <Text style={styles.similarTitle} numberOfLines={2}>
-                    {item.title}
-                  </Text>
-                  {item.price_range && (
-                    <Text style={styles.similarPrice}>{item.price_range}</Text>
-                  )}
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0,0,0,0.8)']}
+                    style={styles.similarOverlay}
+                  >
+                    <Text style={styles.similarTitle} numberOfLines={2}>
+                      {item.title}
+                    </Text>
+                    {item.price_range && (
+                      <Text style={styles.similarPrice}>{item.price_range}</Text>
+                    )}
+                  </LinearGradient>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -297,12 +314,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 16,
   },
+  // Hero
   heroContainer: {
     position: 'relative',
   },
   heroImage: {
     width: '100%',
-    height: 400,
+    height: 420,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
   },
@@ -327,77 +345,123 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...CARD_SHADOW,
   },
+  priceBadge: {
+    position: 'absolute',
+    bottom: 20,
+    right: SPACING.screenHorizontal,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  priceBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  // Content
   contentContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
     paddingTop: SPACING.contentPaddingTop,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
     color: COLORS.textPrimary,
+    letterSpacing: -0.3,
   },
   category: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.textSecondary,
     marginTop: SPACING.titleToSubtitle,
   },
-  price: {
-    fontSize: 18,
-    color: COLORS.primary,
-    fontWeight: '600',
-    marginTop: SPACING.sectionTitleToContent,
+  // Shop Section
+  shopSection: {
+    marginTop: SPACING.sectionGap,
+    backgroundColor: 'rgba(177, 76, 255, 0.05)',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.15)',
   },
-  shopButton: {
+  shopHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.primary,
-    paddingVertical: 16,
-    borderRadius: SIZES.borderRadiusButton,
-    marginTop: SPACING.cardGap,
     gap: 8,
-    ...CARD_SHADOW,
+    marginBottom: 16,
   },
-  shopButtonText: {
-    color: '#FFFFFF',
+  shopTitle: {
     fontSize: 18,
     fontWeight: '700',
+    color: COLORS.textPrimary,
   },
+  productList: {
+    marginBottom: 16,
+  },
+  shopAllButton: {
+    marginTop: 4,
+  },
+  // Stylist Tip
+  stylistTip: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginTop: SPACING.sectionGap,
+    padding: 16,
+    backgroundColor: 'rgba(255, 217, 61, 0.1)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 217, 61, 0.2)',
+  },
+  stylistTipText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  // Section
   section: {
     marginTop: SPACING.sectionGap,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: COLORS.textPrimary,
     paddingHorizontal: SPACING.screenHorizontal,
     marginBottom: SPACING.sectionTitleToContent,
   },
-  productsScroll: {
-    paddingHorizontal: SPACING.screenHorizontal,
-  },
   similarScroll: {
     paddingHorizontal: SPACING.screenHorizontal,
   },
   similarCard: {
+    width: 150,
+    height: 200,
     marginRight: SPACING.cardHorizontalGap,
-    width: 160,
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    ...CARD_SHADOW,
   },
   similarImage: {
-    width: 160,
-    height: 200,
-    borderRadius: SIZES.borderRadiusCard,
-    backgroundColor: COLORS.card,
+    width: '100%',
+    height: '100%',
+  },
+  similarOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
   },
   similarTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '600',
-    marginTop: SPACING.titleToSubtitle,
+    lineHeight: 16,
   },
   similarPrice: {
     color: COLORS.primary,
     fontSize: 12,
+    fontWeight: '700',
     marginTop: 4,
   },
 });
