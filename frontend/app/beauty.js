@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   RefreshControl,
   ScrollView,
@@ -14,7 +13,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAddilets } from '../contexts/AddiletsContext';
-import { COLORS, GRADIENTS, SPACING, CARD_SHADOW } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import BeautyCard from '../components/BeautyCard';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { API_BASE_URL } from '../config';
@@ -31,42 +30,69 @@ const CATEGORIES = [
   { id: 'everyday', name: 'Everyday', icon: 'calendar-today' },
 ];
 
+// Individual Beauty Card Component
+const BeautyCardItem = React.memo(({ item, onPress, isLeft }) => (
+  <TouchableOpacity
+    style={[styles.beautyCard, isLeft ? styles.cardLeft : styles.cardRight]}
+    onPress={() => onPress(item)}
+    activeOpacity={0.85}
+  >
+    <Image source={{ uri: item.image }} style={styles.cardImage} />
+    <LinearGradient
+      colors={['transparent', 'rgba(0,0,0,0.85)']}
+      style={styles.cardOverlay}
+    >
+      {item.difficulty && (
+        <View style={styles.difficultyBadge}>
+          <Text style={styles.difficultyText}>{item.difficulty.toUpperCase()}</Text>
+        </View>
+      )}
+      <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+      {item.duration && (
+        <Text style={styles.cardDuration}>{item.duration}</Text>
+      )}
+    </LinearGradient>
+    <TouchableOpacity style={styles.favoriteButton} activeOpacity={0.7}>
+      <MaterialCommunityIcons name="heart-outline" size={20} color="#FFFFFF" />
+    </TouchableOpacity>
+  </TouchableOpacity>
+));
+
 export default function BeautyScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const returnPath = params.returnPath || '/discover';
   const { personalization } = useAddilets();
-  const flatListRef = useRef(null);
+  const scrollRef = useRef(null);
 
   const [selectedCategory, setSelectedCategory] = useState('natural');
   const [looks, setLooks] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(null);
   
   const makeupRecommendations = personalization?.recommendations?.makeup || [];
 
-  // Load looks
-  const loadLooks = useCallback(async () => {
+  // Load looks - clears data and resets state properly
+  const loadLooks = useCallback(async (category) => {
     setLoading(true);
-    setError(null);
+    setLooks([]); // Clear previous data immediately
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/api/beauty/${selectedCategory}`);
+      const response = await fetch(`${API_BASE_URL}/api/beauty/${category}`);
       const data = await response.json();
       const normalizedLooks = (data.looks || []).map(asCardItem);
       setLooks(normalizedLooks);
     } catch (error) {
       console.error('Error loading beauty looks:', error);
-      setError('Unable to load beauty looks. Please try again.');
       setLooks([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory]);
+  }, []);
 
   useEffect(() => {
-    loadLooks();
-  }, [selectedCategory]);
+    loadLooks(selectedCategory);
+  }, [selectedCategory, loadLooks]);
 
   const handleBack = () => {
     router.push(returnPath);
@@ -75,14 +101,16 @@ export default function BeautyScreen() {
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     trackCategoryView(selectedCategory, 'beauty');
-    await loadLooks();
+    await loadLooks(selectedCategory);
     setRefreshing(false);
   }, [loadLooks, selectedCategory]);
 
   const handleCategorySelect = useCallback((categoryId) => {
     if (categoryId !== selectedCategory) {
+      // Reset scroll position first
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+      // Update category (triggers data reload)
       setSelectedCategory(categoryId);
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     }
   }, [selectedCategory]);
 
@@ -93,109 +121,37 @@ export default function BeautyScreen() {
     });
   }, []);
 
-  const renderBeautyItem = useCallback(({ item }) => (
-    <BeautyCard
-      item={item}
-      onPress={() => handleLookPress(item)}
-      style={styles.beautyCard}
-    />
-  ), [handleLookPress]);
+  // Pair looks into rows for 2-column grid
+  const lookRows = [];
+  for (let i = 0; i < looks.length; i += 2) {
+    lookRows.push({
+      id: `row-${i}`,
+      left: looks[i],
+      right: looks[i + 1] || null,
+    });
+  }
 
-  // Scrollable header - scrolls away with content for max browsing space
-  const ListHeaderComponent = useCallback(() => (
-    <View style={styles.listHeader}>
-      {/* Back + Title Row */}
-      <View style={styles.titleRow}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.pageTitle}>Beauty Hub</Text>
-        <TouchableOpacity 
-          onPress={() => router.push('/saved-beauty')}
-          style={styles.actionButton}
-        >
-          <MaterialCommunityIcons name="heart-outline" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Category Filters - Horizontal scroll */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesScroll}
-      >
-        {CATEGORIES.map((category) => (
-          <GradientChip
-            key={category.id}
-            label={category.name}
-            icon={category.icon}
-            active={selectedCategory === category.id}
-            onPress={() => handleCategorySelect(category.id)}
-            style={styles.categoryChip}
-          />
-        ))}
-      </ScrollView>
-
-      {/* Addilets Personalized Section (if available) */}
-      {makeupRecommendations.length > 0 && (
-        <View style={styles.forYouSection}>
-          <View style={styles.forYouHeader}>
-            <View style={styles.forYouTitleRow}>
-              <MaterialCommunityIcons name="star-four-points" size={16} color={COLORS.primary} />
-              <Text style={styles.forYouTitle}>For You</Text>
-            </View>
-            <TouchableOpacity onPress={() => router.push('/addilets')}>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.forYouScroll}
-          >
-            {makeupRecommendations.slice(0, 5).map((makeup) => (
-              <TouchableOpacity key={makeup.id} style={styles.forYouCard} activeOpacity={0.8}>
-                <Image source={{ uri: makeup.image }} style={styles.forYouImage} />
-                <LinearGradient colors={['transparent', 'rgba(0,0,0,0.85)']} style={styles.forYouOverlay}>
-                  <Text style={styles.forYouLabel} numberOfLines={1}>{makeup.title}</Text>
-                  <View style={styles.forYouMatch}>
-                    <MaterialCommunityIcons name="heart" size={10} color="#FF6EC7" />
-                    <Text style={styles.forYouMatchText}>{makeup.match}%</Text>
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Results count */}
-      <Text style={styles.resultsCount}>
-        {loading ? 'Loading...' : `${looks.length} ${CATEGORIES.find(c => c.id === selectedCategory)?.name || ''} looks`}
-      </Text>
-    </View>
-  ), [handleBack, selectedCategory, handleCategorySelect, loading, looks.length, makeupRecommendations]);
-
-  const renderEmptyState = useCallback(() => (
+  const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <MaterialCommunityIcons name="lipstick" size={48} color={COLORS.textMuted} />
-      <Text style={styles.emptyText}>No looks found</Text>
-      <Text style={styles.emptySubtext}>Try a different category</Text>
+      <MaterialCommunityIcons name="lipstick" size={64} color={COLORS.textMuted} />
+      <Text style={styles.emptyTitle}>No Looks Found</Text>
+      <Text style={styles.emptySubtext}>Try a different category or check back later</Text>
+      <TouchableOpacity
+        style={styles.exploreCTA}
+        onPress={() => handleCategorySelect('natural')}
+      >
+        <Text style={styles.exploreCTAText}>Explore Natural Looks</Text>
+      </TouchableOpacity>
     </View>
-  ), []);
+  );
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={looks}
-        renderItem={renderBeautyItem}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        numColumns={2}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={loading ? <SkeletonGrid /> : renderEmptyState}
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scrollView}
         contentContainerStyle={[
-          styles.listContent,
+          styles.scrollContent,
           { paddingTop: insets.top + 12 }
         ]}
         showsVerticalScrollIndicator={false}
@@ -206,11 +162,102 @@ export default function BeautyScreen() {
             tintColor={COLORS.primary} 
           />
         }
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={6}
-        windowSize={5}
-        initialNumToRender={6}
-      />
+      >
+        {/* Header */}
+        <View style={styles.listHeader}>
+          {/* Back + Title Row */}
+          <View style={styles.titleRow}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.pageTitle}>Beauty Hub</Text>
+            <TouchableOpacity 
+              onPress={() => router.push('/saved-beauty')}
+              style={styles.actionButton}
+            >
+              <MaterialCommunityIcons name="heart-outline" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Category Filters - Horizontal scroll */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesScroll}
+          >
+            {CATEGORIES.map((category) => (
+              <GradientChip
+                key={category.id}
+                label={category.name}
+                icon={category.icon}
+                active={selectedCategory === category.id}
+                onPress={() => handleCategorySelect(category.id)}
+                style={styles.categoryChip}
+              />
+            ))}
+          </ScrollView>
+
+          {/* Addilets Personalized Section (if available) */}
+          {makeupRecommendations.length > 0 && (
+            <View style={styles.forYouSection}>
+              <View style={styles.forYouHeader}>
+                <View style={styles.forYouTitleRow}>
+                  <MaterialCommunityIcons name="star-four-points" size={16} color={COLORS.primary} />
+                  <Text style={styles.forYouTitle}>For You</Text>
+                </View>
+                <TouchableOpacity onPress={() => router.push('/addilets')}>
+                  <Text style={styles.viewAllText}>View All</Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.forYouScroll}
+              >
+                {makeupRecommendations.slice(0, 5).map((makeup) => (
+                  <TouchableOpacity key={makeup.id} style={styles.forYouCard} activeOpacity={0.8}>
+                    <Image source={{ uri: makeup.image }} style={styles.forYouImage} />
+                    <LinearGradient colors={['transparent', 'rgba(0,0,0,0.85)']} style={styles.forYouOverlay}>
+                      <Text style={styles.forYouLabel} numberOfLines={1}>{makeup.title}</Text>
+                      <View style={styles.forYouMatch}>
+                        <MaterialCommunityIcons name="heart" size={10} color="#FF6EC7" />
+                        <Text style={styles.forYouMatchText}>{makeup.match}%</Text>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* Results count */}
+          <Text style={styles.resultsCount}>
+            {loading ? 'Loading...' : `${looks.length} ${CATEGORIES.find(c => c.id === selectedCategory)?.name || ''} looks`}
+          </Text>
+        </View>
+
+        {/* Content */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <SkeletonGrid />
+          </View>
+        ) : looks.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          <View style={styles.gridContainer}>
+            {lookRows.map((row) => (
+              <View key={row.id} style={styles.row}>
+                <BeautyCardItem item={row.left} onPress={handleLookPress} isLeft={true} />
+                {row.right ? (
+                  <BeautyCardItem item={row.right} onPress={handleLookPress} isLeft={false} />
+                ) : (
+                  <View style={styles.emptyCard} />
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -219,12 +266,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  listContent: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingBottom: SPACING.bottomPadding,
   },
   // Header
   listHeader: {
-    marginBottom: 8,
+    marginBottom: 16,
   },
   titleRow: {
     flexDirection: 'row',
@@ -255,7 +305,7 @@ const styles = StyleSheet.create({
   // Categories
   categoriesScroll: {
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingBottom: 16,
+    paddingBottom: 12,
   },
   categoryChip: {
     marginRight: 10,
@@ -331,26 +381,115 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginBottom: 12,
   },
-  // Grid
+  // Loading
+  loadingContainer: {
+    paddingHorizontal: SPACING.screenHorizontal,
+  },
+  // Grid - Using flex for reliable 2-column layout
+  gridContainer: {
+    paddingHorizontal: SPACING.screenHorizontal,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  // Beauty Card - Using flex: 1 for equal width columns
   beautyCard: {
     flex: 1,
-    margin: 6,
-    maxWidth: '48%',
+    height: 200,
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    backgroundColor: COLORS.card,
+    ...CARD_SHADOW,
   },
-  // Empty
+  cardLeft: {
+    marginRight: 6,
+  },
+  cardRight: {
+    marginLeft: 6,
+  },
+  emptyCard: {
+    flex: 1,
+    marginLeft: 6,
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: COLORS.card,
+  },
+  cardOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+    paddingTop: 40,
+  },
+  difficultyBadge: {
+    position: 'absolute',
+    top: -28,
+    right: 12,
+    backgroundColor: '#FF6EC7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  difficultyText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  cardDuration: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Empty State - Premium design with CTA
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
+    paddingHorizontal: 32,
   },
-  emptyText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-    marginTop: 12,
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: 20,
+    marginBottom: 8,
   },
   emptySubtext: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.textMuted,
-    marginTop: 4,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  exploreCTA: {
+    marginTop: 24,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  exploreCTAText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
