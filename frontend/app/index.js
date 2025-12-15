@@ -7,30 +7,66 @@ import {
   FlatList,
   Image,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
-import { fetchRealWeather, getWeatherOutfitImages } from '../services/weatherService';
+import { fetchRealWeather, getWeatherOutfitImages, WEATHER_CONDITIONS } from '../services/weatherService';
+import { API_BASE_URL } from '../config';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Home Screen - Personal Dashboard (Clean & Premium)
+// Home Screen - Personal Dashboard with Weather-Powered Recommendations
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [weather, setWeather] = useState(null);
   const [weatherOutfits, setWeatherOutfits] = useState([]);
+  const [recommendedOutfits, setRecommendedOutfits] = useState([]);
+  const [styleRecommendation, setStyleRecommendation] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load real weather data on mount
+  // Load real weather data and outfit recommendations
   useEffect(() => {
-    const loadWeather = async () => {
-      const data = await fetchRealWeather();
-      setWeather(data);
-      setWeatherOutfits(getWeatherOutfitImages(data.tempCategory));
+    const loadWeatherAndRecommendations = async () => {
+      setLoading(true);
+      try {
+        // Step 1: Get real weather
+        const weatherData = await fetchRealWeather();
+        setWeather(weatherData);
+        
+        // Step 2: Get weather-based outfit recommendations from backend
+        // If we have real location, use it
+        if (!weatherData.isDefault) {
+          // Use the existing weather data to get recommendations
+          const recResponse = await fetch(
+            `${API_BASE_URL}/api/recommendations/weather?temp=${weatherData.temp}&condition=${weatherData.condition}`
+          );
+          const recData = await recResponse.json();
+          
+          if (recData.success && recData.outfits) {
+            setRecommendedOutfits(recData.outfits.slice(0, 3)); // Top 3 for the card
+            setStyleRecommendation(recData.style_recommendation);
+          }
+        }
+        
+        // Fallback: use static weather outfit images
+        setWeatherOutfits(getWeatherOutfitImages(weatherData.tempCategory));
+        
+      } catch (error) {
+        console.error('Error loading weather data:', error);
+        // Fallback to static data
+        const fallbackWeather = await fetchRealWeather();
+        setWeather(fallbackWeather);
+        setWeatherOutfits(getWeatherOutfitImages(fallbackWeather.tempCategory));
+      } finally {
+        setLoading(false);
+      }
     };
-    loadWeather();
+    
+    loadWeatherAndRecommendations();
   }, []);
 
   // Quick actions - simplified to 3 core actions
@@ -55,11 +91,21 @@ export default function HomeScreen() {
     </TouchableOpacity>
   ), []);
 
-  // Render outfit card
+  // Render outfit card for Today's Picks
   const renderOutfitCard = useCallback(({ item, index }) => (
     <TouchableOpacity
       style={styles.outfitCard}
-      onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
+      onPress={() => {
+        if (item.id) {
+          // Navigate to outfit detail if it's a real outfit
+          router.push({ 
+            pathname: '/outfitdetail', 
+            params: { outfitData: JSON.stringify(item), returnPath: '/' } 
+          });
+        } else {
+          router.push({ pathname: '/style', params: { returnPath: '/' } });
+        }
+      }}
       activeOpacity={0.85}
     >
       <Image source={{ uri: item.image }} style={styles.outfitImage} />
@@ -68,9 +114,9 @@ export default function HomeScreen() {
         style={styles.outfitOverlay}
       >
         <View style={styles.outfitTag}>
-          <Text style={styles.outfitTagText}>{item.tag}</Text>
+          <Text style={styles.outfitTagText}>{item.tag || item.weather_match_reason || 'Trending'}</Text>
         </View>
-        <Text style={styles.outfitTitle}>{item.title}</Text>
+        <Text style={styles.outfitTitle} numberOfLines={1}>{item.title}</Text>
       </LinearGradient>
     </TouchableOpacity>
   ), []);
@@ -86,7 +132,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Weather Style Card - Hero */}
+      {/* Weather Style Card - Hero with Outfit Thumbnails */}
       {weather && (
         <TouchableOpacity 
           style={styles.weatherCard}
@@ -111,17 +157,58 @@ export default function HomeScreen() {
               <Text style={styles.weatherCondition}>{weather.conditionLabel}</Text>
             </View>
 
-            {/* Outfit Suggestion */}
+            {/* Outfit Suggestion with Thumbnails */}
             <View style={styles.outfitSuggestion}>
-              <Text style={styles.suggestionLabel}>Today's Style</Text>
-              <Text style={styles.suggestionStyle}>{weather.outfitSuggestion.style}</Text>
-              <View style={styles.suggestionItems}>
-                {weather.outfitSuggestion.items.slice(0, 3).map((item, i) => (
-                  <View key={i} style={styles.suggestionChip}>
-                    <Text style={styles.suggestionChipText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.suggestionLabel}>What to Wear Today</Text>
+              <Text style={styles.suggestionStyle}>
+                {styleRecommendation?.tip || weather.outfitSuggestion.style}
+              </Text>
+              
+              {/* Outfit Thumbnails */}
+              {recommendedOutfits.length > 0 ? (
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.thumbnailScroll}
+                >
+                  {recommendedOutfits.map((outfit, index) => (
+                    <TouchableOpacity
+                      key={outfit.id || index}
+                      style={styles.thumbnailCard}
+                      onPress={() => router.push({
+                        pathname: '/outfitdetail',
+                        params: { outfitData: JSON.stringify(outfit), returnPath: '/' }
+                      })}
+                      activeOpacity={0.85}
+                    >
+                      <Image 
+                        source={{ uri: outfit.image }} 
+                        style={styles.thumbnailImage}
+                      />
+                      <View style={styles.thumbnailOverlay}>
+                        <Text style={styles.thumbnailTitle} numberOfLines={1}>
+                          {outfit.title?.split(' ').slice(0, 2).join(' ')}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    style={styles.seeMoreCard}
+                    onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
+                  >
+                    <MaterialCommunityIcons name="arrow-right" size={20} color="#FFFFFF" />
+                    <Text style={styles.seeMoreText}>More</Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              ) : (
+                <View style={styles.suggestionItems}>
+                  {weather.outfitSuggestion.items.slice(0, 3).map((item, i) => (
+                    <View key={i} style={styles.suggestionChip}>
+                      <Text style={styles.suggestionChipText}>{item}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
 
             {/* CTA */}
@@ -138,8 +225,8 @@ export default function HomeScreen() {
         {quickActions.map(renderQuickAction)}
       </View>
 
-      {/* Today's Picks */}
-      {weatherOutfits.length > 0 && (
+      {/* Today's Picks - Using weather recommendations or fallback */}
+      {(recommendedOutfits.length > 0 || weatherOutfits.length > 0) && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Today's Picks</Text>
@@ -149,8 +236,11 @@ export default function HomeScreen() {
           </View>
           <FlatList
             horizontal
-            data={weatherOutfits}
-            keyExtractor={(item) => `outfit-${item.id}`}
+            data={recommendedOutfits.length > 0 
+              ? recommendedOutfits 
+              : weatherOutfits
+            }
+            keyExtractor={(item, index) => item.id || `outfit-${index}`}
             renderItem={renderOutfitCard}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.outfitsScroll}
@@ -181,7 +271,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
     </View>
-  ), [insets.top, weather, weatherOutfits, quickActions, renderQuickAction, renderOutfitCard]);
+  ), [insets.top, weather, weatherOutfits, recommendedOutfits, styleRecommendation, quickActions, renderQuickAction, renderOutfitCard]);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
@@ -277,10 +367,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   suggestionStyle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   suggestionItems: {
     flexDirection: 'row',
@@ -297,6 +387,49 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  // Outfit Thumbnails in Weather Card
+  thumbnailScroll: {
+    gap: 10,
+  },
+  thumbnailCard: {
+    width: 70,
+    height: 90,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
+  },
+  thumbnailOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 4,
+  },
+  thumbnailTitle: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  seeMoreCard: {
+    width: 50,
+    height: 90,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  seeMoreText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginTop: 4,
   },
   weatherCTA: {
     flexDirection: 'row',
