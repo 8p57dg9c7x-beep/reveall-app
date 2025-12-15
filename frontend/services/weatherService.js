@@ -1,9 +1,38 @@
-// Weather Service for REVEAL
-// Provides weather data for outfit recommendations
+// Weather Service for REVEAL - v1 with Real Location & Weather
+// Simple, reliable, and premium — never blocks UI
 
-const WEATHER_API_KEY = 'demo'; // Will use mock data for v1, can add real API later
+import * as Location from 'expo-location';
 
-// Weather condition mappings for outfit recommendations
+// OpenWeatherMap API (free tier - 1000 calls/day)
+const WEATHER_API_KEY = '4d8fb5b93d4af21d66a2948710284366'; // Free tier key
+const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
+
+// Default fallback data (Los Angeles)
+const DEFAULT_WEATHER = {
+  location: 'Los Angeles',
+  temp: 75,
+  tempF: '75°F',
+  tempC: '24°C',
+  condition: 'sunny',
+  conditionLabel: 'Sunny',
+  icon: 'weather-sunny',
+  iconColor: '#FFD93D',
+  humidity: 45,
+  tempCategory: 'warm',
+  outfitSuggestion: {
+    range: '70-84°F',
+    style: 'Casual Summer',
+    items: ['T-shirt', 'Light pants', 'Sneakers', 'Cap'],
+    colors: ['Light blue', 'Mint', 'Coral'],
+    tip: 'Perfect weather for outdoor activities',
+  },
+  greeting: getGreeting(),
+  dayOfWeek: getDayOfWeek(),
+  date: getFormattedDate(),
+  isDefault: true,
+};
+
+// Weather condition mappings
 export const WEATHER_CONDITIONS = {
   sunny: { icon: 'weather-sunny', color: '#FFD93D', label: 'Sunny' },
   cloudy: { icon: 'weather-cloudy', color: '#9CA3AF', label: 'Cloudy' },
@@ -13,39 +42,41 @@ export const WEATHER_CONDITIONS = {
   windy: { icon: 'weather-windy', color: '#06B6D4', label: 'Windy' },
   hot: { icon: 'weather-sunny-alert', color: '#F97316', label: 'Hot' },
   cold: { icon: 'snowflake', color: '#38BDF8', label: 'Cold' },
+  clear: { icon: 'weather-sunny', color: '#FFD93D', label: 'Clear' },
+  mist: { icon: 'weather-fog', color: '#9CA3AF', label: 'Misty' },
 };
 
 // Temperature-based outfit suggestions
 export const TEMP_OUTFITS = {
-  hot: { // 85°F+
+  hot: {
     range: '85°F+',
     style: 'Light & Minimal',
     items: ['Tank top', 'Shorts', 'Sandals', 'Sunglasses'],
     colors: ['White', 'Beige', 'Pastels'],
     tip: 'Stay cool with breathable fabrics',
   },
-  warm: { // 70-84°F
+  warm: {
     range: '70-84°F',
     style: 'Casual Summer',
     items: ['T-shirt', 'Light pants', 'Sneakers', 'Cap'],
     colors: ['Light blue', 'Mint', 'Coral'],
     tip: 'Perfect weather for outdoor activities',
   },
-  mild: { // 55-69°F
+  mild: {
     range: '55-69°F',
     style: 'Light Layers',
     items: ['Long sleeve', 'Jeans', 'Light jacket', 'Boots'],
     colors: ['Earth tones', 'Navy', 'Olive'],
     tip: 'Layer up for temperature changes',
   },
-  cool: { // 40-54°F
+  cool: {
     range: '40-54°F',
     style: 'Cozy Layers',
     items: ['Sweater', 'Coat', 'Scarf', 'Ankle boots'],
     colors: ['Burgundy', 'Camel', 'Forest green'],
     tip: 'Add a warm layer for comfort',
   },
-  cold: { // Below 40°F
+  cold: {
     range: 'Below 40°F',
     style: 'Winter Warm',
     items: ['Heavy coat', 'Layers', 'Beanie', 'Warm boots'],
@@ -63,79 +94,169 @@ export const getTempCategory = (temp) => {
   return 'cold';
 };
 
-// Get weather condition from code/description
-export const getWeatherCondition = (description) => {
-  const desc = description?.toLowerCase() || '';
-  if (desc.includes('rain') || desc.includes('drizzle')) return 'rainy';
-  if (desc.includes('storm') || desc.includes('thunder')) return 'stormy';
-  if (desc.includes('snow')) return 'snowy';
-  if (desc.includes('wind')) return 'windy';
-  if (desc.includes('cloud') || desc.includes('overcast')) return 'cloudy';
-  return 'sunny';
+// Map OpenWeatherMap condition to our condition
+const mapWeatherCondition = (weatherMain, weatherId) => {
+  const main = weatherMain?.toLowerCase() || '';
+  
+  if (weatherId >= 200 && weatherId < 300) return 'stormy'; // Thunderstorm
+  if (weatherId >= 300 && weatherId < 400) return 'rainy';  // Drizzle
+  if (weatherId >= 500 && weatherId < 600) return 'rainy';  // Rain
+  if (weatherId >= 600 && weatherId < 700) return 'snowy';  // Snow
+  if (weatherId >= 700 && weatherId < 800) return 'mist';   // Atmosphere (fog, mist)
+  if (weatherId === 800) return 'clear';                     // Clear
+  if (weatherId > 800) return 'cloudy';                      // Clouds
+  
+  // Fallback based on main
+  if (main.includes('rain') || main.includes('drizzle')) return 'rainy';
+  if (main.includes('storm') || main.includes('thunder')) return 'stormy';
+  if (main.includes('snow')) return 'snowy';
+  if (main.includes('cloud') || main.includes('overcast')) return 'cloudy';
+  if (main.includes('wind')) return 'windy';
+  if (main.includes('fog') || main.includes('mist')) return 'mist';
+  
+  return 'clear';
 };
 
 // Get time-aware greeting
-export const getGreeting = () => {
+export function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return { text: 'Good Morning', icon: 'weather-sunset-up', period: 'morning' };
   if (hour < 17) return { text: 'Good Afternoon', icon: 'white-balance-sunny', period: 'afternoon' };
   if (hour < 21) return { text: 'Good Evening', icon: 'weather-sunset-down', period: 'evening' };
   return { text: 'Good Night', icon: 'weather-night', period: 'night' };
-};
+}
 
 // Get day of week
-export const getDayOfWeek = () => {
+export function getDayOfWeek() {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return days[new Date().getDay()];
-};
+}
 
 // Get formatted date
-export const getFormattedDate = () => {
+export function getFormattedDate() {
   const options = { month: 'long', day: 'numeric' };
   return new Date().toLocaleDateString('en-US', options);
-};
+}
 
-// Mock weather data generator based on location (for v1)
-export const getMockWeather = (location = 'Los Angeles') => {
-  // Simulate different weather based on mock locations
-  const weatherByLocation = {
-    'Los Angeles': { temp: 75, condition: 'sunny', humidity: 45 },
-    'New York': { temp: 58, condition: 'cloudy', humidity: 65 },
-    'Seattle': { temp: 52, condition: 'rainy', humidity: 80 },
-    'Miami': { temp: 85, condition: 'sunny', humidity: 70 },
-    'Chicago': { temp: 48, condition: 'windy', humidity: 55 },
-    'Denver': { temp: 62, condition: 'sunny', humidity: 30 },
-  };
+// Request location permission (silent - never blocks UI)
+async function getDeviceLocation() {
+  try {
+    // Request permission
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    
+    if (status !== 'granted') {
+      console.log('Location permission not granted, using default');
+      return null;
+    }
+    
+    // Get current position (city-level accuracy is fine)
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Low, // Faster, city-level
+    });
+    
+    return {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+  } catch (error) {
+    console.log('Location error (using default):', error.message);
+    return null;
+  }
+}
 
-  const data = weatherByLocation[location] || weatherByLocation['Los Angeles'];
-  const conditionData = WEATHER_CONDITIONS[data.condition];
-  const tempCategory = getTempCategory(data.temp);
+// Fetch weather from OpenWeatherMap API
+async function fetchWeatherFromAPI(latitude, longitude) {
+  try {
+    const url = `${WEATHER_API_URL}?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=imperial`;
+    
+    const response = await fetch(url, { timeout: 5000 });
+    
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log('Weather API error (using default):', error.message);
+    return null;
+  }
+}
+
+// Parse API response into our weather format
+function parseWeatherResponse(data) {
+  if (!data || !data.main || !data.weather) {
+    return null;
+  }
+  
+  const temp = Math.round(data.main.temp);
+  const weatherMain = data.weather[0]?.main || 'Clear';
+  const weatherId = data.weather[0]?.id || 800;
+  const condition = mapWeatherCondition(weatherMain, weatherId);
+  const conditionData = WEATHER_CONDITIONS[condition] || WEATHER_CONDITIONS.clear;
+  const tempCategory = getTempCategory(temp);
   const outfitSuggestion = TEMP_OUTFITS[tempCategory];
-
+  const cityName = data.name || 'Your Location';
+  
   return {
-    location,
-    temp: data.temp,
-    tempF: `${data.temp}°F`,
-    tempC: `${Math.round((data.temp - 32) * 5/9)}°C`,
-    condition: data.condition,
+    location: cityName,
+    temp,
+    tempF: `${temp}°F`,
+    tempC: `${Math.round((temp - 32) * 5/9)}°C`,
+    condition,
     conditionLabel: conditionData.label,
     icon: conditionData.icon,
     iconColor: conditionData.color,
-    humidity: data.humidity,
+    humidity: data.main.humidity || 50,
     tempCategory,
     outfitSuggestion,
     greeting: getGreeting(),
     dayOfWeek: getDayOfWeek(),
     date: getFormattedDate(),
+    isDefault: false,
   };
-};
+}
 
-// Fetch real weather (placeholder for future API integration)
-export const fetchWeather = async (latitude, longitude) => {
-  // For v1, return mock data
-  // In future, integrate with OpenWeatherMap or similar
-  return getMockWeather('Los Angeles');
-};
+// Main function: Get real weather (with silent fallback)
+export async function fetchRealWeather() {
+  try {
+    // Step 1: Get device location (silent fail)
+    const coords = await getDeviceLocation();
+    
+    if (!coords) {
+      // Permission denied or error - use default silently
+      return { ...DEFAULT_WEATHER, greeting: getGreeting(), dayOfWeek: getDayOfWeek(), date: getFormattedDate() };
+    }
+    
+    // Step 2: Fetch weather from API (silent fail)
+    const weatherData = await fetchWeatherFromAPI(coords.latitude, coords.longitude);
+    
+    if (!weatherData) {
+      // API error - use default silently
+      return { ...DEFAULT_WEATHER, greeting: getGreeting(), dayOfWeek: getDayOfWeek(), date: getFormattedDate() };
+    }
+    
+    // Step 3: Parse response
+    const parsed = parseWeatherResponse(weatherData);
+    
+    if (!parsed) {
+      // Parse error - use default silently
+      return { ...DEFAULT_WEATHER, greeting: getGreeting(), dayOfWeek: getDayOfWeek(), date: getFormattedDate() };
+    }
+    
+    return parsed;
+    
+  } catch (error) {
+    // Any unexpected error - use default silently
+    console.log('Weather fetch error (using default):', error.message);
+    return { ...DEFAULT_WEATHER, greeting: getGreeting(), dayOfWeek: getDayOfWeek(), date: getFormattedDate() };
+  }
+}
+
+// Legacy function for backward compatibility
+export function getMockWeather(location = 'Los Angeles') {
+  return { ...DEFAULT_WEATHER, location, greeting: getGreeting(), dayOfWeek: getDayOfWeek(), date: getFormattedDate() };
+}
 
 // Get outfit images based on weather
 export const getWeatherOutfitImages = (tempCategory) => {
@@ -171,13 +292,12 @@ export const getWeatherOutfitImages = (tempCategory) => {
 };
 
 export default {
+  fetchRealWeather,
   getMockWeather,
-  fetchWeather,
   getGreeting,
   getDayOfWeek,
   getFormattedDate,
   getTempCategory,
-  getWeatherCondition,
   getWeatherOutfitImages,
   WEATHER_CONDITIONS,
   TEMP_OUTFITS,
