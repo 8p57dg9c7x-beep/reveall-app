@@ -461,12 +461,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: SPACING.bottomPadding,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingTop: SPACING.headerPaddingTop,
+    paddingTop: 12,
     paddingBottom: SPACING.headerPaddingBottom,
   },
   backButton: {
