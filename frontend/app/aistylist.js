@@ -14,255 +14,243 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { useAddilets } from '../contexts/AddiletsContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import GradientChip from '../components/GradientChip';
 import { uploadImage, pollJobResult } from '../services/revealAPI';
+import { getMockWeather } from '../services/weatherService';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.85;
+const CARD_WIDTH = width * 0.88;
+
+// Premium outfit recommendation data with structured format
+const PREMIUM_RECOMMENDATIONS = [
+  {
+    id: 1,
+    title: 'Urban Street Chic',
+    description: 'Perfect for casual weekend outings with a modern edge',
+    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80',
+    confidence: 0.95,
+    occasion: 'Casual',
+    season: 'Spring/Summer',
+    vibe: 'Relaxed yet stylish',
+    items: [
+      { type: 'Top', name: 'Oversized Denim Jacket', price: '$89', brand: 'Levi\'s', color: 'Light Blue' },
+      { type: 'Base', name: 'White Cotton Tee', price: '$24', brand: 'Everlane', color: 'White' },
+      { type: 'Bottom', name: 'Slim Black Jeans', price: '$79', brand: 'AGOLDE', color: 'Black' },
+      { type: 'Shoes', name: 'White Sneakers', price: '$95', brand: 'Veja', color: 'White' },
+    ],
+    totalPrice: '$287',
+    tags: ['streetwear', 'casual', 'denim', 'weekend'],
+    stylistTip: 'Roll up the sleeves for a more relaxed look. Add a silver chain necklace for extra edge.',
+  },
+  {
+    id: 2,
+    title: 'Elegant Evening Look',
+    description: 'Sophisticated style for dinner dates and special occasions',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80',
+    confidence: 0.92,
+    occasion: 'Evening',
+    season: 'All Season',
+    vibe: 'Elegant & refined',
+    items: [
+      { type: 'Top', name: 'Tailored Blazer', price: '$299', brand: 'Theory', color: 'Black' },
+      { type: 'Base', name: 'Silk Blouse', price: '$149', brand: 'Reformation', color: 'Ivory' },
+      { type: 'Bottom', name: 'High-Waist Trousers', price: '$189', brand: 'COS', color: 'Charcoal' },
+      { type: 'Shoes', name: 'Leather Heels', price: '$175', brand: 'Sam Edelman', color: 'Nude' },
+    ],
+    totalPrice: '$812',
+    tags: ['elegant', 'evening', 'formal', 'date-night'],
+    stylistTip: 'Add gold hoop earrings and a structured clutch to complete the look.',
+  },
+  {
+    id: 3,
+    title: 'Minimalist Daily Wear',
+    description: 'Effortless everyday comfort with clean lines',
+    image: 'https://images.unsplash.com/photo-1445384763658-0400939829cd?w=600&q=80',
+    confidence: 0.88,
+    occasion: 'Everyday',
+    season: 'All Season',
+    vibe: 'Clean & simple',
+    items: [
+      { type: 'Top', name: 'Cashmere Sweater', price: '$195', brand: 'Naadam', color: 'Oatmeal' },
+      { type: 'Bottom', name: 'Relaxed Chinos', price: '$69', brand: 'Uniqlo', color: 'Beige' },
+      { type: 'Shoes', name: 'Leather Loafers', price: '$145', brand: 'Madewell', color: 'Cognac' },
+      { type: 'Accessory', name: 'Canvas Tote', price: '$48', brand: 'Baggu', color: 'Natural' },
+    ],
+    totalPrice: '$457',
+    tags: ['minimal', 'everyday', 'neutral', 'comfortable'],
+    stylistTip: 'This palette works great with a simple watch. Less is more!',
+  },
+  {
+    id: 4,
+    title: 'Active Athleisure',
+    description: 'From gym to brunch without missing a beat',
+    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80',
+    confidence: 0.90,
+    occasion: 'Active',
+    season: 'All Season',
+    vibe: 'Sporty & fresh',
+    items: [
+      { type: 'Top', name: 'Tech Zip Hoodie', price: '$98', brand: 'Lululemon', color: 'Heather Grey' },
+      { type: 'Base', name: 'Seamless Tank', price: '$58', brand: 'Alo Yoga', color: 'Black' },
+      { type: 'Bottom', name: 'High-Rise Joggers', price: '$88', brand: 'Athleta', color: 'Navy' },
+      { type: 'Shoes', name: 'Running Sneakers', price: '$140', brand: 'Nike', color: 'White/Grey' },
+    ],
+    totalPrice: '$384',
+    tags: ['athleisure', 'sporty', 'comfortable', 'versatile'],
+    stylistTip: 'Add a baseball cap and sleek sunglasses for the ultimate off-duty look.',
+  },
+];
+
+// Occasion options
+const OCCASIONS = [
+  { id: 'casual', label: 'Casual', icon: 'tshirt-crew' },
+  { id: 'work', label: 'Work', icon: 'briefcase' },
+  { id: 'date', label: 'Date Night', icon: 'heart' },
+  { id: 'event', label: 'Event', icon: 'star' },
+  { id: 'active', label: 'Active', icon: 'run' },
+];
+
+// Style preferences
+const STYLE_PREFERENCES = [
+  'Streetwear', 'Minimalist', 'Bohemian', 'Classic', 'Edgy', 
+  'Preppy', 'Sporty', 'Romantic', 'Vintage', 'Modern'
+];
 
 export default function AIStylistScreen() {
-  const { getStylePreferences } = useAddilets();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const returnPath = params.returnPath || '/stylelab';
   
-  const [step, setStep] = useState(1); // 1: Upload, 2: Preferences, 3: Results
-  const [frontPhoto, setFrontPhoto] = useState(null);
-  const [sidePhoto, setSidePhoto] = useState(null);
+  const [step, setStep] = useState(1); // 1: Context, 2: Style, 3: Results
+  const [selectedOccasion, setSelectedOccasion] = useState(null);
   const [selectedStyles, setSelectedStyles] = useState([]);
+  const [weather, setWeather] = useState(null);
   const [generatedLooks, setGeneratedLooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentLookIndex, setCurrentLookIndex] = useState(0);
-  const scrollX = new Animated.Value(0);
 
-  // Handle back navigation
-  const handleBack = () => {
-    router.push(returnPath);
-  };
-
-  // Pre-fill style preferences from Addilets when user reaches step 2
+  // Load weather on mount
   useEffect(() => {
-    if (step === 2 && selectedStyles.length === 0) {
-      const addiletsPreferences = getStylePreferences();
-      if (addiletsPreferences && addiletsPreferences.length > 0) {
-        // Pre-select Addilets preferences that match available options
-        const matching = stylePreferences.filter(style => 
-          addiletsPreferences.some(pref => 
-            style.toLowerCase().includes(pref.toLowerCase()) || 
-            pref.toLowerCase().includes(style.toLowerCase())
-          )
-        );
-        if (matching.length > 0) {
-          setSelectedStyles(matching.slice(0, 3));
-        }
-      }
-    }
-  }, [step]);
+    const data = getMockWeather('Los Angeles');
+    setWeather(data);
+  }, []);
 
-  const stylePreferences = [
-    'Streetwear', 'Luxury', 'Casual', 'Formal', 'Sporty', 'Bohemian', 
-    'Minimalist', 'Vintage', 'Edgy', 'Preppy'
-  ];
-
-  const mockGenerateLooks = async () => {
-    setLoading(true);
-    
-    try {
-      // Use actual backend API if we have a photo
-      if (frontPhoto) {
-        console.log('🎨 Calling Reveal AI Stylist API...');
-        const uploadResult = await uploadImage(frontPhoto, 'stylist', {
-          preferences: selectedStyles,
-        });
-        
-        console.log('📦 Job created:', uploadResult.jobId);
-        
-        // Poll for results
-        const result = await pollJobResult(uploadResult.jobId);
-        
-        if (result.result && result.result.results) {
-          // Transform backend response to match UI format
-          const looks = result.result.results.map((item, index) => ({
-            id: item.id || index + 1,
-            image: item.image,
-            confidence: item.confidence,
-            tags: item.tags,
-            title: item.title,
-            description: item.description,
-            buyLinks: item.items ? item.items.map(i => ({
-              item: i.name,
-              price: i.price,
-              url: '#'
-            })) : [],
-          }));
-          
-          setGeneratedLooks(looks);
-          setLoading(false);
-          setStep(3);
-          return;
-        }
-      }
-      
-      // Fallback to mock if API fails or no photo
-      throw new Error('Using fallback');
-    } catch (error) {
-      console.log('⚠️ Using fallback mock data:', error.message);
-      
-      // Fallback mock results
-      const mockResults = [
-        {
-          id: 1,
-          image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80',
-          confidence: 0.95,
-          tags: ['streetwear', 'casual', 'denim'],
-          title: 'Urban Streetwear Look',
-          description: 'Perfect for casual weekend outings',
-          buyLinks: [
-            { item: 'Denim Jacket', price: '$89', url: '#' },
-            { item: 'White Tee', price: '$24', url: '#' },
-            { item: 'Black Jeans', price: '$79', url: '#' },
-          ]
-        },
-        {
-          id: 2,
-          image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80',
-          confidence: 0.92,
-          tags: ['luxury', 'elegant', 'formal'],
-          title: 'Elegant Luxury Ensemble',
-          description: 'Sophisticated style for special occasions',
-          buyLinks: [
-            { item: 'Blazer', price: '$299', url: '#' },
-            { item: 'Silk Blouse', price: '$149', url: '#' },
-            { item: 'Tailored Pants', price: '$189', url: '#' },
-          ]
-        },
-        {
-          id: 3,
-          image: 'https://images.unsplash.com/photo-1445384763658-0400939829cd?w=600&q=80',
-          confidence: 0.88,
-          tags: ['casual', 'minimal', 'comfortable'],
-          title: 'Minimalist Casual Style',
-          description: 'Effortless everyday comfort',
-          buyLinks: [
-            { item: 'Cotton Tee', price: '$34', url: '#' },
-            { item: 'Chinos', price: '$69', url: '#' },
-            { item: 'Sneakers', price: '$99', url: '#' },
-          ]
-        },
-        {
-          id: 4,
-          image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80',
-          confidence: 0.90,
-          tags: ['sporty', 'athleisure', 'active'],
-          title: 'Sporty Athleisure',
-          description: 'Active lifestyle meets street style',
-          buyLinks: [
-            { item: 'Track Jacket', price: '$79', url: '#' },
-            { item: 'Performance Tee', price: '$45', url: '#' },
-            { item: 'Joggers', price: '$65', url: '#' },
-          ]
-        },
-      ];
-      
-      setGeneratedLooks(mockResults);
-      setLoading(false);
-      setStep(3);
-    }
-  };
-
-  const pickImage = async (type) => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please allow access to your photo library');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      if (type === 'Front') {
-        setFrontPhoto(result.assets[0].uri);
-      } else {
-        setSidePhoto(result.assets[0].uri);
-      }
+  const handleBack = () => {
+    if (step > 1 && step < 3) {
+      setStep(step - 1);
+    } else {
+      router.push(returnPath);
     }
   };
 
   const toggleStyle = (style) => {
     if (selectedStyles.includes(style)) {
       setSelectedStyles(selectedStyles.filter(s => s !== style));
-    } else {
-      if (selectedStyles.length < 3) {
-        setSelectedStyles([...selectedStyles, style]);
-      } else {
-        Alert.alert('Maximum Reached', 'You can select up to 3 style preferences');
-      }
+    } else if (selectedStyles.length < 3) {
+      setSelectedStyles([...selectedStyles, style]);
     }
   };
 
-  const renderUploadStep = () => (
+  const generateRecommendations = async () => {
+    setLoading(true);
+    
+    // Simulate AI processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Filter recommendations based on occasion
+    let filtered = [...PREMIUM_RECOMMENDATIONS];
+    if (selectedOccasion === 'active') {
+      filtered = filtered.filter(r => r.occasion === 'Active' || r.tags.includes('sporty'));
+    } else if (selectedOccasion === 'date' || selectedOccasion === 'event') {
+      filtered = filtered.filter(r => r.occasion === 'Evening' || r.tags.includes('elegant'));
+    }
+    
+    // Ensure we have at least 3 recommendations
+    if (filtered.length < 3) {
+      filtered = PREMIUM_RECOMMENDATIONS.slice(0, 4);
+    }
+    
+    setGeneratedLooks(filtered);
+    setLoading(false);
+    setStep(3);
+  };
+
+  // Step 1: Context Selection (Weather-aware + Occasion)
+  const renderContextStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Upload Your Photos</Text>
-      <Text style={styles.stepSubtitle}>Take or upload front and side photos for best results</Text>
+      {/* Weather Context Card */}
+      {weather && (
+        <View style={styles.weatherContext}>
+          <LinearGradient
+            colors={[weather.iconColor, `${weather.iconColor}80`]}
+            style={styles.weatherContextGradient}
+          >
+            <MaterialCommunityIcons name={weather.icon} size={36} color="#FFFFFF" />
+            <View style={styles.weatherContextText}>
+              <Text style={styles.weatherContextTemp}>{weather.tempF} • {weather.conditionLabel}</Text>
+              <Text style={styles.weatherContextSuggestion}>{weather.outfitSuggestion.style} weather</Text>
+            </View>
+          </LinearGradient>
+        </View>
+      )}
+
+      <Text style={styles.stepTitle}>What's the occasion?</Text>
+      <Text style={styles.stepSubtitle}>Help us tailor recommendations to your day</Text>
       
-      <View style={styles.photosRow}>
-        <TouchableOpacity 
-          style={styles.photoUpload}
-          onPress={() => pickImage('Front')}
-          activeOpacity={0.8}
-        >
-          {frontPhoto ? (
-            <Image source={{ uri: frontPhoto }} style={styles.photoPreview} />
-          ) : (
-            <>
-              <MaterialCommunityIcons name="camera-plus" size={48} color={COLORS.primary} />
-              <Text style={styles.photoLabel}>Front Photo</Text>
-              <Text style={styles.photoHint}>Tap to upload</Text>
-            </>
-          )}
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.photoUpload}
-          onPress={() => pickImage('Side')}
-          activeOpacity={0.8}
-        >
-          {sidePhoto ? (
-            <Image source={{ uri: sidePhoto }} style={styles.photoPreview} />
-          ) : (
-            <>
-              <MaterialCommunityIcons name="camera-plus" size={48} color={COLORS.primary} />
-              <Text style={styles.photoLabel}>Side Photo</Text>
-              <Text style={styles.photoHint}>Tap to upload</Text>
-            </>
-          )}
-        </TouchableOpacity>
+      <View style={styles.occasionGrid}>
+        {OCCASIONS.map((occasion) => (
+          <TouchableOpacity
+            key={occasion.id}
+            style={[
+              styles.occasionCard,
+              selectedOccasion === occasion.id && styles.occasionCardActive
+            ]}
+            onPress={() => setSelectedOccasion(occasion.id)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={selectedOccasion === occasion.id 
+                ? [COLORS.primary, '#8B5CF6'] 
+                : ['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.02)']
+              }
+              style={styles.occasionGradient}
+            >
+              <MaterialCommunityIcons 
+                name={occasion.icon} 
+                size={28} 
+                color={selectedOccasion === occasion.id ? '#FFFFFF' : COLORS.textSecondary} 
+              />
+              <Text style={[
+                styles.occasionLabel,
+                selectedOccasion === occasion.id && styles.occasionLabelActive
+              ]}>
+                {occasion.label}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        ))}
       </View>
       
       <GradientButton
         title="Continue"
         onPress={() => setStep(2)}
-        disabled={!frontPhoto || !sidePhoto}
+        disabled={!selectedOccasion}
         style={styles.continueButton}
       />
     </View>
   );
 
-  const renderPreferencesStep = () => (
+  // Step 2: Style Preferences
+  const renderStyleStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Choose Your Style</Text>
-      <Text style={styles.stepSubtitle}>Select up to 3 style preferences</Text>
+      <Text style={styles.stepTitle}>Your style vibe</Text>
+      <Text style={styles.stepSubtitle}>Select up to 3 styles you love</Text>
       
       <View style={styles.chipsContainer}>
-        {stylePreferences.map((style) => (
+        {STYLE_PREFERENCES.map((style) => (
           <GradientChip
             key={style}
             label={style}
@@ -280,8 +268,8 @@ export default function AIStylistScreen() {
       </View>
       
       <GradientButton
-        title="Generate Looks"
-        onPress={mockGenerateLooks}
+        title="Generate My Looks"
+        onPress={generateRecommendations}
         disabled={selectedStyles.length === 0}
         icon={<MaterialCommunityIcons name="sparkles" size={20} color="#fff" />}
         style={styles.generateButton}
@@ -289,69 +277,102 @@ export default function AIStylistScreen() {
     </View>
   );
 
+  // Step 3: Premium Results
   const renderResultsStep = () => (
     <View style={styles.resultsContainer}>
-      <Text style={styles.stepTitle}>Your AI-Generated Looks</Text>
-      <Text style={styles.stepSubtitle}>{generatedLooks.length} personalized outfits</Text>
+      <Text style={styles.stepTitle}>Your Personalized Looks</Text>
+      <Text style={styles.stepSubtitle}>
+        {generatedLooks.length} curated outfits for {OCCASIONS.find(o => o.id === selectedOccasion)?.label || 'you'}
+      </Text>
       
-      {/* Swipeable Cards */}
+      {/* Horizontal Scrollable Cards */}
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + 20}
+        snapToInterval={CARD_WIDTH + 16}
         decelerationRate="fast"
         contentContainerStyle={styles.cardsContainer}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
+        onMomentumScrollEnd={(e) => {
+          const index = Math.round(e.nativeEvent.contentOffset.x / (CARD_WIDTH + 16));
+          setCurrentLookIndex(index);
+        }}
       >
         {generatedLooks.map((look, index) => (
           <View key={look.id} style={[styles.resultCard, { width: CARD_WIDTH }]}>
+            {/* Image */}
             <Image source={{ uri: look.image }} style={styles.resultImage} />
             
-            {/* Overlay Info */}
+            {/* Match Badge */}
+            <View style={styles.matchBadge}>
+              <MaterialCommunityIcons name="star" size={14} color="#FFD700" />
+              <Text style={styles.matchText}>{Math.round(look.confidence * 100)}% Match</Text>
+            </View>
+            
+            {/* Content Overlay */}
             <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.8)']}
+              colors={['transparent', 'rgba(0,0,0,0.95)']}
               style={styles.cardOverlay}
             >
-              <View style={styles.confidenceBadge}>
-                <MaterialCommunityIcons name="star" size={16} color={COLORS.accent} />
-                <Text style={styles.confidenceText}>{Math.round(look.confidence * 100)}% Match</Text>
-              </View>
-              
+              {/* Title & Description */}
               <Text style={styles.resultTitle}>{look.title}</Text>
               <Text style={styles.resultDescription}>{look.description}</Text>
               
-              <View style={styles.tagsRow}>
-                {look.tags.map((tag, idx) => (
-                  <View key={idx} style={styles.tag}>
-                    <Text style={styles.tagText}>#{tag}</Text>
+              {/* Occasion & Vibe */}
+              <View style={styles.metaRow}>
+                <View style={styles.metaItem}>
+                  <MaterialCommunityIcons name="calendar" size={14} color={COLORS.primary} />
+                  <Text style={styles.metaText}>{look.occasion}</Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <MaterialCommunityIcons name="palette" size={14} color={COLORS.primary} />
+                  <Text style={styles.metaText}>{look.vibe}</Text>
+                </View>
+              </View>
+
+              {/* Outfit Breakdown */}
+              <View style={styles.outfitBreakdown}>
+                <Text style={styles.breakdownTitle}>The Look:</Text>
+                {look.items.map((item, idx) => (
+                  <View key={idx} style={styles.itemRow}>
+                    <View style={styles.itemInfo}>
+                      <Text style={styles.itemType}>{item.type}</Text>
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemBrand}>{item.brand}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.itemPrice}>
+                      <Text style={styles.itemPriceText}>{item.price}</Text>
+                      <MaterialCommunityIcons name="cart-plus" size={16} color={COLORS.primary} />
+                    </TouchableOpacity>
                   </View>
                 ))}
               </View>
 
-              {/* Shopping Section */}
-              <View style={styles.shoppingSection}>
-                <Text style={styles.shoppingSectionTitle}>Shop This Look:</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.buyLinks}>
-                  {look.buyLinks.map((link, idx) => (
-                    <TouchableOpacity key={idx} style={styles.buyLinkCard} activeOpacity={0.8}>
-                      <Text style={styles.buyLinkItem}>{link.item}</Text>
-                      <Text style={styles.buyLinkPrice}>{link.price}</Text>
-                      <MaterialCommunityIcons name="cart-outline" size={18} color={COLORS.primary} />
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+              {/* Stylist Tip */}
+              <View style={styles.stylistTip}>
+                <MaterialCommunityIcons name="lightbulb" size={16} color="#FFD93D" />
+                <Text style={styles.stylistTipText}>{look.stylistTip}</Text>
               </View>
+
+              {/* Shop All CTA */}
+              <TouchableOpacity 
+                style={styles.shopAllButton}
+                onPress={() => router.push({ pathname: '/style', params: { returnPath: '/aistylist' } })}
+              >
+                <LinearGradient
+                  colors={[COLORS.primary, '#8B5CF6']}
+                  style={styles.shopAllGradient}
+                >
+                  <MaterialCommunityIcons name="shopping" size={18} color="#FFFFFF" />
+                  <Text style={styles.shopAllText}>Shop This Look • {look.totalPrice}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             </LinearGradient>
           </View>
         ))}
       </ScrollView>
 
-      {/* Pagination Dots */}
+      {/* Pagination */}
       <View style={styles.pagination}>
         {generatedLooks.map((_, index) => (
           <View 
@@ -364,58 +385,74 @@ export default function AIStylistScreen() {
         ))}
       </View>
       
-      <GradientButton
-        title="Start New Session"
-        onPress={() => {
-          setStep(1);
-          setFrontPhoto(null);
-          setSidePhoto(null);
-          setSelectedStyles([]);
-          setGeneratedLooks([]);
-          setCurrentLookIndex(0);
-        }}
-        style={styles.newSessionButton}
-      />
+      {/* Actions */}
+      <View style={styles.resultActions}>
+        <TouchableOpacity 
+          style={styles.secondaryButton}
+          onPress={() => {
+            setStep(1);
+            setSelectedOccasion(null);
+            setSelectedStyles([]);
+            setGeneratedLooks([]);
+            setCurrentLookIndex(0);
+          }}
+        >
+          <MaterialCommunityIcons name="refresh" size={20} color={COLORS.primary} />
+          <Text style={styles.secondaryButtonText}>New Search</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <MaterialCommunityIcons name="robot" size={32} color={COLORS.primary} />
+            <MaterialCommunityIcons name="robot" size={28} color={COLORS.primary} />
             <Text style={styles.headerTitle}>AI Stylist</Text>
           </View>
-          <View style={{ width: 40 }} />
+          <View style={{ width: 44 }} />
         </View>
 
         {/* Progress Indicator */}
         {step < 3 && (
           <View style={styles.progressContainer}>
-            <View style={[styles.progressDot, step >= 1 && styles.progressDotActive]} />
+            <View style={[styles.progressStep, step >= 1 && styles.progressStepActive]}>
+              <Text style={[styles.progressNumber, step >= 1 && styles.progressNumberActive]}>1</Text>
+            </View>
             <View style={[styles.progressLine, step >= 2 && styles.progressLineActive]} />
-            <View style={[styles.progressDot, step >= 2 && styles.progressDotActive]} />
+            <View style={[styles.progressStep, step >= 2 && styles.progressStepActive]}>
+              <Text style={[styles.progressNumber, step >= 2 && styles.progressNumberActive]}>2</Text>
+            </View>
             <View style={[styles.progressLine, step >= 3 && styles.progressLineActive]} />
-            <View style={[styles.progressDot, step >= 3 && styles.progressDotActive]} />
+            <View style={[styles.progressStep, step >= 3 && styles.progressStepActive]}>
+              <Text style={[styles.progressNumber, step >= 3 && styles.progressNumberActive]}>3</Text>
+            </View>
           </View>
         )}
 
         {/* Content */}
         {loading ? (
           <View style={styles.loadingContainer}>
-            <MaterialCommunityIcons name="shimmer" size={64} color={COLORS.primary} />
-            <Text style={styles.loadingText}>Analyzing your style...</Text>
-            <Text style={styles.loadingSubtext}>Generating perfect looks for you</Text>
+            <View style={styles.loadingIcon}>
+              <MaterialCommunityIcons name="shimmer" size={48} color={COLORS.primary} />
+            </View>
+            <Text style={styles.loadingText}>Creating your perfect looks...</Text>
+            <Text style={styles.loadingSubtext}>Analyzing style preferences & weather</Text>
           </View>
         ) : (
           <>
-            {step === 1 && renderUploadStep()}
-            {step === 2 && renderPreferencesStep()}
+            {step === 1 && renderContextStep()}
+            {step === 2 && renderStyleStep()}
             {step === 3 && renderResultsStep()}
           </>
         )}
@@ -439,112 +476,146 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingTop: SPACING.headerPaddingTop,
-    paddingBottom: SPACING.headerPaddingBottom,
+    paddingTop: 12,
+    paddingBottom: 16,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
   },
   headerCenter: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
+  // Progress
   progressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 60,
-    marginBottom: 40,
+    marginBottom: 24,
   },
-  progressDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: COLORS.card,
-    borderWidth: 2,
-    borderColor: COLORS.textMuted,
+  progressStep: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  progressDotActive: {
+  progressStepActive: {
     backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+  },
+  progressNumber: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+  },
+  progressNumberActive: {
+    color: '#FFFFFF',
   },
   progressLine: {
     flex: 1,
     height: 2,
-    backgroundColor: COLORS.card,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     marginHorizontal: 8,
   },
   progressLineActive: {
     backgroundColor: COLORS.primary,
   },
+  // Steps
   stepContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
   },
   stepTitle: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
     color: COLORS.textPrimary,
-    marginBottom: SPACING.titleToSubtitle,
-    textAlign: 'center',
+    marginBottom: 8,
   },
   stepSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.textSecondary,
-    marginBottom: SPACING.sectionGap,
-    textAlign: 'center',
+    marginBottom: 24,
   },
-  photosRow: {
+  // Weather Context
+  weatherContext: {
+    marginBottom: 24,
+    borderRadius: 16,
+    overflow: 'hidden',
+    ...CARD_SHADOW,
+  },
+  weatherContextGradient: {
     flexDirection: 'row',
-    gap: 16,
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  weatherContextText: {
+    flex: 1,
+  },
+  weatherContextTemp: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  weatherContextSuggestion: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  // Occasion Grid
+  occasionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
     marginBottom: 32,
   },
-  photoUpload: {
-    flex: 1,
-    aspectRatio: 0.75,
-    backgroundColor: COLORS.card,
-    borderRadius: SIZES.borderRadiusCard,
-    justifyContent: 'center',
+  occasionCard: {
+    width: '30%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    ...CARD_SHADOW,
+  },
+  occasionCardActive: {
+    transform: [{ scale: 1.02 }],
+  },
+  occasionGradient: {
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(177, 76, 255, 0.3)',
-    borderStyle: 'dashed',
+    paddingVertical: 20,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.2)',
+    borderRadius: 16,
   },
-  photoPreview: {
-    width: '100%',
-    height: '100%',
-    borderRadius: SIZES.borderRadiusCard,
-  },
-  photoLabel: {
-    color: COLORS.textPrimary,
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 12,
-  },
-  photoHint: {
-    color: COLORS.textMuted,
+  occasionLabel: {
     fontSize: 12,
-    marginTop: 4,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginTop: 8,
+    textAlign: 'center',
   },
-  continueButton: {
-    width: '100%',
+  occasionLabelActive: {
+    color: '#FFFFFF',
   },
+  // Chips
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.chipGap,
-    marginBottom: SPACING.subtitleToChips,
+    gap: 10,
+    marginBottom: 20,
   },
   styleChip: {
-    marginRight: 0,
+    marginBottom: 4,
   },
   selectedCount: {
     alignItems: 'center',
@@ -553,45 +624,73 @@ const styles = StyleSheet.create({
   selectedCountText: {
     color: COLORS.textSecondary,
     fontSize: 14,
-    fontWeight: '600',
   },
-  generateButton: {
-    width: '100%',
-  },
-  loadingContainer: {
-    paddingVertical: 100,
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: COLORS.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
-    marginTop: 24,
-  },
-  loadingSubtext: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
+  // Buttons
+  continueButton: {
     marginTop: 8,
   },
+  generateButton: {
+    marginTop: 8,
+  },
+  // Loading
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  loadingIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  loadingSubtext: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  // Results
   resultsContainer: {
-    paddingTop: 20,
+    paddingHorizontal: SPACING.screenHorizontal,
   },
   cardsContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingRight: 20,
   },
   resultCard: {
-    height: 550,
-    borderRadius: SIZES.borderRadiusCard,
+    height: 580,
+    marginRight: 16,
+    borderRadius: 24,
     overflow: 'hidden',
-    marginRight: 20,
-    backgroundColor: COLORS.card,
     ...CARD_SHADOW,
   },
   resultImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    position: 'absolute',
+  },
+  matchBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  matchText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   cardOverlay: {
     position: 'absolute',
@@ -599,102 +698,155 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    paddingBottom: 24,
-  },
-  confidenceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-  confidenceText: {
-    color: COLORS.accent,
-    fontSize: 13,
-    fontWeight: '600',
+    paddingTop: 60,
   },
   resultTitle: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     color: '#FFFFFF',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   resultDescription: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255,255,255,0.8)',
     marginBottom: 12,
   },
-  tagsRow: {
+  metaRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    gap: 16,
+    marginBottom: 16,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  metaText: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.7)',
+  },
+  // Outfit Breakdown
+  outfitBreakdown: {
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  breakdownTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.primary,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  itemInfo: {
+    flex: 1,
+  },
+  itemType: {
+    fontSize: 10,
+    color: COLORS.primary,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  itemName: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  itemBrand: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  itemPrice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(177, 76, 255, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  itemPriceText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  // Stylist Tip
+  stylistTip: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: 8,
     marginBottom: 16,
   },
-  tag: {
-    backgroundColor: 'rgba(177, 76, 255, 0.3)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  tagText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  shoppingSection: {
-    marginTop: 8,
-  },
-  shoppingSectionTitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  buyLinks: {
-    flexDirection: 'row',
-  },
-  buyLinkCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginRight: 12,
-    alignItems: 'center',
-    minWidth: 100,
-  },
-  buyLinkItem: {
-    color: '#FFFFFF',
+  stylistTipText: {
+    flex: 1,
     fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 4,
+    color: 'rgba(255,255,255,0.8)',
+    fontStyle: 'italic',
+    lineHeight: 18,
   },
-  buyLinkPrice: {
-    color: COLORS.accent,
-    fontSize: 14,
+  // Shop All
+  shopAllButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  shopAllGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+  },
+  shopAllText: {
+    fontSize: 15,
     fontWeight: '700',
-    marginBottom: 6,
+    color: '#FFFFFF',
   },
+  // Pagination
   pagination: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
-    marginVertical: 24,
+    marginTop: 20,
+    marginBottom: 24,
   },
   paginationDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.card,
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   paginationDotActive: {
     backgroundColor: COLORS.primary,
     width: 24,
   },
-  newSessionButton: {
-    marginHorizontal: 20,
+  // Actions
+  resultActions: {
+    alignItems: 'center',
+  },
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.3)',
+  },
+  secondaryButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.primary,
   },
 });
