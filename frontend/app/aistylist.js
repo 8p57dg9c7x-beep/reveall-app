@@ -19,7 +19,7 @@ import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/the
 import GradientButton from '../components/GradientButton';
 import GradientChip from '../components/GradientChip';
 import { uploadImage, pollJobResult } from '../services/revealAPI';
-import { getMockWeather } from '../services/weatherService';
+import { fetchRealWeather } from '../services/weatherService';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.88;
