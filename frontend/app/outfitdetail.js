@@ -215,40 +215,19 @@ export default function OutfitDetail() {
             {outfit.category} • {outfit.gender?.toUpperCase()}
           </Text>
 
-          {/* Shop This Look Section */}
-          <View style={styles.shopSection}>
-            <View style={styles.shopHeader}>
-              <MaterialCommunityIcons name="shopping" size={20} color={COLORS.primary} />
-              <Text style={styles.shopTitle}>Shop This Look</Text>
-            </View>
-            
-            {/* Product List */}
-            <View style={styles.productList}>
-              {products.map((product, index) => (
-                <ShopProductListItem
-                  key={product.id || index}
-                  product={product}
-                  context={{ screen: 'outfitdetail', itemTitle: outfit.title }}
-                />
-              ))}
-            </View>
-            
-            {/* Shop All Button */}
-            <ShopThisLookButton
-              products={products}
-              totalPrice={totalPrice}
-              context={{ screen: 'outfitdetail', itemTitle: outfit.title }}
-              style={styles.shopAllButton}
-            />
-          </View>
-
-          {/* Stylist Tip */}
+          {/* Stylist Tip - v1 Focus: Inspiration */}
           <View style={styles.stylistTip}>
             <MaterialCommunityIcons name="lightbulb" size={18} color="#FFD93D" />
             <Text style={styles.stylistTipText}>
               Pro tip: Mix and match pieces from this look with your existing wardrobe for endless outfit combinations!
             </Text>
           </View>
+
+          {/* Save to Favorites CTA */}
+          <TouchableOpacity style={styles.saveCTA} activeOpacity={0.85}>
+            <MaterialCommunityIcons name="heart-outline" size={22} color={COLORS.primary} />
+            <Text style={styles.saveCTAText}>Save to Favorites</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Similar Styles */}
