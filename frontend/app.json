@@ -20,7 +20,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "REVEAL needs camera access to scan your body measurements and capture outfit photos",
         "NSMicrophoneUsageDescription": "REVEAL needs microphone access to identify songs playing around you",
-        "NSPhotoLibraryUsageDescription": "REVEAL needs photo access to analyze your style and wardrobe"
+        "NSPhotoLibraryUsageDescription": "REVEAL needs photo access to analyze your style and wardrobe",
+        "NSLocationWhenInUseUsageDescription": "REVEAL uses your location to show weather-appropriate outfit recommendations"
       }
     },
     "android": {
