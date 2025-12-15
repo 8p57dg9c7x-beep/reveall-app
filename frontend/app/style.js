@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   // Grid
   gridContainer: {
-    paddingHorizontal: SPACING.screenHorizontal,
+    paddingHorizontal: HORIZONTAL_PADDING,
   },
   row: {
     flexDirection: 'row',
