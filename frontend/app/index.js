@@ -194,13 +194,6 @@ export default function HomeScreen() {
                       </View>
                     </TouchableOpacity>
                   ))}
-                  <TouchableOpacity
-                    style={styles.seeMoreCard}
-                    onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}
-                  >
-                    <MaterialCommunityIcons name="arrow-right" size={20} color="#FFFFFF" />
-                    <Text style={styles.seeMoreText}>More</Text>
-                  </TouchableOpacity>
                 </ScrollView>
               ) : (
                 <View style={styles.suggestionItems}>
