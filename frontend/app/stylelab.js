@@ -150,19 +150,6 @@ export default function StyleLabScreen() {
         <Text style={styles.headerTitle}>Style Lab</Text>
         <Text style={styles.headerSubtitle}>AI-powered tools for your perfect look</Text>
       </View>
-      
-      {/* Shop The Look CTA */}
-      <TouchableOpacity
-        style={styles.shopCTA}
-        onPress={() => router.push({ pathname: '/style', params: { returnPath: '/stylelab' } })}
-        activeOpacity={0.85}
-      >
-        <View style={styles.shopCTAContent}>
-          <MaterialCommunityIcons name="shopping" size={24} color={COLORS.primary} />
-          <Text style={styles.shopCTAText}>Find & shop celebrity styles</Text>
-        </View>
-        <MaterialCommunityIcons name="arrow-right" size={20} color={COLORS.primary} />
-      </TouchableOpacity>
     </View>
   ), [insets.top]);
 
