@@ -9,22 +9,12 @@ import { shouldShowAd, recordAdShown, AD_UNIT_IDS } from './adService';
 // Check if we're on native platform where AdMob works
 const isNativePlatform = Platform.OS === 'ios' || Platform.OS === 'android';
 
-// Conditionally import AdMob (only works on native)
-let InterstitialAd, AdEventType, TestIds;
-if (isNativePlatform) {
-  try {
-    const admob = require('react-native-google-mobile-ads');
-    InterstitialAd = admob.InterstitialAd;
-    AdEventType = admob.AdEventType;
-    TestIds = admob.TestIds;
-  } catch (e) {
-    console.log('AdMob not available:', e.message);
-  }
-}
-
 /**
  * Custom hook for managing interstitial ads
  * Shows ad once per 24 hours when triggered
+ * 
+ * IMPORTANT: AdMob only works on native iOS/Android builds.
+ * On web, this hook gracefully skips ad functionality.
  * 
  * Usage:
  * const { showAdIfEligible, isAdReady, isLoading } = useInterstitialAd();
@@ -40,11 +30,25 @@ export const useInterstitialAd = () => {
   const [adError, setAdError] = useState(null);
   const interstitialRef = useRef(null);
   const hasCheckedRef = useRef(false);
+  const listenersRef = useRef([]);
 
   // Initialize ad on mount (native only)
   useEffect(() => {
-    if (!isNativePlatform || !InterstitialAd) {
-      console.log('📺 AdMob: Skipping on web preview');
+    // Skip entirely on web - don't even try to import AdMob
+    if (!isNativePlatform) {
+      console.log('📺 AdMob: Web platform detected, skipping ad initialization');
+      return;
+    }
+
+    // Dynamically require AdMob only on native platforms
+    let InterstitialAd, AdEventType, TestIds;
+    try {
+      const admob = require('react-native-google-mobile-ads');
+      InterstitialAd = admob.InterstitialAd;
+      AdEventType = admob.AdEventType;
+      TestIds = admob.TestIds;
+    } catch (e) {
+      console.log('📺 AdMob module not available:', e.message);
       return;
     }
 
@@ -81,6 +85,7 @@ export const useInterstitialAd = () => {
     );
 
     interstitialRef.current = interstitial;
+    listenersRef.current = [loadedListener, errorListener, closedListener];
 
     // Preload ad
     setIsLoading(true);
@@ -88,9 +93,11 @@ export const useInterstitialAd = () => {
 
     // Cleanup
     return () => {
-      loadedListener();
-      errorListener();
-      closedListener();
+      listenersRef.current.forEach(unsubscribe => {
+        if (typeof unsubscribe === 'function') {
+          unsubscribe();
+        }
+      });
     };
   }, []);
 
@@ -108,8 +115,8 @@ export const useInterstitialAd = () => {
     hasCheckedRef.current = true;
 
     // Web preview - skip silently
-    if (!isNativePlatform || !InterstitialAd) {
-      console.log('📺 Skipping ad on non-native platform');
+    if (!isNativePlatform) {
+      console.log('📺 Skipping ad on web platform');
       return false;
     }
 
@@ -147,7 +154,7 @@ export const useInterstitialAd = () => {
    */
   const forceShowAd = useCallback(async () => {
     if (!isNativePlatform || !interstitialRef.current || !isAdReady) {
-      console.log('📺 Cannot force show - ad not ready');
+      console.log('📺 Cannot force show - ad not ready or web platform');
       return false;
     }
 
