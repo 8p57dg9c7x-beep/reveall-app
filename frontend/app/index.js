@@ -7,70 +7,40 @@ import {
   FlatList,
   Image,
   Dimensions,
-  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
-import { fetchRealWeather, getWeatherOutfitImages, WEATHER_CONDITIONS } from '../services/weatherService';
-import { API_BASE_URL } from '../config';
+import { fetchRealWeather } from '../services/weatherService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Home Screen - Personal Dashboard with Weather-Powered Recommendations
+// Home Screen - v1 Focused: Weather → AI Stylist → Wardrobe
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [weather, setWeather] = useState(null);
-  const [weatherOutfits, setWeatherOutfits] = useState([]);
-  const [recommendedOutfits, setRecommendedOutfits] = useState([]);
-  const [styleRecommendation, setStyleRecommendation] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load real weather data and outfit recommendations
+  // Load real weather data
   useEffect(() => {
-    const loadWeatherAndRecommendations = async () => {
+    const loadWeather = async () => {
       setLoading(true);
       try {
-        // Step 1: Get real weather
         const weatherData = await fetchRealWeather();
         setWeather(weatherData);
-        
-        // Step 2: ALWAYS get weather-based outfit recommendations from backend
-        // Works with both real location and default weather
-        try {
-          const recResponse = await fetch(
-            `${API_BASE_URL}/api/recommendations/weather?temp=${weatherData.temp}&condition=${weatherData.condition}`
-          );
-          const recData = await recResponse.json();
-          
-          if (recData.success && recData.outfits && recData.outfits.length > 0) {
-            setRecommendedOutfits(recData.outfits.slice(0, 3)); // Top 3 for the card
-            setStyleRecommendation(recData.style_recommendation);
-          }
-        } catch (recError) {
-          console.log('Recommendations fetch error, using fallback:', recError);
-        }
-        
-        // Fallback: use static weather outfit images
-        setWeatherOutfits(getWeatherOutfitImages(weatherData.tempCategory));
-        
       } catch (error) {
         console.error('Error loading weather data:', error);
-        // Fallback to static data
-        const fallbackWeather = await fetchRealWeather();
-        setWeather(fallbackWeather);
-        setWeatherOutfits(getWeatherOutfitImages(fallbackWeather.tempCategory));
       } finally {
         setLoading(false);
       }
     };
     
-    loadWeatherAndRecommendations();
+    loadWeather();
   }, []);
 
-  // Quick actions - v1 Core: 4 actions including Favorites
+  // Quick actions - v1 Core: 4 actions (NO Style Discovery)
   const quickActions = useMemo(() => [
     { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist', color: '#B14CFF' },
     { id: 'body-scan', label: 'Body Scan', icon: 'human', route: '/bodyscanner', color: '#4ECDC4' },
@@ -93,36 +63,6 @@ export default function HomeScreen() {
     </TouchableOpacity>
   ), []);
 
-  // Render outfit card for Today's Picks
-  const renderOutfitCard = useCallback(({ item, index }) => (
-    <TouchableOpacity
-      style={styles.outfitCard}
-      onPress={() => {
-        if (item.id) {
-          // Navigate to outfit detail if it's a real outfit
-          router.push({ 
-            pathname: '/outfitdetail', 
-            params: { outfitData: JSON.stringify(item), returnPath: '/' } 
-          });
-        } else {
-          router.push({ pathname: '/style', params: { returnPath: '/' } });
-        }
-      }}
-      activeOpacity={0.85}
-    >
-      <Image source={{ uri: item.image }} style={styles.outfitImage} />
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.85)']}
-        style={styles.outfitOverlay}
-      >
-        <View style={styles.outfitTag}>
-          <Text style={styles.outfitTagText}>{item.tag || item.weather_match_reason || 'Trending'}</Text>
-        </View>
-        <Text style={styles.outfitTitle} numberOfLines={1}>{item.title}</Text>
-      </LinearGradient>
-    </TouchableOpacity>
-  ), []);
-
   // Main content
   const ListHeaderComponent = useCallback(() => (
     <View style={{ paddingTop: insets.top + 16 }}>
@@ -134,7 +74,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Weather Style Card - Hero with Outfit Thumbnails */}
+      {/* Weather Style Card - Main CTA to AI Stylist */}
       {weather && (
         <TouchableOpacity 
           style={styles.weatherCard}
@@ -159,56 +99,23 @@ export default function HomeScreen() {
               <Text style={styles.weatherCondition}>{weather.conditionLabel}</Text>
             </View>
 
-            {/* Outfit Suggestion with Thumbnails */}
+            {/* Outfit Suggestion */}
             <View style={styles.outfitSuggestion}>
               <Text style={styles.suggestionLabel}>What to Wear Today</Text>
-              <Text style={styles.suggestionStyle}>
-                {styleRecommendation?.tip || weather.outfitSuggestion.style}
-              </Text>
-              
-              {/* Outfit Thumbnails */}
-              {recommendedOutfits.length > 0 ? (
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.thumbnailScroll}
-                >
-                  {recommendedOutfits.map((outfit, index) => (
-                    <TouchableOpacity
-                      key={outfit.id || index}
-                      style={styles.thumbnailCard}
-                      onPress={() => router.push({
-                        pathname: '/outfitdetail',
-                        params: { outfitData: JSON.stringify(outfit), returnPath: '/' }
-                      })}
-                      activeOpacity={0.85}
-                    >
-                      <Image 
-                        source={{ uri: outfit.image }} 
-                        style={styles.thumbnailImage}
-                      />
-                      <View style={styles.thumbnailOverlay}>
-                        <Text style={styles.thumbnailTitle} numberOfLines={1}>
-                          {outfit.title?.split(' ').slice(0, 2).join(' ')}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              ) : (
-                <View style={styles.suggestionItems}>
-                  {weather.outfitSuggestion.items.slice(0, 3).map((item, i) => (
-                    <View key={i} style={styles.suggestionChip}>
-                      <Text style={styles.suggestionChipText}>{item}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
+              <Text style={styles.suggestionStyle}>{weather.outfitSuggestion.style}</Text>
+              <View style={styles.suggestionItems}>
+                {weather.outfitSuggestion.items.slice(0, 3).map((item, i) => (
+                  <View key={i} style={styles.suggestionChip}>
+                    <Text style={styles.suggestionChipText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
             {/* CTA */}
             <View style={styles.weatherCTA}>
-              <Text style={styles.weatherCTAText}>Get Personalized Picks</Text>
+              <MaterialCommunityIcons name="robot" size={18} color="#FFFFFF" />
+              <Text style={styles.weatherCTAText}>Style My Wardrobe</Text>
               <MaterialCommunityIcons name="arrow-right" size={18} color="#FFFFFF" />
             </View>
           </LinearGradient>
@@ -220,30 +127,52 @@ export default function HomeScreen() {
         {quickActions.map(renderQuickAction)}
       </View>
 
-      {/* Today's Picks - Weather-based AI recommendations */}
-      {(recommendedOutfits.length > 0 || weatherOutfits.length > 0) && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Picks</Text>
-            <TouchableOpacity onPress={() => router.push({ pathname: '/aistylist', params: { returnPath: '/' } })}>
-              <Text style={styles.seeAll}>Ask AI</Text>
-            </TouchableOpacity>
+      {/* Wardrobe CTA Card */}
+      <View style={styles.section}>
+        <TouchableOpacity 
+          style={styles.wardrobeCTA}
+          onPress={() => router.push({ pathname: '/aiwardrobe', params: { returnPath: '/' } })}
+          activeOpacity={0.85}
+        >
+          <View style={styles.wardrobeCTAContent}>
+            <View style={styles.wardrobeCTAIcon}>
+              <MaterialCommunityIcons name="wardrobe" size={28} color={COLORS.primary} />
+            </View>
+            <View style={styles.wardrobeCTAText}>
+              <Text style={styles.wardrobeCTATitle}>Build Your Closet</Text>
+              <Text style={styles.wardrobeCTASubtitle}>Add items to get personalized outfit recommendations</Text>
+            </View>
           </View>
-          <FlatList
-            horizontal
-            data={recommendedOutfits.length > 0 
-              ? recommendedOutfits 
-              : weatherOutfits
-            }
-            keyExtractor={(item, index) => item.id || `outfit-${index}`}
-            renderItem={renderOutfitCard}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.outfitsScroll}
-          />
+          <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textMuted} />
+        </TouchableOpacity>
+      </View>
+
+      {/* How It Works Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>How REVEAL Works</Text>
+        <View style={styles.stepsContainer}>
+          <View style={styles.stepItem}>
+            <View style={[styles.stepNumber, { backgroundColor: '#B14CFF25' }]}>
+              <Text style={[styles.stepNumberText, { color: '#B14CFF' }]}>1</Text>
+            </View>
+            <Text style={styles.stepText}>Add your clothes to My Closet</Text>
+          </View>
+          <View style={styles.stepItem}>
+            <View style={[styles.stepNumber, { backgroundColor: '#4ECDC425' }]}>
+              <Text style={[styles.stepNumberText, { color: '#4ECDC4' }]}>2</Text>
+            </View>
+            <Text style={styles.stepText}>Check today's weather</Text>
+          </View>
+          <View style={styles.stepItem}>
+            <View style={[styles.stepNumber, { backgroundColor: '#FF6EC725' }]}>
+              <Text style={[styles.stepNumberText, { color: '#FF6EC7' }]}>3</Text>
+            </View>
+            <Text style={styles.stepText}>Get AI-styled outfits from YOUR wardrobe</Text>
+          </View>
         </View>
-      )}
+      </View>
     </View>
-  ), [insets.top, weather, weatherOutfits, recommendedOutfits, styleRecommendation, quickActions, renderQuickAction, renderOutfitCard]);
+  ), [insets.top, weather, quickActions, renderQuickAction]);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
@@ -360,49 +289,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
-  // Outfit Thumbnails in Weather Card
-  thumbnailScroll: {
-    gap: 10,
-  },
-  thumbnailCard: {
-    width: 70,
-    height: 90,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-  thumbnailImage: {
-    width: '100%',
-    height: '100%',
-  },
-  thumbnailOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 4,
-  },
-  thumbnailTitle: {
-    fontSize: 9,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
-  },
-  seeMoreCard: {
-    width: 50,
-    height: 90,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  seeMoreText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginTop: 4,
-  },
   weatherCTA: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -426,18 +312,18 @@ const styles = StyleSheet.create({
   },
   quickAction: {
     alignItems: 'center',
-    width: '30%',
+    width: '22%',
   },
   quickActionIcon: {
-    width: 56,
-    height: 56,
+    width: 52,
+    height: 52,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
   },
   quickActionLabel: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     color: COLORS.textPrimary,
     textAlign: 'center',
@@ -446,88 +332,78 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: 14,
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.textPrimary,
-  },
-  seeAll: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.primary,
-  },
-  // Outfit Cards
-  outfitsScroll: {
     paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: 14,
   },
-  outfitCard: {
-    width: 150,
-    height: 200,
-    marginRight: 12,
-    borderRadius: SIZES.borderRadiusCard,
-    overflow: 'hidden',
-    ...CARD_SHADOW,
-  },
-  outfitImage: {
-    width: '100%',
-    height: '100%',
-  },
-  outfitOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 12,
-  },
-  outfitTag: {
-    backgroundColor: COLORS.primary,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 6,
-  },
-  outfitTagText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  outfitTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  // Shop CTA
-  shopCTA: {
-    marginHorizontal: SPACING.screenHorizontal,
-    borderRadius: 16,
-    overflow: 'hidden',
-    ...CARD_SHADOW,
-  },
-  shopCTAGradient: {
+  // Wardrobe CTA
+  wardrobeCTA: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 18,
-    gap: 14,
+    marginHorizontal: SPACING.screenHorizontal,
+    padding: 16,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    ...CARD_SHADOW,
   },
-  shopCTAText: {
+  wardrobeCTAContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  wardrobeCTAIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  wardrobeCTAText: {
     flex: 1,
   },
-  shopCTATitle: {
-    fontSize: 17,
+  wardrobeCTATitle: {
+    fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
-  shopCTASubtitle: {
+  wardrobeCTASubtitle: {
     fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: COLORS.textSecondary,
     marginTop: 2,
+  },
+  // Steps
+  stepsContainer: {
+    paddingHorizontal: SPACING.screenHorizontal,
+    gap: 12,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    padding: 14,
+    borderRadius: 12,
+  },
+  stepNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  stepNumberText: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontWeight: '500',
   },
 });
