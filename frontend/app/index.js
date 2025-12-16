@@ -222,18 +222,18 @@ export default function HomeScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Quick Actions - 3 Core Tools */}
+      {/* Quick Actions - v1 Core: 4 Tools */}
       <View style={styles.quickActionsRow}>
         {quickActions.map(renderQuickAction)}
       </View>
 
-      {/* Today's Picks - Using weather recommendations or fallback */}
+      {/* Today's Picks - Weather-based AI recommendations */}
       {(recommendedOutfits.length > 0 || weatherOutfits.length > 0) && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Today's Picks</Text>
-            <TouchableOpacity onPress={() => router.push({ pathname: '/style', params: { returnPath: '/' } })}>
-              <Text style={styles.seeAll}>See All</Text>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/aistylist', params: { returnPath: '/' } })}>
+              <Text style={styles.seeAll}>Ask AI</Text>
             </TouchableOpacity>
           </View>
           <FlatList
