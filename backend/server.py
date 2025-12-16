@@ -34,13 +34,14 @@ logger = logging.getLogger(__name__)
 
 # MongoDB connection
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
+DB_NAME = os.environ.get('DB_NAME', 'app_database')
 mongo_client = MongoClient(MONGO_URL)
-db = mongo_client['app_database']
+db = mongo_client[DB_NAME]
 outfits_collection = db['outfits']
 beauty_collection = db['beauty_looks']
 analytics_collection = db['analytics']
 
-logger.info(f"MongoDB connected: {MONGO_URL}")
+logger.info(f"MongoDB connected: {MONGO_URL}, Database: {DB_NAME}")
 
 # Pydantic Models
 class AudioRecognitionRequest(BaseModel):
