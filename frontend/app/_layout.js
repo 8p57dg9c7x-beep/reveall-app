@@ -8,7 +8,7 @@ import { AddiletsProvider } from '../contexts/AddiletsContext';
 import { initializeFirebase } from '../services/firebase';
 import { FEATURE_FLAGS } from '../config/featureFlags';
 
-// Bundle Version: 1.0.0 - v1 Launch (Focus: Style + Shopping)
+// Bundle Version: 1.0.0 - v1 Launch (Hyper-focused: What to Wear Today)
 export default function RootLayout() {
   // Initialize Firebase on app launch
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function RootLayout() {
           },
         }}
       >
-        {/* ===== v1 TABS (4 Active) ===== */}
+        {/* ===== v1 TABS (3 Active - Hyper-focused) ===== */}
         
         {/* TAB 1: HOME - Weather Outfits + Daily Recommendations */}
         <Tabs.Screen
@@ -63,10 +63,11 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 2: DISCOVER - Style-only Inspiration */}
+        {/* TAB 2: DISCOVER - HIDDEN FOR v1 */}
         <Tabs.Screen
           name="discover"
           options={{
+            href: null, // Hidden for v1
             title: 'Discover',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="compass" size={24} color={color} />
@@ -74,7 +75,7 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 3: STYLE LAB - AI Stylist + Body Scanner */}
+        {/* TAB 2 (actual): STYLE LAB - AI Stylist + Body Scanner + Closet */}
         <Tabs.Screen
           name="stylelab"
           options={{
@@ -85,11 +86,11 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 4: FITNESS - HIDDEN FOR v1 */}
+        {/* TAB: FITNESS - HIDDEN FOR v1 */}
         <Tabs.Screen
           name="fitness"
           options={{
-            href: FEATURE_FLAGS.TABS.FITNESS ? undefined : null,
+            href: null, // Hidden for v1
             title: 'Fitness',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="dumbbell" size={24} color={color} />
@@ -97,7 +98,7 @@ export default function RootLayout() {
           }}
         />
         
-        {/* TAB 5: PROFILE - Saved Items & Settings */}
+        {/* TAB 3: PROFILE - Saved Items & Settings */}
         <Tabs.Screen
           name="profile"
           options={{
@@ -108,34 +109,28 @@ export default function RootLayout() {
           }}
         />
 
-        {/* ===== ACTIVE STACK SCREENS - Style Lab Features ===== */}
+        {/* ===== v1 ACTIVE STACK SCREENS ===== */}
         <Tabs.Screen name="aistylist" options={{ href: null }} />
         <Tabs.Screen name="aiwardrobe" options={{ href: null }} />
         <Tabs.Screen name="bodyscanner" options={{ href: null }} />
+        <Tabs.Screen name="saved-outfits" options={{ href: null }} />
+        <Tabs.Screen name="outfitdetail" options={{ href: null }} />
         
-        {/* ===== HIDDEN FOR v1 - Style Lab Features ===== */}
+        {/* ===== HIDDEN FOR v1 ===== */}
         <Tabs.Screen name="addilets" options={{ href: null }} />
         <Tabs.Screen name="style" options={{ href: null }} />
-
-        {/* ===== ACTIVE STACK SCREENS - Discover Features ===== */}
         <Tabs.Screen name="beauty" options={{ href: null }} />
-        
-        {/* ===== HIDDEN FOR v1 - Music Features ===== */}
+        <Tabs.Screen name="beautydetail" options={{ href: null }} />
+        <Tabs.Screen name="saved-beauty" options={{ href: null }} />
         <Tabs.Screen name="musicscan" options={{ href: null }} />
         <Tabs.Screen name="trendingsongs" options={{ href: null }} />
-
-        {/* ===== DETAIL PAGES (Active) ===== */}
-        <Tabs.Screen name="result" options={{ href: null }} />
-        <Tabs.Screen name="outfitdetail" options={{ href: null }} />
-        <Tabs.Screen name="beautydetail" options={{ href: null }} />
+        <Tabs.Screen name="comingsoon" options={{ href: null }} />
 
         {/* ===== OTHER SCREENS ===== */}
+        <Tabs.Screen name="result" options={{ href: null }} />
         <Tabs.Screen name="favorites" options={{ href: null }} />
         <Tabs.Screen name="watchlist" options={{ href: null }} />
         <Tabs.Screen name="analytics" options={{ href: null }} />
-        <Tabs.Screen name="comingsoon" options={{ href: null }} />
-        <Tabs.Screen name="saved-outfits" options={{ href: null }} />
-        <Tabs.Screen name="saved-beauty" options={{ href: null }} />
         <Tabs.Screen name="universal-search" options={{ href: null }} />
       </Tabs>
       </GestureHandlerRootView>
