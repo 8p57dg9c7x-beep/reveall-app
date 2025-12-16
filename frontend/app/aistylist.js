@@ -133,6 +133,19 @@ export default function AIStylistScreen() {
   const [loading, setLoading] = useState(false);
   const [currentLookIndex, setCurrentLookIndex] = useState(0);
 
+  // Ad integration - show interstitial once per 24 hours
+  const { showAdIfEligible } = useInterstitialAd();
+
+  // Show ad on screen entry (before user interaction)
+  useEffect(() => {
+    // Small delay to let screen render first, then show ad
+    const timer = setTimeout(() => {
+      showAdIfEligible();
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [showAdIfEligible]);
+
   // Load real weather on mount (with silent fallback)
   useEffect(() => {
     const loadWeather = async () => {
