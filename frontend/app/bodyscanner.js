@@ -179,6 +179,47 @@ export default function BodyScannerScreen() {
     }
   };
 
+  // Step 0: Disclaimer screen - Expectation management
+  const renderDisclaimer = () => (
+    <View style={styles.disclaimerContainer}>
+      <View style={styles.iconCircle}>
+        <MaterialCommunityIcons name="information-outline" size={64} color={COLORS.primary} />
+      </View>
+      <Text style={styles.disclaimerTitle}>Before You Start</Text>
+      <Text style={styles.disclaimerSubtitle}>A few things to know about body scanning</Text>
+      
+      <View style={styles.disclaimerCard}>
+        <Text style={styles.disclaimerText}>
+          Results are <Text style={styles.disclaimerHighlight}>estimates</Text> and may vary based on:
+        </Text>
+        <View style={styles.disclaimerList}>
+          <View style={styles.disclaimerItem}>
+            <MaterialCommunityIcons name="lightbulb-on-outline" size={18} color={COLORS.primary} />
+            <Text style={styles.disclaimerItemText}>Lighting conditions</Text>
+          </View>
+          <View style={styles.disclaimerItem}>
+            <MaterialCommunityIcons name="human-handsup" size={18} color={COLORS.primary} />
+            <Text style={styles.disclaimerItemText}>Your posture during photos</Text>
+          </View>
+          <View style={styles.disclaimerItem}>
+            <MaterialCommunityIcons name="tshirt-crew-outline" size={18} color={COLORS.primary} />
+            <Text style={styles.disclaimerItemText}>Clothing type and fit</Text>
+          </View>
+        </View>
+        <Text style={styles.disclaimerNote}>
+          You can always edit measurements manually after scanning.
+        </Text>
+      </View>
+      
+      <GradientButton
+        title="I Understand, Continue"
+        onPress={() => setStep(1)}
+        icon={<MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />}
+        style={styles.continueButton}
+      />
+    </View>
+  );
+
   const renderInstructions = () => (
     <View style={styles.instructionsContainer}>
       <View style={styles.iconCircle}>
