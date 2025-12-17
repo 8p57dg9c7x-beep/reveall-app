@@ -223,7 +223,7 @@ export default function AIStylistScreen() {
       {weather && (
         <View style={styles.weatherCard}>
           <MaterialCommunityIcons name={weather.icon} size={24} color={weather.iconColor} />
-          <Text style={styles.weatherText}>{weather.tempF} • {weather.conditionLabel}</Text>
+          <Text style={styles.weatherText}>{weather.tempDisplay || weather.tempF} • {weather.conditionLabel}</Text>
         </View>
       )}
       
