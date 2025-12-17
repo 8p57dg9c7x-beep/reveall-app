@@ -244,7 +244,7 @@ export default function HomeScreen() {
         </View>
       </View>
     </View>
-  ), [insets.top, weather, quickActions, renderQuickAction]);
+  ), [insets.top, weather, quickActions, renderQuickAction, closetCount, stylistUnlocked]);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
