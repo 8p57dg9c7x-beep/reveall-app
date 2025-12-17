@@ -192,6 +192,30 @@ export default function AIWardrobeScreen() {
     );
   }, [wardrobeItems, selectedItems]);
 
+  // DELETE multiple selected items
+  const deleteSelectedItems = useCallback(() => {
+    if (selectedItems.length === 0) return;
+    
+    Alert.alert(
+      'Delete Selected Items',
+      `Are you sure you want to delete ${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''} from your closet?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const updatedItems = wardrobeItems.filter(item => !selectedItems.includes(item.id));
+            setWardrobeItems(updatedItems);
+            setSelectedItems([]);
+            await saveWardrobe(updatedItems);
+            Alert.alert('Done', `${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''} deleted`);
+          },
+        },
+      ]
+    );
+  }, [wardrobeItems, selectedItems]);
+
   // Long press to delete
   const handleLongPress = useCallback((itemId) => {
     deleteItem(itemId);
