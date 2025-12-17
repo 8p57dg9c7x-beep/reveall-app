@@ -14,6 +14,8 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import { fetchRealWeather } from '../services/weatherService';
+import { isFirstTimeUser, getClosetItemCount, ONBOARDING_CONFIG } from '../services/onboardingService';
+import { logEvent } from '../services/firebase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -22,22 +24,52 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [closetCount, setClosetCount] = useState(0);
+  const [stylistUnlocked, setStylistUnlocked] = useState(false);
 
-  // Load real weather data
+  // Track app open
   useEffect(() => {
-    const loadWeather = async () => {
+    logEvent('app_opened', { screen: 'home' });
+  }, []);
+
+  // Load real weather data and onboarding state
+  useEffect(() => {
+    const loadData = async () => {
       setLoading(true);
       try {
+        // Load weather
         const weatherData = await fetchRealWeather();
         setWeather(weatherData);
+        
+        // Check onboarding state
+        const firstTime = await isFirstTimeUser();
+        setIsNewUser(firstTime);
+        
+        // Check closet count
+        const count = await getClosetItemCount();
+        setClosetCount(count);
+        setStylistUnlocked(count >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS);
       } catch (error) {
-        console.error('Error loading weather data:', error);
+        console.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }
     };
     
-    loadWeather();
+    loadData();
+  }, []);
+
+  // Refresh closet count when returning to home
+  useEffect(() => {
+    const refreshClosetCount = async () => {
+      const count = await getClosetItemCount();
+      setClosetCount(count);
+      setStylistUnlocked(count >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS);
+    };
+    
+    const interval = setInterval(refreshClosetCount, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   // Quick actions - v1 Core: 4 actions (NO Style Discovery)
