@@ -131,9 +131,9 @@ export default function HomeScreen() {
               <Text style={styles.weatherCondition}>{weather.conditionLabel}</Text>
             </View>
 
-            {/* Outfit Suggestion */}
+            {/* Outfit Suggestion - Daily Hook */}
             <View style={styles.outfitSuggestion}>
-              <Text style={styles.suggestionLabel}>What to Wear Today</Text>
+              <Text style={styles.suggestionLabel}>Today's Best Look for You</Text>
               <Text style={styles.suggestionStyle}>{weather.outfitSuggestion.style}</Text>
               <View style={styles.suggestionItems}>
                 {weather.outfitSuggestion.items.slice(0, 3).map((item, i) => (
