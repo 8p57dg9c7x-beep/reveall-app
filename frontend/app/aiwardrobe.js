@@ -172,25 +172,37 @@ export default function AIWardrobeScreen() {
     }
   };
 
-  // DELETE item functionality
-  const deleteItem = useCallback((itemId) => {
-    Alert.alert(
-      'Delete Item',
-      'Are you sure you want to remove this item from your closet?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            const updatedItems = wardrobeItems.filter(item => item.id !== itemId);
-            setWardrobeItems(updatedItems);
-            setSelectedItems(selectedItems.filter(id => id !== itemId));
-            await saveWardrobe(updatedItems);
+  // DELETE item functionality - Cross-platform (Web + Native)
+  const deleteItem = useCallback(async (itemId) => {
+    const confirmMessage = 'Are you sure you want to remove this item from your closet?';
+    
+    // Use window.confirm on web, Alert.alert on native
+    if (Platform.OS === 'web') {
+      if (window.confirm(confirmMessage)) {
+        const updatedItems = wardrobeItems.filter(item => item.id !== itemId);
+        setWardrobeItems(updatedItems);
+        setSelectedItems(selectedItems.filter(id => id !== itemId));
+        await saveWardrobe(updatedItems);
+      }
+    } else {
+      Alert.alert(
+        'Delete Item',
+        confirmMessage,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              const updatedItems = wardrobeItems.filter(item => item.id !== itemId);
+              setWardrobeItems(updatedItems);
+              setSelectedItems(selectedItems.filter(id => id !== itemId));
+              await saveWardrobe(updatedItems);
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   }, [wardrobeItems, selectedItems]);
 
   // DELETE multiple selected items - Cross-platform (Web + Native)
