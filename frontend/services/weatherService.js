@@ -1,7 +1,29 @@
 // Weather Service for REVEAL - v1 with Real Location & Weather
 // Simple, reliable, and premium — never blocks UI
+// Auto-detects locale for temperature units (°C for metric, °F for US)
 
 import * as Location from 'expo-location';
+import * as Localization from 'expo-localization';
+
+// Detect if user prefers metric (Celsius) or imperial (Fahrenheit)
+// US uses Fahrenheit, most of the world uses Celsius
+const getUserTempPreference = () => {
+  try {
+    // Get device region/locale
+    const region = Localization.getLocales()[0]?.regionCode || '';
+    
+    // Countries that use Fahrenheit: US, Bahamas, Cayman Islands, Liberia, Palau, Myanmar (primarily)
+    const fahrenheitCountries = ['US', 'BS', 'KY', 'LR', 'PW', 'MM'];
+    
+    return fahrenheitCountries.includes(region) ? 'fahrenheit' : 'celsius';
+  } catch (error) {
+    console.log('Locale detection error, defaulting to Celsius:', error.message);
+    return 'celsius'; // Default to metric (most of the world)
+  }
+};
+
+// Export for use elsewhere
+export const TEMP_UNIT = getUserTempPreference();
 
 // OpenWeatherMap API (free tier - 1000 calls/day)
 const WEATHER_API_KEY = process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY || '0c4fde9fab4de5bec9ae45330a257380';
