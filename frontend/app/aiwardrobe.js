@@ -527,9 +527,30 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
+  selectionActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  deleteSelectedBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(255, 71, 87, 0.15)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 71, 87, 0.3)',
+  },
+  deleteSelectedText: {
+    color: '#FF4757',
+    fontSize: 13,
+    fontWeight: '700',
+  },
   clearSelection: {
-    color: COLORS.primary,
-    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontSize: 13,
     fontWeight: '600',
   },
   wardrobeGrid: {
