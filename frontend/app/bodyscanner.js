@@ -537,6 +537,70 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
+  // Disclaimer screen styles
+  disclaimerContainer: {
+    paddingHorizontal: SPACING.screenHorizontal,
+    alignItems: 'center',
+  },
+  disclaimerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  disclaimerSubtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  disclaimerCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.2)',
+    width: '100%',
+  },
+  disclaimerText: {
+    fontSize: 15,
+    color: COLORS.textPrimary,
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  disclaimerHighlight: {
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  disclaimerList: {
+    gap: 12,
+    marginBottom: 16,
+  },
+  disclaimerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  disclaimerItemText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  disclaimerNote: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  continueButton: {
+    width: '100%',
+    marginTop: 8,
+  },
+  // Instructions screen styles
   instructionsContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
     alignItems: 'center',
