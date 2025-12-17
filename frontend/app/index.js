@@ -161,7 +161,7 @@ export default function HomeScreen() {
             <View style={[styles.stepNumber, { backgroundColor: '#4ECDC425' }]}>
               <Text style={[styles.stepNumberText, { color: '#4ECDC4' }]}>2</Text>
             </View>
-            <Text style={styles.stepText}>Check today's weather</Text>
+            <Text style={styles.stepText}>We check today's weather for you</Text>
           </View>
           <View style={styles.stepItem}>
             <View style={[styles.stepNumber, { backgroundColor: '#FF6EC725' }]}>
