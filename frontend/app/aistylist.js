@@ -23,6 +23,8 @@ import GradientChip from '../components/GradientChip';
 import { fetchRealWeather } from '../services/weatherService';
 import { useInterstitialAd } from '../services/useInterstitialAd';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { likeOutfit, dislikeOutfit, DISLIKE_REASONS } from '../services/feedbackService';
+import { logEvent } from '../services/firebase';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.88;
