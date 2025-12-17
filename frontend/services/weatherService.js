@@ -334,4 +334,5 @@ export default {
   getWeatherOutfitImages,
   WEATHER_CONDITIONS,
   TEMP_OUTFITS,
+  TEMP_UNIT,
 };
