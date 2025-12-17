@@ -69,10 +69,10 @@ export default function SavedOutfitsScreen() {
       </Text>
       <TouchableOpacity 
         style={styles.exploreCTA}
-        onPress={() => router.push('/style')}
+        onPress={() => router.push('/aistylist')}
       >
-        <MaterialCommunityIcons name="compass-outline" size={20} color="#FFFFFF" />
-        <Text style={styles.exploreCTAText}>Explore Styles</Text>
+        <MaterialCommunityIcons name="robot" size={20} color="#FFFFFF" />
+        <Text style={styles.exploreCTAText}>Get Outfit Ideas</Text>
       </TouchableOpacity>
     </View>
   );
