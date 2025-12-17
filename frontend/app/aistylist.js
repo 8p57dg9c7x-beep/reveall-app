@@ -433,11 +433,72 @@ export default function AIStylistScreen() {
                 </View>
               )}
 
+              {/* Why This Outfit? - Trust Builder */}
+              {look.whyThisOutfit && look.whyThisOutfit.length > 0 && (
+                <View style={styles.whySection}>
+                  <Text style={styles.whyTitle}>Why this outfit?</Text>
+                  {look.whyThisOutfit.map((reason, idx) => (
+                    <View key={idx} style={styles.whyItem}>
+                      <MaterialCommunityIcons name="check-circle" size={14} color={COLORS.primary} />
+                      <Text style={styles.whyText}>{reason}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
               {/* Stylist Tip */}
               <View style={styles.stylistTip}>
                 <MaterialCommunityIcons name="lightbulb" size={16} color="#FFD93D" />
                 <Text style={styles.stylistTipText}>{look.stylistTip}</Text>
               </View>
+
+              {/* Feedback System - Like/Dislike */}
+              {!look.isPlaceholder && (
+                <View style={styles.feedbackSection}>
+                  <Text style={styles.feedbackLabel}>Was this helpful?</Text>
+                  {feedbackGiven[look.id] ? (
+                    <View style={styles.feedbackThanks}>
+                      <MaterialCommunityIcons 
+                        name={feedbackGiven[look.id] === 'like' ? 'thumb-up' : 'thumb-down'} 
+                        size={16} 
+                        color={feedbackGiven[look.id] === 'like' ? '#4ADE80' : '#F87171'} 
+                      />
+                      <Text style={styles.feedbackThanksText}>Thanks for the feedback!</Text>
+                    </View>
+                  ) : showDislikeOptions === look.id ? (
+                    <View style={styles.dislikeOptions}>
+                      <Text style={styles.dislikePrompt}>What didn't work?</Text>
+                      <View style={styles.dislikeButtons}>
+                        {DISLIKE_REASONS.map(reason => (
+                          <TouchableOpacity
+                            key={reason.id}
+                            style={styles.reasonButton}
+                            onPress={() => handleDislikeReason(look.id, reason.id)}
+                          >
+                            <MaterialCommunityIcons name={reason.icon} size={14} color={COLORS.textSecondary} />
+                            <Text style={styles.reasonText}>{reason.label}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  ) : (
+                    <View style={styles.feedbackButtons}>
+                      <TouchableOpacity 
+                        style={styles.feedbackButton}
+                        onPress={() => handleLike(look.id)}
+                      >
+                        <MaterialCommunityIcons name="thumb-up-outline" size={18} color="#4ADE80" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.feedbackButton}
+                        onPress={() => handleDislike(look.id)}
+                      >
+                        <MaterialCommunityIcons name="thumb-down-outline" size={18} color="#F87171" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
 
               {/* CTA - Add to Closet or Save Look */}
               {look.isPlaceholder ? (
