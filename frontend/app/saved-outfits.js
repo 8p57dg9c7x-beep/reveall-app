@@ -65,14 +65,17 @@ export default function SavedOutfitsScreen() {
       </View>
       <Text style={styles.emptyTitle}>No Saved Outfits Yet</Text>
       <Text style={styles.emptySubtitle}>
-        Tap the heart icon on any outfit to save it here for quick access
+        Save outfits you like so the AI can learn your style faster
+      </Text>
+      <Text style={styles.emptyHint}>
+        Tap the heart icon on any outfit recommendation to save it here
       </Text>
       <TouchableOpacity 
         style={styles.exploreCTA}
         onPress={() => router.push('/aistylist')}
       >
         <MaterialCommunityIcons name="robot" size={20} color="#FFFFFF" />
-        <Text style={styles.exploreCTAText}>Get Outfit Ideas</Text>
+        <Text style={styles.exploreCTAText}>Get Your First Outfit</Text>
       </TouchableOpacity>
     </View>
   );
