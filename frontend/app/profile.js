@@ -1,3 +1,6 @@
+// Profile Screen - v1 Clean (NO Beauty references)
+// Only wardrobe-related stats and menu items
+
 import React, { useCallback, useMemo } from 'react';
 import {
   View,
@@ -5,77 +8,58 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useAddilets } from '../contexts/AddiletsContext';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { favoriteOutfits, favoriteBeauty } = useFavorites();
-  const { personalization } = useAddilets();
+  const { favoriteOutfits } = useFavorites();
 
-  // Menu items
+  // v1 Menu items - NO Beauty, NO Shopping, NO Style DNA
   const menuItems = useMemo(() => [
     {
-      id: 'favorites',
-      title: 'Favorites',
-      subtitle: `${favoriteOutfits.length + favoriteBeauty.length} saved items`,
-      icon: 'heart',
-      color: '#FF6B6B',
-      route: '/favorites',
-    },
-    {
       id: 'wardrobe',
-      title: 'My Wardrobe',
-      subtitle: 'Your digital closet',
+      title: 'My Closet',
+      subtitle: 'Your digital wardrobe',
       icon: 'hanger',
       color: '#4ECDC4',
       route: '/aiwardrobe',
     },
     {
-      id: 'saved-styles',
-      title: 'Saved Styles',
-      subtitle: 'Your outfit collection',
-      icon: 'bookmark',
-      color: '#B14CFF',
+      id: 'favorites',
+      title: 'Saved Outfits',
+      subtitle: `${favoriteOutfits.length} saved looks`,
+      icon: 'heart',
+      color: '#FF6B6B',
       route: '/saved-outfits',
     },
     {
-      id: 'saved-beauty',
-      title: 'Saved Beauty',
-      subtitle: 'Your beauty looks',
-      icon: 'shimmer',
-      color: '#FF6EC7',
-      route: '/saved-beauty',
+      id: 'ai-stylist',
+      title: 'AI Stylist',
+      subtitle: 'Get outfit recommendations',
+      icon: 'robot',
+      color: '#B14CFF',
+      route: '/aistylist',
     },
     {
-      id: 'style-dna',
-      title: 'Style DNA',
-      subtitle: 'Your personalized profile',
-      icon: 'dna',
-      color: '#FFD93D',
-      route: '/addilets',
-    },
-    {
-      id: 'settings',
-      title: 'Settings',
-      subtitle: 'Preferences & account',
-      icon: 'cog',
+      id: 'body-scanner',
+      title: 'Body Scanner',
+      subtitle: 'Your measurements',
+      icon: 'human',
       color: '#95E1D3',
-      route: '/comingsoon',
+      route: '/bodyscanner',
     },
-  ], [favoriteOutfits.length, favoriteBeauty.length]);
+  ], [favoriteOutfits.length]);
 
   const renderMenuItem = useCallback(({ item }) => (
     <TouchableOpacity
       style={styles.menuItem}
-      onPress={() => router.push(item.route)}
+      onPress={() => router.push({ pathname: item.route, params: { returnPath: '/profile' } })}
       activeOpacity={0.8}
     >
       <View style={[styles.menuIcon, { backgroundColor: `${item.color}20` }]}>
@@ -95,40 +79,45 @@ export default function ProfileScreen() {
       <View style={styles.profileHeader}>
         <View style={styles.avatarContainer}>
           <LinearGradient
-            colors={[COLORS.primary, '#FF6EC7']}
+            colors={[COLORS.primary, '#8B5CF6']}
             style={styles.avatarGradient}
           >
             <MaterialCommunityIcons name="account" size={48} color="#FFFFFF" />
           </LinearGradient>
         </View>
         <Text style={styles.userName}>REVEAL User</Text>
-        <Text style={styles.userEmail}>Personalized Style Experience</Text>
+        <Text style={styles.userTagline}>Your Personal Style Assistant</Text>
       </View>
 
-      {/* Stats Row */}
+      {/* Stats Row - v1: Only Wardrobe stats */}
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{favoriteOutfits.length}</Text>
-          <Text style={styles.statLabel}>Saved Styles</Text>
+          <Text style={styles.statLabel}>Saved Looks</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{favoriteBeauty.length}</Text>
-          <Text style={styles.statLabel}>Beauty Looks</Text>
+          <Text style={styles.statNumber}>4</Text>
+          <Text style={styles.statLabel}>Closet Items</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>
-            {personalization?.styleProfile?.personalities?.length || 0}
-          </Text>
-          <Text style={styles.statLabel}>Style Tags</Text>
+          <Text style={styles.statNumber}>v1</Text>
+          <Text style={styles.statLabel}>Version</Text>
         </View>
       </View>
 
       {/* Menu Section Title */}
-      <Text style={styles.sectionTitle}>Your Collection</Text>
+      <Text style={styles.sectionTitle}>Your Tools</Text>
     </View>
-  ), [insets.top, favoriteOutfits.length, favoriteBeauty.length, personalization]);
+  ), [insets.top, favoriteOutfits.length]);
+
+  const ListFooterComponent = useCallback(() => (
+    <View style={styles.footer}>
+      <Text style={styles.footerText}>REVEAL v1.0.0</Text>
+      <Text style={styles.footerSubtext}>Weather → AI Stylist → Your Wardrobe</Text>
+    </View>
+  ), []);
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
@@ -137,9 +126,9 @@ export default function ProfileScreen() {
         renderItem={renderMenuItem}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={ListFooterComponent}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
       />
     </LinearGradient>
   );
@@ -171,7 +160,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
-  userEmail: {
+  userTagline: {
     fontSize: 14,
     color: COLORS.textSecondary,
     marginTop: 4,
@@ -241,5 +230,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 2,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    marginTop: 20,
+  },
+  footerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  footerSubtext: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 4,
   },
 });
