@@ -184,8 +184,8 @@ export default function BodyScannerScreen() {
       <View style={styles.iconCircle}>
         <MaterialCommunityIcons name="account-outline" size={64} color={COLORS.primary} />
       </View>
-      <Text style={styles.instructionsTitle}>Body Scan Instructions</Text>
-      <Text style={styles.instructionsSubtitle}>Get accurate measurements in seconds</Text>
+      <Text style={styles.instructionsTitle}>Body Scan</Text>
+      <Text style={styles.instructionsSubtitle}>Get estimated measurements for fit guidance</Text>
       
       <View style={styles.instructionsList}>
         <View style={styles.instructionItem}>
