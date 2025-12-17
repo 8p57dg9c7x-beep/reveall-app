@@ -193,28 +193,39 @@ export default function AIWardrobeScreen() {
     );
   }, [wardrobeItems, selectedItems]);
 
-  // DELETE multiple selected items
-  const deleteSelectedItems = useCallback(() => {
+  // DELETE multiple selected items - Cross-platform (Web + Native)
+  const deleteSelectedItems = useCallback(async () => {
     if (selectedItems.length === 0) return;
     
-    Alert.alert(
-      'Delete Selected Items',
-      `Are you sure you want to delete ${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''} from your closet?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            const updatedItems = wardrobeItems.filter(item => !selectedItems.includes(item.id));
-            setWardrobeItems(updatedItems);
-            setSelectedItems([]);
-            await saveWardrobe(updatedItems);
-            Alert.alert('Done', `${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''} deleted`);
+    const confirmMessage = `Delete ${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''} from your closet?`;
+    
+    // Use window.confirm on web, Alert.alert on native
+    if (Platform.OS === 'web') {
+      if (window.confirm(confirmMessage)) {
+        const updatedItems = wardrobeItems.filter(item => !selectedItems.includes(item.id));
+        setWardrobeItems(updatedItems);
+        setSelectedItems([]);
+        await saveWardrobe(updatedItems);
+      }
+    } else {
+      Alert.alert(
+        'Delete Selected Items',
+        confirmMessage,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              const updatedItems = wardrobeItems.filter(item => !selectedItems.includes(item.id));
+              setWardrobeItems(updatedItems);
+              setSelectedItems([]);
+              await saveWardrobe(updatedItems);
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   }, [wardrobeItems, selectedItems]);
 
   // Long press to delete
