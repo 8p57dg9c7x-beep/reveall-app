@@ -490,6 +490,7 @@ export default function BodyScannerScreen() {
           </View>
         ) : (
           <>
+            {step === 0 && renderDisclaimer()}
             {step === 1 && renderInstructions()}
             {step === 2 && renderCapture()}
             {step === 3 && renderResults()}
