@@ -23,11 +23,13 @@ export default function BodyScannerScreen() {
   const params = useLocalSearchParams();
   const returnPath = params.returnPath || '/stylelab';
   
-  const [step, setStep] = useState(1); // 1: Instructions, 2: Capture, 3: Results
+  const [step, setStep] = useState(0); // 0: Disclaimer, 1: Instructions, 2: Capture, 3: Results
   const [frontPhoto, setFrontPhoto] = useState(null);
   const [sidePhoto, setSidePhoto] = useState(null);
   const [scanResults, setScanResults] = useState(null);
   const [scanning, setScanning] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // For manual editing
+  const [editedMeasurements, setEditedMeasurements] = useState(null);
   const scanProgress = new Animated.Value(0);
 
   // Handle back navigation
