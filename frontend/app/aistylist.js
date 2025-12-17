@@ -966,4 +966,93 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.primary,
   },
+  // "Why this outfit?" section
+  whySection: {
+    backgroundColor: 'rgba(177, 76, 255, 0.1)',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.2)',
+  },
+  whyTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
+    marginBottom: 10,
+  },
+  whyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  whyText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.9)',
+    flex: 1,
+  },
+  // Feedback section
+  feedbackSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  feedbackLabel: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
+  feedbackButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  feedbackButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  feedbackThanks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  feedbackThanksText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  dislikeOptions: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  dislikePrompt: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginBottom: 8,
+  },
+  dislikeButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  reasonButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 8,
+  },
+  reasonText: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+  },
 });
