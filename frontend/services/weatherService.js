@@ -29,12 +29,22 @@ export const TEMP_UNIT = getUserTempPreference();
 const WEATHER_API_KEY = process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY || '0c4fde9fab4de5bec9ae45330a257380';
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
+// Helper to format temperature display based on user preference
+const formatTempDisplay = (tempF) => {
+  if (TEMP_UNIT === 'celsius') {
+    const tempC = Math.round((tempF - 32) * 5/9);
+    return `${tempC}°C`;
+  }
+  return `${tempF}°F`;
+};
+
 // Default fallback data (Los Angeles)
 const DEFAULT_WEATHER = {
   location: 'Los Angeles',
   temp: 75,
   tempF: '75°F',
   tempC: '24°C',
+  tempDisplay: formatTempDisplay(75), // Auto-detected based on locale
   condition: 'sunny',
   conditionLabel: 'Sunny',
   icon: 'weather-sunny',
@@ -42,7 +52,7 @@ const DEFAULT_WEATHER = {
   humidity: 45,
   tempCategory: 'warm',
   outfitSuggestion: {
-    range: '70-84°F',
+    range: TEMP_UNIT === 'celsius' ? '21-29°C' : '70-84°F',
     style: 'Casual Summer',
     items: ['T-shirt', 'Light pants', 'Sneakers', 'Cap'],
     colors: ['Light blue', 'Mint', 'Coral'],
