@@ -478,4 +478,71 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontWeight: '500',
   },
+  // Onboarding Card
+  onboardingCard: {
+    marginHorizontal: SPACING.screenHorizontal,
+    borderRadius: SIZES.borderRadiusCard,
+    overflow: 'hidden',
+    ...CARD_SHADOW,
+  },
+  onboardingGradient: {
+    padding: 20,
+    borderRadius: SIZES.borderRadiusCard,
+    borderWidth: 2,
+    borderColor: 'rgba(177, 76, 255, 0.3)',
+  },
+  onboardingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  onboardingTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  onboardingText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  progressBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.primary,
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  onboardingCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  onboardingCTAText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
 });
