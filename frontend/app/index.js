@@ -92,7 +92,7 @@ export default function HomeScreen() {
               <View style={styles.weatherLeft}>
                 <MaterialCommunityIcons name={weather.icon} size={48} color="#FFFFFF" />
                 <View style={styles.weatherInfo}>
-                  <Text style={styles.weatherTemp}>{weather.tempF}</Text>
+                  <Text style={styles.weatherTemp}>{weather.tempDisplay || weather.tempF}</Text>
                   <Text style={styles.weatherLocation}>{weather.location}</Text>
                 </View>
               </View>
