@@ -23,7 +23,7 @@ export default function ComingSoonScreen() {
 
   const loadUpcoming = async () => {
     try {
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-makeover.preview.emergentagent.com';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://reveal-closet.preview.emergentagent.com';
       const response = await fetch(`${API_URL}/api/discover/upcoming`);
       const data = await response.json();
       setUpcoming(data.results?.slice(0, 20) || []);

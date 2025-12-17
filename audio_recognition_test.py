@@ -3,7 +3,7 @@
 CINESCAN AUDIO RECOGNITION TESTING - COMPREHENSIVE MOVIE SOUNDTRACK TESTING
 CRITICAL MISSION: Test audio recognition with 10 REAL movie soundtrack clips
 SUCCESS CRITERIA: 8/10 minimum accuracy, <5s response time average
-Backend URL: https://reveal-makeover.preview.emergentagent.com
+Backend URL: https://reveal-closet.preview.emergentagent.com
 """
 
 import requests
@@ -14,7 +14,7 @@ import subprocess
 from pathlib import Path
 
 # Backend URL from user request
-BACKEND_URL = "https://reveal-makeover.preview.emergentagent.com"
+BACKEND_URL = "https://reveal-closet.preview.emergentagent.com"
 
 def test_audio_recognition(audio_file_path, expected_movie):
     """Test audio recognition with a single file"""
@@ -154,7 +154,7 @@ def main():
     print("🎵 CINESCAN AUDIO RECOGNITION TESTING")
     print("=" * 60)
     print("**USER REQUIREMENT**: 8/10 minimum accuracy for audio recognition from movie soundtracks/scenes")
-    print("**Backend URL**: https://reveal-makeover.preview.emergentagent.com")
+    print("**Backend URL**: https://reveal-closet.preview.emergentagent.com")
     print("**MISSION**: Test audio recognition with 10 REAL movie soundtrack clips")
     print("=" * 60)
     
