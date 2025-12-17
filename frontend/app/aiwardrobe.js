@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+// My Closet (AI Wardrobe) - v1 with DELETE functionality
+// Manages user's wardrobe items with ability to add, view, and DELETE items
+
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,52 +16,84 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import { uploadImage, pollJobResult } from '../services/revealAPI';
+
+const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 
 export default function AIWardrobeScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const returnPath = params.returnPath || '/stylelab';
   
-  const [wardrobeItems, setWardrobeItems] = useState([
-    {
-      id: 1,
-      image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=300&q=80',
-      category: 'tops',
-      tags: ['white', 'casual', 'cotton'],
-      name: 'White T-Shirt',
-    },
-    {
-      id: 2,
-      image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&q=80',
-      category: 'bottoms',
-      tags: ['black', 'jeans', 'denim'],
-      name: 'Black Jeans',
-    },
-    {
-      id: 3,
-      image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=300&q=80',
-      category: 'shoes',
-      tags: ['sneakers', 'white', 'sport'],
-      name: 'White Sneakers',
-    },
-    {
-      id: 4,
-      image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80',
-      category: 'outerwear',
-      tags: ['blue', 'denim', 'jacket'],
-      name: 'Denim Jacket',
-    },
-  ]);
-  
+  const [wardrobeItems, setWardrobeItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [generatedOutfits, setGeneratedOutfits] = useState([]);
-  const [showOutfits, setShowOutfits] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Handle back navigation
+  // Load wardrobe from AsyncStorage on mount
+  useEffect(() => {
+    loadWardrobe();
+  }, []);
+
+  const loadWardrobe = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(WARDROBE_STORAGE_KEY);
+      if (stored) {
+        setWardrobeItems(JSON.parse(stored));
+      } else {
+        // Default starter items for new users
+        const defaultItems = [
+          {
+            id: 1,
+            image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=300&q=80',
+            category: 'tops',
+            tags: ['white', 'casual', 'cotton'],
+            name: 'White T-Shirt',
+          },
+          {
+            id: 2,
+            image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&q=80',
+            category: 'bottoms',
+            tags: ['black', 'jeans', 'denim'],
+            name: 'Black Jeans',
+          },
+          {
+            id: 3,
+            image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=300&q=80',
+            category: 'shoes',
+            tags: ['sneakers', 'white', 'sport'],
+            name: 'White Sneakers',
+          },
+          {
+            id: 4,
+            image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80',
+            category: 'outerwear',
+            tags: ['blue', 'denim', 'jacket'],
+            name: 'Denim Jacket',
+          },
+        ];
+        setWardrobeItems(defaultItems);
+        await AsyncStorage.setItem(WARDROBE_STORAGE_KEY, JSON.stringify(defaultItems));
+      }
+    } catch (error) {
+      console.log('Error loading wardrobe:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveWardrobe = async (items) => {
+    try {
+      await AsyncStorage.setItem(WARDROBE_STORAGE_KEY, JSON.stringify(items));
+    } catch (error) {
+      console.log('Error saving wardrobe:', error);
+    }
+  };
+
   const handleBack = () => {
     router.push(returnPath);
   };
@@ -91,13 +126,10 @@ export default function AIWardrobeScreen() {
       const imageUri = result.assets[0].uri;
       
       try {
-        // Use actual backend API for auto-tagging
         console.log('👔 Calling Reveal Wardrobe API...');
         const uploadResult = await uploadImage(imageUri, 'wardrobe');
-        
         console.log('📦 Job created:', uploadResult.jobId);
         
-        // Poll for results
         const apiResult = await pollJobResult(uploadResult.jobId);
         
         if (apiResult.result && apiResult.result.item) {
@@ -110,7 +142,9 @@ export default function AIWardrobeScreen() {
             name: 'New Item',
             confidence: tagData.confidence || 0.85,
           };
-          setWardrobeItems([...wardrobeItems, newItem]);
+          const updatedItems = [...wardrobeItems, newItem];
+          setWardrobeItems(updatedItems);
+          await saveWardrobe(updatedItems);
           Alert.alert(
             'Item Added!', 
             `AI tagged: ${tagData.category} - ${tagData.tags.join(', ')} (${Math.round(tagData.confidence * 100)}% confidence)`
@@ -122,7 +156,6 @@ export default function AIWardrobeScreen() {
       } catch (error) {
         console.log('⚠️ Using fallback auto-tag:', error.message);
         
-        // Fallback mock auto-tag
         const newItem = {
           id: Date.now(),
           image: imageUri,
@@ -130,54 +163,51 @@ export default function AIWardrobeScreen() {
           tags: ['new', 'imported'],
           name: 'New Item',
         };
-        setWardrobeItems([...wardrobeItems, newItem]);
+        const updatedItems = [...wardrobeItems, newItem];
+        setWardrobeItems(updatedItems);
+        await saveWardrobe(updatedItems);
         Alert.alert('Item Added!', 'AI has automatically tagged your item');
       }
     }
   };
 
-  const toggleSelectItem = (id) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter(i => i !== id));
-    } else {
-      setSelectedItems([...selectedItems, id]);
-    }
-  };
+  // DELETE item functionality
+  const deleteItem = useCallback((itemId) => {
+    Alert.alert(
+      'Delete Item',
+      'Are you sure you want to remove this item from your closet?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const updatedItems = wardrobeItems.filter(item => item.id !== itemId);
+            setWardrobeItems(updatedItems);
+            setSelectedItems(selectedItems.filter(id => id !== itemId));
+            await saveWardrobe(updatedItems);
+          },
+        },
+      ]
+    );
+  }, [wardrobeItems, selectedItems]);
 
-  const generateOutfits = () => {
-    // Mock outfit generation with loading
-    const mockOutfits = [
-      {
-        id: 1,
-        items: selectedItems.slice(0, 3),
-        name: 'Casual Day Out',
-        occasion: 'Casual',
-        season: 'Spring/Summer',
-        weather: 'Sunny',
-        vibe: 'Relaxed & Comfortable',
-      },
-      {
-        id: 2,
-        items: selectedItems.slice(0, 2),
-        name: 'Urban Minimal',
-        occasion: 'Everyday',
-        season: 'All Seasons',
-        weather: 'Any',
-        vibe: 'Clean & Modern',
-      },
-      {
-        id: 3,
-        items: selectedItems,
-        name: 'Street Ready',
-        occasion: 'Weekend',
-        season: 'Fall/Winter',
-        weather: 'Cool',
-        vibe: 'Edgy & Bold',
-      },
-    ];
-    
-    setGeneratedOutfits(mockOutfits);
-    setShowOutfits(true);
+  // Long press to delete
+  const handleLongPress = useCallback((itemId) => {
+    deleteItem(itemId);
+  }, [deleteItem]);
+
+  const toggleSelectItem = (id) => {
+    if (editMode) {
+      // In edit mode, tap to delete
+      deleteItem(id);
+    } else {
+      if (selectedItems.includes(id)) {
+        setSelectedItems(selectedItems.filter(i => i !== id));
+      } else {
+        setSelectedItems([...selectedItems, id]);
+      }
+    }
   };
 
   const filteredItems = activeCategory === 'all' 
@@ -189,16 +219,31 @@ export default function AIWardrobeScreen() {
     
     return (
       <TouchableOpacity
-        style={[styles.wardrobeItem, isSelected && styles.wardrobeItemSelected]}
+        style={[styles.wardrobeItem, isSelected && !editMode && styles.wardrobeItemSelected]}
         onPress={() => toggleSelectItem(item.id)}
+        onLongPress={() => handleLongPress(item.id)}
+        delayLongPress={500}
         activeOpacity={0.8}
       >
         <Image source={{ uri: item.image }} style={styles.itemImage} />
-        {isSelected && (
+        
+        {/* Delete button in edit mode */}
+        {editMode && (
+          <TouchableOpacity 
+            style={styles.deleteButton}
+            onPress={() => deleteItem(item.id)}
+          >
+            <MaterialCommunityIcons name="close-circle" size={28} color="#FF4757" />
+          </TouchableOpacity>
+        )}
+        
+        {/* Selection badge */}
+        {isSelected && !editMode && (
           <View style={styles.selectedBadge}>
             <MaterialCommunityIcons name="check-circle" size={28} color={COLORS.primary} />
           </View>
         )}
+        
         <LinearGradient
           colors={['transparent', 'rgba(0,0,0,0.8)']}
           style={styles.itemOverlay}
@@ -241,52 +286,6 @@ export default function AIWardrobeScreen() {
     );
   };
 
-  const renderOutfit = (outfit) => {
-    const outfitItems = wardrobeItems.filter(item => outfit.items.includes(item.id));
-    
-    return (
-      <View key={outfit.id} style={styles.outfitCard}>
-        <View style={styles.outfitHeader}>
-          <Text style={styles.outfitName}>{outfit.name}</Text>
-          <TouchableOpacity style={styles.favoriteOutfitButton} activeOpacity={0.8}>
-            <MaterialCommunityIcons name="heart-outline" size={24} color={COLORS.primary} />
-          </TouchableOpacity>
-        </View>
-        
-        <View style={styles.outfitMeta}>
-          <View style={styles.outfitMetaItem}>
-            <MaterialCommunityIcons name="weather-sunny" size={16} color={COLORS.accent} />
-            <Text style={styles.outfitMetaText}>{outfit.season}</Text>
-          </View>
-          <View style={styles.outfitMetaItem}>
-            <MaterialCommunityIcons name="tag" size={16} color={COLORS.accent} />
-            <Text style={styles.outfitMetaText}>{outfit.occasion}</Text>
-          </View>
-        </View>
-
-        <View style={styles.vibeSection}>
-          <Text style={styles.vibeLabel}>Vibe:</Text>
-          <Text style={styles.vibeText}>{outfit.vibe}</Text>
-        </View>
-        
-        {/* Outfit Items Grid */}
-        <View style={styles.outfitItems}>
-          {outfitItems.map((item) => (
-            <View key={item.id} style={styles.outfitItemContainer}>
-              <Image source={{ uri: item.image }} style={styles.outfitItemImage} />
-              <Text style={styles.outfitItemName} numberOfLines={1}>{item.name}</Text>
-            </View>
-          ))}
-        </View>
-        
-        <TouchableOpacity style={styles.saveOutfitButton} activeOpacity={0.8}>
-          <MaterialCommunityIcons name="content-save" size={18} color="#fff" />
-          <Text style={styles.saveOutfitText}>Save to Favorites</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
@@ -303,81 +302,80 @@ export default function AIWardrobeScreen() {
             <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
             <Text style={styles.headerTitle}>My Closet</Text>
           </View>
-          <TouchableOpacity onPress={pickImage} style={styles.addButton}>
-            <MaterialCommunityIcons name="plus" size={24} color={COLORS.textPrimary} />
+          <TouchableOpacity 
+            onPress={() => setEditMode(!editMode)} 
+            style={[styles.editButton, editMode && styles.editButtonActive]}
+          >
+            <MaterialCommunityIcons 
+              name={editMode ? "check" : "pencil"} 
+              size={20} 
+              color={editMode ? "#FFFFFF" : COLORS.textPrimary} 
+            />
           </TouchableOpacity>
         </View>
 
-        {!showOutfits ? (
-          <>
-            {/* Category Tabs */}
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryTabs}
-            >
-              {categories.map(renderCategoryTab)}
-            </ScrollView>
-
-            {/* Wardrobe Grid */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                {activeCategory === 'all' ? 'My Wardrobe' : categories.find(c => c.id === activeCategory)?.name} 
-                {' '}({filteredItems.length} items)
-              </Text>
-              {selectedItems.length > 0 && (
-                <TouchableOpacity onPress={() => setSelectedItems([])} activeOpacity={0.8}>
-                  <Text style={styles.clearSelection}>Clear ({selectedItems.length})</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            
-            {/* Wardrobe Grid - Using View instead of FlatList for scrolling */}
-            {filteredItems.length === 0 ? (
-              <View style={styles.emptyState}>
-                <MaterialCommunityIcons name="tshirt-crew-outline" size={64} color={COLORS.textMuted} />
-                <Text style={styles.emptyStateText}>No items in this category</Text>
-              </View>
-            ) : (
-              <View style={styles.wardrobeGrid}>
-                {filteredItems.map((item) => (
-                  <View key={item.id} style={styles.wardrobeItemWrapper}>
-                    {renderWardrobeItem({ item })}
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* Create Outfit Button */}
-            <GradientButton
-              title={`Create Outfit (${selectedItems.length} selected)`}
-              onPress={generateOutfits}
-              disabled={selectedItems.length < 2}
-              icon={<MaterialCommunityIcons name="sparkles" size={20} color="#fff" />}
-              style={styles.createButton}
-            />
-          </>
-        ) : (
-          <>
-            <View style={styles.outfitsHeader}>
-              <View>
-                <Text style={styles.outfitsTitle}>Generated Outfits</Text>
-                <Text style={styles.outfitsSubtitle}>{generatedOutfits.length} unique combinations</Text>
-              </View>
-              <TouchableOpacity 
-                onPress={() => {
-                  setShowOutfits(false);
-                  setSelectedItems([]);
-                }}
-                activeOpacity={0.8}
-              >
-                <MaterialCommunityIcons name="close-circle" size={32} color={COLORS.primary} />
-              </TouchableOpacity>
-            </View>
-            
-            {generatedOutfits.map(renderOutfit)}
-          </>
+        {/* Edit Mode Banner */}
+        {editMode && (
+          <View style={styles.editBanner}>
+            <MaterialCommunityIcons name="information" size={18} color="#FFD93D" />
+            <Text style={styles.editBannerText}>Tap items to delete them</Text>
+          </View>
         )}
+
+        {/* Category Tabs */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryTabs}
+        >
+          {categories.map(renderCategoryTab)}
+        </ScrollView>
+
+        {/* Section Header */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            {activeCategory === 'all' ? 'My Wardrobe' : categories.find(c => c.id === activeCategory)?.name} 
+            {' '}({filteredItems.length} items)
+          </Text>
+          {selectedItems.length > 0 && !editMode && (
+            <TouchableOpacity onPress={() => setSelectedItems([])} activeOpacity={0.8}>
+              <Text style={styles.clearSelection}>Clear ({selectedItems.length})</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        
+        {/* Wardrobe Grid */}
+        {filteredItems.length === 0 ? (
+          <View style={styles.emptyState}>
+            <MaterialCommunityIcons name="tshirt-crew-outline" size={64} color={COLORS.textMuted} />
+            <Text style={styles.emptyStateText}>No items in this category</Text>
+            <TouchableOpacity style={styles.addFirstButton} onPress={pickImage}>
+              <MaterialCommunityIcons name="plus" size={20} color={COLORS.primary} />
+              <Text style={styles.addFirstText}>Add your first item</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.wardrobeGrid}>
+            {filteredItems.map((item) => (
+              <View key={item.id} style={styles.wardrobeItemWrapper}>
+                {renderWardrobeItem({ item })}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Add Item Button */}
+        <GradientButton
+          title="Add New Item"
+          onPress={pickImage}
+          icon={<MaterialCommunityIcons name="plus" size={20} color="#fff" />}
+          style={styles.addButton}
+        />
+
+        {/* Hint text */}
+        <Text style={styles.hintText}>
+          💡 Long press any item to delete it
+        </Text>
       </ScrollView>
     </LinearGradient>
   );
@@ -419,13 +417,31 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
-  addButton: {
+  editButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.card,
     borderRadius: 20,
+  },
+  editButtonActive: {
+    backgroundColor: COLORS.primary,
+  },
+  editBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: 12,
+    padding: 12,
+    backgroundColor: 'rgba(255, 217, 61, 0.15)',
+    borderRadius: 10,
+  },
+  editBannerText: {
+    color: '#FFD93D',
+    fontSize: 14,
+    fontWeight: '600',
   },
   categoryTabs: {
     paddingHorizontal: SPACING.screenHorizontal,
@@ -496,11 +512,6 @@ const styles = StyleSheet.create({
     width: '48%',
     marginBottom: SPACING.cardGap,
   },
-  wardrobeRow: {
-    paddingHorizontal: SPACING.screenHorizontal,
-    justifyContent: 'space-between',
-    marginBottom: SPACING.cardGap,
-  },
   wardrobeItem: {
     width: '100%',
     height: 240,
@@ -518,6 +529,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 20,
+    padding: 2,
+    zIndex: 10,
   },
   selectedBadge: {
     position: 'absolute',
@@ -564,125 +584,33 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontSize: 16,
     marginTop: 16,
+    marginBottom: 20,
   },
-  createButton: {
-    marginHorizontal: 20,
-    marginTop: 24,
-  },
-  outfitsHeader: {
+  addFirstButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  outfitsTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  outfitsSubtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  outfitCard: {
-    backgroundColor: COLORS.card,
-    borderRadius: SIZES.borderRadiusCard,
-    padding: SPACING.cardPadding + 4,
-    marginHorizontal: SPACING.screenHorizontal,
-    marginBottom: SPACING.cardGap + 4,
-    ...CARD_SHADOW,
-  },
-  outfitHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  outfitName: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  favoriteOutfitButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  outfitMeta: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 12,
-  },
-  outfitMetaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  outfitMetaText: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  vibeSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(177, 76, 255, 0.1)',
-    borderRadius: 8,
-  },
-  vibeLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  vibeText: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  outfitItems: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
-  },
-  outfitItemContainer: {
-    width: '30%',
-    alignItems: 'center',
-  },
-  outfitItemImage: {
-    width: '100%',
-    height: 120,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    marginBottom: 6,
-  },
-  outfitItemName: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  saveOutfitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 10,
-    backgroundColor: 'rgba(177, 76, 255, 0.2)',
+    paddingVertical: 12,
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.primary,
   },
-  saveOutfitText: {
-    color: COLORS.textPrimary,
-    fontSize: 15,
-    fontWeight: '700',
+  addFirstText: {
+    color: COLORS.primary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  addButton: {
+    marginHorizontal: SPACING.screenHorizontal,
+    marginTop: 24,
+  },
+  hintText: {
+    textAlign: 'center',
+    color: COLORS.textMuted,
+    fontSize: 13,
+    marginTop: 16,
+    paddingHorizontal: 20,
   },
 });
