@@ -90,10 +90,55 @@ export const logUserAction = async (action, category, label, value) => {
   }
 };
 
+// ===== REVEAL v1 Analytics Events =====
+
+// Track app opened
+export const trackAppOpened = () => logEvent('app_opened', { timestamp: new Date().toISOString() });
+
+// Track onboarding completion
+export const trackOnboardingComplete = (timeSpentSeconds) => 
+  logEvent('onboarding_complete', { time_spent_seconds: timeSpentSeconds });
+
+// Track closet item added
+export const trackClosetItemAdded = (category, method = 'manual') => 
+  logEvent('closet_item_added', { category, method });
+
+// Track outfit generated
+export const trackOutfitGenerated = (occasion, itemCount) => 
+  logEvent('outfit_generated', { occasion, item_count: itemCount });
+
+// Track outfit saved
+export const trackOutfitSaved = (outfitId) => 
+  logEvent('outfit_saved', { outfit_id: outfitId?.toString() });
+
+// Track outfit liked
+export const trackOutfitLiked = (outfitId) => 
+  logEvent('outfit_liked', { outfit_id: outfitId?.toString() });
+
+// Track outfit disliked
+export const trackOutfitDisliked = (outfitId, reason) => 
+  logEvent('outfit_disliked', { outfit_id: outfitId?.toString(), reason });
+
+// Track body scan completed
+export const trackBodyScanComplete = () => logEvent('body_scan_complete');
+
+// Track AI Stylist unlocked (reached 3 items)
+export const trackStylistUnlocked = () => logEvent('stylist_unlocked');
+
 export default {
   initializeFirebase,
   logEvent,
   logScreenView,
   logUserAction,
   firebaseConfig,
+  // v1 Analytics
+  trackAppOpened,
+  trackOnboardingComplete,
+  trackClosetItemAdded,
+  trackOutfitGenerated,
+  trackOutfitSaved,
+  trackOutfitLiked,
+  trackOutfitDisliked,
+  trackBodyScanComplete,
+  trackStylistUnlocked,
 };
