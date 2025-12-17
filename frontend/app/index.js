@@ -159,25 +159,65 @@ export default function HomeScreen() {
         {quickActions.map(renderQuickAction)}
       </View>
 
-      {/* Wardrobe CTA Card */}
-      <View style={styles.section}>
-        <TouchableOpacity 
-          style={styles.wardrobeCTA}
-          onPress={() => router.push({ pathname: '/aiwardrobe', params: { returnPath: '/' } })}
-          activeOpacity={0.85}
-        >
-          <View style={styles.wardrobeCTAContent}>
-            <View style={styles.wardrobeCTAIcon}>
-              <MaterialCommunityIcons name="wardrobe" size={28} color={COLORS.primary} />
+      {/* Onboarding Progress Card - First-Time User Flow */}
+      {!stylistUnlocked && (
+        <View style={styles.section}>
+          <TouchableOpacity 
+            style={styles.onboardingCard}
+            onPress={() => router.push({ pathname: '/aiwardrobe', params: { returnPath: '/' } })}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={['rgba(177, 76, 255, 0.15)', 'rgba(139, 92, 246, 0.1)']}
+              style={styles.onboardingGradient}
+            >
+              <View style={styles.onboardingHeader}>
+                <MaterialCommunityIcons name="sparkles" size={24} color={COLORS.primary} />
+                <Text style={styles.onboardingTitle}>Unlock AI Stylist</Text>
+              </View>
+              
+              <Text style={styles.onboardingText}>
+                Add {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more item{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount !== 1 ? 's' : ''} to your closet to get personalized outfit recommendations
+              </Text>
+              
+              {/* Progress Bar */}
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: `${(closetCount / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }]} />
+                </View>
+                <Text style={styles.progressText}>{closetCount}/{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS}</Text>
+              </View>
+              
+              <View style={styles.onboardingCTA}>
+                <MaterialCommunityIcons name="plus" size={18} color="#FFFFFF" />
+                <Text style={styles.onboardingCTAText}>Add Your Clothes</Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Wardrobe CTA Card - For returning users */}
+      {stylistUnlocked && (
+        <View style={styles.section}>
+          <TouchableOpacity 
+            style={styles.wardrobeCTA}
+            onPress={() => router.push({ pathname: '/aiwardrobe', params: { returnPath: '/' } })}
+            activeOpacity={0.85}
+          >
+            <View style={styles.wardrobeCTAContent}>
+              <View style={styles.wardrobeCTAIcon}>
+                <MaterialCommunityIcons name="wardrobe" size={28} color={COLORS.primary} />
+              </View>
+              <View style={styles.wardrobeCTAText}>
+                <Text style={styles.wardrobeCTATitle}>My Closet</Text>
+                <Text style={styles.wardrobeCTASubtitle}>{closetCount} items • Ready for styling</Text>
+              </View>
             </View>
-            <View style={styles.wardrobeCTAText}>
-              <Text style={styles.wardrobeCTATitle}>Build Your Closet</Text>
-              <Text style={styles.wardrobeCTASubtitle}>Add items to get personalized outfit recommendations</Text>
-            </View>
-          </View>
-          <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textMuted} />
-        </TouchableOpacity>
-      </View>
+            <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* How It Works Section */}
       <View style={styles.section}>
