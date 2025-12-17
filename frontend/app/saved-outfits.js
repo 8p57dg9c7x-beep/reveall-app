@@ -255,10 +255,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   emptySubtitle: {
-    fontSize: 15,
+    fontSize: 16,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+  emptyHint: {
+    fontSize: 13,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   exploreCTA: {
     flexDirection: 'row',
