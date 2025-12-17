@@ -362,9 +362,15 @@ export default function AIWardrobeScreen() {
             {' '}({filteredItems.length} items)
           </Text>
           {selectedItems.length > 0 && !editMode && (
-            <TouchableOpacity onPress={() => setSelectedItems([])} activeOpacity={0.8}>
-              <Text style={styles.clearSelection}>Clear ({selectedItems.length})</Text>
-            </TouchableOpacity>
+            <View style={styles.selectionActions}>
+              <TouchableOpacity onPress={deleteSelectedItems} activeOpacity={0.8} style={styles.deleteSelectedBtn}>
+                <MaterialCommunityIcons name="trash-can-outline" size={16} color="#FF4757" />
+                <Text style={styles.deleteSelectedText}>Delete ({selectedItems.length})</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSelectedItems([])} activeOpacity={0.8}>
+                <Text style={styles.clearSelection}>Clear</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
         
