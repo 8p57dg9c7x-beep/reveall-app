@@ -92,6 +92,26 @@ export default function AIStylistScreen() {
   const [currentLookIndex, setCurrentLookIndex] = useState(0);
   const [wardrobeItems, setWardrobeItems] = useState([]);
   const [hasWardrobe, setHasWardrobe] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState({}); // Track feedback per outfit
+  const [showDislikeOptions, setShowDislikeOptions] = useState(null); // Which outfit is showing dislike options
+
+  // Feedback handlers
+  const handleLike = async (outfitId) => {
+    await likeOutfit(outfitId);
+    setFeedbackGiven(prev => ({ ...prev, [outfitId]: 'like' }));
+    logEvent('outfit_liked', { outfit_id: outfitId.toString() });
+  };
+
+  const handleDislike = (outfitId) => {
+    setShowDislikeOptions(outfitId);
+  };
+
+  const handleDislikeReason = async (outfitId, reason) => {
+    await dislikeOutfit(outfitId, reason);
+    setFeedbackGiven(prev => ({ ...prev, [outfitId]: 'dislike' }));
+    setShowDislikeOptions(null);
+    logEvent('outfit_disliked', { outfit_id: outfitId.toString(), reason });
+  };
 
   // Ad integration
   const { showAdIfEligible } = useInterstitialAd();
