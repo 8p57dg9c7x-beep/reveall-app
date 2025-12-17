@@ -43,6 +43,41 @@ const STYLE_PREFERENCES = [
   'Elegant', 'Relaxed', 'Bold', 'Neutral'
 ];
 
+// Generate "Why this outfit?" explanation - simple, human language
+const generateWhyThisOutfit = (occasion, styles, weather, items) => {
+  const reasons = [];
+  
+  // Weather reason
+  if (weather) {
+    if (weather.condition === 'rainy' || weather.condition === 'stormy') {
+      reasons.push('Perfect for today\'s rainy weather');
+    } else if (weather.temp < 60) {
+      reasons.push('Layered for the cooler weather');
+    } else if (weather.temp > 80) {
+      reasons.push('Light and breathable for the warm day');
+    } else {
+      reasons.push(`Suited for today's ${weather.conditionLabel?.toLowerCase() || 'weather'}`);
+    }
+  }
+  
+  // Occasion reason
+  if (occasion) {
+    reasons.push(`Matches your ${occasion.toLowerCase()} plans`);
+  }
+  
+  // Style reason
+  if (styles && styles.length > 0) {
+    reasons.push(`Fits your ${styles[0].toLowerCase()} style preference`);
+  }
+  
+  // Items reason
+  if (items && items.length >= 3) {
+    reasons.push('Uses pieces you already own');
+  }
+  
+  return reasons.slice(0, 2); // Keep it to 2 reasons for simplicity
+};
+
 export default function AIStylistScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
