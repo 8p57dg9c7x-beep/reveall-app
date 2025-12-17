@@ -235,6 +235,7 @@ function parseWeatherResponse(data) {
     temp,
     tempF: `${temp}°F`,
     tempC: `${Math.round((temp - 32) * 5/9)}°C`,
+    tempDisplay: formatTempDisplay(temp), // Auto-detected based on locale
     condition,
     conditionLabel: conditionData.label,
     icon: conditionData.icon,
