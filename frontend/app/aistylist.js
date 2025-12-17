@@ -169,6 +169,8 @@ export default function AIStylistScreen() {
             tags: item.tags || [],
           })),
           stylistTip: getStyleTip(occasion, selectedStyles, weather),
+          // "Why this outfit?" - AI explanation for trust
+          whyThisOutfit: generateWhyThisOutfit(occasion, selectedStyles, weather, outfitItems),
         });
       }
     }
