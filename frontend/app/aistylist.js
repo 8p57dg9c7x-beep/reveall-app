@@ -357,7 +357,7 @@ export default function AIStylistScreen() {
         onPress={generateRecommendations}
         disabled={selectedStyles.length === 0}
         loading={loading}
-        icon={<MaterialCommunityIcons name="sparkles" size={20} color="#fff" />}
+        icon={<MaterialCommunityIcons name="creation" size={20} color="#fff" />}
         style={styles.generateButton}
       />
     </View>
