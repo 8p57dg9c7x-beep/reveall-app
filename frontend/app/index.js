@@ -74,7 +74,7 @@ export default function HomeScreen() {
 
   // Quick actions - v1 Core: 4 actions (NO Style Discovery)
   const quickActions = useMemo(() => [
-    { id: 'ai-stylist', label: 'AI Stylist', icon: 'robot', route: '/aistylist', color: '#B14CFF' },
+    { id: 'ai-stylist', label: 'Outfit Ideas', icon: 'hanger', route: '/aistylist', color: '#B14CFF' },
     { id: 'body-scan', label: 'Body Scan', icon: 'human', route: '/bodyscanner', color: '#4ECDC4' },
     { id: 'wardrobe', label: 'My Closet', icon: 'hanger', route: '/aiwardrobe', color: '#FF6EC7' },
     { id: 'favorites', label: 'Favorites', icon: 'heart', route: '/saved-outfits', color: '#FF4757' },
