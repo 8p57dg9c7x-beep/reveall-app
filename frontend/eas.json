@@ -12,22 +12,18 @@
       },
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_API_URL": "http://localhost:8001",
-        "EXPO_PUBLIC_OPENWEATHER_API_KEY": "0c4fde9fab4de5bec9ae45330a257380"
       }
     },
     "preview": {
       "distribution": "internal",
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "resourceClass": "m-medium"
       },
       "android": {
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-backend-url.com",
         "EXPO_PUBLIC_OPENWEATHER_API_KEY": "0c4fde9fab4de5bec9ae45330a257380"
       }
     },
@@ -35,14 +31,14 @@
       "distribution": "store",
       "ios": {
         "simulator": false,
-        "autoIncrement": true
+        "autoIncrement": true,
+        "resourceClass": "m-medium"
       },
       "android": {
         "buildType": "app-bundle",
         "autoIncrement": true
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-production-backend-url.com",
         "EXPO_PUBLIC_OPENWEATHER_API_KEY": "0c4fde9fab4de5bec9ae45330a257380"
       }
     }
