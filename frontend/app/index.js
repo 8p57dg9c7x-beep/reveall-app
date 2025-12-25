@@ -239,7 +239,7 @@ export default function HomeScreen() {
             <View style={[styles.stepNumber, { backgroundColor: '#FF6EC725' }]}>
               <Text style={[styles.stepNumberText, { color: '#FF6EC7' }]}>3</Text>
             </View>
-            <Text style={styles.stepText}>Get AI-styled outfits from YOUR wardrobe</Text>
+            <Text style={styles.stepText}>See outfit ideas from your wardrobe</Text>
           </View>
         </View>
       </View>
