@@ -243,7 +243,7 @@ export default function AIStylistScreen() {
         occasion: occasion,
         vibe: 'Fresh Start',
         items: [],
-        stylistTip: 'Start by adding your favorite pieces to My Closet. The AI will learn your style!',
+        stylistTip: 'Start by adding your favorite pieces to My Closet. We\'ll help you put them together.',
         isPlaceholder: true,
       });
     }
