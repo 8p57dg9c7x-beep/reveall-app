@@ -581,7 +581,7 @@ export default function AIStylistScreen() {
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <MaterialCommunityIcons name="robot" size={28} color={COLORS.primary} />
-            <Text style={styles.headerTitle}>AI Stylist</Text>
+            <Text style={styles.headerTitle}>Outfit Ideas</Text>
           </View>
           <View style={{ width: 44 }} />
         </View>
