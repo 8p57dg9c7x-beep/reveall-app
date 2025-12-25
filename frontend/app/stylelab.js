@@ -22,9 +22,9 @@ export default function StyleLabScreen() {
     const allFeatures = [
       {
         id: 'ai-stylist',
-        title: 'AI Stylist',
-        subtitle: 'Get personalized outfit recommendations',
-        icon: 'robot',
+        title: 'Outfit Ideas',
+        subtitle: 'Get suggestions based on weather and your wardrobe',
+        icon: 'hanger',
         color: '#B14CFF',
         route: '/aistylist',
         params: { returnPath: '/stylelab' },
