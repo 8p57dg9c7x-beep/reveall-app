@@ -173,7 +173,7 @@ export default function HomeScreen() {
             >
               <View style={styles.onboardingHeader}>
                 <MaterialCommunityIcons name="creation" size={24} color={COLORS.primary} />
-                <Text style={styles.onboardingTitle}>Unlock AI Stylist</Text>
+                <Text style={styles.onboardingTitle}>Get Outfit Ideas</Text>
               </View>
               
               <Text style={styles.onboardingText}>
