@@ -148,7 +148,7 @@ export default function StyleLabScreen() {
       <View style={styles.header}>
         <MaterialCommunityIcons name="flask" size={40} color={COLORS.primary} />
         <Text style={styles.headerTitle}>Style Lab</Text>
-        <Text style={styles.headerSubtitle}>AI-powered tools for your perfect look</Text>
+        <Text style={styles.headerSubtitle}>Tools to help you dress better</Text>
       </View>
     </View>
   ), [insets.top]);
