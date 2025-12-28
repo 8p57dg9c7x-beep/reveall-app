@@ -342,14 +342,11 @@ export default function AIWardrobeScreen() {
         contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+        {/* Clean Header - No back button since it's a tab */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <MaterialCommunityIcons name="hanger" size={32} color={COLORS.primary} />
+          <View style={styles.headerLeft}>
             <Text style={styles.headerTitle}>My Closet</Text>
+            <Text style={styles.headerSubtitle}>{wardrobeItems.length} items</Text>
           </View>
           <TouchableOpacity 
             onPress={() => setEditMode(!editMode)} 
@@ -369,6 +366,26 @@ export default function AIWardrobeScreen() {
             <MaterialCommunityIcons name="information" size={18} color="#FFD93D" />
             <Text style={styles.editBannerText}>Tap items to delete them</Text>
           </View>
+        )}
+
+        {/* Style My Wardrobe - Only shows after 3+ items */}
+        {wardrobeItems.length >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS && !editMode && (
+          <TouchableOpacity 
+            style={styles.styleWardrobeCard}
+            onPress={() => router.push('/aistylist')}
+            activeOpacity={0.9}
+          >
+            <View style={styles.styleWardrobeContent}>
+              <View style={styles.styleWardrobeIcon}>
+                <MaterialCommunityIcons name="hanger" size={22} color={COLORS.primary} />
+              </View>
+              <View style={styles.styleWardrobeText}>
+                <Text style={styles.styleWardrobeTitle}>Style My Wardrobe</Text>
+                <Text style={styles.styleWardrobeSubtitle}>Get outfit ideas from your clothes</Text>
+              </View>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={COLORS.textMuted} />
+          </TouchableOpacity>
         )}
 
         {/* Category Tabs */}
