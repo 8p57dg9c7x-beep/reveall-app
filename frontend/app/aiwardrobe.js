@@ -236,7 +236,7 @@ export default function MyClosetScreen() {
             </View>
             <Text style={styles.emptyTitle}>This is where your wardrobe begins</Text>
             <Text style={styles.emptySubtitle}>
-              Add your clothes to create a space that's organized, calm, and ready to help you look your best.
+              Add your clothes to create a space that is organized, calm, and ready to help you look your best.
             </Text>
           </View>
         )}
