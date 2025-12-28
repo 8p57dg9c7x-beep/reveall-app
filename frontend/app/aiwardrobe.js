@@ -1,5 +1,5 @@
-// My Closet - v1: The Heart of the App
-// Premium, spacious, calm digital wardrobe
+// My Closet - v1: A Real Wardrobe Experience
+// Horizontal drawers, sections, haptic feedback
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -11,6 +11,7 @@ import {
   Image,
   Alert,
   Platform,
+  Vibration,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -18,34 +19,45 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
-import GradientButton from '../components/GradientButton';
-import { uploadImage, pollJobResult } from '../services/revealAPI';
+import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
 import { ONBOARDING_CONFIG } from '../services/onboardingService';
 
 const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 
-export default function AIWardrobeScreen() {
+// Categories as "drawers"
+const DRAWERS = [
+  { id: 'tops', label: 'Tops', icon: 'tshirt-crew-outline' },
+  { id: 'bottoms', label: 'Bottoms', icon: 'lingerie' },
+  { id: 'shoes', label: 'Shoes', icon: 'shoe-sneaker' },
+  { id: 'outerwear', label: 'Outerwear', icon: 'coat-rack' },
+  { id: 'accessories', label: 'Accessories', icon: 'watch' },
+];
+
+// Default starter items
+const DEFAULT_ITEMS = [
+  { id: '1', name: 'White T-Shirt', category: 'tops', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&q=80' },
+  { id: '2', name: 'Black Jeans', category: 'bottoms', image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&q=80' },
+  { id: '3', name: 'White Sneakers', category: 'shoes', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&q=80' },
+  { id: '4', name: 'Denim Jacket', category: 'outerwear', image: 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=300&q=80' },
+];
+
+export default function MyClosetScreen() {
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams();
-  const returnPath = params.returnPath || '/';
   const scrollViewRef = useRef(null);
-  
   const [wardrobeItems, setWardrobeItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('all');
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Reset scroll to top on tab focus
+  // Reset scroll on focus
   useFocusEffect(
     useCallback(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
     }, [])
   );
 
-  // Load wardrobe from AsyncStorage on mount
+  // Load wardrobe
   useEffect(() => {
     loadWardrobe();
   }, []);
@@ -56,42 +68,12 @@ export default function AIWardrobeScreen() {
       if (stored) {
         setWardrobeItems(JSON.parse(stored));
       } else {
-        // Default starter items for new users
-        const defaultItems = [
-          {
-            id: 1,
-            image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=300&q=80',
-            category: 'tops',
-            tags: ['white', 'casual', 'cotton'],
-            name: 'White T-Shirt',
-          },
-          {
-            id: 2,
-            image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&q=80',
-            category: 'bottoms',
-            tags: ['black', 'jeans', 'denim'],
-            name: 'Black Jeans',
-          },
-          {
-            id: 3,
-            image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=300&q=80',
-            category: 'shoes',
-            tags: ['sneakers', 'white', 'sport'],
-            name: 'White Sneakers',
-          },
-          {
-            id: 4,
-            image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80',
-            category: 'outerwear',
-            tags: ['blue', 'denim', 'jacket'],
-            name: 'Denim Jacket',
-          },
-        ];
-        setWardrobeItems(defaultItems);
-        await AsyncStorage.setItem(WARDROBE_STORAGE_KEY, JSON.stringify(defaultItems));
+        setWardrobeItems(DEFAULT_ITEMS);
+        await AsyncStorage.setItem(WARDROBE_STORAGE_KEY, JSON.stringify(DEFAULT_ITEMS));
       }
     } catch (error) {
-      console.log('Error loading wardrobe:', error);
+      console.error('Error loading wardrobe:', error);
+      setWardrobeItems(DEFAULT_ITEMS);
     } finally {
       setLoading(false);
     }
@@ -101,246 +83,163 @@ export default function AIWardrobeScreen() {
     try {
       await AsyncStorage.setItem(WARDROBE_STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
-      console.log('Error saving wardrobe:', error);
+      console.error('Error saving wardrobe:', error);
     }
   };
 
-  const handleBack = () => {
-    router.push(returnPath);
+  // Haptic feedback helper
+  const triggerHaptic = (type = 'light') => {
+    if (Platform.OS !== 'web') {
+      if (type === 'success') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else if (type === 'light') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    }
   };
 
-  const categories = [
-    { id: 'all', name: 'All', icon: 'view-grid', count: wardrobeItems.length },
-    { id: 'tops', name: 'Tops', icon: 'tshirt-crew', count: wardrobeItems.filter(i => i.category === 'tops').length },
-    { id: 'bottoms', name: 'Bottoms', icon: 'human-handsdown', count: wardrobeItems.filter(i => i.category === 'bottoms').length },
-    { id: 'shoes', name: 'Shoes', icon: 'shoe-sneaker', count: wardrobeItems.filter(i => i.category === 'shoes').length },
-    { id: 'outerwear', name: 'Outerwear', icon: 'coat-rack', count: wardrobeItems.filter(i => i.category === 'outerwear').length },
-    { id: 'accessories', name: 'Accessories', icon: 'diamond', count: wardrobeItems.filter(i => i.category === 'accessories').length },
-  ];
-
+  // Pick image and add item
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    triggerHaptic('light');
     
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please allow access to your photo library');
+      Alert.alert('Permission needed', 'Please allow access to your photos to add items.');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [3, 4],
+      aspect: [1, 1],
       quality: 0.8,
     });
 
-    if (!result.canceled) {
-      const imageUri = result.assets[0].uri;
+    if (!result.canceled && result.assets[0]) {
+      // Auto-detect category (simplified for v1)
+      const newItem = {
+        id: Date.now().toString(),
+        name: 'New Item',
+        category: 'tops', // Default, user can change later
+        image: result.assets[0].uri,
+        addedAt: new Date().toISOString(),
+      };
+
+      const updated = [newItem, ...wardrobeItems];
+      setWardrobeItems(updated);
+      await saveWardrobe(updated);
       
-      try {
-        console.log('👔 Calling Reveal Wardrobe API...');
-        const uploadResult = await uploadImage(imageUri, 'wardrobe');
-        console.log('📦 Job created:', uploadResult.jobId);
-        
-        const apiResult = await pollJobResult(uploadResult.jobId);
-        
-        if (apiResult.result && apiResult.result.item) {
-          const tagData = apiResult.result.item;
-          const newItem = {
-            id: Date.now(),
-            image: imageUri,
-            category: tagData.category || 'tops',
-            tags: tagData.tags || ['imported'],
-            name: 'New Item',
-            confidence: tagData.confidence || 0.85,
-          };
-          const updatedItems = [...wardrobeItems, newItem];
-          setWardrobeItems(updatedItems);
-          await saveWardrobe(updatedItems);
+      // Success haptic and milestone check
+      triggerHaptic('success');
+      
+      // Milestone feedback
+      if (updated.length === ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) {
+        setTimeout(() => {
           Alert.alert(
-            'Item Added!', 
-            `AI tagged: ${tagData.category} - ${tagData.tags.join(', ')} (${Math.round(tagData.confidence * 100)}% confidence)`
+            '🎉 Ready to Style!',
+            'Your wardrobe can now dress you. Tap "Style My Wardrobe" to get outfit ideas.',
+            [{ text: 'Let\'s Go!', style: 'default' }]
           );
-          return;
-        }
-        
-        throw new Error('Using fallback');
-      } catch (error) {
-        console.log('⚠️ Using fallback auto-tag:', error.message);
-        
-        const newItem = {
-          id: Date.now(),
-          image: imageUri,
-          category: 'tops',
-          tags: ['new', 'imported'],
-          name: 'New Item',
-        };
-        const updatedItems = [...wardrobeItems, newItem];
-        setWardrobeItems(updatedItems);
-        await saveWardrobe(updatedItems);
-        Alert.alert('Item Added!', 'AI has automatically tagged your item');
+        }, 500);
       }
     }
   };
 
-  // DELETE item functionality - Cross-platform (Web + Native)
-  const deleteItem = useCallback(async (itemId) => {
-    const confirmMessage = 'Are you sure you want to remove this item from your closet?';
+  // Delete item
+  const deleteItem = async (itemId) => {
+    triggerHaptic('medium');
     
-    // Use window.confirm on web, Alert.alert on native
     if (Platform.OS === 'web') {
-      if (window.confirm(confirmMessage)) {
-        const updatedItems = wardrobeItems.filter(item => item.id !== itemId);
-        setWardrobeItems(updatedItems);
-        setSelectedItems(selectedItems.filter(id => id !== itemId));
-        await saveWardrobe(updatedItems);
+      if (window.confirm('Remove this item from your closet?')) {
+        const updated = wardrobeItems.filter(item => item.id !== itemId);
+        setWardrobeItems(updated);
+        await saveWardrobe(updated);
       }
     } else {
       Alert.alert(
-        'Delete Item',
-        confirmMessage,
+        'Remove Item',
+        'Remove this item from your closet?',
         [
           { text: 'Cancel', style: 'cancel' },
           {
-            text: 'Delete',
+            text: 'Remove',
             style: 'destructive',
             onPress: async () => {
-              const updatedItems = wardrobeItems.filter(item => item.id !== itemId);
-              setWardrobeItems(updatedItems);
-              setSelectedItems(selectedItems.filter(id => id !== itemId));
-              await saveWardrobe(updatedItems);
+              const updated = wardrobeItems.filter(item => item.id !== itemId);
+              setWardrobeItems(updated);
+              await saveWardrobe(updated);
+              triggerHaptic('success');
             },
           },
         ]
       );
     }
-  }, [wardrobeItems, selectedItems]);
-
-  // DELETE multiple selected items - Cross-platform (Web + Native)
-  const deleteSelectedItems = useCallback(async () => {
-    if (selectedItems.length === 0) return;
-    
-    const confirmMessage = `Delete ${selectedItems.length} item${selectedItems.length > 1 ? 's' : ''} from your closet?`;
-    
-    // Use window.confirm on web, Alert.alert on native
-    if (Platform.OS === 'web') {
-      if (window.confirm(confirmMessage)) {
-        const updatedItems = wardrobeItems.filter(item => !selectedItems.includes(item.id));
-        setWardrobeItems(updatedItems);
-        setSelectedItems([]);
-        await saveWardrobe(updatedItems);
-      }
-    } else {
-      Alert.alert(
-        'Delete Selected Items',
-        confirmMessage,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: async () => {
-              const updatedItems = wardrobeItems.filter(item => !selectedItems.includes(item.id));
-              setWardrobeItems(updatedItems);
-              setSelectedItems([]);
-              await saveWardrobe(updatedItems);
-            },
-          },
-        ]
-      );
-    }
-  }, [wardrobeItems, selectedItems]);
-
-  // Long press to delete
-  const handleLongPress = useCallback((itemId) => {
-    deleteItem(itemId);
-  }, [deleteItem]);
-
-  const toggleSelectItem = (id) => {
-    if (editMode) {
-      // In edit mode, tap to delete
-      deleteItem(id);
-    } else {
-      if (selectedItems.includes(id)) {
-        setSelectedItems(selectedItems.filter(i => i !== id));
-      } else {
-        setSelectedItems([...selectedItems, id]);
-      }
-    }
   };
 
-  const filteredItems = activeCategory === 'all' 
-    ? wardrobeItems 
-    : wardrobeItems.filter(item => item.category === activeCategory);
-
-  const renderWardrobeItem = ({ item }) => {
-    const isSelected = selectedItems.includes(item.id);
-    
-    return (
-      <TouchableOpacity
-        style={[styles.wardrobeItem, isSelected && !editMode && styles.wardrobeItemSelected]}
-        onPress={() => toggleSelectItem(item.id)}
-        onLongPress={() => handleLongPress(item.id)}
-        delayLongPress={500}
-        activeOpacity={0.8}
-      >
-        <Image source={{ uri: item.image }} style={styles.itemImage} />
-        
-        {/* Delete button in edit mode */}
-        {editMode && (
-          <TouchableOpacity 
-            style={styles.deleteButton}
-            onPress={() => deleteItem(item.id)}
-          >
-            <MaterialCommunityIcons name="close-circle" size={28} color="#FF4757" />
-          </TouchableOpacity>
-        )}
-        
-        {/* Selection badge */}
-        {isSelected && !editMode && (
-          <View style={styles.selectedBadge}>
-            <MaterialCommunityIcons name="check-circle" size={28} color={COLORS.primary} />
-          </View>
-        )}
-        
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)']}
-          style={styles.itemOverlay}
-        >
-          <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-          <View style={styles.itemTags}>
-            {item.tags.slice(0, 2).map((tag, idx) => (
-              <View key={idx} style={styles.itemTag}>
-                <Text style={styles.itemTagText}>#{tag}</Text>
-              </View>
-            ))}
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
+  // Get items for a drawer/category
+  const getDrawerItems = (categoryId) => {
+    return wardrobeItems.filter(item => item.category === categoryId);
   };
 
-  const renderCategoryTab = (category) => {
-    const isActive = activeCategory === category.id;
+  // Check if can style
+  const canStyle = wardrobeItems.length >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
+
+  // Render a single drawer section
+  const renderDrawer = (drawer) => {
+    const items = getDrawerItems(drawer.id);
     
     return (
-      <TouchableOpacity 
-        key={category.id} 
-        style={[styles.categoryTab, isActive && styles.categoryTabActive]}
-        onPress={() => setActiveCategory(category.id)}
-        activeOpacity={0.8}
-      >
-        <MaterialCommunityIcons 
-          name={category.icon} 
-          size={20} 
-          color={isActive ? COLORS.textPrimary : COLORS.textSecondary} 
-        />
-        <Text style={[styles.categoryTabText, isActive && styles.categoryTabTextActive]}>
-          {category.name}
-        </Text>
-        <View style={[styles.categoryCount, isActive && styles.categoryCountActive]}>
-          <Text style={styles.categoryCountText}>{category.count}</Text>
+      <View key={drawer.id} style={styles.drawer}>
+        <View style={styles.drawerHeader}>
+          <View style={styles.drawerLabel}>
+            <MaterialCommunityIcons name={drawer.icon} size={18} color={COLORS.textSecondary} />
+            <Text style={styles.drawerTitle}>{drawer.label}</Text>
+          </View>
+          <Text style={styles.drawerCount}>{items.length}</Text>
         </View>
-      </TouchableOpacity>
+        
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.drawerContent}
+        >
+          {items.length > 0 ? (
+            items.map((item) => (
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.itemCard}
+                onLongPress={() => editMode && deleteItem(item.id)}
+                activeOpacity={0.9}
+              >
+                <Image source={{ uri: item.image }} style={styles.itemImage} />
+                {editMode && (
+                  <TouchableOpacity 
+                    style={styles.deleteButton}
+                    onPress={() => deleteItem(item.id)}
+                  >
+                    <MaterialCommunityIcons name="close" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={styles.emptyDrawer}>
+              <MaterialCommunityIcons name={drawer.icon} size={24} color={COLORS.textMuted} />
+              <Text style={styles.emptyDrawerText}>No {drawer.label.toLowerCase()} yet</Text>
+            </View>
+          )}
+          
+          {/* Add button at end of drawer */}
+          <TouchableOpacity 
+            style={styles.addInDrawer}
+            onPress={pickImage}
+          >
+            <MaterialCommunityIcons name="plus" size={24} color={COLORS.primary} />
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     );
   };
 
@@ -348,117 +247,81 @@ export default function AIWardrobeScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
         ref={scrollViewRef}
-        style={styles.scrollView} 
+        style={styles.scrollView}
         contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Clean Header - No back button since it's a tab */}
+        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.headerTitle}>My Closet</Text>
             <Text style={styles.headerSubtitle}>{wardrobeItems.length} items</Text>
           </View>
           <TouchableOpacity 
-            onPress={() => setEditMode(!editMode)} 
+            onPress={() => { setEditMode(!editMode); triggerHaptic('light'); }}
             style={[styles.editButton, editMode && styles.editButtonActive]}
           >
             <MaterialCommunityIcons 
               name={editMode ? "check" : "pencil"} 
-              size={20} 
-              color={editMode ? "#FFFFFF" : COLORS.textPrimary} 
+              size={18} 
+              color={editMode ? "#FFFFFF" : COLORS.textSecondary} 
             />
           </TouchableOpacity>
         </View>
 
-        {/* Edit Mode Banner */}
-        {editMode && (
-          <View style={styles.editBanner}>
-            <MaterialCommunityIcons name="information" size={18} color="#FFD93D" />
-            <Text style={styles.editBannerText}>Tap items to delete them</Text>
-          </View>
-        )}
-
-        {/* Style My Wardrobe - Only shows after 3+ items */}
-        {wardrobeItems.length >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS && !editMode && (
+        {/* Style My Wardrobe - Only after milestone */}
+        {canStyle && !editMode && (
           <TouchableOpacity 
-            style={styles.styleWardrobeCard}
-            onPress={() => router.push('/aistylist')}
+            style={styles.styleCard}
+            onPress={() => { triggerHaptic('light'); router.push('/aistylist'); }}
             activeOpacity={0.9}
           >
-            <View style={styles.styleWardrobeContent}>
-              <View style={styles.styleWardrobeIcon}>
-                <MaterialCommunityIcons name="hanger" size={22} color={COLORS.primary} />
-              </View>
-              <View style={styles.styleWardrobeText}>
-                <Text style={styles.styleWardrobeTitle}>Style My Wardrobe</Text>
-                <Text style={styles.styleWardrobeSubtitle}>Get outfit ideas from your clothes</Text>
-              </View>
+            <View style={styles.styleCardLeft}>
+              <Text style={styles.styleCardTitle}>Style My Wardrobe</Text>
+              <Text style={styles.styleCardSubtitle}>Get outfit ideas for today</Text>
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={COLORS.textMuted} />
+            <MaterialCommunityIcons name="chevron-right" size={22} color={COLORS.primary} />
           </TouchableOpacity>
         )}
 
-        {/* Category Tabs */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryTabs}
-        >
-          {categories.map(renderCategoryTab)}
-        </ScrollView>
-
-        {/* Section Header */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            {activeCategory === 'all' ? 'My Wardrobe' : categories.find(c => c.id === activeCategory)?.name} 
-            {' '}({filteredItems.length} items)
-          </Text>
-          {selectedItems.length > 0 && !editMode && (
-            <View style={styles.selectionActions}>
-              <TouchableOpacity onPress={deleteSelectedItems} activeOpacity={0.8} style={styles.deleteSelectedBtn}>
-                <MaterialCommunityIcons name="trash-can-outline" size={16} color="#FF4757" />
-                <Text style={styles.deleteSelectedText}>Delete ({selectedItems.length})</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSelectedItems([])} activeOpacity={0.8}>
-                <Text style={styles.clearSelection}>Clear</Text>
-              </TouchableOpacity>
+        {/* Milestone Progress - Before unlocking */}
+        {!canStyle && (
+          <View style={styles.milestoneCard}>
+            <View style={styles.milestoneProgress}>
+              <View style={[styles.milestoneBar, { width: `${(wardrobeItems.length / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }]} />
             </View>
-          )}
-        </View>
-        
-        {/* Wardrobe Grid */}
-        {filteredItems.length === 0 ? (
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="tshirt-crew-outline" size={64} color={COLORS.textMuted} />
-            <Text style={styles.emptyStateText}>No items in this category</Text>
-            <TouchableOpacity style={styles.addFirstButton} onPress={pickImage}>
-              <MaterialCommunityIcons name="plus" size={20} color={COLORS.primary} />
-              <Text style={styles.addFirstText}>Add your first item</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.wardrobeGrid}>
-            {filteredItems.map((item) => (
-              <View key={item.id} style={styles.wardrobeItemWrapper}>
-                {renderWardrobeItem({ item })}
-              </View>
-            ))}
+            <Text style={styles.milestoneText}>
+              {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - wardrobeItems.length} more to unlock outfit suggestions
+            </Text>
           </View>
         )}
+
+        {/* Drawers */}
+        <View style={styles.drawersSection}>
+          {DRAWERS.map(renderDrawer)}
+        </View>
 
       </ScrollView>
 
-      {/* Clean Bottom CTA - Single "Add Item" action */}
+      {/* Bottom Add CTA */}
       {!editMode && (
         <View style={[styles.bottomCTA, { paddingBottom: insets.bottom + 16 }]}>
           <TouchableOpacity 
-            style={styles.addItemButton}
+            style={styles.addButton}
             onPress={pickImage}
             activeOpacity={0.9}
           >
-            <MaterialCommunityIcons name="plus" size={20} color="#FFFFFF" />
-            <Text style={styles.addItemText}>Add Item</Text>
+            <MaterialCommunityIcons name="camera-plus" size={20} color="#FFFFFF" />
+            <Text style={styles.addButtonText}>Add Item</Text>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Edit Mode Banner */}
+      {editMode && (
+        <View style={[styles.editBanner, { paddingBottom: insets.bottom + 16 }]}>
+          <MaterialCommunityIcons name="gesture-tap" size={18} color="#FFD93D" />
+          <Text style={styles.editBannerText}>Tap items to remove them</Text>
         </View>
       )}
     </LinearGradient>
@@ -473,19 +336,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: SPACING.bottomPadding,
+    paddingBottom: 100,
   },
+  
+  // Header
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: SPACING.screenHorizontal,
     paddingTop: 16,
     paddingBottom: 20,
   },
-  headerLeft: {
-    flex: 1,
-  },
+  headerLeft: {},
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
@@ -500,249 +363,156 @@ const styles = StyleSheet.create({
   editButton: {
     width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.card,
-    borderRadius: 20,
   },
   editButtonActive: {
     backgroundColor: COLORS.primary,
   },
-  editBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginHorizontal: SPACING.screenHorizontal,
-    marginBottom: 12,
-    padding: 12,
-    backgroundColor: 'rgba(255, 217, 61, 0.15)',
-    borderRadius: 10,
-  },
-  editBannerText: {
-    color: '#FFD93D',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  // Style My Wardrobe Card
-  styleWardrobeCard: {
+  
+  // Style Card
+  styleCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginHorizontal: SPACING.screenHorizontal,
-    marginBottom: 20,
-    padding: 16,
-    backgroundColor: 'rgba(177, 76, 255, 0.08)',
-    borderRadius: 14,
+    marginBottom: 24,
+    padding: 18,
+    backgroundColor: 'rgba(177, 76, 255, 0.1)',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(177, 76, 255, 0.15)',
+    borderColor: 'rgba(177, 76, 255, 0.2)',
   },
-  styleWardrobeContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  styleWardrobeIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(177, 76, 255, 0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  styleWardrobeText: {
-    flex: 1,
-  },
-  styleWardrobeTitle: {
-    fontSize: 15,
+  styleCardLeft: {},
+  styleCardTitle: {
+    fontSize: 17,
     fontWeight: '600',
     color: COLORS.textPrimary,
   },
-  styleWardrobeSubtitle: {
+  styleCardSubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 2,
   },
-  categoryTabs: {
-    paddingHorizontal: SPACING.screenHorizontal,
-    paddingBottom: SPACING.subtitleToChips,
-    gap: SPACING.chipGap,
+  
+  // Milestone
+  milestoneCard: {
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: 24,
+    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 12,
   },
-  categoryTab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: COLORS.card,
-    borderRadius: SIZES.borderRadiusPill,
-    gap: 8,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  categoryTabActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: 'rgba(177, 76, 255, 0.15)',
-  },
-  categoryTabText: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  categoryTabTextActive: {
-    color: COLORS.textPrimary,
-  },
-  categoryCount: {
-    backgroundColor: COLORS.card,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  categoryCountActive: {
-    backgroundColor: COLORS.primary,
-  },
-  categoryCountText: {
-    color: COLORS.textPrimary,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: SPACING.sectionTitleToContent,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  selectionActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  deleteSelectedBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: 'rgba(255, 71, 87, 0.15)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 71, 87, 0.3)',
-  },
-  deleteSelectedText: {
-    color: '#FF4757',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  clearSelection: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  wardrobeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: SPACING.screenHorizontal,
-    justifyContent: 'space-between',
-  },
-  wardrobeItemWrapper: {
-    width: '48%',
-    marginBottom: SPACING.cardGap,
-  },
-  wardrobeItem: {
-    width: '100%',
-    height: 240,
-    backgroundColor: COLORS.card,
-    borderRadius: SIZES.borderRadiusCard,
+  milestoneProgress: {
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 2,
+    marginBottom: 10,
     overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: 'transparent',
-    ...CARD_SHADOW,
   },
-  wardrobeItemSelected: {
-    borderColor: COLORS.primary,
+  milestoneBar: {
+    height: '100%',
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
+  },
+  milestoneText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+  },
+  
+  // Drawers Section
+  drawersSection: {
+    gap: 8,
+  },
+  drawer: {
+    marginBottom: 16,
+  },
+  drawerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: 12,
+  },
+  drawerLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  drawerTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  drawerCount: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  drawerContent: {
+    paddingHorizontal: SPACING.screenHorizontal,
+    gap: 12,
+  },
+  
+  // Item Card
+  itemCard: {
+    width: 100,
+    height: 100,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   itemImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    resizeMode: 'cover',
   },
   deleteButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 20,
-    padding: 2,
-    zIndex: 10,
-  },
-  selectedBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderRadius: 20,
-    padding: 4,
-  },
-  itemOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 12,
-  },
-  itemName: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  itemTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  itemTag: {
-    backgroundColor: 'rgba(177, 76, 255, 0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  itemTagText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyStateText: {
-    color: COLORS.textMuted,
-    fontSize: 16,
-    marginTop: 16,
-    marginBottom: 20,
-  },
-  addFirstButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    top: 6,
+    right: 6,
+    width: 24,
+    height: 24,
     borderRadius: 12,
+    backgroundColor: '#FF4757',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  // Empty Drawer
+  emptyDrawer: {
+    width: 100,
+    height: 100,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderStyle: 'dashed',
   },
-  addFirstText: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: '600',
+  emptyDrawerText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 4,
+    textAlign: 'center',
   },
-  // Clean Bottom CTA
+  
+  // Add in Drawer
+  addInDrawer: {
+    width: 100,
+    height: 100,
+    borderRadius: 14,
+    backgroundColor: 'rgba(177, 76, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.2)',
+  },
+  
+  // Bottom CTA
   bottomCTA: {
     position: 'absolute',
     bottom: 0,
@@ -754,18 +524,40 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.06)',
   },
-  addItemButton: {
+  addButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: 14,
   },
-  addItemText: {
+  addButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  
+  // Edit Banner
+  editBanner: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingHorizontal: SPACING.screenHorizontal,
+    paddingTop: 16,
+    backgroundColor: 'rgba(255, 217, 61, 0.15)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 217, 61, 0.3)',
+  },
+  editBannerText: {
+    color: '#FFD93D',
+    fontSize: 14,
     fontWeight: '600',
   },
 });
