@@ -1,5 +1,5 @@
-// My Closet (AI Wardrobe) - v1 with DELETE functionality
-// Manages user's wardrobe items with ability to add, view, and DELETE items
+// My Closet - v1: The Heart of the App
+// Premium, spacious, calm digital wardrobe
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import GradientButton from '../components/GradientButton';
 import { uploadImage, pollJobResult } from '../services/revealAPI';
+import { ONBOARDING_CONFIG } from '../services/onboardingService';
 
 const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 
