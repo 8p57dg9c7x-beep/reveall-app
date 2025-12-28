@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View } from 'react-native';
 import { COLORS } from '../constants/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
@@ -22,6 +23,7 @@ export default function RootLayout() {
         <Tabs
         screenOptions={{
           headerShown: false,
+          animation: 'fade', // Subtle fade transition between tabs
           tabBarStyle: {
             backgroundColor: COLORS.tabBarBackground,
             borderTopWidth: 1,
