@@ -485,7 +485,6 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 2,
   },
-  },
   editButton: {
     width: 40,
     height: 40,
