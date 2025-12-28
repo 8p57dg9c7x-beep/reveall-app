@@ -512,6 +512,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  // Style My Wardrobe Card
+  styleWardrobeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: 'rgba(177, 76, 255, 0.08)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.15)',
+  },
+  styleWardrobeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  styleWardrobeIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(177, 76, 255, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  styleWardrobeText: {
+    flex: 1,
+  },
+  styleWardrobeTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  styleWardrobeSubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
   categoryTabs: {
     paddingHorizontal: SPACING.screenHorizontal,
     paddingBottom: SPACING.subtitleToChips,
