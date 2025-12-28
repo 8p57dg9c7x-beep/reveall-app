@@ -468,26 +468,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingTop: 12,
-    paddingBottom: SPACING.headerPaddingBottom,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
-  },
-  headerCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  headerLeft: {
+    flex: 1,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: COLORS.textPrimary,
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
   },
   editButton: {
     width: 40,
