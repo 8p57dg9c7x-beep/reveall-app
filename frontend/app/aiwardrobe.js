@@ -446,19 +446,21 @@ export default function AIWardrobeScreen() {
           </View>
         )}
 
-        {/* Add Item Button */}
-        <GradientButton
-          title="Add New Item"
-          onPress={pickImage}
-          icon={<MaterialCommunityIcons name="plus" size={20} color="#fff" />}
-          style={styles.addButton}
-        />
-
-        {/* Hint text */}
-        <Text style={styles.hintText}>
-          💡 Long press any item to delete it
-        </Text>
       </ScrollView>
+
+      {/* Clean Bottom CTA - Single "Add Item" action */}
+      {!editMode && (
+        <View style={[styles.bottomCTA, { paddingBottom: insets.bottom + 16 }]}>
+          <TouchableOpacity 
+            style={styles.addItemButton}
+            onPress={pickImage}
+            activeOpacity={0.9}
+          >
+            <MaterialCommunityIcons name="plus" size={20} color="#FFFFFF" />
+            <Text style={styles.addItemText}>Add Item</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </LinearGradient>
   );
 }
