@@ -29,13 +29,21 @@ const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 export default function AIWardrobeScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
-  const returnPath = params.returnPath || '/stylelab';
+  const returnPath = params.returnPath || '/';
+  const scrollViewRef = useRef(null);
   
   const [wardrobeItems, setWardrobeItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Reset scroll to top on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    }, [])
+  );
 
   // Load wardrobe from AsyncStorage on mount
   useEffect(() => {
