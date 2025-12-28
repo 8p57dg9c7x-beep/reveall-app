@@ -8,7 +8,7 @@ import { AddiletsProvider } from '../contexts/AddiletsContext';
 import { initializeFirebase } from '../services/firebase';
 import { FEATURE_FLAGS } from '../config/featureFlags';
 
-// Bundle Version: 1.0.0 - v1 Launch (Hyper-focused: What to Wear Today)
+// Bundle Version: 1.0.0 - v1 Launch (Premium Digital Wardrobe)
 export default function RootLayout() {
   // Initialize Firebase on app launch
   useEffect(() => {
@@ -25,14 +25,14 @@ export default function RootLayout() {
           tabBarStyle: {
             backgroundColor: COLORS.tabBarBackground,
             borderTopWidth: 1,
-            borderTopColor: 'rgba(177, 76, 255, 0.1)',
+            borderTopColor: 'rgba(177, 76, 255, 0.08)',
             elevation: 0,
             height: 100,
             paddingBottom: 30,
             paddingTop: 12,
             shadowColor: COLORS.primary,
             shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
+            shadowOpacity: 0.05,
             shadowRadius: 12,
           },
           tabBarActiveTintColor: COLORS.tabBarActive,
@@ -50,55 +50,31 @@ export default function RootLayout() {
           },
         }}
       >
-        {/* ===== v1 TABS (3 Active - Hyper-focused) ===== */}
+        {/* ===== v1 TABS: Closet-Centric Navigation ===== */}
         
-        {/* TAB 1: HOME - Weather Outfits + Daily Recommendations */}
+        {/* TAB 1: TODAY - Calm welcome + wardrobe preview */}
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
+            title: 'Today',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="home" size={24} color={color} />
+              <MaterialCommunityIcons name="white-balance-sunny" size={24} color={color} />
             ),
           }}
         />
         
-        {/* TAB 2: DISCOVER - HIDDEN FOR v1 */}
+        {/* TAB 2: MY CLOSET - The heart of the app */}
         <Tabs.Screen
-          name="discover"
+          name="aiwardrobe"
           options={{
-            href: null, // Hidden for v1
-            title: 'Discover',
+            title: 'My Closet',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="compass" size={24} color={color} />
+              <MaterialCommunityIcons name="wardrobe" size={24} color={color} />
             ),
           }}
         />
         
-        {/* TAB 2 (actual): STYLE LAB - AI Stylist + Body Scanner + Closet */}
-        <Tabs.Screen
-          name="stylelab"
-          options={{
-            title: 'Style Lab',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="flask" size={24} color={color} />
-            ),
-          }}
-        />
-        
-        {/* TAB: FITNESS - HIDDEN FOR v1 */}
-        <Tabs.Screen
-          name="fitness"
-          options={{
-            href: null, // Hidden for v1
-            title: 'Fitness',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="dumbbell" size={24} color={color} />
-            ),
-          }}
-        />
-        
-        {/* TAB 3: PROFILE - Saved Items & Settings */}
+        {/* TAB 3: PROFILE - Settings & saved items */}
         <Tabs.Screen
           name="profile"
           options={{
@@ -109,14 +85,16 @@ export default function RootLayout() {
           }}
         />
 
-        {/* ===== v1 ACTIVE STACK SCREENS ===== */}
+        {/* ===== STACK SCREENS (accessible via navigation) ===== */}
         <Tabs.Screen name="aistylist" options={{ href: null }} />
-        <Tabs.Screen name="aiwardrobe" options={{ href: null }} />
         <Tabs.Screen name="bodyscanner" options={{ href: null }} />
         <Tabs.Screen name="saved-outfits" options={{ href: null }} />
         <Tabs.Screen name="outfitdetail" options={{ href: null }} />
+        <Tabs.Screen name="stylelab" options={{ href: null }} />
         
         {/* ===== HIDDEN FOR v1 ===== */}
+        <Tabs.Screen name="discover" options={{ href: null }} />
+        <Tabs.Screen name="fitness" options={{ href: null }} />
         <Tabs.Screen name="addilets" options={{ href: null }} />
         <Tabs.Screen name="style" options={{ href: null }} />
         <Tabs.Screen name="beauty" options={{ href: null }} />
@@ -125,8 +103,6 @@ export default function RootLayout() {
         <Tabs.Screen name="musicscan" options={{ href: null }} />
         <Tabs.Screen name="trendingsongs" options={{ href: null }} />
         <Tabs.Screen name="comingsoon" options={{ href: null }} />
-
-        {/* ===== OTHER SCREENS ===== */}
         <Tabs.Screen name="result" options={{ href: null }} />
         <Tabs.Screen name="favorites" options={{ href: null }} />
         <Tabs.Screen name="watchlist" options={{ href: null }} />
