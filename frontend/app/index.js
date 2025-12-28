@@ -90,6 +90,7 @@ export default function TodayScreen() {
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
+        ref={scrollViewRef}
         contentContainerStyle={[styles.content, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
