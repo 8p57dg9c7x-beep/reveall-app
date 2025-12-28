@@ -742,15 +742,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  addButton: {
-    marginHorizontal: SPACING.screenHorizontal,
-    marginTop: 24,
+  // Clean Bottom CTA
+  bottomCTA: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: SPACING.screenHorizontal,
+    paddingTop: 16,
+    backgroundColor: 'rgba(11, 8, 18, 0.95)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.06)',
   },
-  hintText: {
-    textAlign: 'center',
-    color: COLORS.textMuted,
-    fontSize: 13,
-    marginTop: 16,
-    paddingHorizontal: 20,
+  addItemButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: 14,
+  },
+  addItemText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
