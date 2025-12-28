@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
@@ -24,10 +25,18 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Philosophy: "This is my wardrobe — organized, calm, and helpful."
 export default function TodayScreen() {
   const insets = useSafeAreaInsets();
+  const scrollViewRef = useRef(null);
   const [weather, setWeather] = useState(null);
   const [closetCount, setClosetCount] = useState(0);
   const [recentItems, setRecentItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Reset scroll to top on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    }, [])
+  );
 
   // Track app open
   useEffect(() => {
