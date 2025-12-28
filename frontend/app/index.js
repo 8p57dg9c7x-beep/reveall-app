@@ -16,22 +16,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
 import { fetchRealWeather } from '../services/weatherService';
-import { getClosetItemCount, ONBOARDING_CONFIG } from '../services/onboardingService';
+import { ONBOARDING_CONFIG } from '../services/onboardingService';
 import { logEvent } from '../services/firebase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Today Screen - v1: "What should I wear today?"
-// A living wardrobe that thinks for you
+// Today Screen - A calm daily check-in
+// "Confidence starts here."
 export default function TodayScreen() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef(null);
   const [weather, setWeather] = useState(null);
   const [closetCount, setClosetCount] = useState(0);
   const [recentItems, setRecentItems] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Reset scroll on focus
   useFocusEffect(
     useCallback(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
@@ -44,7 +42,6 @@ export default function TodayScreen() {
 
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
       try {
         const weatherData = await fetchRealWeather();
         setWeather(weatherData);
@@ -53,18 +50,15 @@ export default function TodayScreen() {
         if (wardrobeJson) {
           const items = JSON.parse(wardrobeJson);
           setClosetCount(items.length);
-          setRecentItems(items.slice(0, 6));
+          setRecentItems(items.slice(0, 4));
         }
       } catch (error) {
         console.error('Error loading data:', error);
-      } finally {
-        setLoading(false);
       }
     };
     loadData();
   }, []);
 
-  // Refresh closet data periodically
   useFocusEffect(
     useCallback(() => {
       const refresh = async () => {
@@ -72,7 +66,7 @@ export default function TodayScreen() {
         if (wardrobeJson) {
           const items = JSON.parse(wardrobeJson);
           setClosetCount(items.length);
-          setRecentItems(items.slice(0, 6));
+          setRecentItems(items.slice(0, 4));
         }
       };
       refresh();
@@ -82,115 +76,116 @@ export default function TodayScreen() {
   const hasItems = closetCount > 0;
   const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
 
-  // Get outfit suggestion text based on weather
-  const getOutfitHint = () => {
-    if (!weather) return "Checking the weather...";
+  // Gentle outfit hint based on weather
+  const getDailyHint = () => {
+    if (!weather) return null;
     const temp = weather.temp || 70;
-    if (temp < 50) return "Layer up today — it's cold outside";
-    if (temp < 65) return "A light jacket would be perfect";
-    if (temp < 80) return "Great day for your favorite pieces";
-    return "Keep it light and breezy today";
+    if (temp < 50) return "Layer up — it's chilly today";
+    if (temp < 65) return "A light layer would be perfect";
+    if (temp < 80) return "Great weather for your favorites";
+    return "Keep it light and comfortable";
   };
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
         ref={scrollViewRef}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 24 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Dominant Hero: What to Wear Today */}
-        <View style={styles.heroSection}>
-          <Text style={styles.heroQuestion}>What should I wear today?</Text>
+        {/* Warm Welcome */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.greeting}>{weather?.greeting?.text || 'Good day'}</Text>
           
+          {/* Ambient Weather - Subtle */}
           {weather && (
-            <View style={styles.weatherContext}>
-              <MaterialCommunityIcons name={weather.icon} size={20} color={weather.iconColor} />
-              <Text style={styles.weatherText}>{weather.tempDisplay} · {weather.conditionLabel}</Text>
+            <View style={styles.weatherRow}>
+              <MaterialCommunityIcons name={weather.icon} size={18} color={weather.iconColor} />
+              <Text style={styles.weatherText}>{weather.tempDisplay}</Text>
             </View>
           )}
-          
-          <Text style={styles.outfitHint}>{getOutfitHint()}</Text>
         </View>
 
-        {/* Outfit Preview / Anticipation */}
+        {/* Daily Anchor - Subtle reason to check in */}
         {hasItems && canStyle ? (
           <TouchableOpacity 
-            style={styles.outfitPreview}
+            style={styles.dailyCard}
             onPress={() => router.push('/aistylist')}
             activeOpacity={0.9}
           >
-            <View style={styles.outfitHeader}>
-              <Text style={styles.outfitLabel}>Today's suggestion</Text>
-              <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textMuted} />
-            </View>
+            <Text style={styles.dailyLabel}>Today's suggestion</Text>
             
-            <View style={styles.outfitItems}>
+            <View style={styles.outfitPreview}>
               {recentItems.slice(0, 3).map((item, index) => (
-                <View key={item.id} style={[styles.outfitItem, index === 1 && styles.outfitItemCenter]}>
-                  <Image source={{ uri: item.image }} style={styles.outfitItemImage} />
-                  <Text style={styles.outfitItemLabel}>{item.category || 'Item'}</Text>
-                </View>
+                <Image 
+                  key={item.id} 
+                  source={{ uri: item.image }} 
+                  style={[
+                    styles.outfitItem,
+                    index === 1 && styles.outfitItemCenter
+                  ]} 
+                />
               ))}
             </View>
             
-            <Text style={styles.outfitTap}>Tap to see full outfit</Text>
+            {getDailyHint() && (
+              <Text style={styles.dailyHint}>{getDailyHint()}</Text>
+            )}
+            
+            <Text style={styles.dailyAction}>Help me decide →</Text>
           </TouchableOpacity>
         ) : hasItems ? (
-          /* Milestone: Almost ready */
-          <View style={styles.milestoneCard}>
-            <View style={styles.milestoneProgress}>
-              <View style={[styles.milestoneBar, { width: `${(closetCount / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }]} />
-            </View>
-            <Text style={styles.milestoneText}>
-              {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more item{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount !== 1 ? 's' : ''} until your wardrobe can dress you
+          /* Progress toward first outfit */
+          <View style={styles.progressCard}>
+            <Text style={styles.progressTitle}>Almost there</Text>
+            <Text style={styles.progressText}>
+              {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more item{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount !== 1 ? 's' : ''} to unlock your first outfit suggestion
             </Text>
-            <TouchableOpacity 
-              style={styles.milestoneButton}
-              onPress={() => router.push('/aiwardrobe')}
-            >
-              <Text style={styles.milestoneButtonText}>Add to Closet</Text>
-            </TouchableOpacity>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${(closetCount / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }]} />
+            </View>
           </View>
         ) : (
-          /* Empty: Outfit Placeholder for anticipation */
-          <View style={styles.placeholderCard}>
-            <View style={styles.placeholderOutfit}>
+          /* Empty - Warm invitation */
+          <View style={styles.inviteCard}>
+            <Text style={styles.inviteTitle}>Your Wardrobe Awaits</Text>
+            <Text style={styles.inviteTagline}>Confidence starts here.</Text>
+            
+            <View style={styles.inviteVisual}>
               <View style={styles.placeholderItem}>
-                <MaterialCommunityIcons name="tshirt-crew-outline" size={32} color={COLORS.textMuted} />
-                <Text style={styles.placeholderLabel}>Top</Text>
+                <MaterialCommunityIcons name="tshirt-crew-outline" size={28} color="rgba(255,255,255,0.3)" />
               </View>
               <View style={styles.placeholderItem}>
-                <MaterialCommunityIcons name="lingerie" size={32} color={COLORS.textMuted} />
-                <Text style={styles.placeholderLabel}>Bottom</Text>
+                <MaterialCommunityIcons name="hanger" size={28} color="rgba(255,255,255,0.3)" />
               </View>
               <View style={styles.placeholderItem}>
-                <MaterialCommunityIcons name="shoe-sneaker" size={32} color={COLORS.textMuted} />
-                <Text style={styles.placeholderLabel}>Shoes</Text>
+                <MaterialCommunityIcons name="shoe-sneaker" size={28} color="rgba(255,255,255,0.3)" />
               </View>
             </View>
-            <Text style={styles.placeholderText}>Your outfit will appear here</Text>
-            <Text style={styles.placeholderSubtext}>Add clothes to your closet to get started</Text>
+            
+            <TouchableOpacity 
+              style={styles.inviteCTA}
+              onPress={() => router.push('/aiwardrobe')}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.inviteCTAText}>Open My Closet</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {/* Quick Access to Closet */}
-        <TouchableOpacity 
-          style={styles.closetAccess}
-          onPress={() => router.push('/aiwardrobe')}
-          activeOpacity={0.9}
-        >
-          <View style={styles.closetAccessLeft}>
-            <MaterialCommunityIcons name="wardrobe-outline" size={24} color={COLORS.primary} />
-            <View>
-              <Text style={styles.closetAccessTitle}>My Closet</Text>
-              <Text style={styles.closetAccessSubtitle}>
-                {closetCount === 0 ? 'Start building' : `${closetCount} items`}
-              </Text>
-            </View>
-          </View>
-          <MaterialCommunityIcons name="chevron-right" size={22} color={COLORS.textMuted} />
-        </TouchableOpacity>
+        {/* Closet Access - Always visible */}
+        {hasItems && (
+          <TouchableOpacity 
+            style={styles.closetLink}
+            onPress={() => router.push('/aiwardrobe')}
+            activeOpacity={0.8}
+          >
+            <MaterialCommunityIcons name="wardrobe-outline" size={20} color={COLORS.textSecondary} />
+            <Text style={styles.closetLinkText}>My Closet</Text>
+            <Text style={styles.closetLinkCount}>{closetCount}</Text>
+            <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        )}
 
       </ScrollView>
     </LinearGradient>
@@ -206,183 +201,162 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   
-  // Hero Section - Dominant
-  heroSection: {
-    marginBottom: 28,
+  // Welcome
+  welcomeSection: {
+    marginBottom: 32,
   },
-  heroQuestion: {
+  greeting: {
     fontSize: 32,
     fontWeight: '700',
     color: COLORS.textPrimary,
     letterSpacing: -1,
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  weatherContext: {
+  weatherRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 6,
   },
   weatherText: {
     fontSize: 15,
     color: COLORS.textSecondary,
   },
-  outfitHint: {
-    fontSize: 17,
-    color: COLORS.textPrimary,
-    fontWeight: '500',
-  },
   
-  // Outfit Preview
-  outfitPreview: {
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(177, 76, 255, 0.15)',
-  },
-  outfitHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  // Daily Card - For users with items
+  dailyCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 24,
+    padding: 24,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 24,
   },
-  outfitLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
+  dailyLabel: {
+    fontSize: 12,
     fontWeight: '600',
+    color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    marginBottom: 20,
   },
-  outfitItems: {
+  outfitPreview: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    gap: 12,
-    marginBottom: 16,
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
   },
   outfitItem: {
-    alignItems: 'center',
-    width: 90,
-  },
-  outfitItemCenter: {
-    transform: [{ scale: 1.1 }],
-  },
-  outfitItemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+    width: 72,
+    height: 72,
+    borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
-  outfitItemLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 6,
+  outfitItemCenter: {
+    width: 88,
+    height: 88,
+    borderRadius: 20,
   },
-  outfitTap: {
-    fontSize: 13,
-    color: COLORS.primary,
+  dailyHint: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    marginBottom: 16,
     textAlign: 'center',
-    fontWeight: '500',
+  },
+  dailyAction: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.primary,
   },
   
-  // Milestone Card
-  milestoneCard: {
-    backgroundColor: 'rgba(177, 76, 255, 0.08)',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    alignItems: 'center',
+  // Progress Card
+  progressCard: {
+    backgroundColor: 'rgba(177, 76, 255, 0.06)',
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
   },
-  milestoneProgress: {
-    width: '100%',
+  progressTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  progressText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  progressBar: {
     height: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 2,
-    marginBottom: 16,
     overflow: 'hidden',
   },
-  milestoneBar: {
+  progressFill: {
     height: '100%',
     backgroundColor: COLORS.primary,
     borderRadius: 2,
   },
-  milestoneText: {
-    fontSize: 15,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  milestoneButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  milestoneButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '600',
-  },
   
-  // Placeholder Card
-  placeholderCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 20,
-    padding: 32,
-    marginBottom: 20,
+  // Invite Card - Empty state
+  inviteCard: {
+    alignItems: 'center',
+    paddingVertical: 48,
+    marginBottom: 24,
+  },
+  inviteTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+  },
+  inviteTagline: {
+    fontSize: 17,
+    color: COLORS.textSecondary,
+    marginBottom: 40,
+  },
+  inviteVisual: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 40,
+  },
+  placeholderItem: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
-    borderStyle: 'dashed',
   },
-  placeholderOutfit: {
-    flexDirection: 'row',
-    gap: 24,
-    marginBottom: 20,
+  inviteCTA: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 16,
   },
-  placeholderItem: {
-    alignItems: 'center',
-    opacity: 0.5,
-  },
-  placeholderLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 6,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    marginBottom: 4,
-  },
-  placeholderSubtext: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-  },
-  
-  // Closet Access
-  closetAccess: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 14,
-    padding: 16,
-  },
-  closetAccessLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  closetAccessTitle: {
+  inviteCTAText: {
     fontSize: 16,
     fontWeight: '600',
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
   },
-  closetAccessSubtitle: {
-    fontSize: 13,
+  
+  // Closet Link
+  closetLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 16,
+  },
+  closetLinkText: {
+    flex: 1,
+    fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 1,
+  },
+  closetLinkCount: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginRight: 4,
   },
 });
