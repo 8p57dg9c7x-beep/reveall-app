@@ -50,13 +50,8 @@ export default function MyClosetScreen() {
   useFocusEffect(
     useCallback(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-      loadWardrobe();
     }, [])
   );
-
-  useEffect(() => {
-    loadWardrobe();
-  }, []);
 
   const loadWardrobe = async () => {
     try {
@@ -71,6 +66,10 @@ export default function MyClosetScreen() {
       setWardrobeItems(DEFAULT_ITEMS);
     }
   };
+
+  useEffect(() => {
+    loadWardrobe();
+  }, []);
 
   const saveWardrobe = async (items) => {
     await AsyncStorage.setItem(WARDROBE_STORAGE_KEY, JSON.stringify(items));
