@@ -80,7 +80,7 @@ export default function TodayScreen() {
   const getDailyHint = () => {
     if (!weather) return null;
     const temp = weather.temp || 70;
-    if (temp < 50) return "Layer up — it's chilly today";
+    if (temp < 50) return "Layer up - it's chilly today";
     if (temp < 65) return "A light layer would be perfect";
     if (temp < 80) return "Great weather for your favorites";
     return "Keep it light and comfortable";
