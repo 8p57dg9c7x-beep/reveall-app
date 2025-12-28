@@ -131,6 +131,7 @@ export default function ProfileScreen() {
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <FlatList
+        ref={flatListRef}
         data={menuItems}
         renderItem={renderMenuItem}
         keyExtractor={(item) => item.id}
