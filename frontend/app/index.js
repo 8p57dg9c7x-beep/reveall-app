@@ -1,10 +1,10 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
   Image,
   Dimensions,
 } from 'react-native';
@@ -12,44 +12,44 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 import { fetchRealWeather } from '../services/weatherService';
-import { isFirstTimeUser, getClosetItemCount, ONBOARDING_CONFIG } from '../services/onboardingService';
+import { getClosetItemCount, ONBOARDING_CONFIG } from '../services/onboardingService';
 import { logEvent } from '../services/firebase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Home Screen - v1 Focused: Weather → AI Stylist → Wardrobe
-export default function HomeScreen() {
+// Today Screen - v1: Calm, Wardrobe-First Welcome
+// Philosophy: "This is my wardrobe — organized, calm, and helpful."
+export default function TodayScreen() {
   const insets = useSafeAreaInsets();
   const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isNewUser, setIsNewUser] = useState(false);
   const [closetCount, setClosetCount] = useState(0);
-  const [stylistUnlocked, setStylistUnlocked] = useState(false);
+  const [recentItems, setRecentItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Track app open
   useEffect(() => {
-    logEvent('app_opened', { screen: 'home' });
+    logEvent('app_opened', { screen: 'today' });
   }, []);
 
-  // Load real weather data and onboarding state
+  // Load data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Load weather
+        // Load weather (ambient, not hero)
         const weatherData = await fetchRealWeather();
         setWeather(weatherData);
         
-        // Check onboarding state
-        const firstTime = await isFirstTimeUser();
-        setIsNewUser(firstTime);
-        
-        // Check closet count
-        const count = await getClosetItemCount();
-        setClosetCount(count);
-        setStylistUnlocked(count >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS);
+        // Load closet items for preview
+        const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
+        if (wardrobeJson) {
+          const items = JSON.parse(wardrobeJson);
+          setClosetCount(items.length);
+          setRecentItems(items.slice(0, 4)); // Show 4 recent items as preview
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -60,201 +60,143 @@ export default function HomeScreen() {
     loadData();
   }, []);
 
-  // Refresh closet count when returning to home
+  // Refresh data periodically
   useEffect(() => {
-    const refreshClosetCount = async () => {
-      const count = await getClosetItemCount();
-      setClosetCount(count);
-      setStylistUnlocked(count >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS);
+    const refresh = async () => {
+      const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
+      if (wardrobeJson) {
+        const items = JSON.parse(wardrobeJson);
+        setClosetCount(items.length);
+        setRecentItems(items.slice(0, 4));
+      }
     };
     
-    const interval = setInterval(refreshClosetCount, 2000);
+    const interval = setInterval(refresh, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  // Quick actions - v1 Core: 4 actions (NO Style Discovery)
-  const quickActions = useMemo(() => [
-    { id: 'ai-stylist', label: 'Outfit Ideas', icon: 'hanger', route: '/aistylist', color: '#B14CFF' },
-    { id: 'body-scan', label: 'Body Scan', icon: 'human', route: '/bodyscanner', color: '#4ECDC4' },
-    { id: 'wardrobe', label: 'My Closet', icon: 'hanger', route: '/aiwardrobe', color: '#FF6EC7' },
-    { id: 'favorites', label: 'Favorites', icon: 'heart', route: '/saved-outfits', color: '#FF4757' },
-  ], []);
-
-  // Render quick action button
-  const renderQuickAction = useCallback((action) => (
-    <TouchableOpacity
-      key={action.id}
-      style={styles.quickAction}
-      onPress={() => router.push({ pathname: action.route, params: { returnPath: '/' } })}
-      activeOpacity={0.85}
-    >
-      <View style={[styles.quickActionIcon, { backgroundColor: `${action.color}25` }]}>
-        <MaterialCommunityIcons name={action.icon} size={22} color={action.color} />
-      </View>
-      <Text style={styles.quickActionLabel}>{action.label}</Text>
-    </TouchableOpacity>
-  ), []);
-
-  // Main content
-  const ListHeaderComponent = useCallback(() => (
-    <View style={{ paddingTop: insets.top + 16 }}>
-      {/* Greeting */}
-      {weather && (
-        <View style={styles.greetingSection}>
-          <Text style={styles.greetingText}>{weather.greeting.text}</Text>
-          <Text style={styles.dateText}>{weather.dayOfWeek}, {weather.date}</Text>
-        </View>
-      )}
-
-      {/* Weather Style Card - Main CTA to AI Stylist */}
-      {weather && (
-        <TouchableOpacity 
-          style={styles.weatherCard}
-          onPress={() => router.push({ pathname: '/aistylist', params: { returnPath: '/' } })}
-          activeOpacity={0.9}
-        >
-          <LinearGradient
-            colors={[weather.iconColor, `${weather.iconColor}90`]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.weatherGradient}
-          >
-            {/* Weather Info */}
-            <View style={styles.weatherTop}>
-              <View style={styles.weatherLeft}>
-                <MaterialCommunityIcons name={weather.icon} size={48} color="#FFFFFF" />
-                <View style={styles.weatherInfo}>
-                  <Text style={styles.weatherTemp}>{weather.tempDisplay || weather.tempF}</Text>
-                  <Text style={styles.weatherLocation}>{weather.location}</Text>
-                </View>
-              </View>
-              <Text style={styles.weatherCondition}>{weather.conditionLabel}</Text>
-            </View>
-
-            {/* Outfit Suggestion - Daily Hook */}
-            <View style={styles.outfitSuggestion}>
-              <Text style={styles.suggestionLabel}>Today's Best Look for You</Text>
-              <Text style={styles.suggestionStyle}>{weather.outfitSuggestion.style}</Text>
-              <View style={styles.suggestionItems}>
-                {weather.outfitSuggestion.items.slice(0, 3).map((item, i) => (
-                  <View key={i} style={styles.suggestionChip}>
-                    <Text style={styles.suggestionChipText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {/* CTA */}
-            <View style={styles.weatherCTA}>
-              <MaterialCommunityIcons name="robot" size={18} color="#FFFFFF" />
-              <Text style={styles.weatherCTAText}>Style My Wardrobe</Text>
-              <MaterialCommunityIcons name="arrow-right" size={18} color="#FFFFFF" />
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
-
-      {/* Quick Actions - v1 Core: 4 Tools */}
-      <View style={styles.quickActionsRow}>
-        {quickActions.map(renderQuickAction)}
-      </View>
-
-      {/* Onboarding Progress Card - First-Time User Flow */}
-      {!stylistUnlocked && (
-        <View style={styles.section}>
-          <TouchableOpacity 
-            style={styles.onboardingCard}
-            onPress={() => router.push({ pathname: '/aiwardrobe', params: { returnPath: '/' } })}
-            activeOpacity={0.85}
-          >
-            <LinearGradient
-              colors={['rgba(177, 76, 255, 0.15)', 'rgba(139, 92, 246, 0.1)']}
-              style={styles.onboardingGradient}
-            >
-              <View style={styles.onboardingHeader}>
-                <MaterialCommunityIcons name="creation" size={24} color={COLORS.primary} />
-                <Text style={styles.onboardingTitle}>Get Outfit Ideas</Text>
-              </View>
-              
-              <Text style={styles.onboardingText}>
-                Add {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more item{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount !== 1 ? 's' : ''} to your closet to get personalized outfit recommendations
-              </Text>
-              
-              {/* Progress Bar */}
-              <View style={styles.progressContainer}>
-                <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: `${(closetCount / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }]} />
-                </View>
-                <Text style={styles.progressText}>{closetCount}/{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS}</Text>
-              </View>
-              
-              <View style={styles.onboardingCTA}>
-                <MaterialCommunityIcons name="plus" size={18} color="#FFFFFF" />
-                <Text style={styles.onboardingCTAText}>Add Your Clothes</Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Wardrobe CTA Card - For returning users */}
-      {stylistUnlocked && (
-        <View style={styles.section}>
-          <TouchableOpacity 
-            style={styles.wardrobeCTA}
-            onPress={() => router.push({ pathname: '/aiwardrobe', params: { returnPath: '/' } })}
-            activeOpacity={0.85}
-          >
-            <View style={styles.wardrobeCTAContent}>
-              <View style={styles.wardrobeCTAIcon}>
-                <MaterialCommunityIcons name="wardrobe" size={28} color={COLORS.primary} />
-              </View>
-              <View style={styles.wardrobeCTAText}>
-                <Text style={styles.wardrobeCTATitle}>My Closet</Text>
-                <Text style={styles.wardrobeCTASubtitle}>{closetCount} items • Ready for styling</Text>
-              </View>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textMuted} />
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* How It Works Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>How REVEAL Works</Text>
-        <View style={styles.stepsContainer}>
-          <View style={styles.stepItem}>
-            <View style={[styles.stepNumber, { backgroundColor: '#B14CFF25' }]}>
-              <Text style={[styles.stepNumberText, { color: '#B14CFF' }]}>1</Text>
-            </View>
-            <Text style={styles.stepText}>Add your clothes to My Closet</Text>
-          </View>
-          <View style={styles.stepItem}>
-            <View style={[styles.stepNumber, { backgroundColor: '#4ECDC425' }]}>
-              <Text style={[styles.stepNumberText, { color: '#4ECDC4' }]}>2</Text>
-            </View>
-            <Text style={styles.stepText}>We check today's weather for you</Text>
-          </View>
-          <View style={styles.stepItem}>
-            <View style={[styles.stepNumber, { backgroundColor: '#FF6EC725' }]}>
-              <Text style={[styles.stepNumberText, { color: '#FF6EC7' }]}>3</Text>
-            </View>
-            <Text style={styles.stepText}>See outfit ideas from your wardrobe</Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  ), [insets.top, weather, quickActions, renderQuickAction, closetCount, stylistUnlocked]);
+  const hasItems = closetCount > 0;
+  const canStyleWardrobe = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      <FlatList
-        data={[]}
-        renderItem={null}
-        ListHeaderComponent={ListHeaderComponent}
+      <ScrollView 
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
-      />
+      >
+        {/* Calm Header with Ambient Weather */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.greeting}>{weather?.greeting?.text || 'Welcome'}</Text>
+            <Text style={styles.dateText}>{weather?.dayOfWeek}, {weather?.date}</Text>
+          </View>
+          
+          {/* Ambient Weather Badge - Subtle, not hero */}
+          {weather && (
+            <View style={styles.weatherBadge}>
+              <MaterialCommunityIcons name={weather.icon} size={18} color={weather.iconColor} />
+              <Text style={styles.weatherTemp}>{weather.tempDisplay}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Main Content: Wardrobe Preview or Welcome */}
+        {hasItems ? (
+          <>
+            {/* Your Wardrobe Preview */}
+            <TouchableOpacity 
+              style={styles.wardrobePreview}
+              onPress={() => router.push('/aiwardrobe')}
+              activeOpacity={0.9}
+            >
+              <View style={styles.wardrobeHeader}>
+                <Text style={styles.wardrobeTitle}>Your Wardrobe</Text>
+                <View style={styles.wardrobeCount}>
+                  <Text style={styles.wardrobeCountText}>{closetCount} items</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textMuted} />
+                </View>
+              </View>
+              
+              {/* Item Preview Grid */}
+              <View style={styles.itemGrid}>
+                {recentItems.map((item, index) => (
+                  <View key={item.id || index} style={styles.itemPreview}>
+                    <Image source={{ uri: item.image }} style={styles.itemImage} />
+                  </View>
+                ))}
+                {recentItems.length < 4 && Array.from({ length: 4 - recentItems.length }).map((_, i) => (
+                  <View key={`empty-${i}`} style={[styles.itemPreview, styles.itemEmpty]}>
+                    <MaterialCommunityIcons name="plus" size={24} color={COLORS.textMuted} />
+                  </View>
+                ))}
+              </View>
+            </TouchableOpacity>
+
+            {/* Style My Wardrobe - Only shows after 3+ items */}
+            {canStyleWardrobe && weather && (
+              <TouchableOpacity 
+                style={styles.styleCard}
+                onPress={() => router.push('/aistylist')}
+                activeOpacity={0.9}
+              >
+                <View style={styles.styleCardContent}>
+                  <View style={styles.styleCardLeft}>
+                    <Text style={styles.styleCardTitle}>Style My Wardrobe</Text>
+                    <Text style={styles.styleCardSubtitle}>
+                      {weather.tempDisplay} · {weather.conditionLabel}
+                    </Text>
+                  </View>
+                  <View style={styles.styleCardIcon}>
+                    <MaterialCommunityIcons name="hanger" size={24} color={COLORS.primary} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {/* Add More Prompt - if less than 3 items */}
+            {!canStyleWardrobe && (
+              <View style={styles.addMoreCard}>
+                <Text style={styles.addMoreText}>
+                  Add {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more item{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount !== 1 ? 's' : ''} to unlock outfit suggestions
+                </Text>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: `${(closetCount / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }]} />
+                </View>
+              </View>
+            )}
+          </>
+        ) : (
+          /* Empty State - Warm Welcome */
+          <View style={styles.welcomeCard}>
+            <View style={styles.welcomeIcon}>
+              <MaterialCommunityIcons name="wardrobe-outline" size={64} color={COLORS.primary} />
+            </View>
+            <Text style={styles.welcomeTitle}>Your Wardrobe Awaits</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Add your clothes to create a calm, organized space — and get outfit ideas that actually fit your style.
+            </Text>
+            <TouchableOpacity 
+              style={styles.welcomeCTA}
+              onPress={() => router.push('/aiwardrobe')}
+              activeOpacity={0.85}
+            >
+              <MaterialCommunityIcons name="plus" size={20} color="#FFFFFF" />
+              <Text style={styles.welcomeCTAText}>Add Your First Piece</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Ambient Weather Suggestion - Subtle hint */}
+        {weather && hasItems && (
+          <View style={styles.weatherHint}>
+            <MaterialCommunityIcons name={weather.icon} size={16} color={COLORS.textMuted} />
+            <Text style={styles.weatherHintText}>
+              {weather.outfitSuggestion?.tip || `Good day for ${weather.outfitSuggestion?.style?.toLowerCase()}`}
+            </Text>
+          </View>
+        )}
+
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -264,16 +206,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: SPACING.bottomPadding,
-  },
-  // Greeting
-  greetingSection: {
     paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: 20,
+    paddingBottom: 120,
   },
-  greetingText: {
+  
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 32,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  greeting: {
     fontSize: 28,
-    fontWeight: '800',
+    fontWeight: '700',
     color: COLORS.textPrimary,
     letterSpacing: -0.5,
   },
@@ -282,267 +231,193 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 4,
   },
-  // Weather Card
-  weatherCard: {
-    marginHorizontal: SPACING.screenHorizontal,
-    borderRadius: 24,
-    overflow: 'hidden',
-    marginBottom: 24,
-    ...CARD_SHADOW,
-  },
-  weatherGradient: {
-    padding: 20,
-  },
-  weatherTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  weatherLeft: {
+  
+  // Ambient Weather Badge
+  weatherBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  weatherInfo: {
-    marginLeft: 12,
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   weatherTemp: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: -1,
-  },
-  weatherLocation: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  weatherCondition: {
     fontSize: 14,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    color: COLORS.textPrimary,
   },
-  outfitSuggestion: {
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 14,
+  
+  // Wardrobe Preview
+  wardrobePreview: {
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
-  suggestionLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  suggestionStyle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 12,
-  },
-  suggestionItems: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  suggestionChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  suggestionChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  weatherCTA: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  weatherCTAText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  // Quick Actions
-  quickActionsRow: {
+  wardrobeHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: 28,
-  },
-  quickAction: {
     alignItems: 'center',
-    width: '22%',
+    marginBottom: 16,
   },
-  quickActionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  quickActionLabel: {
-    fontSize: 11,
+  wardrobeTitle: {
+    fontSize: 18,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    textAlign: 'center',
   },
-  // Sections
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: 14,
-  },
-  // Wardrobe CTA
-  wardrobeCTA: {
+  wardrobeCount: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: SPACING.screenHorizontal,
-    padding: 16,
-    backgroundColor: COLORS.card,
-    borderRadius: 16,
-    ...CARD_SHADOW,
+    gap: 4,
   },
-  wardrobeCTAContent: {
+  wardrobeCountText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+  },
+  itemGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  itemPreview: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
-  wardrobeCTAIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+  itemImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  itemEmpty: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderStyle: 'dashed',
   },
-  wardrobeCTAText: {
+  
+  // Style My Wardrobe Card
+  styleCard: {
+    backgroundColor: 'rgba(177, 76, 255, 0.1)',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.2)',
+  },
+  styleCardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  styleCardLeft: {
     flex: 1,
   },
-  wardrobeCTATitle: {
+  styleCardTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: COLORS.textPrimary,
   },
-  wardrobeCTASubtitle: {
+  styleCardSubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 2,
   },
-  // Steps
-  stepsContainer: {
-    paddingHorizontal: SPACING.screenHorizontal,
-    gap: 12,
-  },
-  stepItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    padding: 14,
-    borderRadius: 12,
-  },
-  stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  styleCardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
-  stepNumberText: {
-    fontSize: 14,
-    fontWeight: '800',
+  
+  // Add More Card
+  addMoreCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
   },
-  stepText: {
-    flex: 1,
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    fontWeight: '500',
-  },
-  // Onboarding Card
-  onboardingCard: {
-    marginHorizontal: SPACING.screenHorizontal,
-    borderRadius: SIZES.borderRadiusCard,
-    overflow: 'hidden',
-    ...CARD_SHADOW,
-  },
-  onboardingGradient: {
-    padding: 20,
-    borderRadius: SIZES.borderRadiusCard,
-    borderWidth: 2,
-    borderColor: 'rgba(177, 76, 255, 0.3)',
-  },
-  onboardingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 12,
-  },
-  onboardingTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-  },
-  onboardingText: {
+  addMoreText: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
+    textAlign: 'center',
+    marginBottom: 12,
   },
   progressBar: {
-    flex: 1,
-    height: 8,
+    height: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 4,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: COLORS.primary,
-    borderRadius: 4,
+    borderRadius: 2,
   },
-  progressText: {
-    fontSize: 14,
+  
+  // Welcome Card (Empty State)
+  welcomeCard: {
+    alignItems: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 24,
+  },
+  welcomeIcon: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(177, 76, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  welcomeTitle: {
+    fontSize: 24,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: COLORS.textPrimary,
+    marginBottom: 12,
+    textAlign: 'center',
   },
-  onboardingCTA: {
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  welcomeCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 14,
+  },
+  welcomeCTAText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  
+  // Weather Hint
+  weatherHint: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: COLORS.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 8,
   },
-  onboardingCTAText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  weatherHintText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
   },
 });
