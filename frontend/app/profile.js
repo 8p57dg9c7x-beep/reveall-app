@@ -1,7 +1,7 @@
 // Profile Screen - v1 Clean (NO Beauty references)
 // Only wardrobe-related stats and menu items
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
@@ -19,6 +20,14 @@ import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/the
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { favoriteOutfits } = useFavorites();
+  const flatListRef = useRef(null);
+
+  // Reset scroll to top on tab focus
+  useFocusEffect(
+    useCallback(() => {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }, [])
+  );
 
   // v1 Menu items - NO Beauty, NO Shopping, NO Style DNA
   const menuItems = useMemo(() => [
