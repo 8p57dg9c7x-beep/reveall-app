@@ -154,6 +154,16 @@ export default function MyClosetScreen() {
   const hasItems = wardrobeItems.length > 0;
   const canStyle = wardrobeItems.length >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
 
+  // Gentle Progress - Encouraging copy based on wardrobe size
+  const getProgressMessage = () => {
+    const count = wardrobeItems.length;
+    if (count === 0) return null;
+    if (count <= 2) return "Your wardrobe is taking shape";
+    if (count <= 4) return "Almost ready for personalized suggestions";
+    if (count <= 7) return "Your style story is growing";
+    return "Your closet is ready to inspire";
+  };
+
   // Render category section
   const renderSection = (category) => {
     const items = getItemsByCategory(category.id);
