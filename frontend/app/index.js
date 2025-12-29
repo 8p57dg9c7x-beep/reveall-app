@@ -30,6 +30,7 @@ export default function TodayScreen() {
   const [weather, setWeather] = useState(null);
   const [closetCount, setClosetCount] = useState(0);
   const [recentItems, setRecentItems] = useState([]);
+  const { openHelpMeDecide } = useHelpMeDecide();
 
   useFocusEffect(
     useCallback(() => {
