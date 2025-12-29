@@ -318,22 +318,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   
-  // Decide Card
-  decideCard: {
-    flexDirection: 'row',
+  // Subtle Help Link (secondary action)
+  subtleLink: {
     alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingVertical: 12,
     marginHorizontal: SPACING.screenHorizontal,
-    marginBottom: 32,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    backgroundColor: 'rgba(177, 76, 255, 0.08)',
-    borderRadius: 16,
+    marginBottom: 24,
   },
-  decideText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: COLORS.textPrimary,
+  subtleLinkText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textDecorationLine: 'underline',
   },
   
   // Closet Content
