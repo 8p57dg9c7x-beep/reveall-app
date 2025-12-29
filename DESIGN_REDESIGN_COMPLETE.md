@@ -333,10 +333,10 @@ The complete redesign is finished and tested! All screens now match the futurist
 **Accessibility**: High contrast maintained  
 
 **Test URLs**:
-- Home: https://reveal-closet.preview.emergentagent.com/
-- Scan: https://reveal-closet.preview.emergentagent.com/scan
-- Identify: https://reveal-closet.preview.emergentagent.com/identify
-- Watchlist: https://reveal-closet.preview.emergentagent.com/watchlist
+- Home: https://wardrobeai-32.preview.emergentagent.com/
+- Scan: https://wardrobeai-32.preview.emergentagent.com/scan
+- Identify: https://wardrobeai-32.preview.emergentagent.com/identify
+- Watchlist: https://wardrobeai-32.preview.emergentagent.com/watchlist
 
 ---
 
