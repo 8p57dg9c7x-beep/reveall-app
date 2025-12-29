@@ -90,9 +90,9 @@ export const getIntelligenceMessage = async () => {
 // These are shown right away, not rate-limited
 export const getFeedbackAcknowledgment = async (type) => {
   if (type === 'like') {
-    return "Noted. I'll keep this in mind.";
+    return "Noted. I will keep this in mind.";
   } else if (type === 'dislike') {
-    return "Got it. I'll adjust my suggestions.";
+    return "Got it. I will adjust my suggestions.";
   }
   return null;
 };
