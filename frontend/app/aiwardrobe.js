@@ -225,15 +225,14 @@ export default function MyClosetScreen() {
           )}
         </View>
 
-        {/* Help me decide - Only when ready */}
+        {/* Help me decide - Subtle text link (secondary) */}
         {canStyle && !editMode && (
           <TouchableOpacity 
-            style={styles.decideCard}
-            onPress={() => { triggerHaptic(); router.push('/aistylist'); }}
-            activeOpacity={0.9}
+            style={styles.subtleLink}
+            onPress={() => { triggerHaptic(); openHelpMeDecide(); }}
+            activeOpacity={0.7}
           >
-            <Text style={styles.decideText}>Help me decide today</Text>
-            <MaterialCommunityIcons name="arrow-right" size={18} color={COLORS.primary} />
+            <Text style={styles.subtleLinkText}>Need outfit inspiration?</Text>
           </TouchableOpacity>
         )}
 
