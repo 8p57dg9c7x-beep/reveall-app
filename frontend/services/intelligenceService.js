@@ -52,7 +52,7 @@ export const getIntelligenceMessage = async () => {
 
     // Priority 1: After first feedback
     if (feedbackStats.total === 1 && !state.messagesShown.includes('first_feedback')) {
-      message = "Noted. I'll remember that.";
+      message = "Noted. I will remember that.";
       messageId = 'first_feedback';
     }
     // Priority 2: After several feedbacks
