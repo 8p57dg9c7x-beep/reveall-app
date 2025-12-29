@@ -810,6 +810,19 @@ const styles = StyleSheet.create({
   resultsContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
   },
+  intelligenceMessage: {
+    backgroundColor: 'rgba(177, 76, 255, 0.08)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  intelligenceText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
+  },
   cardsContainer: {
     paddingRight: 20,
   },
