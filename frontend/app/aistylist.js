@@ -287,11 +287,11 @@ export default function AIStylistScreen() {
     return tip;
   };
 
-  // Step 1: Occasion Selection
+  // Step 1: Occasion Selection (Optional, Skippable)
   const renderOccasionStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>What's the occasion?</Text>
-      <Text style={styles.stepSubtitle}>Help me style your wardrobe for the moment</Text>
+      <Text style={styles.stepSubtitle}>Optional — skip if you're just exploring</Text>
       
       {weather && (
         <View style={styles.weatherCard}>
@@ -320,14 +320,17 @@ export default function AIStylistScreen() {
               styles.occasionLabel,
               selectedOccasion === occasion.id && styles.occasionLabelSelected
             ]}>{occasion.label}</Text>
+            <Text style={[
+              styles.occasionDescription,
+              selectedOccasion === occasion.id && styles.occasionDescriptionSelected
+            ]}>{occasion.description}</Text>
           </TouchableOpacity>
         ))}
       </View>
       
       <GradientButton
-        title="Continue"
+        title={selectedOccasion ? "Continue" : "Skip — Surprise Me"}
         onPress={() => setStep(2)}
-        disabled={!selectedOccasion}
         style={styles.continueButton}
       />
     </View>
