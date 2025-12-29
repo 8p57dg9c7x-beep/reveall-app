@@ -29,13 +29,13 @@ import { logEvent } from '../services/firebase';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.88;
 
-// Occasions for styling
+// Occasions for styling - v1.1 with skippable context
 const OCCASIONS = [
-  { id: 'casual', label: 'Casual', icon: 'coffee' },
-  { id: 'work', label: 'Work', icon: 'briefcase' },
-  { id: 'evening', label: 'Evening', icon: 'glass-cocktail' },
-  { id: 'active', label: 'Active', icon: 'run' },
-  { id: 'weekend', label: 'Weekend', icon: 'calendar-weekend' },
+  { id: 'everyday', label: 'Everyday', icon: 'coffee', description: 'Casual day-to-day' },
+  { id: 'work', label: 'Work', icon: 'briefcase', description: 'Office or meetings' },
+  { id: 'date', label: 'Date Night', icon: 'heart', description: 'Something special' },
+  { id: 'dinner', label: 'Dinner Out', icon: 'silverware-fork-knife', description: 'Restaurant or event' },
+  { id: 'active', label: 'Active', icon: 'run', description: 'Workout or outdoors' },
 ];
 
 const STYLE_PREFERENCES = [
