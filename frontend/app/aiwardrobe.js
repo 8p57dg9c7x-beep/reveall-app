@@ -299,6 +299,12 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     letterSpacing: -1,
   },
+  progressMessage: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
   editButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
