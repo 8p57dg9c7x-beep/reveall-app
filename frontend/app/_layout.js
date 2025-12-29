@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { View } from 'react-native';
 import { COLORS } from '../constants/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
+import { HelpMeDecideProvider } from '../contexts/HelpMeDecideContext';
 import { initializeFirebase } from '../services/firebase';
-import { FEATURE_FLAGS } from '../config/featureFlags';
 
 // Bundle Version: 1.0.0 - v1 Launch (Premium Digital Wardrobe)
 export default function RootLayout() {
