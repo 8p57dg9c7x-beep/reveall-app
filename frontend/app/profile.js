@@ -32,14 +32,6 @@ export default function ProfileScreen() {
   // v1 Menu items - Settings pages only (proper stack navigation)
   const menuItems = useMemo(() => [
     {
-      id: 'wardrobe',
-      title: 'My Closet',
-      subtitle: 'Your digital wardrobe',
-      icon: 'hanger',
-      color: '#4ECDC4',
-      route: '/aiwardrobe',
-    },
-    {
       id: 'style-preferences',
       title: 'Style Preferences',
       subtitle: 'Help us know your coloring',
@@ -48,20 +40,20 @@ export default function ProfileScreen() {
       route: '/style-preferences',
     },
     {
-      id: 'favorites',
-      title: 'Saved Outfits',
-      subtitle: `${favoriteOutfits.length} saved looks`,
-      icon: 'heart',
-      color: '#FF6B6B',
-      route: '/saved-outfits',
-    },
-    {
       id: 'body-scanner',
       title: 'Body Scanner',
       subtitle: 'Your measurements',
       icon: 'human',
       color: '#95E1D3',
       route: '/bodyscanner',
+    },
+    {
+      id: 'favorites',
+      title: 'Saved Outfits',
+      subtitle: `${favoriteOutfits.length} saved looks`,
+      icon: 'heart',
+      color: '#FF6B6B',
+      route: '/saved-outfits',
     },
   ], [favoriteOutfits.length]);
 
