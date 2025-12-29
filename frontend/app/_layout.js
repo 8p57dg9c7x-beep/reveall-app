@@ -111,6 +111,7 @@ export default function RootLayout() {
         <Tabs.Screen name="analytics" options={{ href: null }} />
         <Tabs.Screen name="universal-search" options={{ href: null }} />
       </Tabs>
+          </HelpMeDecideProvider>
       </GestureHandlerRootView>
       </AddiletsProvider>
     </FavoritesProvider>
