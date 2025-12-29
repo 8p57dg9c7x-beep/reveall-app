@@ -393,6 +393,13 @@ export default function AIStylistScreen() {
         }
       </Text>
       
+      {/* Quiet Intelligence Message */}
+      {intelligenceMessage && (
+        <View style={styles.intelligenceMessage}>
+          <Text style={styles.intelligenceText}>{intelligenceMessage}</Text>
+        </View>
+      )}
+      
       <ScrollView
         horizontal
         pagingEnabled
