@@ -206,7 +206,12 @@ export default function MyClosetScreen() {
       >
         {/* Minimal Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>My Closet</Text>
+          <View>
+            <Text style={styles.headerTitle}>My Closet</Text>
+            {getProgressMessage() && (
+              <Text style={styles.progressMessage}>{getProgressMessage()}</Text>
+            )}
+          </View>
           {hasItems && (
             <TouchableOpacity 
               onPress={() => { setEditMode(!editMode); triggerHaptic(); }}
