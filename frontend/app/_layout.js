@@ -19,6 +19,7 @@ export default function RootLayout() {
     <FavoritesProvider>
       <AddiletsProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
+          <HelpMeDecideProvider>
         <Tabs
         screenOptions={{
           headerShown: false,
