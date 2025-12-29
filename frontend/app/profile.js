@@ -29,7 +29,7 @@ export default function ProfileScreen() {
     }, [])
   );
 
-  // v1 Menu items - NO Beauty, NO Shopping, NO Style DNA
+  // v1 Menu items - Settings pages only (proper stack navigation)
   const menuItems = useMemo(() => [
     {
       id: 'wardrobe',
@@ -54,14 +54,6 @@ export default function ProfileScreen() {
       icon: 'heart',
       color: '#FF6B6B',
       route: '/saved-outfits',
-    },
-    {
-      id: 'ai-stylist',
-      title: 'AI Stylist',
-      subtitle: 'Get outfit recommendations',
-      icon: 'robot',
-      color: '#B14CFF',
-      route: '/aistylist',
     },
     {
       id: 'body-scanner',
