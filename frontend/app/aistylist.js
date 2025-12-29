@@ -762,6 +762,14 @@ const styles = StyleSheet.create({
   occasionLabelSelected: {
     color: '#FFFFFF',
   },
+  occasionDescription: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  occasionDescriptionSelected: {
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
   continueButton: {
     marginTop: 8,
   },
