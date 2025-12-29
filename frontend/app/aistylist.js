@@ -95,12 +95,19 @@ export default function AIStylistScreen() {
   const [hasWardrobe, setHasWardrobe] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState({}); // Track feedback per outfit
   const [showDislikeOptions, setShowDislikeOptions] = useState(null); // Which outfit is showing dislike options
+  const [intelligenceMessage, setIntelligenceMessage] = useState(null); // Quiet intelligence acknowledgment
 
-  // Feedback handlers
+  // Feedback handlers with quiet intelligence
   const handleLike = async (outfitId) => {
     await likeOutfit(outfitId);
     setFeedbackGiven(prev => ({ ...prev, [outfitId]: 'like' }));
     logEvent('outfit_liked', { outfit_id: outfitId.toString() });
+    // Show quiet acknowledgment
+    const ack = await getFeedbackAcknowledgment('like');
+    if (ack) {
+      setIntelligenceMessage(ack);
+      setTimeout(() => setIntelligenceMessage(null), 3000);
+    }
   };
 
   const handleDislike = (outfitId) => {
@@ -112,6 +119,12 @@ export default function AIStylistScreen() {
     setFeedbackGiven(prev => ({ ...prev, [outfitId]: 'dislike' }));
     setShowDislikeOptions(null);
     logEvent('outfit_disliked', { outfit_id: outfitId.toString(), reason });
+    // Show quiet acknowledgment
+    const ack = await getFeedbackAcknowledgment('dislike');
+    if (ack) {
+      setIntelligenceMessage(ack);
+      setTimeout(() => setIntelligenceMessage(null), 3000);
+    }
   };
 
   // Ad integration
