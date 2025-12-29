@@ -46,6 +46,7 @@ export default function MyClosetScreen() {
   const scrollViewRef = useRef(null);
   const [wardrobeItems, setWardrobeItems] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const { openHelpMeDecide } = useHelpMeDecide();
 
   useFocusEffect(
     useCallback(() => {
