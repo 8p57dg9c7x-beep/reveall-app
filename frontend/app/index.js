@@ -115,10 +115,10 @@ export default function TodayScreen() {
         {hasItems && canStyle ? (
           <TouchableOpacity 
             style={styles.dailyCard}
-            onPress={() => router.push('/aistylist')}
+            onPress={openHelpMeDecide}
             activeOpacity={0.9}
           >
-            <Text style={styles.dailyLabel}>Today's suggestion</Text>
+            <Text style={styles.dailyLabel}>Today&apos;s suggestion</Text>
             
             <View style={styles.outfitPreview}>
               {recentItems.slice(0, 3).map((item, index) => (
