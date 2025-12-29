@@ -40,6 +40,14 @@ export default function ProfileScreen() {
       route: '/aiwardrobe',
     },
     {
+      id: 'style-preferences',
+      title: 'Style Preferences',
+      subtitle: 'Help us know your coloring',
+      icon: 'palette-outline',
+      color: '#B14CFF',
+      route: '/style-preferences',
+    },
+    {
       id: 'favorites',
       title: 'Saved Outfits',
       subtitle: `${favoriteOutfits.length} saved looks`,
