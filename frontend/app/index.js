@@ -224,6 +224,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textSecondary,
   },
+  recognitionText: {
+    fontSize: 15,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    marginBottom: 12,
+  },
   
   // Daily Card - For users with items
   dailyCard: {
