@@ -93,6 +93,7 @@ export default function RootLayout() {
         <Tabs.Screen name="saved-outfits" options={{ href: null }} />
         <Tabs.Screen name="outfitdetail" options={{ href: null }} />
         <Tabs.Screen name="stylelab" options={{ href: null }} />
+        <Tabs.Screen name="style-preferences" options={{ href: null }} />
         
         {/* ===== HIDDEN FOR v1 ===== */}
         <Tabs.Screen name="discover" options={{ href: null }} />
