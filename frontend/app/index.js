@@ -97,6 +97,9 @@ export default function TodayScreen() {
         <View style={styles.welcomeSection}>
           <Text style={styles.greeting}>{weather?.greeting?.text || 'Good day'}</Text>
           
+          {/* Moment of Recognition - Human-centric tagline */}
+          <Text style={styles.recognitionText}>Getting dressed shouldn't be stressful.</Text>
+          
           {/* Ambient Weather - Subtle */}
           {weather && (
             <View style={styles.weatherRow}>
