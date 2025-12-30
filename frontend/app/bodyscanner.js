@@ -419,7 +419,7 @@ export default function BodyScannerScreen() {
           Alert.alert('Success!', 'Measurements saved to your profile', [
             {
               text: 'OK',
-              onPress: () => router.push(returnPath),
+              onPress: () => router.back(),
             }
           ]);
         }}
