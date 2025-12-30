@@ -70,13 +70,6 @@ export default function SavedOutfitsScreen() {
       <Text style={styles.emptyHint}>
         Tap the heart icon on any outfit recommendation to save it here
       </Text>
-      <TouchableOpacity 
-        style={styles.exploreCTA}
-        onPress={() => router.push('/aistylist')}
-      >
-        <MaterialCommunityIcons name="robot" size={20} color="#FFFFFF" />
-        <Text style={styles.exploreCTAText}>Get Your First Outfit</Text>
-      </TouchableOpacity>
     </View>
   );
 
