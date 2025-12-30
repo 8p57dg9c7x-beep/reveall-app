@@ -21,7 +21,7 @@ import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
 import { ONBOARDING_CONFIG } from '../services/onboardingService';
-import { useHelpMeDecide } from '../contexts/HelpMeDecideContext';
+import { useHelpMeDecide } from './_layout';
 
 const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 
