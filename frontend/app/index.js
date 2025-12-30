@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
 import { fetchRealWeather } from '../services/weatherService';
 import { ONBOARDING_CONFIG } from '../services/onboardingService';
-import { useHelpMeDecide } from '../contexts/HelpMeDecideContext';
+import { useHelpMeDecide } from './_layout';
 import { logEvent } from '../services/firebase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
