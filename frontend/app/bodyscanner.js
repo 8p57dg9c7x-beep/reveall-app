@@ -30,9 +30,9 @@ export default function BodyScannerScreen() {
   const [editedMeasurements, setEditedMeasurements] = useState(null);
   const scanProgress = new Animated.Value(0);
 
-  // Handle back navigation
+  // Handle back navigation - always go back (closes modal)
   const handleBack = () => {
-    router.push(returnPath);
+    router.back();
   };
 
   const pickImage = async (type) => {
