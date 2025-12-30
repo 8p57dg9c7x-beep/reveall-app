@@ -20,8 +20,6 @@ import { uploadMultipleImages, pollJobResult } from '../services/revealAPI';
 
 export default function BodyScannerScreen() {
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams();
-  const returnPath = params.returnPath || '/stylelab';
   
   const [step, setStep] = useState(0); // 0: Disclaimer, 1: Instructions, 2: Capture, 3: Results
   const [frontPhoto, setFrontPhoto] = useState(null);
