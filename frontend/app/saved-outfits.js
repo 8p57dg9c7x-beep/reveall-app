@@ -41,12 +41,8 @@ export default function SavedOutfitsScreen() {
   const insets = useSafeAreaInsets();
   const { favoriteOutfits } = useFavorites();
 
-  const handleOutfitPress = (outfit) => {
-    router.push({
-      pathname: '/outfitdetail',
-      params: { outfitData: JSON.stringify(outfit), returnPath: '/saved-outfits' },
-    });
-  };
+  // V1: Tapping on outfits shows them in place, no deep navigation
+  // This keeps the user one step from Profile at all times
 
   // Pair outfits into rows for 2-column grid
   const outfitRows = [];
