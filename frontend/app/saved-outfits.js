@@ -14,12 +14,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
 
-// Individual Outfit Card Component
-const OutfitCardItem = React.memo(({ item, onPress, isLeft }) => (
-  <TouchableOpacity
+// Individual Outfit Card Component - Display only, no deep navigation in V1
+const OutfitCardItem = React.memo(({ item, isLeft }) => (
+  <View
     style={[styles.outfitCard, isLeft ? styles.cardLeft : styles.cardRight]}
-    onPress={() => onPress(item)}
-    activeOpacity={0.85}
   >
     <Image source={{ uri: item.image }} style={styles.cardImage} />
     <LinearGradient
@@ -34,7 +32,7 @@ const OutfitCardItem = React.memo(({ item, onPress, isLeft }) => (
     <View style={styles.savedBadge}>
       <MaterialCommunityIcons name="heart" size={16} color="#FF6EC7" />
     </View>
-  </TouchableOpacity>
+  </View>
 ));
 
 export default function SavedOutfitsScreen() {
