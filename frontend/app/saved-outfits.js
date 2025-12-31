@@ -99,9 +99,9 @@ export default function SavedOutfitsScreen() {
           <View style={styles.gridContainer}>
             {outfitRows.map((row) => (
               <View key={row.id} style={styles.row}>
-                <OutfitCardItem item={row.left} onPress={handleOutfitPress} isLeft={true} />
+                <OutfitCardItem item={row.left} isLeft={true} />
                 {row.right ? (
-                  <OutfitCardItem item={row.right} onPress={handleOutfitPress} isLeft={false} />
+                  <OutfitCardItem item={row.right} isLeft={false} />
                 ) : (
                   <View style={styles.emptyCard} />
                 )}
