@@ -283,34 +283,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 120,
+    paddingBottom: 140,
     minHeight: '100%',
   },
   
-  // Header - Minimal
+  // Header - Clean and confident
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingTop: 20,
-    paddingBottom: 24,
+    paddingTop: 24,
+    paddingBottom: 8,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    letterSpacing: -1,
+    letterSpacing: -0.5,
   },
   progressMessage: {
     fontSize: 14,
     color: COLORS.textMuted,
-    marginTop: 4,
+    marginTop: 6,
     fontStyle: 'italic',
+    opacity: 0.8,
   },
   editButton: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    marginTop: 4,
   },
   editText: {
     fontSize: 15,
@@ -324,46 +326,49 @@ const styles = StyleSheet.create({
   // Subtle Help Link (secondary action)
   subtleLink: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 16,
     marginHorizontal: SPACING.screenHorizontal,
-    marginBottom: 24,
+    marginBottom: 8,
   },
   subtleLinkText: {
     fontSize: 14,
     color: COLORS.textMuted,
     textDecorationLine: 'underline',
+    opacity: 0.7,
   },
   
-  // Closet Content
+  // Closet Content - More breathing room
   closetContent: {
-    gap: 32,
+    gap: 40,
+    paddingTop: 16,
   },
   
-  // Section
+  // Section - Feels like a space, not a list
   section: {
-    // No card styling - items float in space
+    // Subtle framing through spacing
   },
   sectionLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
     paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: 16,
+    marginBottom: 20,
+    opacity: 0.6,
   },
   sectionContent: {
     paddingHorizontal: SPACING.screenHorizontal,
-    gap: 16,
+    gap: 14,
   },
   
-  // Item
+  // Item - Larger, more presence
   item: {
-    width: 110,
-    height: 110,
-    borderRadius: 20,
+    width: 100,
+    height: 120,
+    borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   itemImage: {
     width: '100%',
@@ -374,10 +379,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#FF4757',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 71, 87, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -387,47 +392,49 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 40,
-    paddingTop: 60,
+    paddingHorizontal: 48,
+    paddingTop: 80,
   },
   emptyVisual: {
-    marginBottom: 40,
+    marginBottom: 48,
   },
   emptyHanger: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.04)',
   },
   emptyTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '600',
     color: COLORS.textPrimary,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   emptySubtitle: {
     fontSize: 15,
     color: COLORS.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
+    opacity: 0.8,
   },
   
-  // Bottom CTA
+  // Bottom CTA - Clean and confident
   bottomArea: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingTop: 16,
-    backgroundColor: 'rgba(11, 8, 18, 0.95)',
+    paddingTop: 20,
+    backgroundColor: 'rgba(11, 8, 18, 0.98)',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.04)',
+    borderTopColor: 'rgba(255, 255, 255, 0.03)',
   },
   addButton: {
     flexDirection: 'row',
@@ -436,7 +443,7 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: COLORS.primary,
     paddingVertical: 18,
-    borderRadius: 16,
+    borderRadius: 14,
   },
   addButtonText: {
     fontSize: 17,
