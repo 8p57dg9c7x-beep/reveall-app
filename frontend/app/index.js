@@ -32,9 +32,23 @@ export default function TodayScreen() {
   const [recentItems, setRecentItems] = useState([]);
   const { openHelpMeDecide } = useHelpMeDecide();
 
+  // NAVIGATION: Always reset scroll to top when tab is focused
+  // IMPORTANT: This must run every single time the tab gains focus
   useFocusEffect(
     useCallback(() => {
+      // Immediate scroll reset - no animation, no delay
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+      
+      // Refresh wardrobe data
+      const refresh = async () => {
+        const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
+        if (wardrobeJson) {
+          const items = JSON.parse(wardrobeJson);
+          setClosetCount(items.length);
+          setRecentItems(items.slice(0, 4));
+        }
+      };
+      refresh();
     }, [])
   );
 
@@ -60,20 +74,6 @@ export default function TodayScreen() {
     };
     loadData();
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      const refresh = async () => {
-        const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
-        if (wardrobeJson) {
-          const items = JSON.parse(wardrobeJson);
-          setClosetCount(items.length);
-          setRecentItems(items.slice(0, 4));
-        }
-      };
-      refresh();
-    }, [])
-  );
 
   const hasItems = closetCount > 0;
   const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
