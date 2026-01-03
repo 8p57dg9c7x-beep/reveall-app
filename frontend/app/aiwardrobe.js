@@ -48,8 +48,11 @@ export default function MyClosetScreen() {
   const [editMode, setEditMode] = useState(false);
   const { openHelpMeDecide } = useHelpMeDecide();
 
+  // NAVIGATION: Always reset scroll to top when tab is focused
+  // IMPORTANT: This must run every single time the tab gains focus
   useFocusEffect(
     useCallback(() => {
+      // Immediate scroll reset - no animation, no delay
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
     }, [])
   );
