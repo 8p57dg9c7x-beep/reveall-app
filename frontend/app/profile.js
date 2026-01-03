@@ -22,9 +22,11 @@ export default function ProfileScreen() {
   const { favoriteOutfits } = useFavorites();
   const flatListRef = useRef(null);
 
-  // Reset scroll to top on tab focus
+  // NAVIGATION: Always reset scroll to top when tab is focused
+  // IMPORTANT: This must run every single time the tab gains focus
   useFocusEffect(
     useCallback(() => {
+      // Immediate scroll reset - no animation, no delay
       flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
     }, [])
   );
