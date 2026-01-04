@@ -142,6 +142,7 @@ export default function MyClosetScreen() {
       const updated = wardrobeItems.filter(item => item.id !== itemId);
       setWardrobeItems(updated);
       await saveWardrobe(updated);
+      setSelectedItem(null);
       triggerHaptic('success');
     };
 
@@ -152,6 +153,43 @@ export default function MyClosetScreen() {
         { text: 'Cancel', style: 'cancel' },
         { text: 'Remove', style: 'destructive', onPress: doDelete },
       ]);
+    }
+  };
+
+  // Replace item photo
+  const replaceItemPhoto = async () => {
+    if (!selectedItem) return;
+    
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const updated = wardrobeItems.map(item => 
+        item.id === selectedItem.id 
+          ? { ...item, image: result.assets[0].uri }
+          : item
+      );
+      setWardrobeItems(updated);
+      await saveWardrobe(updated);
+      setSelectedItem({ ...selectedItem, image: result.assets[0].uri });
+      triggerHaptic('success');
+    }
+  };
+
+  // Handle item tap - in edit mode delete, otherwise show detail
+  const handleItemPress = (item) => {
+    triggerHaptic();
+    if (editMode) {
+      deleteItem(item.id);
+    } else {
+      setSelectedItem(item);
     }
   };
 
