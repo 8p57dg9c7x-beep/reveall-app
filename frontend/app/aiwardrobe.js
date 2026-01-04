@@ -11,6 +11,8 @@ import {
   Image,
   Alert,
   Platform,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,6 +26,7 @@ import { ONBOARDING_CONFIG } from '../services/onboardingService';
 import { useHelpMeDecide } from './_layout';
 
 const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Categories
 const CATEGORIES = [
