@@ -227,7 +227,7 @@ export default function MyClosetScreen() {
             <TouchableOpacity 
               key={item.id} 
               style={styles.item}
-              onPress={() => editMode && deleteItem(item.id)}
+              onPress={() => handleItemPress(item)}
               activeOpacity={0.9}
             >
               <Image source={{ uri: item.image }} style={styles.itemImage} />
