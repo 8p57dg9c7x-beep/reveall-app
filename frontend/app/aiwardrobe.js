@@ -49,6 +49,7 @@ export default function MyClosetScreen() {
   const scrollViewRef = useRef(null);
   const [wardrobeItems, setWardrobeItems] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const { openHelpMeDecide } = useHelpMeDecide();
 
   // NAVIGATION: Always reset scroll to top when tab is focused
