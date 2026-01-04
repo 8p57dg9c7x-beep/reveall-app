@@ -424,4 +424,57 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     opacity: 0.5,
   },
+  // Avatar Preview Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 40,
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    top: -80,
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalAvatar: {
+    width: SCREEN_WIDTH - 80,
+    height: SCREEN_WIDTH - 80,
+    borderRadius: (SCREEN_WIDTH - 80) / 2,
+    marginBottom: 40,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  modalActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+  },
+  modalActionButtonDanger: {
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+  },
+  modalActionText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.primary,
+  },
+  modalActionTextDanger: {
+    color: '#FF6B6B',
+  },
 });
