@@ -177,9 +177,6 @@ export default function ProfileScreen() {
         <Text style={styles.userName}>Your Wardrobe</Text>
         <Text style={styles.userTagline}>Organized, calm, ready to inspire</Text>
       </View>
-        <Text style={styles.userName}>REVEAL User</Text>
-        <Text style={styles.userTagline}>Your Personal Style Assistant</Text>
-      </View>
 
       {/* Stats Row - Wardrobe stats */}
       <View style={styles.statsRow}>
