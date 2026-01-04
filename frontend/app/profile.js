@@ -176,7 +176,7 @@ export default function ProfileScreen() {
         {/* Avatar - Tappable, optional */}
         <TouchableOpacity 
           style={styles.avatarContainer}
-          onPress={pickAvatar}
+          onPress={handleAvatarPress}
           activeOpacity={0.9}
         >
           {avatarUri ? (
