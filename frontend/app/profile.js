@@ -11,6 +11,8 @@ import {
   FlatList,
   Image,
   Platform,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,6 +26,7 @@ import { useFavorites } from '../contexts/FavoritesContext';
 import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
 
 const AVATAR_KEY = '@reveal_profile_avatar';
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
