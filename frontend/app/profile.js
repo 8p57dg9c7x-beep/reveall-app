@@ -34,6 +34,7 @@ export default function ProfileScreen() {
   const flatListRef = useRef(null);
   const [avatarUri, setAvatarUri] = useState(null);
   const [closetCount, setClosetCount] = useState(0);
+  const [showAvatarPreview, setShowAvatarPreview] = useState(false);
 
   // Load avatar and closet count on mount
   useEffect(() => {
