@@ -96,9 +96,31 @@ export default function ProfileScreen() {
       const uri = result.assets[0].uri;
       setAvatarUri(uri);
       await AsyncStorage.setItem(AVATAR_KEY, uri);
+      setShowAvatarPreview(false);
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
+    }
+  };
+
+  // Handle avatar tap — if photo exists, show preview; if not, pick new
+  const handleAvatarPress = () => {
+    triggerHaptic();
+    if (avatarUri) {
+      setShowAvatarPreview(true);
+    } else {
+      pickAvatar();
+    }
+  };
+
+  // Remove avatar
+  const removeAvatar = async () => {
+    triggerHaptic();
+    setAvatarUri(null);
+    await AsyncStorage.removeItem(AVATAR_KEY);
+    setShowAvatarPreview(false);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
   };
 
