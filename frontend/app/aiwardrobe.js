@@ -316,6 +316,55 @@ export default function MyClosetScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Item Detail Modal */}
+      <Modal
+        visible={selectedItem !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedItem(null)}
+      >
+        <View style={styles.itemModalOverlay}>
+          <View style={styles.itemModalContent}>
+            {/* Close button */}
+            <TouchableOpacity 
+              style={styles.itemModalCloseButton}
+              onPress={() => setSelectedItem(null)}
+            >
+              <MaterialCommunityIcons name="close" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            
+            {/* Large item preview */}
+            {selectedItem && (
+              <>
+                <Image source={{ uri: selectedItem.image }} style={styles.itemModalImage} />
+                <Text style={styles.itemModalCategory}>
+                  {CATEGORIES.find(c => c.id === selectedItem.category)?.label || 'Item'}
+                </Text>
+              </>
+            )}
+            
+            {/* Actions */}
+            <View style={styles.itemModalActions}>
+              <TouchableOpacity 
+                style={styles.itemModalActionButton}
+                onPress={replaceItemPhoto}
+              >
+                <MaterialCommunityIcons name="camera" size={20} color={COLORS.primary} />
+                <Text style={styles.itemModalActionText}>Replace Photo</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.itemModalActionButton, styles.itemModalActionButtonDanger]}
+                onPress={() => selectedItem && deleteItem(selectedItem.id)}
+              >
+                <MaterialCommunityIcons name="delete-outline" size={20} color="#FF6B6B" />
+                <Text style={[styles.itemModalActionText, styles.itemModalActionTextDanger]}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
