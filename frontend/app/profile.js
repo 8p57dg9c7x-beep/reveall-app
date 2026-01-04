@@ -240,6 +240,50 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
+      
+      {/* Avatar Preview Modal */}
+      <Modal
+        visible={showAvatarPreview}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAvatarPreview(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Close button */}
+            <TouchableOpacity 
+              style={styles.modalCloseButton}
+              onPress={() => setShowAvatarPreview(false)}
+            >
+              <MaterialCommunityIcons name="close" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            
+            {/* Large avatar preview */}
+            {avatarUri && (
+              <Image source={{ uri: avatarUri }} style={styles.modalAvatar} />
+            )}
+            
+            {/* Actions */}
+            <View style={styles.modalActions}>
+              <TouchableOpacity 
+                style={styles.modalActionButton}
+                onPress={pickAvatar}
+              >
+                <MaterialCommunityIcons name="camera" size={20} color={COLORS.primary} />
+                <Text style={styles.modalActionText}>Change Photo</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalActionButton, styles.modalActionButtonDanger]}
+                onPress={removeAvatar}
+              >
+                <MaterialCommunityIcons name="delete-outline" size={20} color="#FF6B6B" />
+                <Text style={[styles.modalActionText, styles.modalActionTextDanger]}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
