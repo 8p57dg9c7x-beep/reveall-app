@@ -1,37 +1,104 @@
-// Profile Screen - v1 Clean (NO Beauty references)
-// Only wardrobe-related stats and menu items
+// Profile Screen - v1 Clean
+// Ownership through optional avatar
+// Settings only — no social features
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  Image,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
+
+const AVATAR_KEY = '@reveal_profile_avatar';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { favoriteOutfits } = useFavorites();
   const flatListRef = useRef(null);
+  const [avatarUri, setAvatarUri] = useState(null);
+  const [closetCount, setClosetCount] = useState(0);
 
-  // NAVIGATION: Always reset scroll to top when tab is focused
-  // IMPORTANT: This must run every single time the tab gains focus
+  // Load avatar and closet count on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const storedAvatar = await AsyncStorage.getItem(AVATAR_KEY);
+        if (storedAvatar) setAvatarUri(storedAvatar);
+        
+        const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
+        if (wardrobeJson) {
+          const items = JSON.parse(wardrobeJson);
+          setClosetCount(items.length);
+        }
+      } catch (error) {
+        console.log('Error loading profile data:', error);
+      }
+    };
+    loadData();
+  }, []);
+
+  // Refresh closet count on focus
   useFocusEffect(
     useCallback(() => {
-      // Immediate scroll reset - no animation, no delay
+      const refresh = async () => {
+        const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
+        if (wardrobeJson) {
+          const items = JSON.parse(wardrobeJson);
+          setClosetCount(items.length);
+        }
+      };
+      refresh();
+      // Scroll reset
       flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
     }, [])
   );
 
-  // v1 Menu items - Settings pages only (proper stack navigation)
+  // Haptic feedback
+  const triggerHaptic = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
+
+  // Pick avatar image — minimal, pressure-free
+  const pickAvatar = async () => {
+    triggerHaptic();
+    
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const uri = result.assets[0].uri;
+      setAvatarUri(uri);
+      await AsyncStorage.setItem(AVATAR_KEY, uri);
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    }
+  };
+
+  // v1 Menu items - Settings pages only
   const menuItems = useMemo(() => [
     {
       id: 'style-preferences',
@@ -80,14 +147,36 @@ export default function ProfileScreen() {
     <View style={{ paddingTop: insets.top + SPACING.headerPaddingTop }}>
       {/* Profile Header */}
       <View style={styles.profileHeader}>
-        <View style={styles.avatarContainer}>
-          <LinearGradient
-            colors={[COLORS.primary, '#8B5CF6']}
-            style={styles.avatarGradient}
-          >
-            <MaterialCommunityIcons name="account" size={48} color="#FFFFFF" />
-          </LinearGradient>
-        </View>
+        {/* Avatar - Tappable, optional */}
+        <TouchableOpacity 
+          style={styles.avatarContainer}
+          onPress={pickAvatar}
+          activeOpacity={0.9}
+        >
+          {avatarUri ? (
+            <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+          ) : (
+            <LinearGradient
+              colors={[COLORS.primary, '#8B5CF6']}
+              style={styles.avatarGradient}
+            >
+              <MaterialCommunityIcons name="account" size={48} color="#FFFFFF" />
+            </LinearGradient>
+          )}
+          {/* Subtle edit indicator */}
+          <View style={styles.avatarEditBadge}>
+            <MaterialCommunityIcons name="camera" size={12} color="#FFFFFF" />
+          </View>
+        </TouchableOpacity>
+        
+        {/* Gentle prompt for avatar - only if no avatar set */}
+        {!avatarUri && (
+          <Text style={styles.avatarHint}>Tap to add your photo</Text>
+        )}
+        
+        <Text style={styles.userName}>Your Wardrobe</Text>
+        <Text style={styles.userTagline}>Organized, calm, ready to inspire</Text>
+      </View>
         <Text style={styles.userName}>REVEAL User</Text>
         <Text style={styles.userTagline}>Your Personal Style Assistant</Text>
       </View>
