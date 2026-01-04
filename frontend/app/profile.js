@@ -201,8 +201,7 @@ export default function ProfileScreen() {
 
   const ListFooterComponent = useCallback(() => (
     <View style={styles.footer}>
-      <Text style={styles.footerText}>REVEAL v1.0.0</Text>
-      <Text style={styles.footerSubtext}>Weather → AI Stylist → Your Wardrobe</Text>
+      <Text style={styles.footerText}>REVEAL v1.0</Text>
     </View>
   ), []);
 
