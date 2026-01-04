@@ -181,7 +181,7 @@ export default function ProfileScreen() {
         <Text style={styles.userTagline}>Your Personal Style Assistant</Text>
       </View>
 
-      {/* Stats Row - v1: Only Wardrobe stats */}
+      {/* Stats Row - Wardrobe stats */}
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{favoriteOutfits.length}</Text>
@@ -189,20 +189,15 @@ export default function ProfileScreen() {
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>4</Text>
+          <Text style={styles.statNumber}>{closetCount}</Text>
           <Text style={styles.statLabel}>Closet Items</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>v1</Text>
-          <Text style={styles.statLabel}>Version</Text>
         </View>
       </View>
 
       {/* Menu Section Title */}
-      <Text style={styles.sectionTitle}>Your Tools</Text>
+      <Text style={styles.sectionTitle}>Settings</Text>
     </View>
-  ), [insets.top, favoriteOutfits.length]);
+  ), [insets.top, favoriteOutfits.length, avatarUri, closetCount]);
 
   const ListFooterComponent = useCallback(() => (
     <View style={styles.footer}>
