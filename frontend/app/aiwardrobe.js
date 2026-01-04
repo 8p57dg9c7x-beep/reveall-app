@@ -541,4 +541,64 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+  // Item Detail Modal
+  itemModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemModalContent: {
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 40,
+  },
+  itemModalCloseButton: {
+    position: 'absolute',
+    top: -80,
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemModalImage: {
+    width: SCREEN_WIDTH - 80,
+    height: SCREEN_WIDTH - 80,
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  itemModalCategory: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 24,
+  },
+  itemModalActions: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  itemModalActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+  },
+  itemModalActionButtonDanger: {
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+  },
+  itemModalActionText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.primary,
+  },
+  itemModalActionTextDanger: {
+    color: '#FF6B6B',
+  },
 });
