@@ -28,15 +28,42 @@ import { useHelpMeDecide } from './_layout';
 const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Categories
+// V1 Categories - Ordered by how people get dressed
+// Hierarchy: Outerwear (featured) → Tops → Bottoms → Shoes (elevated)
 const CATEGORIES = [
-  { id: 'tops', label: 'Tops', icon: 'tshirt-crew-outline' },
-  { id: 'bottoms', label: 'Bottoms', icon: 'lingerie' },
-  { id: 'shoes', label: 'Shoes', icon: 'shoe-sneaker' },
-  { id: 'outerwear', label: 'Outerwear', icon: 'coat-rack' },
+  { 
+    id: 'outerwear', 
+    label: 'Outerwear', 
+    icon: 'coat-rack',
+    placeholder: 'Add your first jacket',
+    cardSize: { width: 120, height: 140 }, // Featured - larger
+    featured: true,
+  },
+  { 
+    id: 'tops', 
+    label: 'Tops', 
+    icon: 'tshirt-crew-outline',
+    placeholder: 'Add a top',
+    cardSize: { width: 100, height: 120 }, // Standard
+  },
+  { 
+    id: 'bottoms', 
+    label: 'Bottoms', 
+    icon: 'lingerie',
+    placeholder: 'Add bottoms',
+    cardSize: { width: 100, height: 120 }, // Standard
+  },
+  { 
+    id: 'shoes', 
+    label: 'Shoes', 
+    icon: 'shoe-sneaker',
+    placeholder: 'Add your first pair',
+    cardSize: { width: 110, height: 110 }, // Elevated - square
+    elevated: true,
+  },
 ];
 
-// Default items
+// Default items (for demo purposes)
 const DEFAULT_ITEMS = [
   { id: '1', name: 'White T-Shirt', category: 'tops', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&q=80' },
   { id: '2', name: 'Black Jeans', category: 'bottoms', image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&q=80' },
@@ -50,6 +77,8 @@ export default function MyClosetScreen() {
   const [wardrobeItems, setWardrobeItems] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [pendingCategory, setPendingCategory] = useState(null);
   const { openHelpMeDecide } = useHelpMeDecide();
 
   // NAVIGATION: Always reset scroll to top when tab is focused
