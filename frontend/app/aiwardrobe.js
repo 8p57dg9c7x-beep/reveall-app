@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     marginHorizontal: SPACING.screenHorizontal,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   subtleLinkText: {
     fontSize: 14,
@@ -647,33 +647,38 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   
-  // Closet Content - More breathing room
-  closetContent: {
-    gap: 36,
-    paddingTop: 16,
+  // Your Pieces Header
+  yourPiecesHeader: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: 20,
   },
   
-  // Section - Feels like a space, not a list
+  // Closet Content - Tighter, cohesive
+  closetContent: {
+    gap: 24,
+  },
+  
+  // Section - One wardrobe feel, not separate sections
   section: {
     // Subtle framing through spacing
   },
   sectionFeatured: {
     // Featured sections (Outerwear) get extra presence
-    paddingTop: 8,
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    color: COLORS.textSecondary,
     paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: 16,
-    opacity: 0.6,
+    marginBottom: 12,
+    opacity: 0.8,
   },
   sectionLabelFeatured: {
-    opacity: 0.8,
-    fontSize: 13,
+    fontWeight: '600',
+    opacity: 1,
   },
   sectionContent: {
     paddingHorizontal: SPACING.screenHorizontal,
