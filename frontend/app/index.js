@@ -100,7 +100,7 @@ export default function TodayScreen() {
           <Text style={styles.greeting}>{weather?.greeting?.text || 'Good day'}</Text>
           
           {/* Moment of Recognition - Human-centric tagline */}
-          <Text style={styles.recognitionText}>Getting dressed shouldn't be stressful.</Text>
+          <Text style={styles.recognitionText}>Getting dressed should not be stressful.</Text>
           
           {/* Ambient Weather - Subtle */}
           {weather && (
