@@ -306,8 +306,6 @@ export default function MyClosetScreen() {
               <Text style={styles.placeholderText}>{placeholder}</Text>
             </TouchableOpacity>
           )}
-            </TouchableOpacity>
-          ))}
         </ScrollView>
       </View>
     );
