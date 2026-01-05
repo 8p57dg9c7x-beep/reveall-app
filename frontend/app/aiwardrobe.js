@@ -1,5 +1,5 @@
-// My Closet - A personal space, not a list
-// "This is where your wardrobe begins."
+// My Closet - Personal Mode
+// "Your wardrobe, your identity"
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,13 +24,13 @@ import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
 import { ONBOARDING_CONFIG } from '../services/onboardingService';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { useHelpMeDecide } from './_layout';
 
 const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // V1 Categories - Ordered by how people get dressed
-// Hierarchy: Outerwear (featured) → Tops → Bottoms → Shoes (elevated)
 const CATEGORIES = [
   { 
     id: 'outerwear', 
