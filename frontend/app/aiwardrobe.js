@@ -649,6 +649,95 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+  
+  // Placeholder Card - Guide users to add items
+  placeholderCard: {
+    borderRadius: 16,
+    backgroundColor: 'rgba(177, 76, 255, 0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.15)',
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  placeholderText: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    opacity: 0.7,
+    textAlign: 'center',
+    paddingHorizontal: 8,
+  },
+  
+  // Category Picker Modal
+  categoryPickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'flex-end',
+  },
+  categoryPickerContent: {
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: SPACING.screenHorizontal,
+  },
+  categoryPickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  categoryPickerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  categoryPickerClose: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categoryPickerGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  categoryPickerItem: {
+    width: '47%',
+    alignItems: 'center',
+    paddingVertical: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  categoryPickerIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(177, 76, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  categoryPickerIconFeatured: {
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+  },
+  categoryPickerLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.textPrimary,
+  },
+  
   // Item Detail Modal
   itemModalOverlay: {
     flex: 1,
