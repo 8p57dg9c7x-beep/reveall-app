@@ -252,32 +252,60 @@ export default function MyClosetScreen() {
     return "Your closet is ready to inspire";
   };
 
-  // Render category section
+  // Render category section - ALWAYS show all categories with hierarchy
   const renderSection = (category) => {
     const items = getItemsByCategory(category.id);
-    if (items.length === 0) return null;
+    const { cardSize, featured, elevated, placeholder } = category;
+    
+    // Dynamic styles based on hierarchy
+    const itemStyle = {
+      width: cardSize.width,
+      height: cardSize.height,
+      borderRadius: featured ? 20 : elevated ? 16 : 16,
+    };
     
     return (
-      <View key={category.id} style={styles.section}>
-        <Text style={styles.sectionLabel}>{category.label}</Text>
+      <View key={category.id} style={[styles.section, featured && styles.sectionFeatured]}>
+        <Text style={[styles.sectionLabel, featured && styles.sectionLabelFeatured]}>
+          {category.label}
+        </Text>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.sectionContent}
         >
-          {items.map((item) => (
+          {items.length > 0 ? (
+            // Show items
+            items.map((item) => (
+              <TouchableOpacity 
+                key={item.id} 
+                style={[styles.item, itemStyle]}
+                onPress={() => handleItemPress(item)}
+                activeOpacity={0.9}
+              >
+                <Image source={{ uri: item.image }} style={styles.itemImage} />
+                {editMode && (
+                  <View style={styles.deleteIcon}>
+                    <MaterialCommunityIcons name="close" size={12} color="#FFF" />
+                  </View>
+                )}
+              </TouchableOpacity>
+            ))
+          ) : (
+            // Show placeholder - guide user to add items
             <TouchableOpacity 
-              key={item.id} 
-              style={styles.item}
-              onPress={() => handleItemPress(item)}
-              activeOpacity={0.9}
+              style={[styles.placeholderCard, itemStyle]}
+              onPress={() => selectCategoryAndPickImage(category.id)}
+              activeOpacity={0.8}
             >
-              <Image source={{ uri: item.image }} style={styles.itemImage} />
-              {editMode && (
-                <View style={styles.deleteIcon}>
-                  <MaterialCommunityIcons name="close" size={12} color="#FFF" />
-                </View>
-              )}
+              <MaterialCommunityIcons 
+                name={category.icon} 
+                size={featured ? 32 : 24} 
+                color="rgba(177, 76, 255, 0.4)" 
+              />
+              <Text style={styles.placeholderText}>{placeholder}</Text>
+            </TouchableOpacity>
+          )}
             </TouchableOpacity>
           ))}
         </ScrollView>
