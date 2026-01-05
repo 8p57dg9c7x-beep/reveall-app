@@ -549,8 +549,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     paddingHorizontal: SPACING.screenHorizontal,
-    marginBottom: 20,
+    marginBottom: 16,
     opacity: 0.6,
+  },
+  sectionLabelFeatured: {
+    opacity: 0.8,
+    fontSize: 13,
   },
   sectionContent: {
     paddingHorizontal: SPACING.screenHorizontal,
