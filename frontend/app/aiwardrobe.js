@@ -324,9 +324,6 @@ export default function MyClosetScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>My Closet</Text>
-            {getProgressMessage() && (
-              <Text style={styles.progressMessage}>{getProgressMessage()}</Text>
-            )}
           </View>
           {hasItems && (
             <TouchableOpacity 
@@ -340,7 +337,60 @@ export default function MyClosetScreen() {
           )}
         </View>
 
-        {/* Help me decide - Subtle text link (secondary) */}
+        {/* Style Snapshot - Visual identity at top */}
+        {hasItems && wardrobeItems.length >= 2 && (
+          <View style={styles.snapshotContainer}>
+            <View style={styles.snapshotGrid}>
+              {wardrobeItems.slice(0, 4).map((item, index) => (
+                <Image 
+                  key={item.id} 
+                  source={{ uri: item.image }} 
+                  style={[
+                    styles.snapshotImage,
+                    wardrobeItems.length < 4 && index >= wardrobeItems.length && styles.snapshotImageHidden,
+                  ]} 
+                />
+              ))}
+              {/* Fill empty slots if less than 4 items */}
+              {wardrobeItems.length < 4 && Array(4 - wardrobeItems.length).fill(0).map((_, i) => (
+                <View key={`empty-${i}`} style={styles.snapshotEmpty} />
+              ))}
+            </View>
+            <Text style={styles.snapshotCaption}>
+              {wardrobeItems.length} {wardrobeItems.length === 1 ? 'piece' : 'pieces'} in your wardrobe
+            </Text>
+          </View>
+        )}
+
+        {/* Saved Looks - Surface inside My Closet */}
+        {favoriteOutfits.length > 0 && (
+          <View style={styles.savedLooksSection}>
+            <View style={styles.savedLooksHeader}>
+              <Text style={styles.savedLooksTitle}>Saved Looks</Text>
+              <TouchableOpacity onPress={() => router.push('/saved-outfits')}>
+                <Text style={styles.savedLooksSeeAll}>See all →</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.savedLooksScroll}
+            >
+              {favoriteOutfits.slice(0, 5).map((outfit) => (
+                <TouchableOpacity 
+                  key={outfit.id} 
+                  style={styles.savedLookCard}
+                  onPress={() => router.push('/saved-outfits')}
+                  activeOpacity={0.9}
+                >
+                  <Image source={{ uri: outfit.image }} style={styles.savedLookImage} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Help me decide - Subtle text link */}
         {canStyle && !editMode && (
           <TouchableOpacity 
             style={styles.subtleLink}
@@ -349,6 +399,11 @@ export default function MyClosetScreen() {
           >
             <Text style={styles.subtleLinkText}>Need outfit inspiration?</Text>
           </TouchableOpacity>
+        )}
+
+        {/* Your Pieces - Single section header */}
+        {hasItems && (
+          <Text style={styles.yourPiecesHeader}>Your Pieces</Text>
         )}
 
         {/* Content - ALWAYS show all categories */}
