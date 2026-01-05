@@ -540,20 +540,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingHorizontal: SPACING.screenHorizontal,
     paddingTop: 24,
-    paddingBottom: 8,
+    paddingBottom: 16,
   },
   headerTitle: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: '700',
     color: COLORS.textPrimary,
     letterSpacing: -0.5,
-  },
-  progressMessage: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    marginTop: 6,
-    fontStyle: 'italic',
-    opacity: 0.8,
   },
   editButton: {
     paddingHorizontal: 16,
@@ -569,12 +562,83 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   
+  // Style Snapshot - Visual identity
+  snapshotContainer: {
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  snapshotGrid: {
+    width: 140,
+    height: 140,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    borderRadius: 20,
+    overflow: 'hidden',
+    gap: 2,
+  },
+  snapshotImage: {
+    width: 69,
+    height: 69,
+  },
+  snapshotImageHidden: {
+    opacity: 0,
+  },
+  snapshotEmpty: {
+    width: 69,
+    height: 69,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  snapshotCaption: {
+    marginTop: 12,
+    fontSize: 13,
+    color: COLORS.textMuted,
+    opacity: 0.7,
+  },
+  
+  // Saved Looks Section
+  savedLooksSection: {
+    marginBottom: 24,
+  },
+  savedLooksHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.screenHorizontal,
+    marginBottom: 12,
+  },
+  savedLooksTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  savedLooksSeeAll: {
+    fontSize: 13,
+    color: COLORS.primary,
+  },
+  savedLooksScroll: {
+    paddingHorizontal: SPACING.screenHorizontal,
+    gap: 12,
+  },
+  savedLookCard: {
+    width: 80,
+    height: 100,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  },
+  savedLookImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  
   // Subtle Help Link (secondary action)
   subtleLink: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 12,
     marginHorizontal: SPACING.screenHorizontal,
-    marginBottom: 8,
+    marginBottom: 16,
   },
   subtleLinkText: {
     fontSize: 14,
