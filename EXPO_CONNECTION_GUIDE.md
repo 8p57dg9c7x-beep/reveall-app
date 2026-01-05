@@ -14,7 +14,7 @@
 ### Method 2: Web Preview URL
 Visit this URL on your phone's browser, then click "Open in Expo Go":
 ```
-https://wardrobeai-32.preview.emergentagent.com
+https://smart-closet-36.preview.emergentagent.com
 ```
 
 ### Method 3: Development Server

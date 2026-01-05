@@ -128,7 +128,7 @@ Since I'm an AI running in a Docker container without physical device access, yo
 4. OR shake device → "Reload" button
 
 ### Option 2: Test on Web Browser
-1. Open: https://wardrobeai-32.preview.emergentagent.com (or your preview URL)
+1. Open: https://smart-closet-36.preview.emergentagent.com (or your preview URL)
 2. **Hard Refresh**:
    - Windows: `Ctrl + Shift + R`
    - Mac: `Cmd + Shift + R`

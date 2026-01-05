@@ -7,7 +7,7 @@ import requests
 import os
 import time
 
-BACKEND_URL = "https://wardrobeai-32.preview.emergentagent.com"
+BACKEND_URL = "https://smart-closet-36.preview.emergentagent.com"
 TEST_AUDIO_DIR = "/app/test_audio"
 
 def test_audio_endpoint_detailed():

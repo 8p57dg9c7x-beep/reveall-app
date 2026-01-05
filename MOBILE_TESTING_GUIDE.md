@@ -4,7 +4,7 @@
 
 ### Option 1: Web Preview (Instant)
 Access the app directly in your browser:
-- **URL**: https://wardrobeai-32.preview.emergentagent.com
+- **URL**: https://smart-closet-36.preview.emergentagent.com
 - Works on desktop and mobile browsers
 - No installation required
 
@@ -174,10 +174,10 @@ tail -100 /var/log/supervisor/expo.out.log | grep -A 10 "Tunnel ready"
 
 ## 🔗 Useful Links
 
-- **Web Preview**: https://wardrobeai-32.preview.emergentagent.com
-- **Home Screen**: https://wardrobeai-32.preview.emergentagent.com/
-- **Identify Screen**: https://wardrobeai-32.preview.emergentagent.com/identify
-- **Watchlist Screen**: https://wardrobeai-32.preview.emergentagent.com/watchlist
+- **Web Preview**: https://smart-closet-36.preview.emergentagent.com
+- **Home Screen**: https://smart-closet-36.preview.emergentagent.com/
+- **Identify Screen**: https://smart-closet-36.preview.emergentagent.com/identify
+- **Watchlist Screen**: https://smart-closet-36.preview.emergentagent.com/watchlist
 
 ## 📝 Testing Notes
 

@@ -44,7 +44,7 @@ exps://exp.host/@anonymous/reveal-22dc64e7-a772-41bf-8cf5-76280e5dd0f3
 
 Open this in your phone's browser, then click "Open in Expo Go":
 ```
-https://wardrobeai-32.preview.emergentagent.com
+https://smart-closet-36.preview.emergentagent.com
 ```
 
 ---
