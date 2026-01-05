@@ -530,13 +530,17 @@ const styles = StyleSheet.create({
   
   // Closet Content - More breathing room
   closetContent: {
-    gap: 40,
+    gap: 36,
     paddingTop: 16,
   },
   
   // Section - Feels like a space, not a list
   section: {
     // Subtle framing through spacing
+  },
+  sectionFeatured: {
+    // Featured sections (Outerwear) get extra presence
+    paddingTop: 8,
   },
   sectionLabel: {
     fontSize: 12,
