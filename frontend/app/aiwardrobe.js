@@ -122,12 +122,22 @@ export default function MyClosetScreen() {
     }
   };
 
-  const pickImage = async () => {
+  // STEP 1: User taps "Add Item" → Show category picker
+  const handleAddItem = () => {
     triggerHaptic();
+    setShowCategoryPicker(true);
+  };
+
+  // STEP 2: User selects category → Open image picker
+  const selectCategoryAndPickImage = async (categoryId) => {
+    triggerHaptic();
+    setPendingCategory(categoryId);
+    setShowCategoryPicker(false);
     
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission needed', 'Please allow access to your photos.');
+      setPendingCategory(null);
       return;
     }
 
@@ -139,10 +149,11 @@ export default function MyClosetScreen() {
     });
 
     if (!result.canceled && result.assets[0]) {
+      // STEP 3: Save item to EXACTLY the selected category
       const newItem = {
         id: Date.now().toString(),
         name: 'New Item',
-        category: 'tops',
+        category: categoryId, // Explicit - user chose this
         image: result.assets[0].uri,
         addedAt: new Date().toISOString(),
       };
@@ -162,6 +173,8 @@ export default function MyClosetScreen() {
         }, 400);
       }
     }
+    
+    setPendingCategory(null);
   };
 
   const deleteItem = async (itemId) => {
