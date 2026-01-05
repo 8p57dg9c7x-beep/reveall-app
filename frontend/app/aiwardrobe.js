@@ -81,6 +81,7 @@ export default function MyClosetScreen() {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [pendingCategory, setPendingCategory] = useState(null);
   const { openHelpMeDecide } = useHelpMeDecide();
+  const { favoriteOutfits } = useFavorites();
 
   // NAVIGATION: Always reset scroll to top when tab is focused
   // IMPORTANT: This must run every single time the tab gains focus
