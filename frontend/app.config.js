@@ -43,7 +43,12 @@ export default {
         "READ_MEDIA_VIDEO",
         "READ_MEDIA_AUDIO"
       ],
-      edgeToEdgeEnabled: true
+      edgeToEdgeEnabled: true,
+      jsEngine: "jsc"
+    },
+    ios: {
+      ...this.ios,
+      jsEngine: "jsc"
     },
     web: {
       bundler: "metro",
