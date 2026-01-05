@@ -351,25 +351,10 @@ export default function MyClosetScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Content */}
-        {hasItems ? (
-          <View style={styles.closetContent}>
-            {CATEGORIES.map(renderSection)}
-          </View>
-        ) : (
-          /* Premium Empty State */
-          <View style={styles.emptyState}>
-            <View style={styles.emptyVisual}>
-              <View style={styles.emptyHanger}>
-                <MaterialCommunityIcons name="hanger" size={48} color="rgba(255,255,255,0.15)" />
-              </View>
-            </View>
-            <Text style={styles.emptyTitle}>This is where your wardrobe begins</Text>
-            <Text style={styles.emptySubtitle}>
-              Add your clothes to create a space that is organized, calm, and ready to help you look your best.
-            </Text>
-          </View>
-        )}
+        {/* Content - ALWAYS show all categories */}
+        <View style={styles.closetContent}>
+          {CATEGORIES.map(renderSection)}
+        </View>
 
       </ScrollView>
 
@@ -378,7 +363,7 @@ export default function MyClosetScreen() {
         <View style={[styles.bottomArea, { paddingBottom: insets.bottom + 16 }]}>
           <TouchableOpacity 
             style={styles.addButton}
-            onPress={pickImage}
+            onPress={handleAddItem}
             activeOpacity={0.9}
           >
             <MaterialCommunityIcons name="plus" size={22} color="#FFFFFF" />
@@ -386,6 +371,51 @@ export default function MyClosetScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Category Picker Modal - Step 1 of Add Flow */}
+      <Modal
+        visible={showCategoryPicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowCategoryPicker(false)}
+      >
+        <View style={styles.categoryPickerOverlay}>
+          <View style={styles.categoryPickerContent}>
+            <View style={styles.categoryPickerHeader}>
+              <Text style={styles.categoryPickerTitle}>What are you adding?</Text>
+              <TouchableOpacity 
+                style={styles.categoryPickerClose}
+                onPress={() => setShowCategoryPicker(false)}
+              >
+                <MaterialCommunityIcons name="close" size={24} color={COLORS.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.categoryPickerGrid}>
+              {CATEGORIES.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={styles.categoryPickerItem}
+                  onPress={() => selectCategoryAndPickImage(category.id)}
+                  activeOpacity={0.8}
+                >
+                  <View style={[
+                    styles.categoryPickerIcon,
+                    category.featured && styles.categoryPickerIconFeatured,
+                  ]}>
+                    <MaterialCommunityIcons 
+                      name={category.icon} 
+                      size={32} 
+                      color={COLORS.primary} 
+                    />
+                  </View>
+                  <Text style={styles.categoryPickerLabel}>{category.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Item Detail Modal */}
       <Modal
