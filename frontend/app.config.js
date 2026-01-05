@@ -81,10 +81,7 @@ export default {
     },
     extra: {
       apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:8001",
-      buildVersion: "v1.0.0",
-      eas: {
-        projectId: "4ea42c93-d02e-443d-a498-ee6a8bf81e49"
-      }
+      buildVersion: "v1.0.0"
     }
   }
 };
