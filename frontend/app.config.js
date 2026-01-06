@@ -23,6 +23,7 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "com.reveal.app",
       infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
         NSCameraUsageDescription: "REVEAL needs camera access to identify movies and outfits",
         NSMicrophoneUsageDescription: "REVEAL needs microphone access to identify songs",
         NSPhotoLibraryUsageDescription: "REVEAL needs photo access to identify items from your images"
