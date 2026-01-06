@@ -74,13 +74,6 @@ export default {
         {
           microphonePermission: "REVEAL needs microphone access to identify songs"
         }
-      ],
-      [
-        "react-native-google-mobile-ads",
-        {
-          androidAppId: "ca-app-pub-3940256099942544~3347511713",
-          iosAppId: "ca-app-pub-3940256099942544~1458002511"
-        }
       ]
     ],
     experiments: {
