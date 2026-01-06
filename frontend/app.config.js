@@ -54,6 +54,16 @@ export default {
     plugins: [
       "expo-router",
       [
+        "expo-build-properties",
+        {
+          ios: {
+            useFrameworks: "static"
+          }
+        }
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/analytics",
+      [
         "expo-splash-screen",
         {
           image: "./assets/images/splash-icon.png",
