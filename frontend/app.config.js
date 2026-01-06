@@ -7,7 +7,7 @@ export default {
     icon: "./assets/images/icon.png",
     scheme: "reveal",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
+    newArchEnabled: false,
     updates: {
       url: "https://u.expo.dev/44522b56-4fb8-41cc-847c-bc621e161e2c"
     },
