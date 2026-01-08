@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   
   // Welcome
   welcomeSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   greeting: {
     fontSize: 32,
@@ -265,6 +265,49 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontStyle: 'italic',
     marginBottom: 12,
+  },
+  
+  // Hero Section - Visual landing point
+  heroSection: {
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  heroCollage: {
+    flexDirection: 'row',
+    gap: 8,
+    height: 160,
+  },
+  heroMainImage: {
+    width: 140,
+    height: 160,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  heroSideImages: {
+    gap: 8,
+  },
+  heroSmallImage: {
+    width: 76,
+    height: 76,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  heroAbstract: {
+    width: '100%',
+    height: 140,
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  heroGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   
   // Daily Card - For users with items
