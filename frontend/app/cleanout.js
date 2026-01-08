@@ -1,5 +1,5 @@
-// Clean-Out Mode Screen
-// Help users decide what to Keep / Sell / Donate
+// Clean-Out Mode - Full Screen Experience
+// Help users decide: Keep / Sell / Donate
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -10,6 +10,8 @@ import {
   Platform,
   Dimensions,
   ActivityIndicator,
+  Image,
+  StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,19 +19,24 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
-import CleanOutCard from '../components/CleanOutCard';
+import { COLORS, GRADIENTS } from '../constants/theme';
 import {
   DECISIONS,
   startCleanOutSession,
   recordDecision,
   undoLastDecision,
-  getSessionStats,
   endCleanOutSession,
 } from '../services/cleanOutService';
 
 const WARDROBE_KEY = '@reveal_wardrobe';
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const CATEGORY_LABELS = {
+  outerwear: 'Outerwear',
+  tops: 'Top',
+  bottoms: 'Bottoms',
+  shoes: 'Shoes',
+};
 
 export default function CleanOutScreen() {
   const insets = useSafeAreaInsets();
@@ -38,10 +45,10 @@ export default function CleanOutScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [showSummary, setShowSummary] = useState(false);
   const [summary, setSummary] = useState(null);
-  const [lastDecision, setLastDecision] = useState(null);
   const [canUndo, setCanUndo] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Load wardrobe items and start session
+  // Load wardrobe and start session
   useEffect(() => {
     const init = async () => {
       try {
@@ -60,12 +67,12 @@ export default function CleanOutScreen() {
     init();
   }, []);
 
-  const triggerHaptic = (type = 'light') => {
+  const triggerHaptic = (type = 'medium') => {
     if (Platform.OS !== 'web') {
       if (type === 'success') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } else if (type === 'warning') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      } else if (type === 'light') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } else {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
@@ -74,19 +81,18 @@ export default function CleanOutScreen() {
 
   // Handle decision
   const handleDecision = useCallback(async (decision) => {
-    if (currentIndex >= items.length) return;
-
-    triggerHaptic(decision === DECISIONS.KEEP ? 'success' : 'light');
+    if (currentIndex >= items.length || isProcessing) return;
+    
+    setIsProcessing(true);
+    triggerHaptic(decision === DECISIONS.KEEP ? 'success' : 'medium');
     
     const currentItem = items[currentIndex];
     await recordDecision(currentItem.id, decision, currentItem);
     
-    setLastDecision({ itemId: currentItem.id, decision });
     setCanUndo(true);
 
-    // Move to next item or show summary
+    // Move to next or show summary
     if (currentIndex + 1 >= items.length) {
-      // Session complete
       const sessionSummary = await endCleanOutSession();
       setSummary(sessionSummary);
       setShowSummary(true);
@@ -94,212 +100,262 @@ export default function CleanOutScreen() {
     } else {
       setCurrentIndex(prev => prev + 1);
     }
-  }, [currentIndex, items]);
+    
+    setIsProcessing(false);
+  }, [currentIndex, items, isProcessing]);
 
   // Handle undo
   const handleUndo = useCallback(async () => {
-    if (!canUndo || currentIndex === 0) return;
-
-    triggerHaptic('warning');
+    if (!canUndo || currentIndex === 0 || isProcessing) return;
     
-    const result = await undoLastDecision();
-    if (result) {
-      setCurrentIndex(prev => prev - 1);
-      setCanUndo(false);
-      setLastDecision(null);
-    }
-  }, [canUndo, currentIndex]);
-
-  // Handle close/exit
-  const handleClose = useCallback(async () => {
-    triggerHaptic();
+    setIsProcessing(true);
+    triggerHaptic('light');
     
-    // If we've made decisions, show summary
-    const stats = await getSessionStats();
-    if (stats.total > 0) {
-      const sessionSummary = await endCleanOutSession();
-      setSummary(sessionSummary);
-      setShowSummary(true);
-    } else {
-      // No decisions made, just exit
-      await endCleanOutSession();
-      router.back();
-    }
+    await undoLastDecision();
+    setCurrentIndex(prev => prev - 1);
+    setCanUndo(false);
+    
+    setIsProcessing(false);
+  }, [canUndo, currentIndex, isProcessing]);
+
+  // Handle close
+  const handleClose = useCallback(() => {
+    triggerHaptic('light');
+    router.back();
   }, []);
 
-  // Handle finish
+  // Handle finish from summary
   const handleFinish = useCallback(() => {
     triggerHaptic('success');
     router.back();
   }, []);
 
   const currentItem = items[currentIndex];
-  const progress = items.length > 0 ? ((currentIndex) / items.length) * 100 : 0;
+  const progress = items.length > 0 ? ((currentIndex + 1) / items.length) * 100 : 0;
 
-  // Loading state
+  // ============================================
+  // LOADING STATE
+  // ============================================
   if (isLoading) {
     return (
-      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading your closet...</Text>
-        </View>
-      </LinearGradient>
+      <View style={styles.fullScreen}>
+        <StatusBar barStyle="light-content" />
+        <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={styles.loadingText}>Loading your closet...</Text>
+          </View>
+        </LinearGradient>
+      </View>
     );
   }
 
-  // Empty state
+  // ============================================
+  // EMPTY STATE
+  // ============================================
   if (items.length === 0) {
     return (
-      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-        <View style={[styles.content, { paddingTop: insets.top }]}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <MaterialCommunityIcons name="close" size={28} color={COLORS.textPrimary} />
-          </TouchableOpacity>
+      <View style={styles.fullScreen}>
+        <StatusBar barStyle="light-content" />
+        <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+          {/* Header */}
+          <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+              <MaterialCommunityIcons name="close" size={28} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+          </View>
           
-          <View style={styles.emptyContainer}>
+          {/* Empty content */}
+          <View style={styles.centerContent}>
             <MaterialCommunityIcons name="hanger" size={64} color={COLORS.textMuted} />
             <Text style={styles.emptyTitle}>No items to review</Text>
             <Text style={styles.emptySubtitle}>Add items to your closet first</Text>
-            <TouchableOpacity 
-              style={styles.emptyButton}
-              onPress={() => router.back()}
-            >
-              <Text style={styles.emptyButtonText}>Go to My Closet</Text>
+          </View>
+          
+          {/* Bottom action */}
+          <View style={[styles.bottomSafeArea, { paddingBottom: insets.bottom + 16 }]}>
+            <TouchableOpacity style={styles.primaryButton} onPress={handleClose}>
+              <Text style={styles.primaryButtonText}>Go to My Closet</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      </View>
     );
   }
 
-  // Summary state
+  // ============================================
+  // SUMMARY STATE
+  // ============================================
   if (showSummary && summary) {
     return (
-      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-        <View style={[styles.content, { paddingTop: insets.top }]}>
-          <View style={styles.summaryContainer}>
+      <View style={styles.fullScreen}>
+        <StatusBar barStyle="light-content" />
+        <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+          {/* Spacer for top safe area */}
+          <View style={{ height: insets.top + 40 }} />
+          
+          {/* Summary content - centered */}
+          <View style={styles.centerContent}>
             <MaterialCommunityIcons name="check-circle" size={80} color="#22C55E" />
             <Text style={styles.summaryTitle}>Clean-Out Complete!</Text>
             <Text style={styles.summarySubtitle}>
               You reviewed {summary.totalReviewed} {summary.totalReviewed === 1 ? 'item' : 'items'}
             </Text>
             
-            <View style={styles.summaryStats}>
-              <View style={styles.summaryStat}>
-                <View style={[styles.summaryStatIcon, { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
+            {/* Stats row */}
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <View style={[styles.statIcon, { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
                   <MaterialCommunityIcons name="check" size={24} color="#22C55E" />
                 </View>
-                <Text style={styles.summaryStatNumber}>{summary.kept}</Text>
-                <Text style={styles.summaryStatLabel}>Keeping</Text>
+                <Text style={styles.statNumber}>{summary.kept}</Text>
+                <Text style={styles.statLabel}>Keeping</Text>
               </View>
               
-              <View style={styles.summaryStat}>
-                <View style={[styles.summaryStatIcon, { backgroundColor: 'rgba(177, 76, 255, 0.15)' }]}>
+              <View style={styles.statItem}>
+                <View style={[styles.statIcon, { backgroundColor: 'rgba(177, 76, 255, 0.15)' }]}>
                   <MaterialCommunityIcons name="tag-outline" size={24} color={COLORS.primary} />
                 </View>
-                <Text style={styles.summaryStatNumber}>{summary.toSell}</Text>
-                <Text style={styles.summaryStatLabel}>To Sell</Text>
+                <Text style={styles.statNumber}>{summary.toSell}</Text>
+                <Text style={styles.statLabel}>To Sell</Text>
               </View>
               
-              <View style={styles.summaryStat}>
-                <View style={[styles.summaryStatIcon, { backgroundColor: 'rgba(255, 159, 67, 0.15)' }]}>
+              <View style={styles.statItem}>
+                <View style={[styles.statIcon, { backgroundColor: 'rgba(255, 159, 67, 0.15)' }]}>
                   <MaterialCommunityIcons name="gift-outline" size={24} color="#FF9F43" />
                 </View>
-                <Text style={styles.summaryStatNumber}>{summary.toDonate}</Text>
-                <Text style={styles.summaryStatLabel}>To Donate</Text>
+                <Text style={styles.statNumber}>{summary.toDonate}</Text>
+                <Text style={styles.statLabel}>To Donate</Text>
               </View>
             </View>
 
             {summary.toSell > 0 && (
-              <Text style={styles.sellStackHint}>
+              <Text style={styles.sellHint}>
                 Items marked "Sell" are saved in your Sell Stack
               </Text>
             )}
-            
-            <TouchableOpacity 
-              style={styles.finishButton}
-              onPress={handleFinish}
-              activeOpacity={0.9}
-            >
-              <Text style={styles.finishButtonText}>Done</Text>
+          </View>
+          
+          {/* Bottom action */}
+          <View style={[styles.bottomSafeArea, { paddingBottom: insets.bottom + 16 }]}>
+            <TouchableOpacity style={styles.primaryButton} onPress={handleFinish}>
+              <Text style={styles.primaryButtonText}>Done</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      </View>
     );
   }
 
-  // Main review state
+  // ============================================
+  // MAIN REVIEW STATE
+  // ============================================
   return (
-    <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      <View style={[styles.content, { paddingTop: insets.top }]}>
-        {/* Header */}
-        <View style={styles.header}>
+    <View style={styles.fullScreen}>
+      <StatusBar barStyle="light-content" />
+      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+        
+        {/* HEADER - Fixed top */}
+        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <MaterialCommunityIcons name="close" size={28} color={COLORS.textPrimary} />
           </TouchableOpacity>
           
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Clean-Out Mode</Text>
-            <Text style={styles.progressText}>
-              {currentIndex + 1} of {items.length}
-            </Text>
+            <Text style={styles.headerTitle}>Clean-Out</Text>
+            <Text style={styles.progressText}>{currentIndex + 1} of {items.length}</Text>
           </View>
           
-          {/* Undo button */}
           <TouchableOpacity 
-            style={[styles.undoButton, !canUndo && styles.undoButtonDisabled]}
+            style={[styles.undoButton, !canUndo && styles.undoDisabled]}
             onPress={handleUndo}
             disabled={!canUndo}
           >
             <MaterialCommunityIcons 
               name="undo" 
-              size={24} 
+              size={22} 
               color={canUndo ? COLORS.textPrimary : COLORS.textMuted} 
             />
           </TouchableOpacity>
         </View>
 
-        {/* Progress bar */}
+        {/* PROGRESS BAR */}
         <View style={styles.progressBar}>
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
 
-        {/* Card */}
-        <View style={styles.cardContainer}>
-          <CleanOutCard 
-            item={currentItem} 
-            onDecision={handleDecision}
-          />
+        {/* ITEM IMAGE - Flexible center area */}
+        <View style={styles.imageContainer}>
+          {currentItem && (
+            <View style={styles.imageWrapper}>
+              <Image source={{ uri: currentItem.image }} style={styles.itemImage} />
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>
+                  {CATEGORY_LABELS[currentItem.category] || 'Item'}
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
 
-        {/* Hint text */}
-        <Text style={styles.hintText}>
-          What do you want to do with this piece?
-        </Text>
-      </View>
-    </LinearGradient>
+        {/* ACTIONS - Fixed bottom with SafeArea */}
+        <View style={[styles.bottomSafeArea, { paddingBottom: insets.bottom + 16 }]}>
+          <Text style={styles.questionText}>What do you want to do with this?</Text>
+          
+          <View style={styles.actionsRow}>
+            {/* Donate */}
+            <TouchableOpacity
+              style={[styles.actionButton, styles.donateBtn]}
+              onPress={() => handleDecision(DECISIONS.DONATE)}
+              activeOpacity={0.8}
+              disabled={isProcessing}
+            >
+              <MaterialCommunityIcons name="gift-outline" size={28} color="#FF9F43" />
+              <Text style={[styles.actionLabel, { color: '#FF9F43' }]}>Donate</Text>
+            </TouchableOpacity>
+
+            {/* Keep - Primary */}
+            <TouchableOpacity
+              style={[styles.actionButton, styles.keepBtn]}
+              onPress={() => handleDecision(DECISIONS.KEEP)}
+              activeOpacity={0.8}
+              disabled={isProcessing}
+            >
+              <MaterialCommunityIcons name="check" size={36} color="#FFFFFF" />
+              <Text style={styles.keepLabel}>Keep</Text>
+            </TouchableOpacity>
+
+            {/* Sell */}
+            <TouchableOpacity
+              style={[styles.actionButton, styles.sellBtn]}
+              onPress={() => handleDecision(DECISIONS.SELL)}
+              activeOpacity={0.8}
+              disabled={isProcessing}
+            >
+              <MaterialCommunityIcons name="tag-outline" size={28} color={COLORS.primary} />
+              <Text style={[styles.actionLabel, { color: COLORS.primary }]}>Sell</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+      </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  fullScreen: {
+    flex: 1,
+    backgroundColor: '#0D0D0D',
+  },
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: SPACING.screenHorizontal,
-  },
-  loadingContainer: {
+  centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: COLORS.textSecondary,
+    paddingHorizontal: 32,
   },
   
   // Header
@@ -307,7 +363,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   closeButton: {
     width: 44,
@@ -319,8 +376,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '600',
     color: COLORS.textPrimary,
   },
   progressText: {
@@ -334,19 +391,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
-  undoButtonDisabled: {
+  undoDisabled: {
     opacity: 0.4,
   },
   
-  // Progress bar
+  // Progress
   progressBar: {
-    height: 4,
+    height: 3,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 20,
     borderRadius: 2,
-    marginBottom: 24,
-    overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
@@ -354,27 +410,103 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   
-  // Card container
-  cardContainer: {
+  // Image
+  imageContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+  },
+  imageWrapper: {
+    width: SCREEN_WIDTH - 48,
+    maxHeight: SCREEN_HEIGHT * 0.45,
+    aspectRatio: 0.85,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  itemImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  categoryBadge: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  categoryText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   
-  // Hint
-  hintText: {
+  // Bottom actions
+  bottomSafeArea: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    backgroundColor: 'rgba(13, 13, 13, 0.95)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  questionText: {
     textAlign: 'center',
     fontSize: 15,
-    color: COLORS.textMuted,
-    marginBottom: 32,
+    color: COLORS.textSecondary,
+    marginBottom: 20,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  actionButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+  },
+  donateBtn: {
+    width: 80,
+    height: 80,
+    backgroundColor: 'rgba(255, 159, 67, 0.12)',
+  },
+  keepBtn: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#22C55E',
+  },
+  sellBtn: {
+    width: 80,
+    height: 80,
+    backgroundColor: 'rgba(177, 76, 255, 0.12)',
+  },
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  keepLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginTop: 4,
   },
   
-  // Empty state
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  // Loading
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: COLORS.textSecondary,
   },
+  
+  // Empty
   emptyTitle: {
     fontSize: 22,
     fontWeight: '700',
@@ -386,26 +518,8 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 8,
   },
-  emptyButton: {
-    marginTop: 32,
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: 16,
-  },
-  emptyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
   
   // Summary
-  summaryContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
   summaryTitle: {
     fontSize: 28,
     fontWeight: '700',
@@ -417,15 +531,15 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 8,
   },
-  summaryStats: {
+  statsRow: {
     flexDirection: 'row',
     marginTop: 40,
     gap: 24,
   },
-  summaryStat: {
+  statItem: {
     alignItems: 'center',
   },
-  summaryStatIcon: {
+  statIcon: {
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -433,30 +547,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  summaryStatNumber: {
+  statNumber: {
     fontSize: 28,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
-  summaryStatLabel: {
+  statLabel: {
     fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 2,
   },
-  sellStackHint: {
+  sellHint: {
     fontSize: 14,
     color: COLORS.textMuted,
     marginTop: 32,
     textAlign: 'center',
   },
-  finishButton: {
-    marginTop: 40,
+  
+  // Primary button
+  primaryButton: {
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 48,
     paddingVertical: 16,
     borderRadius: 16,
+    alignItems: 'center',
   },
-  finishButtonText: {
+  primaryButtonText: {
     fontSize: 17,
     fontWeight: '600',
     color: '#FFFFFF',
