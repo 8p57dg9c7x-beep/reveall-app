@@ -362,6 +362,24 @@ export default function MyClosetScreen() {
           </View>
         )}
 
+        {/* Clean-Out Mode Entry - Only show when items exist */}
+        {hasItems && wardrobeItems.length >= 3 && !editMode && (
+          <TouchableOpacity 
+            style={styles.cleanOutButton}
+            onPress={() => { triggerHaptic(); router.push('/cleanout'); }}
+            activeOpacity={0.9}
+          >
+            <View style={styles.cleanOutIcon}>
+              <MaterialCommunityIcons name="hanger" size={20} color={COLORS.primary} />
+            </View>
+            <View style={styles.cleanOutContent}>
+              <Text style={styles.cleanOutTitle}>Clean-Out Mode</Text>
+              <Text style={styles.cleanOutSubtitle}>Keep, Sell, or Donate</Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        )}
+
         {/* Saved Looks - Surface inside My Closet */}
         {favoriteOutfits.length > 0 && (
           <View style={styles.savedLooksSection}>
