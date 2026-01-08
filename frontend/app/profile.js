@@ -157,7 +157,15 @@ export default function ProfileScreen() {
       color: '#FF6B6B',
       route: '/saved-outfits',
     },
-  ], [favoriteOutfits.length]);
+    {
+      id: 'sell-stack',
+      title: 'Sell Stack',
+      subtitle: sellStackCount > 0 ? `${sellStackCount} items to sell` : 'Items marked for sale',
+      icon: 'tag-outline',
+      color: '#F59E0B',
+      route: '/sellstack',
+    },
+  ], [favoriteOutfits.length, sellStackCount]);
 
   const renderMenuItem = useCallback(({ item }) => (
     <TouchableOpacity
