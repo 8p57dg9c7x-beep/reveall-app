@@ -35,9 +35,10 @@ export default function ProfileScreen() {
   const flatListRef = useRef(null);
   const [avatarUri, setAvatarUri] = useState(null);
   const [closetCount, setClosetCount] = useState(0);
+  const [sellStackCount, setSellStackCount] = useState(0);
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
 
-  // Load avatar and closet count on mount
+  // Load avatar, closet count, and sell stack on mount
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -49,6 +50,9 @@ export default function ProfileScreen() {
           const items = JSON.parse(wardrobeJson);
           setClosetCount(items.length);
         }
+        
+        const sellStack = await getSellStack();
+        setSellStackCount(sellStack.length);
       } catch (error) {
         console.log('Error loading profile data:', error);
       }
@@ -56,7 +60,7 @@ export default function ProfileScreen() {
     loadData();
   }, []);
 
-  // Refresh closet count on focus
+  // Refresh counts on focus
   useFocusEffect(
     useCallback(() => {
       const refresh = async () => {
@@ -65,6 +69,8 @@ export default function ProfileScreen() {
           const items = JSON.parse(wardrobeJson);
           setClosetCount(items.length);
         }
+        const sellStack = await getSellStack();
+        setSellStackCount(sellStack.length);
       };
       refresh();
       // Scroll reset
