@@ -22,10 +22,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
-import { ONBOARDING_CONFIG } from '../services/onboardingService';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { useHelpMeDecide } from './_layout';
+import { COLORS, GRADIENTS, SPACING } from '../../constants/theme';
+import { ONBOARDING_CONFIG } from '../../services/onboardingService';
+import { useFavorites } from '../../contexts/FavoritesContext';
+import { useHelpMeDecide } from '../_layout';
 
 const WARDROBE_STORAGE_KEY = '@reveal_wardrobe';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

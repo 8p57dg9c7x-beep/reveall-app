@@ -22,9 +22,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { COLORS, GRADIENTS, SIZES, SPACING } from '../constants/theme';
-import { getSellStack } from '../services/cleanOutService';
+import { useFavorites } from '../../contexts/FavoritesContext';
+import { COLORS, GRADIENTS, SIZES, SPACING } from '../../constants/theme';
+import { getSellStack } from '../../services/cleanOutService';
 
 const AVATAR_KEY = '@reveal_profile_avatar';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');

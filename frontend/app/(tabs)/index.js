@@ -14,11 +14,11 @@ import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
-import { fetchRealWeather } from '../services/weatherService';
-import { ONBOARDING_CONFIG } from '../services/onboardingService';
-import { useHelpMeDecide } from './_layout';
-import { logEvent } from '../services/firebase';
+import { COLORS, GRADIENTS, SPACING } from '../../constants/theme';
+import { fetchRealWeather } from '../../services/weatherService';
+import { ONBOARDING_CONFIG } from '../../services/onboardingService';
+import { useHelpMeDecide } from '../_layout';
+import { logEvent } from '../../services/firebase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
