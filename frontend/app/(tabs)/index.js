@@ -99,9 +99,6 @@ export default function TodayScreen() {
         <View style={styles.welcomeSection}>
           <Text style={styles.greeting}>{weather?.greeting?.text || 'Good day'}</Text>
           
-          {/* Moment of Recognition - Human-centric tagline */}
-          <Text style={styles.recognitionText}>Getting dressed should not be stressful.</Text>
-          
           {/* Ambient Weather - Subtle */}
           {weather && (
             <View style={styles.weatherRow}>
@@ -111,38 +108,25 @@ export default function TodayScreen() {
           )}
         </View>
 
-        {/* HERO SECTION - Visual landing point */}
+        {/* HERO - Single visual anchor */}
         <View style={styles.heroSection}>
-          {hasItems && recentItems.length >= 2 ? (
-            // Show collage of recent items
-            <View style={styles.heroCollage}>
-              <View style={styles.heroMainImage}>
-                {recentItems[0] && (
-                  <Image source={{ uri: recentItems[0].image }} style={styles.heroImage} />
-                )}
+          <View style={styles.heroCard}>
+            {hasItems && recentItems.length > 0 ? (
+              <>
+                <Image source={{ uri: recentItems[0].image }} style={styles.heroImage} />
+                <View style={styles.heroOverlay}>
+                  <Text style={styles.heroTitle}>Your Style</Text>
+                  <Text style={styles.heroSubtitle}>{closetCount} pieces in your wardrobe</Text>
+                </View>
+              </>
+            ) : (
+              <View style={styles.heroEmpty}>
+                <MaterialCommunityIcons name="hanger" size={40} color="rgba(255,255,255,0.15)" />
+                <Text style={styles.heroEmptyText}>Your wardrobe awaits</Text>
+                <Text style={styles.heroEmptySubtext}>Add your first piece</Text>
               </View>
-              <View style={styles.heroSideImages}>
-                {recentItems[1] && (
-                  <Image source={{ uri: recentItems[1].image }} style={styles.heroSmallImage} />
-                )}
-                {recentItems[2] && (
-                  <Image source={{ uri: recentItems[2].image }} style={styles.heroSmallImage} />
-                )}
-              </View>
-            </View>
-          ) : (
-            // Empty/minimal state - abstract visual
-            <View style={styles.heroAbstract}>
-              <LinearGradient 
-                colors={['rgba(177, 76, 255, 0.15)', 'rgba(102, 126, 234, 0.08)']}
-                style={styles.heroGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <MaterialCommunityIcons name="hanger" size={48} color="rgba(255,255,255,0.2)" />
-              </LinearGradient>
-            </View>
-          )}
+            )}
+          </View>
         </View>
 
         {/* Daily Anchor - Subtle reason to check in */}
