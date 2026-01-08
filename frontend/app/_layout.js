@@ -1,30 +1,20 @@
-// REVEAL V1 - Clean Navigation Architecture
+// REVEAL V1 - Root Layout with True Full-Screen Modals
 // 
-// RULES (Non-negotiable):
-// 1. Tab bar ALWAYS visible on Today / My Closet / Profile
-// 2. Switching tabs ALWAYS starts at top
-// 3. Today = emotional home (one tap from anywhere)
-// 4. "Help me decide" = modal (not a screen)
-// 5. Profile = settings only. Sub-pages slide up as modals.
-// 6. One primary CTA per screen
-//
-// STRUCTURE:
+// ARCHITECTURE:
 // ┌─────────────────────────────────────────┐
-// │          TAB BAR (Always Visible)       │
-// ├─────────────┬─────────────┬─────────────┤
-// │    TODAY    │  MY CLOSET  │   PROFILE   │
-// └─────────────┴─────────────┴─────────────┘
-//
-// MODALS (overlay, don't hide tabs):
-// - Help Me Decide (bottom sheet)
-// - Style Preferences (slide-up modal)
-// - Body Scanner (slide-up modal)
-// - Saved Outfits (slide-up modal)
+// │           STACK (Root)                  │
+// │  ┌─────────────────────────────────┐    │
+// │  │      TABS (Main App)            │    │
+// │  │  ┌───────┬───────┬───────┐      │    │
+// │  │  │ Today │Closet │Profile│      │    │
+// │  │  └───────┴───────┴───────┘      │    │
+// │  └─────────────────────────────────┘    │
+// │                                         │
+// │  [Clean-Out Mode - True Full Screen]    │
+// └─────────────────────────────────────────┘
 
-import React, { useEffect, useRef, createContext, useContext, useState, useCallback } from 'react';
-import { Tabs } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../constants/theme';
+import React, { useEffect, useRef, createContext, useContext, useCallback } from 'react';
+import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { AddiletsProvider } from '../contexts/AddiletsContext';
@@ -32,7 +22,7 @@ import HelpMeDecideModal from '../components/HelpMeDecideModal';
 import { initializeFirebase } from '../services/firebase';
 
 // ============================================
-// HELP ME DECIDE CONTEXT (Bottom Sheet Modal)
+// HELP ME DECIDE CONTEXT
 // ============================================
 const HelpMeDecideContext = createContext(null);
 
@@ -45,17 +35,15 @@ export function useHelpMeDecide() {
 }
 
 // ============================================
-// ROOT LAYOUT
+// ROOT LAYOUT - Stack Navigator
 // ============================================
 export default function RootLayout() {
   const helpMeDecideRef = useRef(null);
   
-  // Initialize Firebase on app launch
   useEffect(() => {
     initializeFirebase();
   }, []);
 
-  // Help Me Decide modal controls
   const openHelpMeDecide = useCallback(() => {
     helpMeDecideRef.current?.open();
   }, []);
@@ -70,140 +58,30 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <HelpMeDecideContext.Provider value={{ openHelpMeDecide, closeHelpMeDecide }}>
             
-            {/* ===== TAB NAVIGATOR ===== */}
-            <Tabs
-              screenOptions={{
-                headerShown: false,
-                animation: 'fade',
-                tabBarStyle: {
-                  backgroundColor: COLORS.tabBarBackground,
-                  borderTopWidth: 1,
-                  borderTopColor: 'rgba(177, 76, 255, 0.08)',
-                  elevation: 0,
-                  height: 100,
-                  paddingBottom: 30,
-                  paddingTop: 12,
-                  shadowColor: COLORS.primary,
-                  shadowOffset: { width: 0, height: -2 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 12,
-                },
-                tabBarActiveTintColor: COLORS.tabBarActive,
-                tabBarInactiveTintColor: COLORS.tabBarInactive,
-                tabBarLabelStyle: {
-                  fontSize: 11,
-                  fontWeight: '600',
-                  marginTop: 6,
-                },
-                tabBarIconStyle: {
-                  marginTop: 4,
-                },
-                tabBarItemStyle: {
-                  paddingVertical: 4,
-                },
-              }}
-            >
-              {/* ===== TAB 1: TODAY ===== */}
-              <Tabs.Screen
-                name="index"
-                options={{
-                  title: 'Today',
-                  tabBarIcon: ({ color }) => (
-                    <MaterialCommunityIcons name="white-balance-sunny" size={24} color={color} />
-                  ),
-                }}
-              />
+            <Stack screenOptions={{ headerShown: false }}>
+              {/* Main tabs - this will be the (tabs) folder */}
+              <Stack.Screen name="(tabs)" />
               
-              {/* ===== TAB 2: MY CLOSET ===== */}
-              <Tabs.Screen
-                name="aiwardrobe"
-                options={{
-                  title: 'My Closet',
-                  tabBarIcon: ({ color }) => (
-                    <MaterialCommunityIcons name="wardrobe" size={24} color={color} />
-                  ),
-                }}
-              />
-              
-              {/* ===== TAB 3: PROFILE ===== */}
-              <Tabs.Screen
-                name="profile"
-                options={{
-                  title: 'Profile',
-                  tabBarIcon: ({ color }) => (
-                    <MaterialCommunityIcons name="account" size={24} color={color} />
-                  ),
-                }}
-              />
-
-              {/* ===== MODAL SCREENS (slide up, tab bar visible behind) ===== */}
-              <Tabs.Screen 
-                name="style-preferences" 
-                options={{ 
-                  href: null,
-                  presentation: 'modal',
-                }} 
-              />
-              <Tabs.Screen 
-                name="bodyscanner" 
-                options={{ 
-                  href: null,
-                  presentation: 'modal',
-                }} 
-              />
-              <Tabs.Screen 
-                name="saved-outfits" 
-                options={{ 
-                  href: null,
-                  presentation: 'modal',
-                }} 
-              />
-              <Tabs.Screen 
-                name="outfitdetail" 
-                options={{ 
-                  href: null,
-                  presentation: 'modal',
-                }} 
-              />
-              
-              {/* ===== CLEAN-OUT MODE (Full screen modal) ===== */}
-              <Tabs.Screen 
+              {/* TRUE Full-screen modals - NO tab bar */}
+              <Stack.Screen 
                 name="cleanout" 
                 options={{ 
-                  href: null,
                   presentation: 'fullScreenModal',
-                }} 
-              />
-              <Tabs.Screen 
-                name="sellstack" 
-                options={{ 
-                  href: null,
-                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
                 }} 
               />
               
-              {/* ===== HIDDEN SCREENS (not accessible in v1) ===== */}
-              <Tabs.Screen name="aistylist" options={{ href: null }} />
-              <Tabs.Screen name="stylelab" options={{ href: null }} />
-              <Tabs.Screen name="discover" options={{ href: null }} />
-              <Tabs.Screen name="fitness" options={{ href: null }} />
-              <Tabs.Screen name="addilets" options={{ href: null }} />
-              <Tabs.Screen name="style" options={{ href: null }} />
-              <Tabs.Screen name="beauty" options={{ href: null }} />
-              <Tabs.Screen name="beautydetail" options={{ href: null }} />
-              <Tabs.Screen name="saved-beauty" options={{ href: null }} />
-              <Tabs.Screen name="musicscan" options={{ href: null }} />
-              <Tabs.Screen name="trendingsongs" options={{ href: null }} />
-              <Tabs.Screen name="comingsoon" options={{ href: null }} />
-              <Tabs.Screen name="result" options={{ href: null }} />
-              <Tabs.Screen name="favorites" options={{ href: null }} />
-              <Tabs.Screen name="watchlist" options={{ href: null }} />
-              <Tabs.Screen name="analytics" options={{ href: null }} />
-              <Tabs.Screen name="universal-search" options={{ href: null }} />
-              <Tabs.Screen name="stylepreferences" options={{ href: null }} />
-            </Tabs>
+              {/* Regular modals */}
+              <Stack.Screen 
+                name="sellstack" 
+                options={{ 
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
+                }} 
+              />
+            </Stack>
             
-            {/* ===== HELP ME DECIDE BOTTOM SHEET ===== */}
+            {/* Help Me Decide Bottom Sheet */}
             <HelpMeDecideModal ref={helpMeDecideRef} />
             
           </HelpMeDecideContext.Provider>
