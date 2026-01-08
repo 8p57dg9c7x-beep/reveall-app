@@ -614,6 +614,41 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   
+  // Clean-Out Mode Button
+  cleanOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(177, 76, 255, 0.08)',
+    marginHorizontal: SPACING.screenHorizontal,
+    marginBottom: 20,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 76, 255, 0.15)',
+  },
+  cleanOutIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(177, 76, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cleanOutContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  cleanOutTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  cleanOutSubtitle: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  
   // Saved Looks Section
   savedLooksSection: {
     marginBottom: 24,
