@@ -244,27 +244,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textSecondary,
   },
-  recognitionText: {
-    fontSize: 15,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    marginBottom: 12,
-  },
   
-  // Hero Section - Visual landing point
+  // Hero Section - Single visual anchor
   heroSection: {
-    marginBottom: 24,
-    alignItems: 'center',
+    marginBottom: 28,
   },
-  heroCollage: {
-    flexDirection: 'row',
-    gap: 8,
-    height: 160,
-  },
-  heroMainImage: {
-    width: 140,
-    height: 160,
-    borderRadius: 20,
+  heroCard: {
+    width: '100%',
+    height: 180,
+    borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
@@ -273,25 +261,39 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  heroSideImages: {
-    gap: 8,
+  heroOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
-  heroSmallImage: {
-    width: 76,
-    height: 76,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  heroTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
-  heroAbstract: {
-    width: '100%',
-    height: 140,
-    borderRadius: 24,
-    overflow: 'hidden',
+  heroSubtitle: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 2,
   },
-  heroGradient: {
+  heroEmpty: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  heroEmptyText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginTop: 12,
+  },
+  heroEmptySubtext: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.3)',
+    marginTop: 4,
   },
   
   // Daily Card - For users with items
