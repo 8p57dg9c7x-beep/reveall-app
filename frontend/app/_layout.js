@@ -166,6 +166,22 @@ export default function RootLayout() {
                 }} 
               />
               
+              {/* ===== CLEAN-OUT MODE (Full screen modal) ===== */}
+              <Tabs.Screen 
+                name="cleanout" 
+                options={{ 
+                  href: null,
+                  presentation: 'fullScreenModal',
+                }} 
+              />
+              <Tabs.Screen 
+                name="sellstack" 
+                options={{ 
+                  href: null,
+                  presentation: 'modal',
+                }} 
+              />
+              
               {/* ===== HIDDEN SCREENS (not accessible in v1) ===== */}
               <Tabs.Screen name="aistylist" options={{ href: null }} />
               <Tabs.Screen name="stylelab" options={{ href: null }} />
