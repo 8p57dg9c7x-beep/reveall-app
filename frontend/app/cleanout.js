@@ -442,6 +442,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginTop: 8,
+    color: '#FFFFFF',
+  },
+  donateIcon: {
+    backgroundColor: '#FF9F43',
+  },
+  sellIcon: {
+    backgroundColor: COLORS.primary,
   },
   keepBtn: {
     width: 88,
