@@ -1,5 +1,5 @@
-// Sell Stack Screen
-// View items marked for sale during clean-out sessions
+// Sell Stack - Premium & Empowering
+// Items marked for sale during clean-out sessions
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -20,6 +20,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
 import { getSellStack, removeFromSellStack, clearSellStack } from '../services/cleanOutService';
+
+const CATEGORY_LABELS = {
+  outerwear: 'Outerwear',
+  tops: 'Top',
+  bottoms: 'Bottoms',
+  shoes: 'Shoes',
+};
 
 export default function SellStackScreen() {
   const insets = useSafeAreaInsets();
@@ -65,10 +72,10 @@ export default function SellStackScreen() {
     };
 
     if (Platform.OS === 'web') {
-      if (window.confirm('Remove this item from sell stack?')) doRemove();
+      if (window.confirm('Remove from sell stack?')) doRemove();
     } else {
       Alert.alert(
-        'Remove from Sell Stack?',
+        'Remove item?',
         'This item will no longer be marked for sale.',
         [
           { text: 'Cancel', style: 'cancel' },
@@ -84,17 +91,14 @@ export default function SellStackScreen() {
     const doClear = async () => {
       await clearSellStack();
       setSellItems([]);
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
     };
 
     if (Platform.OS === 'web') {
-      if (window.confirm('Clear all items from sell stack?')) doClear();
+      if (window.confirm('Clear all items?')) doClear();
     } else {
       Alert.alert(
-        'Clear Sell Stack?',
-        'All items will be removed from your sell stack.',
+        'Clear sell stack?',
+        'All items will be removed.',
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Clear All', style: 'destructive', onPress: doClear },
@@ -109,19 +113,20 @@ export default function SellStackScreen() {
         source={{ uri: item.itemData?.image }} 
         style={styles.itemImage} 
       />
-      <View style={styles.itemInfo}>
+      <View style={styles.itemContent}>
         <Text style={styles.itemCategory}>
-          {item.itemData?.category || 'Item'}
+          {CATEGORY_LABELS[item.itemData?.category] || 'Item'}
         </Text>
         <Text style={styles.itemDate}>
-          Added {new Date(item.addedAt).toLocaleDateString()}
+          Added {new Date(item.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
         </Text>
       </View>
       <TouchableOpacity 
-        style={styles.removeButton}
+        style={styles.removeBtn}
         onPress={() => handleRemoveItem(item.itemId)}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <MaterialCommunityIcons name="close" size={20} color={COLORS.textSecondary} />
+        <MaterialCommunityIcons name="close" size={18} color={COLORS.textSecondary} />
       </TouchableOpacity>
     </View>
   );
@@ -129,35 +134,48 @@ export default function SellStackScreen() {
   const ListHeaderComponent = () => (
     <View style={styles.header}>
       <TouchableOpacity 
-        style={styles.backButton}
+        style={styles.backBtn}
         onPress={() => router.back()}
       >
-        <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.textPrimary} />
+        <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
       </TouchableOpacity>
       <View style={styles.headerCenter}>
         <Text style={styles.headerTitle}>Sell Stack</Text>
-        <Text style={styles.headerSubtitle}>
-          {sellItems.length} {sellItems.length === 1 ? 'item' : 'items'} to sell
-        </Text>
+        {sellItems.length > 0 && (
+          <Text style={styles.headerCount}>{sellItems.length}</Text>
+        )}
       </View>
-      {sellItems.length > 0 && (
+      {sellItems.length > 0 ? (
         <TouchableOpacity 
-          style={styles.clearButton}
+          style={styles.clearBtn}
           onPress={handleClearAll}
         >
-          <Text style={styles.clearButtonText}>Clear</Text>
+          <Text style={styles.clearText}>Clear</Text>
         </TouchableOpacity>
+      ) : (
+        <View style={styles.headerPlaceholder} />
       )}
     </View>
   );
 
   const ListEmptyComponent = () => (
-    <View style={styles.emptyContainer}>
-      <MaterialCommunityIcons name="tag-off-outline" size={64} color={COLORS.textMuted} />
-      <Text style={styles.emptyTitle}>No items to sell</Text>
+    <View style={styles.emptyState}>
+      <View style={styles.emptyVisual}>
+        <View style={styles.emptyTag}>
+          <View style={styles.emptyTagHole} />
+        </View>
+      </View>
+      <Text style={styles.emptyTitle}>Nothing to sell yet</Text>
       <Text style={styles.emptySubtitle}>
         Items you mark "Sell" during Clean-Out Mode will appear here
       </Text>
+      <TouchableOpacity 
+        style={styles.emptyCTA}
+        onPress={() => { triggerHaptic(); router.replace('/aiwardrobe'); }}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.emptyCTAText}>Start a clean-out</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -171,7 +189,7 @@ export default function SellStackScreen() {
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top },
+          { paddingTop: insets.top + 16 },
           sellItems.length === 0 && styles.listContentEmpty,
         ]}
         showsVerticalScrollIndicator={false}
@@ -196,10 +214,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    marginBottom: 16,
+    marginBottom: 32,
   },
-  backButton: {
+  backBtn: {
     width: 44,
     height: 44,
     justifyContent: 'center',
@@ -207,84 +224,120 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '600',
     color: COLORS.textPrimary,
   },
-  headerSubtitle: {
-    fontSize: 14,
+  headerCount: {
+    fontSize: 15,
     color: COLORS.textSecondary,
-    marginTop: 2,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
-  clearButton: {
-    paddingHorizontal: 16,
+  headerPlaceholder: {
+    width: 44,
+  },
+  clearBtn: {
+    paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  clearButtonText: {
+  clearText: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#FF6B6B',
+    fontWeight: '500',
+    color: COLORS.textSecondary,
   },
   
   // Item card
   itemCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: 16,
     padding: 12,
     marginBottom: 12,
   },
   itemImage: {
-    width: 72,
-    height: 72,
+    width: 64,
+    height: 64,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
-  itemInfo: {
+  itemContent: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: 14,
   },
   itemCategory: {
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    textTransform: 'capitalize',
   },
   itemDate: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 4,
+    marginTop: 2,
   },
-  removeButton: {
-    width: 40,
-    height: 40,
+  removeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   
-  // Empty state
-  emptyContainer: {
+  // Empty state - Elegant
+  emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingVertical: 80,
+  },
+  emptyVisual: {
+    marginBottom: 32,
+  },
+  emptyTag: {
+    width: 48,
+    height: 64,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 4,
+    alignItems: 'center',
+    paddingTop: 8,
+  },
+  emptyTagHole: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
     color: COLORS.textPrimary,
-    marginTop: 16,
+    marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 15,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    marginTop: 8,
     lineHeight: 22,
+    maxWidth: 280,
+    marginBottom: 28,
+  },
+  emptyCTA: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  emptyCTAText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.primary,
   },
 });
