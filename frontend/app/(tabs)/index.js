@@ -5,56 +5,45 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, SPACING } from '../../constants/theme';
 import { fetchRealWeather } from '../../services/weatherService';
 import { ONBOARDING_CONFIG } from '../../services/onboardingService';
 import { useHelpMeDecide } from '../_layout';
-import { logEvent } from '../../services/firebase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Today Screen - A calm daily check-in
-// "Confidence starts here."
+// Today Screen - Minimal, Intentional
+// ONE hero action. Everything else secondary.
 export default function TodayScreen() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef(null);
   const [weather, setWeather] = useState(null);
   const [closetCount, setClosetCount] = useState(0);
-  const [recentItems, setRecentItems] = useState([]);
   const { openHelpMeDecide } = useHelpMeDecide();
 
-  // NAVIGATION: Always reset scroll to top when tab is focused
-  // IMPORTANT: This must run every single time the tab gains focus
   useFocusEffect(
     useCallback(() => {
-      // Immediate scroll reset - no animation, no delay
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-      
-      // Refresh wardrobe data
       const refresh = async () => {
         const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
         if (wardrobeJson) {
           const items = JSON.parse(wardrobeJson);
           setClosetCount(items.length);
-          setRecentItems(items.slice(0, 4));
         }
       };
       refresh();
     }, [])
   );
-
-  useEffect(() => {
-    logEvent('app_opened', { screen: 'today' });
-  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -66,7 +55,6 @@ export default function TodayScreen() {
         if (wardrobeJson) {
           const items = JSON.parse(wardrobeJson);
           setClosetCount(items.length);
-          setRecentItems(items.slice(0, 4));
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -75,138 +63,107 @@ export default function TodayScreen() {
     loadData();
   }, []);
 
-  const hasItems = closetCount > 0;
-  const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
+  const triggerHaptic = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  };
 
-  // Gentle outfit hint based on weather
-  const getDailyHint = () => {
+  const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
+  const hasItems = closetCount > 0;
+
+  // Weather-aware hint
+  const getContextHint = () => {
     if (!weather) return null;
     const temp = weather.temp || 70;
-    if (temp < 50) return "Layer up - it's chilly today";
-    if (temp < 65) return "A light layer would be perfect";
-    if (temp < 80) return "Great weather for your favorites";
-    return "Keep it light and comfortable";
+    if (temp < 50) return "It's cold outside";
+    if (temp < 65) return "A bit cool today";
+    if (temp < 80) return "Perfect weather";
+    return "Warm day ahead";
   };
 
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
         ref={scrollViewRef}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 24 }]}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 32 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Warm Welcome */}
-        <View style={styles.welcomeSection}>
+        {/* Minimal Header */}
+        <View style={styles.header}>
           <Text style={styles.greeting}>{weather?.greeting?.text || 'Good day'}</Text>
-          
-          {/* Ambient Weather - Subtle */}
           {weather && (
-            <View style={styles.weatherRow}>
-              <MaterialCommunityIcons name={weather.icon} size={18} color={weather.iconColor} />
+            <View style={styles.weatherPill}>
+              <MaterialCommunityIcons name={weather.icon} size={16} color={COLORS.textSecondary} />
               <Text style={styles.weatherText}>{weather.tempDisplay}</Text>
             </View>
           )}
         </View>
 
-        {/* HERO - Single visual anchor */}
-        <View style={styles.heroSection}>
-          <View style={styles.heroCard}>
-            {hasItems && recentItems.length > 0 ? (
-              <>
-                <Image source={{ uri: recentItems[0].image }} style={styles.heroImage} />
-                <View style={styles.heroOverlay}>
-                  <Text style={styles.heroTitle}>Your Style</Text>
-                  <Text style={styles.heroSubtitle}>{closetCount} pieces in your wardrobe</Text>
-                </View>
-              </>
-            ) : (
-              <View style={styles.heroEmpty}>
-                <MaterialCommunityIcons name="hanger" size={40} color="rgba(255,255,255,0.15)" />
-                <Text style={styles.heroEmptyText}>Your wardrobe awaits</Text>
-                <Text style={styles.heroEmptySubtext}>Add your first piece</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Daily Anchor - Subtle reason to check in */}
-        {hasItems && canStyle ? (
+        {/* HERO - ONE action */}
+        {canStyle ? (
           <TouchableOpacity 
-            style={styles.dailyCard}
-            onPress={openHelpMeDecide}
-            activeOpacity={0.9}
+            style={styles.heroCard}
+            onPress={() => { triggerHaptic(); openHelpMeDecide(); }}
+            activeOpacity={0.95}
           >
-            <Text style={styles.dailyLabel}>Today&apos;s suggestion</Text>
-            
-            <View style={styles.outfitPreview}>
-              {recentItems.slice(0, 3).map((item, index) => (
-                <Image 
-                  key={item.id} 
-                  source={{ uri: item.image }} 
-                  style={[
-                    styles.outfitItem,
-                    index === 1 && styles.outfitItemCenter
-                  ]} 
-                />
-              ))}
+            <View style={styles.heroContent}>
+              <Text style={styles.heroQuestion}>What should I wear today?</Text>
+              {getContextHint() && (
+                <Text style={styles.heroHint}>{getContextHint()}</Text>
+              )}
             </View>
-            
-            {getDailyHint() && (
-              <Text style={styles.dailyHint}>{getDailyHint()}</Text>
-            )}
-            
-            <Text style={styles.dailyAction}>Help me decide →</Text>
+            <View style={styles.heroAction}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="#FFFFFF" />
+            </View>
           </TouchableOpacity>
         ) : hasItems ? (
-          /* Progress toward first outfit */
+          // Progress state - not yet ready for styling
           <View style={styles.progressCard}>
-            <Text style={styles.progressTitle}>Almost there</Text>
-            <Text style={styles.progressText}>
-              {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more item{ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount !== 1 ? 's' : ''} to unlock your first outfit suggestion
+            <Text style={styles.progressTitle}>Building your wardrobe</Text>
+            <Text style={styles.progressSubtitle}>
+              {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount === 1 ? 'piece' : 'pieces'} to unlock outfit suggestions
             </Text>
-            <View style={styles.progressBar}>
+            <View style={styles.progressTrack}>
               <View style={[styles.progressFill, { width: `${(closetCount / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }]} />
             </View>
+            <TouchableOpacity 
+              style={styles.progressAction}
+              onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.progressActionText}>Add items</Text>
+            </TouchableOpacity>
           </View>
         ) : (
-          /* Empty - Warm invitation */
-          <View style={styles.inviteCard}>
-            <Text style={styles.inviteTitle}>Your Wardrobe Awaits</Text>
-            <Text style={styles.inviteTagline}>Confidence starts here.</Text>
-            
-            <View style={styles.inviteVisual}>
-              <View style={styles.placeholderItem}>
-                <MaterialCommunityIcons name="tshirt-crew-outline" size={28} color="rgba(255,255,255,0.3)" />
-              </View>
-              <View style={styles.placeholderItem}>
-                <MaterialCommunityIcons name="hanger" size={28} color="rgba(255,255,255,0.3)" />
-              </View>
-              <View style={styles.placeholderItem}>
-                <MaterialCommunityIcons name="shoe-sneaker" size={28} color="rgba(255,255,255,0.3)" />
-              </View>
+          // Empty state - inviting
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIcon}>
+              <MaterialCommunityIcons name="hanger" size={32} color="rgba(255,255,255,0.4)" />
             </View>
-            
+            <Text style={styles.emptyTitle}>Your wardrobe awaits</Text>
+            <Text style={styles.emptySubtitle}>Add a few pieces to get started</Text>
             <TouchableOpacity 
-              style={styles.inviteCTA}
-              onPress={() => router.push('/aiwardrobe')}
+              style={styles.emptyCTA}
+              onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
               activeOpacity={0.9}
             >
-              <Text style={styles.inviteCTAText}>Open My Closet</Text>
+              <Text style={styles.emptyCTAText}>Open My Closet</Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Closet Access - Always visible */}
+        {/* Secondary - Closet access (subtle) */}
         {hasItems && (
           <TouchableOpacity 
             style={styles.closetLink}
-            onPress={() => router.push('/aiwardrobe')}
-            activeOpacity={0.8}
+            onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
+            activeOpacity={0.7}
           >
-            <MaterialCommunityIcons name="wardrobe-outline" size={20} color={COLORS.textSecondary} />
             <Text style={styles.closetLinkText}>My Closet</Text>
-            <Text style={styles.closetLinkCount}>{closetCount}</Text>
-            <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
+            <View style={styles.closetBadge}>
+              <Text style={styles.closetBadgeText}>{closetCount}</Text>
+            </View>
           </TouchableOpacity>
         )}
 
@@ -224,213 +181,165 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   
-  // Welcome
-  welcomeSection: {
-    marginBottom: 24,
+  // Header - Minimal
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 48,
   },
   greeting: {
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 28,
+    fontWeight: '600',
     color: COLORS.textPrimary,
-    letterSpacing: -1,
-    marginBottom: 8,
+    letterSpacing: -0.5,
   },
-  weatherRow: {
+  weatherPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   weatherText: {
-    fontSize: 15,
+    fontSize: 14,
     color: COLORS.textSecondary,
   },
   
-  // Hero Section - Single visual anchor
-  heroSection: {
-    marginBottom: 28,
-  },
+  // HERO - The ONE action
   heroCard: {
-    width: '100%',
-    height: 180,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  heroOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  heroTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  heroSubtitle: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginTop: 2,
-  },
-  heroEmpty: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heroEmptyText: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
-    marginTop: 12,
-  },
-  heroEmptySubtext: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.3)',
-    marginTop: 4,
-  },
-  
-  // Daily Card - For users with items
-  dailyCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 24,
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  dailyLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 20,
-  },
-  outfitPreview: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.primary,
+    borderRadius: 24,
+    padding: 28,
+    marginBottom: 32,
   },
-  outfitItem: {
-    width: 72,
-    height: 72,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  heroContent: {
+    flex: 1,
   },
-  outfitItemCenter: {
-    width: 88,
-    height: 88,
-    borderRadius: 20,
-  },
-  dailyHint: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  dailyAction: {
-    fontSize: 15,
+  heroQuestion: {
+    fontSize: 22,
     fontWeight: '600',
-    color: COLORS.primary,
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+    lineHeight: 28,
+  },
+  heroHint: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 6,
+  },
+  heroAction: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 16,
   },
   
-  // Progress Card
+  // Progress state
   progressCard: {
-    backgroundColor: 'rgba(177, 76, 255, 0.06)',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 24,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 24,
+    padding: 28,
+    marginBottom: 32,
   },
   progressTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    marginBottom: 8,
   },
-  progressText: {
+  progressSubtitle: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    marginBottom: 16,
-    lineHeight: 20,
+    marginTop: 6,
+    marginBottom: 20,
   },
-  progressBar: {
+  progressTrack: {
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 2,
-    overflow: 'hidden',
+    marginBottom: 20,
   },
   progressFill: {
     height: '100%',
     backgroundColor: COLORS.primary,
     borderRadius: 2,
   },
+  progressAction: {
+    alignSelf: 'flex-start',
+  },
+  progressActionText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
   
-  // Invite Card - Empty state
-  inviteCard: {
+  // Empty state
+  emptyCard: {
     alignItems: 'center',
     paddingVertical: 48,
-    marginBottom: 24,
+    marginBottom: 32,
   },
-  inviteTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginBottom: 8,
-  },
-  inviteTagline: {
-    fontSize: 17,
-    color: COLORS.textSecondary,
-    marginBottom: 40,
-  },
-  inviteVisual: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 40,
-  },
-  placeholderItem: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  emptyIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255,255,255,0.04)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    marginBottom: 20,
   },
-  inviteCTA: {
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    marginTop: 6,
+    marginBottom: 28,
+  },
+  emptyCTA: {
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
     borderRadius: 16,
   },
-  inviteCTAText: {
+  emptyCTAText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
   },
   
-  // Closet Link
+  // Closet link - Secondary, subtle
   closetLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'center',
+    gap: 8,
     paddingVertical: 16,
   },
   closetLinkText: {
-    flex: 1,
     fontSize: 15,
     color: COLORS.textSecondary,
   },
-  closetLinkCount: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    marginRight: 4,
+  closetBadge: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  closetBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
   },
 });
