@@ -268,7 +268,7 @@ export default function CleanOutScreen() {
 
       {/* BOTTOM: FIXED ACTION AREA */}
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 20 }]}>
-        <Text style={styles.questionText}>What do you want to do with this?</Text>
+        <Text style={styles.questionText}>What will you do with this piece?</Text>
         
         <View style={styles.actionsRow}>
           {/* DONATE */}
@@ -278,10 +278,10 @@ export default function CleanOutScreen() {
             activeOpacity={0.7}
             disabled={isProcessing}
           >
-            <View style={[styles.actionIcon, { backgroundColor: 'rgba(255, 159, 67, 0.15)' }]}>
-              <MaterialCommunityIcons name="gift-outline" size={26} color="#FF9F43" />
+            <View style={[styles.actionIcon, styles.donateIcon]}>
+              <MaterialCommunityIcons name="hand-heart-outline" size={24} color="#FFFFFF" />
             </View>
-            <Text style={[styles.actionText, { color: '#FF9F43' }]}>Donate</Text>
+            <Text style={styles.actionText}>Donate</Text>
           </TouchableOpacity>
 
           {/* KEEP - PRIMARY */}
@@ -302,10 +302,10 @@ export default function CleanOutScreen() {
             activeOpacity={0.7}
             disabled={isProcessing}
           >
-            <View style={[styles.actionIcon, { backgroundColor: 'rgba(177, 76, 255, 0.15)' }]}>
-              <MaterialCommunityIcons name="tag-outline" size={26} color={COLORS.primary} />
+            <View style={[styles.actionIcon, styles.sellIcon]}>
+              <MaterialCommunityIcons name="currency-usd" size={24} color="#FFFFFF" />
             </View>
-            <Text style={[styles.actionText, { color: COLORS.primary }]}>Sell</Text>
+            <Text style={styles.actionText}>Sell</Text>
           </TouchableOpacity>
         </View>
       </View>
