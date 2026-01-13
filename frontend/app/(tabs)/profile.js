@@ -131,12 +131,13 @@ export default function ProfileScreen() {
     }
   };
 
-  // v1 Menu items - Settings pages only
-  const menuItems = useMemo(() => [
+  // v1 Menu items - Grouped with hierarchy
+  // Core settings first, then collections
+  const coreSettings = useMemo(() => [
     {
       id: 'style-preferences',
       title: 'Style Preferences',
-      subtitle: 'Help us know your coloring',
+      subtitle: 'Your color palette',
       icon: 'palette-outline',
       color: '#B14CFF',
       route: '/style-preferences',
@@ -149,20 +150,23 @@ export default function ProfileScreen() {
       color: '#95E1D3',
       route: '/bodyscanner',
     },
+  ], []);
+
+  const collections = useMemo(() => [
     {
       id: 'favorites',
-      title: 'Saved Outfits',
-      subtitle: `${favoriteOutfits.length} saved looks`,
-      icon: 'heart',
-      color: '#FF6B6B',
+      title: 'Saved Looks',
+      subtitle: favoriteOutfits.length > 0 ? `${favoriteOutfits.length} looks` : 'None yet',
+      icon: 'heart-outline',
+      color: COLORS.textSecondary,
       route: '/saved-outfits',
     },
     {
       id: 'sell-stack',
       title: 'Sell Stack',
-      subtitle: sellStackCount > 0 ? `${sellStackCount} items to sell` : 'Items marked for sale',
+      subtitle: sellStackCount > 0 ? `${sellStackCount} items` : 'None yet',
       icon: 'tag-outline',
-      color: '#F59E0B',
+      color: COLORS.textSecondary,
       route: '/sellstack',
     },
   ], [favoriteOutfits.length, sellStackCount]);
