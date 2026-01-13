@@ -1,5 +1,8 @@
-// Clean-Out Mode - True Full Screen Experience
-// NO tab bar. Clear hierarchy: Image → Progress → Actions
+// ═══════════════════════════════════════════════════════════════
+// CLEAN-OUT MODE
+// A thoughtful, calm decision-making experience.
+// Focus on the item. Space to breathe. Premium feel.
+// ═══════════════════════════════════════════════════════════════
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -13,13 +16,12 @@ import {
   Image,
   StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS, GRADIENTS } from '../constants/theme';
+import { COLORS } from '../constants/theme';
 import {
   DECISIONS,
   startCleanOutSession,
@@ -65,14 +67,12 @@ export default function CleanOutScreen() {
     init();
   }, []);
 
-  const triggerHaptic = (type = 'medium') => {
+  const triggerHaptic = (type = 'light') => {
     if (Platform.OS !== 'web') {
       if (type === 'success') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } else if (type === 'light') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } else {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     }
   };
@@ -81,7 +81,7 @@ export default function CleanOutScreen() {
     if (currentIndex >= items.length || isProcessing) return;
     
     setIsProcessing(true);
-    triggerHaptic(decision === DECISIONS.KEEP ? 'success' : 'medium');
+    triggerHaptic(decision === DECISIONS.KEEP ? 'success' : 'light');
     
     const currentItem = items[currentIndex];
     await recordDecision(currentItem.id, decision, currentItem);
@@ -104,7 +104,7 @@ export default function CleanOutScreen() {
     if (!canUndo || currentIndex === 0 || isProcessing) return;
     
     setIsProcessing(true);
-    triggerHaptic('light');
+    triggerHaptic();
     
     await undoLastDecision();
     setCurrentIndex(prev => prev - 1);
@@ -114,151 +114,143 @@ export default function CleanOutScreen() {
   }, [canUndo, currentIndex, isProcessing]);
 
   const handleClose = useCallback(() => {
-    triggerHaptic('light');
-    router.back();
-  }, []);
-
-  const handleFinish = useCallback(() => {
-    triggerHaptic('success');
+    triggerHaptic();
     router.back();
   }, []);
 
   const currentItem = items[currentIndex];
   const progress = items.length > 0 ? ((currentIndex + 1) / items.length) * 100 : 0;
 
-  // ============================================
-  // LOADING
-  // ============================================
+  // ═══════════════════════════════════════════════════════════════
+  // LOADING STATE
+  // ═══════════════════════════════════════════════════════════════
   if (isLoading) {
     return (
-      <View style={[styles.screen, { backgroundColor: '#0A0A0A' }]}>
+      <View style={styles.screen}>
         <StatusBar barStyle="light-content" />
-        <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading your closet...</Text>
+        <View style={styles.centered}>
+          <ActivityIndicator size="small" color="rgba(255,255,255,0.5)" />
         </View>
       </View>
     );
   }
 
-  // ============================================
+  // ═══════════════════════════════════════════════════════════════
   // EMPTY STATE
-  // ============================================
+  // ═══════════════════════════════════════════════════════════════
   if (items.length === 0) {
     return (
-      <View style={[styles.screen, { backgroundColor: '#0A0A0A' }]}>
+      <View style={styles.screen}>
         <StatusBar barStyle="light-content" />
         
-        {/* Top bar */}
-        <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-          <TouchableOpacity onPress={handleClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <MaterialCommunityIcons name="close" size={28} color="#FFFFFF" />
+        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+          <TouchableOpacity onPress={handleClose} hitSlop={16}>
+            <MaterialCommunityIcons name="close" size={24} color="rgba(255,255,255,0.7)" />
           </TouchableOpacity>
         </View>
         
-        <View style={styles.centerContent}>
-          <MaterialCommunityIcons name="hanger" size={56} color="rgba(255,255,255,0.3)" />
-          <Text style={styles.emptyTitle}>No items to review</Text>
-          <Text style={styles.emptySubtitle}>Add items to your closet first</Text>
+        <View style={styles.centered}>
+          <Text style={styles.emptyText}>No items to review</Text>
         </View>
         
-        <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 20 }]}>
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleClose}>
-            <Text style={styles.primaryBtnText}>Go to My Closet</Text>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 32 }]}>
+          <TouchableOpacity style={styles.doneButton} onPress={handleClose}>
+            <Text style={styles.doneButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  // ============================================
-  // SUMMARY
-  // ============================================
+  // ═══════════════════════════════════════════════════════════════
+  // SUMMARY STATE
+  // ═══════════════════════════════════════════════════════════════
   if (showSummary && summary) {
     return (
-      <View style={[styles.screen, { backgroundColor: '#0A0A0A' }]}>
+      <View style={styles.screen}>
         <StatusBar barStyle="light-content" />
         
-        <View style={[styles.summaryContent, { paddingTop: insets.top + 60 }]}>
-          <MaterialCommunityIcons name="check-circle" size={72} color="#22C55E" />
-          <Text style={styles.summaryTitle}>Clean-Out Complete!</Text>
+        <View style={[styles.summaryContent, { paddingTop: insets.top + 80 }]}>
+          <Text style={styles.summaryTitle}>Done</Text>
           <Text style={styles.summarySubtitle}>
-            You reviewed {summary.totalReviewed} {summary.totalReviewed === 1 ? 'item' : 'items'}
+            {summary.totalReviewed} {summary.totalReviewed === 1 ? 'item' : 'items'} reviewed
           </Text>
           
-          <View style={styles.statsRow}>
-            <View style={styles.statBox}>
-              <Text style={[styles.statNum, { color: '#22C55E' }]}>{summary.kept}</Text>
-              <Text style={styles.statLabel}>Keeping</Text>
+          <View style={styles.summaryStats}>
+            <View style={styles.summaryStatItem}>
+              <Text style={styles.summaryStatValue}>{summary.kept}</Text>
+              <Text style={styles.summaryStatLabel}>Keeping</Text>
             </View>
-            <View style={styles.statBox}>
-              <Text style={[styles.statNum, { color: COLORS.primary }]}>{summary.toSell}</Text>
-              <Text style={styles.statLabel}>To Sell</Text>
+            <View style={styles.summaryStatDivider} />
+            <View style={styles.summaryStatItem}>
+              <Text style={styles.summaryStatValue}>{summary.toSell}</Text>
+              <Text style={styles.summaryStatLabel}>Selling</Text>
             </View>
-            <View style={styles.statBox}>
-              <Text style={[styles.statNum, { color: '#FF9F43' }]}>{summary.toDonate}</Text>
-              <Text style={styles.statLabel}>To Donate</Text>
+            <View style={styles.summaryStatDivider} />
+            <View style={styles.summaryStatItem}>
+              <Text style={styles.summaryStatValue}>{summary.toDonate}</Text>
+              <Text style={styles.summaryStatLabel}>Donating</Text>
             </View>
           </View>
-
-          {summary.toSell > 0 && (
-            <Text style={styles.sellNote}>
-              Items marked "Sell" are in your Sell Stack
-            </Text>
-          )}
         </View>
         
-        <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 20 }]}>
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleFinish}>
-            <Text style={styles.primaryBtnText}>Done</Text>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 32 }]}>
+          <TouchableOpacity 
+            style={styles.doneButton} 
+            onPress={() => { triggerHaptic('success'); router.back(); }}
+          >
+            <Text style={styles.doneButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  // ============================================
-  // MAIN REVIEW SCREEN
-  // ============================================
+  // ═══════════════════════════════════════════════════════════════
+  // MAIN REVIEW STATE
+  // ═══════════════════════════════════════════════════════════════
   return (
-    <View style={[styles.screen, { backgroundColor: '#0A0A0A' }]}>
+    <View style={styles.screen}>
       <StatusBar barStyle="light-content" />
       
-      {/* TOP: Close + Title + Undo */}
-      <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-        <TouchableOpacity onPress={handleClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <MaterialCommunityIcons name="close" size={28} color="#FFFFFF" />
+      {/* ─────────────────────────────────────────────────────── */}
+      {/* HEADER - Minimal, functional                            */}
+      {/* ─────────────────────────────────────────────────────── */}
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <TouchableOpacity onPress={handleClose} hitSlop={16}>
+          <MaterialCommunityIcons name="close" size={24} color="rgba(255,255,255,0.7)" />
         </TouchableOpacity>
         
-        <View style={styles.titleArea}>
-          <Text style={styles.title}>Clean-Out</Text>
-          <Text style={styles.counter}>{currentIndex + 1} of {items.length}</Text>
-        </View>
+        <Text style={styles.headerCounter}>{currentIndex + 1} / {items.length}</Text>
         
         <TouchableOpacity 
           onPress={handleUndo} 
           disabled={!canUndo}
-          style={[styles.undoBtn, !canUndo && styles.undoBtnDisabled]}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          hitSlop={16}
+          style={{ opacity: canUndo ? 1 : 0.3 }}
         >
-          <MaterialCommunityIcons name="undo" size={22} color={canUndo ? '#FFFFFF' : 'rgba(255,255,255,0.3)'} />
+          <MaterialCommunityIcons name="undo" size={22} color="rgba(255,255,255,0.7)" />
         </TouchableOpacity>
       </View>
 
-      {/* PROGRESS BAR */}
-      <View style={styles.progressContainer}>
+      {/* ─────────────────────────────────────────────────────── */}
+      {/* PROGRESS - Subtle, informative                          */}
+      {/* ─────────────────────────────────────────────────────── */}
+      <View style={styles.progressSection}>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
       </View>
 
-      {/* CENTER: ITEM IMAGE */}
-      <View style={styles.imageArea}>
+      {/* ─────────────────────────────────────────────────────── */}
+      {/* ITEM IMAGE - The star of the show                       */}
+      {/* ─────────────────────────────────────────────────────── */}
+      <View style={styles.itemSection}>
         {currentItem && (
-          <View style={styles.imageCard}>
+          <View style={styles.itemCard}>
             <Image source={{ uri: currentItem.image }} style={styles.itemImage} />
-            <View style={styles.categoryPill}>
-              <Text style={styles.categoryText}>
+            <View style={styles.itemCategory}>
+              <Text style={styles.itemCategoryText}>
                 {CATEGORY_LABELS[currentItem.category] || 'Item'}
               </Text>
             </View>
@@ -266,276 +258,265 @@ export default function CleanOutScreen() {
         )}
       </View>
 
-      {/* BOTTOM: FIXED ACTION AREA */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 20 }]}>
-        <Text style={styles.questionText}>What will you do with this piece?</Text>
-        
+      {/* ─────────────────────────────────────────────────────── */}
+      {/* ACTIONS - Calm, grounded, intentional                   */}
+      {/* ─────────────────────────────────────────────────────── */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.actionsRow}>
+          
           {/* DONATE */}
           <TouchableOpacity
-            style={styles.actionBtn}
+            style={styles.actionButton}
             onPress={() => handleDecision(DECISIONS.DONATE)}
-            activeOpacity={0.7}
-            disabled={isProcessing}
-          >
-            <View style={[styles.actionIcon, styles.donateIcon]}>
-              <MaterialCommunityIcons name="hand-heart-outline" size={24} color="#FFFFFF" />
-            </View>
-            <Text style={styles.actionText}>Donate</Text>
-          </TouchableOpacity>
-
-          {/* KEEP - PRIMARY */}
-          <TouchableOpacity
-            style={styles.keepBtn}
-            onPress={() => handleDecision(DECISIONS.KEEP)}
             activeOpacity={0.8}
             disabled={isProcessing}
           >
-            <MaterialCommunityIcons name="check" size={32} color="#FFFFFF" />
-            <Text style={styles.keepText}>Keep</Text>
+            <View style={[styles.actionCircle, styles.donateCircle]}>
+              <MaterialCommunityIcons name="hand-heart-outline" size={22} color="#FFFFFF" />
+            </View>
+            <Text style={styles.actionLabel}>Donate</Text>
+          </TouchableOpacity>
+
+          {/* KEEP - Primary */}
+          <TouchableOpacity
+            style={styles.keepButton}
+            onPress={() => handleDecision(DECISIONS.KEEP)}
+            activeOpacity={0.85}
+            disabled={isProcessing}
+          >
+            <MaterialCommunityIcons name="check" size={28} color="#FFFFFF" />
+            <Text style={styles.keepLabel}>Keep</Text>
           </TouchableOpacity>
 
           {/* SELL */}
           <TouchableOpacity
-            style={styles.actionBtn}
+            style={styles.actionButton}
             onPress={() => handleDecision(DECISIONS.SELL)}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
             disabled={isProcessing}
           >
-            <View style={[styles.actionIcon, styles.sellIcon]}>
-              <MaterialCommunityIcons name="currency-usd" size={24} color="#FFFFFF" />
+            <View style={[styles.actionCircle, styles.sellCircle]}>
+              <MaterialCommunityIcons name="currency-usd" size={22} color="#FFFFFF" />
             </View>
-            <Text style={styles.actionText}>Sell</Text>
+            <Text style={styles.actionLabel}>Sell</Text>
           </TouchableOpacity>
+          
         </View>
       </View>
     </View>
   );
 }
 
+// ═══════════════════════════════════════════════════════════════
+// STYLES - Premium, spacious, calm
+// ═══════════════════════════════════════════════════════════════
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: '#0B0B0B',
   },
-  centerContent: {
+  centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
   },
   
-  // TOP BAR
-  topBar: {
+  // ─────────────────────────────────────────────────────────────
+  // HEADER
+  // ─────────────────────────────────────────────────────────────
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
-  titleArea: {
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  counter: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
-    marginTop: 2,
-  },
-  undoBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  undoBtnDisabled: {
-    opacity: 0.5,
+  headerCounter: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.4)',
+    letterSpacing: 0.5,
   },
   
+  // ─────────────────────────────────────────────────────────────
   // PROGRESS
-  progressContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+  // ─────────────────────────────────────────────────────────────
+  progressSection: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
   },
   progressTrack: {
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 2,
+    height: 2,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 1,
   },
   progressFill: {
     height: '100%',
     backgroundColor: COLORS.primary,
-    borderRadius: 2,
+    borderRadius: 1,
   },
   
-  // IMAGE AREA
-  imageArea: {
+  // ─────────────────────────────────────────────────────────────
+  // ITEM - The focus
+  // ─────────────────────────────────────────────────────────────
+  itemSection: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
   },
-  imageCard: {
-    width: SCREEN_WIDTH - 48,
-    height: SCREEN_HEIGHT * 0.42,
-    borderRadius: 24,
+  itemCard: {
+    width: SCREEN_WIDTH - 64,
+    aspectRatio: 0.75,
+    maxHeight: SCREEN_HEIGHT * 0.48,
+    borderRadius: 20,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
   },
   itemImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  categoryPill: {
+  itemCategory: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    top: 20,
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingVertical: 7,
+    borderRadius: 16,
   },
-  categoryText: {
-    color: '#FFFFFF',
+  itemCategoryText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '500',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
   
-  // BOTTOM BAR - FIXED
-  bottomBar: {
+  // ─────────────────────────────────────────────────────────────
+  // FOOTER / ACTIONS
+  // ─────────────────────────────────────────────────────────────
+  footer: {
     paddingHorizontal: 24,
-    paddingTop: 20,
-    backgroundColor: '#0A0A0A',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-  },
-  questionText: {
-    textAlign: 'center',
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.5)',
-    marginBottom: 20,
+    paddingTop: 32,
   },
   actionsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'center',
-    gap: 20,
+    gap: 28,
   },
-  actionBtn: {
+  
+  // Secondary actions (Donate, Sell)
+  actionButton: {
     alignItems: 'center',
-    width: 72,
   },
-  actionIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+  actionCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  actionText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 8,
-    color: '#FFFFFF',
+  donateCircle: {
+    backgroundColor: '#E67E22',
   },
-  donateIcon: {
-    backgroundColor: '#FF9F43',
-  },
-  sellIcon: {
+  sellCircle: {
     backgroundColor: COLORS.primary,
   },
-  keepBtn: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: '#22C55E',
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: 10,
+    letterSpacing: 0.3,
+  },
+  
+  // Primary action (Keep)
+  keepButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#27AE60',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 4,
   },
-  keepText: {
-    fontSize: 13,
-    fontWeight: '600',
+  keepLabel: {
+    fontSize: 12,
+    fontWeight: '500',
     color: '#FFFFFF',
     marginTop: 2,
+    letterSpacing: 0.3,
   },
   
-  // LOADING
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.5)',
-  },
-  
+  // ─────────────────────────────────────────────────────────────
   // EMPTY
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginTop: 20,
+  // ─────────────────────────────────────────────────────────────
+  emptyText: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.4)',
   },
-  emptySubtitle: {
+  
+  // ─────────────────────────────────────────────────────────────
+  // SUMMARY
+  // ─────────────────────────────────────────────────────────────
+  summaryContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  summaryTitle: {
+    fontSize: 32,
+    fontWeight: '300',
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
+  },
+  summarySubtitle: {
     fontSize: 15,
     color: 'rgba(255,255,255,0.5)',
     marginTop: 8,
   },
-  
-  // SUMMARY
-  summaryContent: {
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  summaryTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginTop: 24,
-  },
-  summarySubtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.5)',
-    marginTop: 8,
-  },
-  statsRow: {
+  summaryStats: {
     flexDirection: 'row',
-    marginTop: 48,
+    alignItems: 'center',
+    marginTop: 56,
     gap: 32,
   },
-  statBox: {
+  summaryStatItem: {
     alignItems: 'center',
   },
-  statNum: {
-    fontSize: 36,
-    fontWeight: '700',
+  summaryStatValue: {
+    fontSize: 32,
+    fontWeight: '300',
+    color: '#FFFFFF',
   },
-  statLabel: {
+  summaryStatLabel: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
-    marginTop: 4,
-  },
-  sellNote: {
-    fontSize: 14,
     color: 'rgba(255,255,255,0.4)',
-    marginTop: 40,
-    textAlign: 'center',
+    marginTop: 6,
+    letterSpacing: 0.3,
+  },
+  summaryStatDivider: {
+    width: 1,
+    height: 48,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   
-  // PRIMARY BUTTON
-  primaryBtn: {
+  // ─────────────────────────────────────────────────────────────
+  // DONE BUTTON
+  // ─────────────────────────────────────────────────────────────
+  doneButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
   },
-  primaryBtnText: {
-    fontSize: 17,
-    fontWeight: '600',
+  doneButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
     color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 });
