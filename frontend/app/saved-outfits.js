@@ -6,31 +6,32 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, GRADIENTS, SIZES, SPACING, CARD_SHADOW } from '../constants/theme';
+import * as Haptics from 'expo-haptics';
+import { COLORS, GRADIENTS, SPACING } from '../constants/theme';
 import { useFavorites } from '../contexts/FavoritesContext';
-
-// Individual Outfit Card
-const OutfitCard = React.memo(({ item, isLeft }) => (
-  <View style={[styles.card, isLeft ? styles.cardLeft : styles.cardRight]}>
-    <Image source={{ uri: item.image }} style={styles.cardImage} />
-    <LinearGradient
-      colors={['transparent', 'rgba(0,0,0,0.8)']}
-      style={styles.cardOverlay}
-    >
-      <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
-    </LinearGradient>
-  </View>
-));
 
 export default function SavedOutfitsScreen() {
   const insets = useSafeAreaInsets();
   const { favoriteOutfits } = useFavorites();
 
+  const triggerHaptic = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
+
+  const handleBack = () => {
+    triggerHaptic();
+    router.back();
+  };
+
+  // Organize into rows of 2
   const outfitRows = [];
   for (let i = 0; i < favoriteOutfits.length; i += 2) {
     outfitRows.push({
@@ -44,49 +45,63 @@ export default function SavedOutfitsScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView
         contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + 16 },
-          favoriteOutfits.length === 0 && styles.scrollContentEmpty,
+          styles.content,
+          { 
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 100 
+          }
         ]}
         showsVerticalScrollIndicator={false}
+        alwaysBounceVertical={true}
+        bounces={true}
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Saved Looks</Text>
-            {favoriteOutfits.length > 0 && (
-              <Text style={styles.headerCount}>{favoriteOutfits.length}</Text>
-            )}
-          </View>
+          <Text style={styles.headerTitle}>Saved Looks</Text>
           <View style={styles.headerPlaceholder} />
         </View>
 
         {/* Content */}
         {favoriteOutfits.length === 0 ? (
           <View style={styles.emptyState}>
+            {/* Abstract visual */}
             <View style={styles.emptyVisual}>
-              <View style={styles.emptyLine} />
-              <View style={[styles.emptyLine, styles.emptyLineShort]} />
-              <View style={[styles.emptyLine, styles.emptyLineShorter]} />
+              <View style={styles.emptyShape} />
+              <View style={[styles.emptyShape, styles.emptyShapeMedium]} />
+              <View style={[styles.emptyShape, styles.emptyShapeSmall]} />
             </View>
+            
             <Text style={styles.emptyTitle}>No saved looks yet</Text>
             <Text style={styles.emptySubtitle}>
-              When you find an outfit you love, save it here for later
+              When you find an outfit you love, it'll appear here
             </Text>
           </View>
         ) : (
           <View style={styles.grid}>
             {outfitRows.map((row) => (
               <View key={row.id} style={styles.row}>
-                <OutfitCard item={row.left} isLeft={true} />
+                <View style={styles.card}>
+                  <Image source={{ uri: row.left.image }} style={styles.cardImage} />
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0,0,0,0.7)']}
+                    style={styles.cardOverlay}
+                  >
+                    <Text style={styles.cardTitle} numberOfLines={2}>{row.left.title}</Text>
+                  </LinearGradient>
+                </View>
                 {row.right ? (
-                  <OutfitCard item={row.right} isLeft={false} />
+                  <View style={styles.card}>
+                    <Image source={{ uri: row.right.image }} style={styles.cardImage} />
+                    <LinearGradient
+                      colors={['transparent', 'rgba(0,0,0,0.7)']}
+                      style={styles.cardOverlay}
+                    >
+                      <Text style={styles.cardTitle} numberOfLines={2}>{row.right.title}</Text>
+                    </LinearGradient>
+                  </View>
                 ) : (
                   <View style={styles.cardPlaceholder} />
                 )}
@@ -103,12 +118,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
+  content: {
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingBottom: 100,
-  },
-  scrollContentEmpty: {
-    flex: 1,
+    flexGrow: 1,
   },
   
   // Header
@@ -123,25 +135,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-start',
   },
-  headerCenter: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   headerTitle: {
-    fontSize: 24,
+    flex: 1,
+    fontSize: 20,
     fontWeight: '600',
     color: COLORS.textPrimary,
-  },
-  headerCount: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    overflow: 'hidden',
+    textAlign: 'center',
   },
   headerPlaceholder: {
     width: 44,
@@ -157,69 +156,68 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    height: 220,
-    borderRadius: 20,
+    height: 200,
+    borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
-  cardLeft: {},
-  cardRight: {},
   cardPlaceholder: {
     flex: 1,
   },
   cardImage: {
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
   },
   cardOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 16,
-    paddingTop: 48,
+    padding: 14,
+    paddingTop: 40,
   },
   cardTitle: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '500',
     color: '#FFFFFF',
   },
   
-  // Empty State - Elegant & intentional
+  // Empty State
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 80,
+    paddingVertical: 60,
   },
   emptyVisual: {
     alignItems: 'center',
     marginBottom: 32,
     gap: 8,
   },
-  emptyLine: {
-    width: 64,
+  emptyShape: {
+    width: 56,
     height: 3,
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 2,
   },
-  emptyLineShort: {
-    width: 48,
+  emptyShapeMedium: {
+    width: 40,
   },
-  emptyLineShorter: {
-    width: 32,
+  emptyShapeSmall: {
+    width: 24,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '500',
     color: COLORS.textPrimary,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
+    fontSize: 14,
+    color: COLORS.textMuted,
     textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 260,
+    lineHeight: 20,
+    maxWidth: 240,
   },
 });
