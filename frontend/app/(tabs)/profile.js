@@ -171,7 +171,7 @@ export default function ProfileScreen() {
     },
   ], [favoriteOutfits.length, sellStackCount]);
 
-  const renderMenuItem = useCallback(({ item }) => (
+  const renderSettingItem = useCallback(({ item }) => (
     <TouchableOpacity
       style={styles.menuItem}
       onPress={() => router.push({ pathname: item.route, params: { returnPath: '/profile' } })}
@@ -185,6 +185,20 @@ export default function ProfileScreen() {
         <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
       </View>
       <MaterialCommunityIcons name="chevron-right" size={24} color={COLORS.textSecondary} />
+    </TouchableOpacity>
+  ), []);
+
+  // Lighter weight collection items
+  const renderCollectionItem = useCallback(({ item }) => (
+    <TouchableOpacity
+      style={styles.collectionItem}
+      onPress={() => router.push({ pathname: item.route, params: { returnPath: '/profile' } })}
+      activeOpacity={0.7}
+    >
+      <MaterialCommunityIcons name={item.icon} size={20} color={item.color} />
+      <Text style={styles.collectionTitle}>{item.title}</Text>
+      <Text style={styles.collectionCount}>{item.subtitle}</Text>
+      <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
     </TouchableOpacity>
   ), []);
 
