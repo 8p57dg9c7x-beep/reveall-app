@@ -1,13 +1,11 @@
-// Sell Stack - Premium & Empowering
-// Items marked for sale during clean-out sessions
-
+// Sell Stack - Items marked for sale
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
   Image,
   Platform,
   Alert,
@@ -60,15 +58,17 @@ export default function SellStackScreen() {
     }
   };
 
+  const handleBack = () => {
+    triggerHaptic();
+    router.back();
+  };
+
   const handleRemoveItem = async (itemId) => {
     triggerHaptic();
     
     const doRemove = async () => {
       const updated = await removeFromSellStack(itemId);
       setSellItems(updated);
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
     };
 
     if (Platform.OS === 'web') {
@@ -107,93 +107,82 @@ export default function SellStackScreen() {
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemCard}>
-      <Image 
-        source={{ uri: item.itemData?.image }} 
-        style={styles.itemImage} 
-      />
-      <View style={styles.itemContent}>
-        <Text style={styles.itemCategory}>
-          {CATEGORY_LABELS[item.itemData?.category] || 'Item'}
-        </Text>
-        <Text style={styles.itemDate}>
-          Added {new Date(item.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-        </Text>
-      </View>
-      <TouchableOpacity 
-        style={styles.removeBtn}
-        onPress={() => handleRemoveItem(item.itemId)}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <MaterialCommunityIcons name="close" size={18} color={COLORS.textSecondary} />
-      </TouchableOpacity>
-    </View>
-  );
-
-  const ListHeaderComponent = () => (
-    <View style={styles.header}>
-      <TouchableOpacity 
-        style={styles.backBtn}
-        onPress={() => router.back()}
-      >
-        <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
-      </TouchableOpacity>
-      <View style={styles.headerCenter}>
-        <Text style={styles.headerTitle}>Sell Stack</Text>
-        {sellItems.length > 0 && (
-          <Text style={styles.headerCount}>{sellItems.length}</Text>
-        )}
-      </View>
-      {sellItems.length > 0 ? (
-        <TouchableOpacity 
-          style={styles.clearBtn}
-          onPress={handleClearAll}
-        >
-          <Text style={styles.clearText}>Clear</Text>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.headerPlaceholder} />
-      )}
-    </View>
-  );
-
-  const ListEmptyComponent = () => (
-    <View style={styles.emptyState}>
-      <View style={styles.emptyVisual}>
-        <View style={styles.emptyTag}>
-          <View style={styles.emptyTagHole} />
-        </View>
-      </View>
-      <Text style={styles.emptyTitle}>Nothing to sell yet</Text>
-      <Text style={styles.emptySubtitle}>
-        Items you mark "Sell" during Clean-Out Mode will appear here
-      </Text>
-      <TouchableOpacity 
-        style={styles.emptyCTA}
-        onPress={() => { triggerHaptic(); router.replace('/aiwardrobe'); }}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.emptyCTAText}>Start a clean-out</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
-      <FlatList
-        data={sellItems}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.itemId}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={ListEmptyComponent}
+      <ScrollView
         contentContainerStyle={[
-          styles.listContent,
-          { paddingTop: insets.top + 16 },
-          sellItems.length === 0 && styles.listContentEmpty,
+          styles.content,
+          { 
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 100 
+          }
         ]}
         showsVerticalScrollIndicator={false}
-      />
+        alwaysBounceVertical={true}
+        bounces={true}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>Sell Stack</Text>
+            {sellItems.length > 0 && (
+              <Text style={styles.headerCount}>{sellItems.length}</Text>
+            )}
+          </View>
+          {sellItems.length > 0 ? (
+            <TouchableOpacity style={styles.clearButton} onPress={handleClearAll}>
+              <Text style={styles.clearText}>Clear</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.headerPlaceholder} />
+          )}
+        </View>
+
+        {/* Content */}
+        {sellItems.length === 0 ? (
+          <View style={styles.emptyState}>
+            {/* Abstract visual - tag shape */}
+            <View style={styles.emptyVisual}>
+              <View style={styles.emptyTag}>
+                <View style={styles.emptyTagHole} />
+              </View>
+            </View>
+            
+            <Text style={styles.emptyTitle}>Nothing to sell yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Items you mark "Sell" during Clean-Out Mode will appear here
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {sellItems.map((item) => (
+              <View key={item.itemId} style={styles.itemCard}>
+                <Image 
+                  source={{ uri: item.itemData?.image }} 
+                  style={styles.itemImage} 
+                />
+                <View style={styles.itemContent}>
+                  <Text style={styles.itemCategory}>
+                    {CATEGORY_LABELS[item.itemData?.category] || 'Item'}
+                  </Text>
+                  <Text style={styles.itemDate}>
+                    Added {new Date(item.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </Text>
+                </View>
+                <TouchableOpacity 
+                  style={styles.removeButton}
+                  onPress={() => handleRemoveItem(item.itemId)}
+                >
+                  <MaterialCommunityIcons name="close" size={18} color={COLORS.textSecondary} />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -202,12 +191,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  listContent: {
+  content: {
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingBottom: 100,
-  },
-  listContentEmpty: {
-    flex: 1,
+    flexGrow: 1,
   },
   
   // Header
@@ -216,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  backBtn: {
+  backButton: {
     width: 44,
     height: 44,
     justifyContent: 'center',
@@ -226,48 +212,50 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     color: COLORS.textPrimary,
   },
   headerCount: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
+    fontSize: 14,
+    color: COLORS.textMuted,
     backgroundColor: 'rgba(255,255,255,0.08)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
     overflow: 'hidden',
   },
   headerPlaceholder: {
     width: 44,
   },
-  clearBtn: {
-    paddingHorizontal: 12,
+  clearButton: {
+    paddingHorizontal: 8,
     paddingVertical: 8,
   },
   clearText: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 14,
     color: COLORS.textSecondary,
   },
   
-  // Item card
+  // List
+  list: {
+    gap: 12,
+  },
   itemCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 12,
-    marginBottom: 12,
   },
   itemImage: {
-    width: 64,
-    height: 64,
-    borderRadius: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 10,
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
   itemContent: {
@@ -275,69 +263,59 @@ const styles = StyleSheet.create({
     marginLeft: 14,
   },
   itemCategory: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '500',
     color: COLORS.textPrimary,
   },
   itemDate: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
     marginTop: 2,
   },
-  removeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  removeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   
-  // Empty state - Elegant
+  // Empty State
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 80,
+    paddingVertical: 60,
   },
   emptyVisual: {
     marginBottom: 32,
   },
   emptyTag: {
-    width: 48,
-    height: 64,
+    width: 44,
+    height: 60,
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 4,
     alignItems: 'center',
-    paddingTop: 8,
+    paddingTop: 10,
   },
   emptyTagHole: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: 'rgba(255,255,255,0.1)',
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '500',
     color: COLORS.textPrimary,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
+    fontSize: 14,
+    color: COLORS.textMuted,
     textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 280,
-    marginBottom: 28,
-  },
-  emptyCTA: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  emptyCTAText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.primary,
+    lineHeight: 20,
+    maxWidth: 260,
   },
 });
