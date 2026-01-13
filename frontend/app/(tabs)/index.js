@@ -74,15 +74,28 @@ export default function TodayScreen() {
   const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
   const hasItems = closetCount > 0;
 
+  // Get time-based context
+  const getTimeContext = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'this morning';
+    if (hour < 17) return 'this afternoon';
+    return 'this evening';
+  };
+
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
         ref={scrollViewRef}
         contentContainerStyle={[
           styles.content, 
-          { paddingTop: insets.top + 48, paddingBottom: insets.bottom + 120 }
+          { 
+            paddingTop: insets.top + 48, 
+            paddingBottom: insets.bottom + 140  // Extra space for tab bar
+          }
         ]}
         showsVerticalScrollIndicator={false}
+        alwaysBounceVertical={true}  // Native iOS bounce
+        bounces={true}
       >
         
         {/* ─────────────────────────────────────────────────────── */}
@@ -90,12 +103,10 @@ export default function TodayScreen() {
         {/* ─────────────────────────────────────────────────────── */}
         
         <View style={styles.hero}>
-          {/* Greeting - Large, confident */}
           <Text style={styles.greeting}>
             {weather?.greeting?.text || 'Good day'}
           </Text>
           
-          {/* Weather context - Subtle, secondary */}
           {weather && (
             <View style={styles.weatherContext}>
               <MaterialCommunityIcons 
@@ -147,19 +158,29 @@ export default function TodayScreen() {
         )}
 
         {/* ─────────────────────────────────────────────────────── */}
-        {/* SECONDARY - Quiet access to closet                      */}
+        {/* SECONDARY CONTEXT - Subtle, not a CTA                   */}
         {/* ─────────────────────────────────────────────────────── */}
         
-        <View style={styles.secondary}>
+        {hasItems && (
+          <View style={styles.secondaryContext}>
+            <Text style={styles.contextText}>
+              {closetCount} {closetCount === 1 ? 'piece' : 'pieces'} ready for {getTimeContext()}
+            </Text>
+          </View>
+        )}
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* TERTIARY - Quiet access to closet                       */}
+        {/* ─────────────────────────────────────────────────────── */}
+        
+        <View style={styles.tertiary}>
           <TouchableOpacity 
             style={styles.closetAccess}
             onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
             activeOpacity={0.7}
           >
             <Text style={styles.closetLabel}>My Closet</Text>
-            {hasItems && (
-              <Text style={styles.closetCount}>{closetCount}</Text>
-            )}
+            <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -169,7 +190,7 @@ export default function TodayScreen() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STYLES - Calm, spacious, intentional
+// STYLES
 // ═══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
@@ -178,14 +199,12 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: SPACING.screenHorizontal,
-    minHeight: SCREEN_HEIGHT * 0.7,
+    flexGrow: 1,  // Ensures scrolling works
   },
   
-  // ─────────────────────────────────────────────────────────────
-  // HERO - The emotional landing moment
-  // ─────────────────────────────────────────────────────────────
+  // HERO
   hero: {
-    marginBottom: 64,
+    marginBottom: 56,
   },
   greeting: {
     fontSize: 36,
@@ -206,9 +225,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   
-  // ─────────────────────────────────────────────────────────────
-  // PRIMARY ACTION - Single, clear purpose
-  // ─────────────────────────────────────────────────────────────
+  // PRIMARY ACTION
   primaryAction: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -217,7 +234,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 24,
     paddingHorizontal: 28,
-    marginBottom: 48,
+    marginBottom: 32,
   },
   primaryQuestion: {
     fontSize: 19,
@@ -234,11 +251,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   
-  // ─────────────────────────────────────────────────────────────
-  // PROGRESS - When building wardrobe
-  // ─────────────────────────────────────────────────────────────
+  // PROGRESS
   progressSection: {
-    marginBottom: 48,
+    marginBottom: 32,
   },
   progressLabel: {
     fontSize: 15,
@@ -262,11 +277,9 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   
-  // ─────────────────────────────────────────────────────────────
-  // EMPTY - Inviting, not sad
-  // ─────────────────────────────────────────────────────────────
+  // EMPTY
   emptySection: {
-    marginBottom: 48,
+    marginBottom: 32,
   },
   emptyMessage: {
     fontSize: 17,
@@ -274,31 +287,30 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   
-  // ─────────────────────────────────────────────────────────────
-  // SECONDARY - Subtle, always available
-  // ─────────────────────────────────────────────────────────────
-  secondary: {
+  // SECONDARY CONTEXT - Subtle, text-only
+  secondaryContext: {
+    marginBottom: 48,
+  },
+  contextText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    letterSpacing: 0.2,
+  },
+  
+  // TERTIARY - Closet link
+  tertiary: {
     marginTop: 'auto',
-    paddingTop: 32,
+    paddingTop: 24,
   },
   closetAccess: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 4,
     paddingVertical: 12,
   },
   closetLabel: {
     fontSize: 15,
     color: COLORS.textMuted,
-  },
-  closetCount: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
-    overflow: 'hidden',
   },
 });
