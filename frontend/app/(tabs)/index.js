@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,15 +19,13 @@ import { fetchRealWeather } from '../../services/weatherService';
 import { ONBOARDING_CONFIG } from '../../services/onboardingService';
 import { useHelpMeDecide } from '../_layout';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
 // ═══════════════════════════════════════════════════════════════
-// TODAY SCREEN
-// A calm, intentional landing moment.
-// One hero. One action. Space to breathe.
+// HOME
+// Like opening your wardrobe, not opening an app.
+// One purpose. Calm. Reassuring.
 // ═══════════════════════════════════════════════════════════════
 
-export default function TodayScreen() {
+export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef(null);
   const [weather, setWeather] = useState(null);
@@ -38,32 +35,30 @@ export default function TodayScreen() {
   useFocusEffect(
     useCallback(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-      const refresh = async () => {
-        const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
-        if (wardrobeJson) {
-          setClosetCount(JSON.parse(wardrobeJson).length);
-        }
-      };
-      refresh();
+      loadClosetCount();
     }, [])
   );
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const weatherData = await fetchRealWeather();
-        setWeather(weatherData);
-        
-        const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
-        if (wardrobeJson) {
-          setClosetCount(JSON.parse(wardrobeJson).length);
-        }
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-    };
     loadData();
   }, []);
+
+  const loadData = async () => {
+    try {
+      const weatherData = await fetchRealWeather();
+      setWeather(weatherData);
+      await loadClosetCount();
+    } catch (error) {
+      console.log('Error loading data:', error);
+    }
+  };
+
+  const loadClosetCount = async () => {
+    const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
+    if (wardrobeJson) {
+      setClosetCount(JSON.parse(wardrobeJson).length);
+    }
+  };
 
   const triggerHaptic = () => {
     if (Platform.OS !== 'web') {
@@ -74,14 +69,6 @@ export default function TodayScreen() {
   const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
   const hasItems = closetCount > 0;
 
-  // Get time-based context
-  const getTimeContext = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'this morning';
-    if (hour < 17) return 'this afternoon';
-    return 'this evening';
-  };
-
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
@@ -89,98 +76,79 @@ export default function TodayScreen() {
         contentContainerStyle={[
           styles.content, 
           { 
-            paddingTop: insets.top + 48, 
-            paddingBottom: insets.bottom + 140  // Extra space for tab bar
+            paddingTop: insets.top + 60, 
+            paddingBottom: insets.bottom + 140
           }
         ]}
         showsVerticalScrollIndicator={false}
-        alwaysBounceVertical={true}  // Native iOS bounce
+        alwaysBounceVertical={true}
         bounces={true}
       >
         
         {/* ─────────────────────────────────────────────────────── */}
-        {/* HERO SECTION - The emotional anchor                     */}
+        {/* EMOTIONAL HEADLINE                                      */}
+        {/* Calm. No icons. No cards.                               */}
         {/* ─────────────────────────────────────────────────────── */}
         
-        <View style={styles.hero}>
-          <Text style={styles.greeting}>
+        <View style={styles.headline}>
+          <Text style={styles.headlineText}>
             {weather?.greeting?.text || 'Good day'}
           </Text>
           
+          {/* Weather - quiet context */}
           {weather && (
-            <View style={styles.weatherContext}>
-              <MaterialCommunityIcons 
-                name={weather.icon} 
-                size={18} 
-                color={COLORS.textMuted} 
-              />
-              <Text style={styles.weatherText}>{weather.tempDisplay}</Text>
-            </View>
+            <Text style={styles.weatherText}>
+              {weather.tempDisplay} outside
+            </Text>
           )}
         </View>
 
         {/* ─────────────────────────────────────────────────────── */}
-        {/* PRIMARY ACTION - The ONE thing to do                    */}
+        {/* ONE PRIMARY ACTION                                       */}
+        {/* "Help me decide what to wear today"                      */}
         {/* ─────────────────────────────────────────────────────── */}
         
         {canStyle ? (
           <TouchableOpacity 
             style={styles.primaryAction}
             onPress={() => { triggerHaptic(); openHelpMeDecide(); }}
-            activeOpacity={0.92}
+            activeOpacity={0.9}
           >
-            <Text style={styles.primaryQuestion}>
-              What should I wear?
+            <Text style={styles.primaryText}>
+              Help me decide what to wear
             </Text>
-            <View style={styles.primaryArrow}>
-              <MaterialCommunityIcons name="arrow-right" size={20} color="#FFFFFF" />
-            </View>
           </TouchableOpacity>
         ) : hasItems ? (
-          <View style={styles.progressSection}>
-            <Text style={styles.progressLabel}>Building your wardrobe</Text>
-            <View style={styles.progressTrack}>
-              <View 
-                style={[
-                  styles.progressFill, 
-                  { width: `${(closetCount / ONBOARDING_CONFIG.MIN_CLOSET_ITEMS) * 100}%` }
-                ]} 
-              />
-            </View>
-            <Text style={styles.progressHint}>
-              {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more to unlock suggestions
+          <View style={styles.buildingState}>
+            <Text style={styles.buildingText}>
+              Add {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount === 1 ? 'piece' : 'pieces'} to unlock outfit suggestions
             </Text>
           </View>
         ) : (
-          <View style={styles.emptySection}>
-            <Text style={styles.emptyMessage}>Your wardrobe awaits</Text>
-          </View>
-        )}
-
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* SECONDARY CONTEXT - Subtle, not a CTA                   */}
-        {/* ─────────────────────────────────────────────────────── */}
-        
-        {hasItems && (
-          <View style={styles.secondaryContext}>
-            <Text style={styles.contextText}>
-              {closetCount} {closetCount === 1 ? 'piece' : 'pieces'} ready for {getTimeContext()}
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>
+              Start by adding a few pieces to your closet
             </Text>
           </View>
         )}
 
         {/* ─────────────────────────────────────────────────────── */}
-        {/* TERTIARY - Quiet access to closet                       */}
+        {/* SECONDARY - Closet access                               */}
+        {/* Reassuring, not competing                               */}
         {/* ─────────────────────────────────────────────────────── */}
         
-        <View style={styles.tertiary}>
+        <View style={styles.secondary}>
           <TouchableOpacity 
-            style={styles.closetAccess}
+            style={styles.closetLink}
             onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
             activeOpacity={0.7}
           >
-            <Text style={styles.closetLabel}>My Closet</Text>
-            <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
+            <Text style={styles.closetText}>
+              {hasItems 
+                ? `Your closet · ${closetCount} ${closetCount === 1 ? 'piece' : 'pieces'}`
+                : 'Open your closet'
+              }
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -191,6 +159,7 @@ export default function TodayScreen() {
 
 // ═══════════════════════════════════════════════════════════════
 // STYLES
+// Minimal. Calm. Like opening a wardrobe.
 // ═══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
@@ -199,117 +168,82 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: SPACING.screenHorizontal,
-    flexGrow: 1,  // Ensures scrolling works
+    flexGrow: 1,
   },
   
-  // HERO
-  hero: {
-    marginBottom: 56,
+  // ─────────────────────────────────────────────────────────────
+  // HEADLINE - Emotional, calm
+  // ─────────────────────────────────────────────────────────────
+  headline: {
+    marginBottom: 80,
   },
-  greeting: {
-    fontSize: 36,
+  headlineText: {
+    fontSize: 34,
     fontWeight: '300',
     color: COLORS.textPrimary,
-    letterSpacing: -1,
-    lineHeight: 44,
-  },
-  weatherContext: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 16,
-    gap: 8,
+    letterSpacing: -0.5,
+    lineHeight: 42,
   },
   weatherText: {
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.textMuted,
+    marginTop: 12,
     letterSpacing: 0.2,
   },
   
-  // PRIMARY ACTION
+  // ─────────────────────────────────────────────────────────────
+  // PRIMARY ACTION - The one thing
+  // ─────────────────────────────────────────────────────────────
   primaryAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
-    borderRadius: 20,
-    paddingVertical: 24,
-    paddingHorizontal: 28,
-    marginBottom: 32,
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    alignItems: 'center',
   },
-  primaryQuestion: {
-    fontSize: 19,
+  primaryText: {
+    fontSize: 17,
     fontWeight: '500',
     color: '#FFFFFF',
     letterSpacing: -0.2,
   },
-  primaryArrow: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   
-  // PROGRESS
-  progressSection: {
-    marginBottom: 32,
+  // ─────────────────────────────────────────────────────────────
+  // BUILDING STATE - Encouraging
+  // ─────────────────────────────────────────────────────────────
+  buildingState: {
+    paddingVertical: 20,
   },
-  progressLabel: {
-    fontSize: 15,
-    fontWeight: '500',
+  buildingText: {
+    fontSize: 16,
     color: COLORS.textSecondary,
-    marginBottom: 16,
-  },
-  progressTrack: {
-    height: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 2,
-    marginBottom: 12,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.primary,
-    borderRadius: 2,
-  },
-  progressHint: {
-    fontSize: 14,
-    color: COLORS.textMuted,
+    lineHeight: 24,
   },
   
-  // EMPTY
-  emptySection: {
-    marginBottom: 32,
+  // ─────────────────────────────────────────────────────────────
+  // EMPTY STATE - Inviting
+  // ─────────────────────────────────────────────────────────────
+  emptyState: {
+    paddingVertical: 20,
   },
-  emptyMessage: {
-    fontSize: 17,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-  },
-  
-  // SECONDARY CONTEXT - Subtle, text-only
-  secondaryContext: {
-    marginBottom: 48,
-  },
-  contextText: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    letterSpacing: 0.2,
+  emptyText: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    lineHeight: 24,
   },
   
-  // TERTIARY - Closet link
-  tertiary: {
+  // ─────────────────────────────────────────────────────────────
+  // SECONDARY - Quiet, reassuring
+  // ─────────────────────────────────────────────────────────────
+  secondary: {
     marginTop: 'auto',
-    paddingTop: 24,
+    paddingTop: 48,
   },
-  closetAccess: {
-    flexDirection: 'row',
+  closetLink: {
+    paddingVertical: 16,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 12,
   },
-  closetLabel: {
+  closetText: {
     fontSize: 15,
     color: COLORS.textMuted,
   },
