@@ -284,10 +284,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryText: {
-    fontSize: 17,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#FFFFFF',
     letterSpacing: -0.2,
+  },
+  primarySubtext: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: 6,
+    letterSpacing: 0.1,
   },
   
   // ─────────────────────────────────────────────────────────────
