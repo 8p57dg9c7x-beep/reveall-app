@@ -160,7 +160,7 @@ export default function ProfileScreen() {
             )}
           </TouchableOpacity>
           
-          <Text style={styles.headerTitle}>Your Wardrobe</Text>
+          <Text style={styles.headerTitle}>Your Closet</Text>
           <Text style={styles.headerSubtitle}>{closetCount} pieces</Text>
         </View>
 
