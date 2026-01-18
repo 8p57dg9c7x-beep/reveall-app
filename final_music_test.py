@@ -22,7 +22,7 @@ import subprocess
 from pathlib import Path
 
 # Backend URL
-BACKEND_URL = "https://smart-closet-36.preview.emergentagent.com/api"
+BACKEND_URL = "https://reveal-final.preview.emergentagent.com/api"
 
 class FinalMusicTester:
     def __init__(self):
