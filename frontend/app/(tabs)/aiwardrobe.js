@@ -357,7 +357,7 @@ export default function MyClosetScreen() {
               ))}
             </View>
             <Text style={styles.snapshotCaption}>
-              {wardrobeItems.length} {wardrobeItems.length === 1 ? 'piece' : 'pieces'} in your wardrobe
+              {wardrobeItems.length} {wardrobeItems.length === 1 ? 'piece' : 'pieces'} in your closet
             </Text>
           </View>
         )}
