@@ -169,10 +169,14 @@ export default function HomeScreen() {
               <MaterialCommunityIcons name="chevron-right" size={16} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* EMPTY STATE                                             */}
+        {/* ─────────────────────────────────────────────────────── */}
+        
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>
-              Your wardrobe awaits
+              Your closet awaits
             </Text>
             <TouchableOpacity 
               style={styles.startLink}
