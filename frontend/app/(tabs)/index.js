@@ -153,7 +153,7 @@ export default function HomeScreen() {
             activeOpacity={0.9}
           >
             <Text style={styles.primaryText}>What should I wear?</Text>
-            <Text style={styles.primarySubtext}>Based on today's weather & your closet</Text>
+            <Text style={styles.primarySubtext}>Based on weather and your closet</Text>
           </TouchableOpacity>
         ) : hasItems ? (
           <View style={styles.buildingState}>
