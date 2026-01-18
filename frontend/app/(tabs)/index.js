@@ -137,7 +137,7 @@ export default function HomeScreen() {
               ))}
             </View>
             <Text style={styles.wardrobeLabel}>
-              {closetCount} {closetCount === 1 ? 'piece' : 'pieces'} waiting
+              {closetCount} {closetCount === 1 ? 'piece' : 'pieces'} in your closet
             </Text>
           </TouchableOpacity>
         )}
