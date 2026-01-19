@@ -7,7 +7,7 @@ import {
   ScrollView,
   Platform,
   Image,
-  Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -21,81 +21,130 @@ import { fetchRealWeather } from '../../services/weatherService';
 import { ONBOARDING_CONFIG } from '../../services/onboardingService';
 import { useHelpMeDecide } from '../_layout';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// ═══════════════════════════════════════════════════════════════
+// HOME SCREEN - DETERMINISTIC STATE CONTRACT
+// ═══════════════════════════════════════════════════════════════
+//
+// STATE CONTRACT:
+// ┌─────────────────────────────────────────────────────────────┐
+// │ items.length === 0        → EMPTY STATE                    │
+// │ items.length > 0 && < 5   → BUILDING STATE                 │
+// │ items.length >= 5         → READY STATE (primary CTA)      │
+// └─────────────────────────────────────────────────────────────┘
+//
+// GUARANTEES:
+// 1. Same items array → same UI render, always
+// 2. State is re-fetched on EVERY focus event
+// 3. No derived state that can go stale
+// 4. Loading guard prevents flash of wrong content
+//
+// ═══════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════
-// HOME
-// Like opening your wardrobe, not opening an app.
-// One purpose. Calm. Personal.
-// ═══════════════════════════════════════════════════════════════
+const STORAGE_KEY = '@reveal_wardrobe';
+const MIN_ITEMS_FOR_STYLING = ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef(null);
-  const [weather, setWeather] = useState(null);
-  const [closetCount, setClosetCount] = useState(0);
-  const [recentItems, setRecentItems] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false);
   const { openHelpMeDecide } = useHelpMeDecide();
+  
+  // ═══════════════════════════════════════════════════════════════
+  // SINGLE SOURCE OF TRUTH
+  // All UI decisions derive from this one state
+  // ═══════════════════════════════════════════════════════════════
+  const [items, setItems] = useState(null); // null = loading, [] = empty, [...] = has items
+  const [weather, setWeather] = useState(null);
 
   // ═══════════════════════════════════════════════════════════════
-  // DETERMINISTIC STATE LOADING
-  // Every time Home gains focus, re-fetch closet data from storage
-  // This ensures: same state → same UI, every single time
+  // DATA LOADING
   // ═══════════════════════════════════════════════════════════════
   
-  const loadClosetData = useCallback(async () => {
+  const loadItems = useCallback(async () => {
     try {
-      const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
-      if (wardrobeJson) {
-        const items = JSON.parse(wardrobeJson);
-        setClosetCount(items.length);
-        setRecentItems(items.slice(-3).reverse());
-      } else {
-        // Explicit reset if no data
-        setClosetCount(0);
-        setRecentItems([]);
-      }
+      const json = await AsyncStorage.getItem(STORAGE_KEY);
+      const parsed = json ? JSON.parse(json) : [];
+      // Ensure we always get an array
+      setItems(Array.isArray(parsed) ? parsed : []);
     } catch (error) {
-      console.log('Error loading closet data:', error);
-      // On error, reset to safe defaults
-      setClosetCount(0);
-      setRecentItems([]);
+      console.log('[Home] Error loading items:', error);
+      setItems([]); // Fail safe to empty
     }
-    setIsLoaded(true);
   }, []);
 
-  // CRITICAL: Reload closet data EVERY time screen gains focus
-  useFocusEffect(
-    useCallback(() => {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-      loadClosetData();
-    }, [loadClosetData])
-  );
-
-  // Initial weather load (only once)
+  // Load weather once on mount
   useEffect(() => {
     const loadWeather = async () => {
       try {
-        const weatherData = await fetchRealWeather();
-        setWeather(weatherData);
+        const data = await fetchRealWeather();
+        setWeather(data);
       } catch (error) {
-        console.log('Error loading weather:', error);
+        console.log('[Home] Error loading weather:', error);
       }
     };
     loadWeather();
   }, []);
 
+  // ═══════════════════════════════════════════════════════════════
+  // CRITICAL: Re-fetch items on EVERY focus
+  // This is the key to deterministic behavior
+  // ═══════════════════════════════════════════════════════════════
+  useFocusEffect(
+    useCallback(() => {
+      // Reset scroll position
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+      // Always re-fetch - this ensures fresh data after any navigation
+      loadItems();
+    }, [loadItems])
+  );
+
+  // ═══════════════════════════════════════════════════════════════
+  // DERIVED STATE - Computed fresh on every render
+  // These are NOT stored in state, preventing stale values
+  // ═══════════════════════════════════════════════════════════════
+  const isLoading = items === null;
+  const itemCount = items?.length ?? 0;
+  const isEmpty = itemCount === 0;
+  const isBuilding = itemCount > 0 && itemCount < MIN_ITEMS_FOR_STYLING;
+  const isReady = itemCount >= MIN_ITEMS_FOR_STYLING;
+  const recentItems = items?.slice(-3).reverse() ?? [];
+  const itemsNeeded = MIN_ITEMS_FOR_STYLING - itemCount;
+
+  // ═══════════════════════════════════════════════════════════════
+  // HELPERS
+  // ═══════════════════════════════════════════════════════════════
+  
   const triggerHaptic = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
 
-  // Deterministic state derivation
-  const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
-  const hasItems = closetCount > 0;
+  const navigateToCloset = () => {
+    triggerHaptic();
+    router.push('/aiwardrobe');
+  };
 
+  const handlePrimaryCTA = () => {
+    triggerHaptic();
+    openHelpMeDecide();
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // LOADING STATE - Prevents flash of wrong content
+  // ═══════════════════════════════════════════════════════════════
+  if (isLoading) {
+    return (
+      <LinearGradient colors={GRADIENTS.background} style={styles.container}>
+        <View style={[styles.loadingContainer, { paddingTop: insets.top + 100 }]}>
+          <ActivityIndicator size="small" color={COLORS.textMuted} />
+        </View>
+      </LinearGradient>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER - Deterministic based on itemCount
+  // ═══════════════════════════════════════════════════════════════
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
@@ -113,14 +162,12 @@ export default function HomeScreen() {
       >
         
         {/* ─────────────────────────────────────────────────────── */}
-        {/* EMOTIONAL HEADLINE                                      */}
+        {/* GREETING - Always shown                                 */}
         {/* ─────────────────────────────────────────────────────── */}
-        
         <View style={styles.headline}>
           <Text style={styles.headlineText}>
             {weather?.greeting?.text || 'Good day'}
           </Text>
-          
           {weather && (
             <Text style={styles.weatherText}>
               {weather.tempDisplay} outside
@@ -129,20 +176,18 @@ export default function HomeScreen() {
         </View>
 
         {/* ─────────────────────────────────────────────────────── */}
-        {/* EMOTIONAL ANCHOR - Your wardrobe presence               */}
-        {/* Subtle visual that says "this is yours"                 */}
+        {/* CLOSET PREVIEW - Only when items exist                  */}
         {/* ─────────────────────────────────────────────────────── */}
-        
-        {hasItems && recentItems.length > 0 && (
+        {!isEmpty && recentItems.length > 0 && (
           <TouchableOpacity 
             style={styles.wardrobeAnchor}
-            onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
+            onPress={navigateToCloset}
             activeOpacity={0.9}
           >
             <View style={styles.wardrobePreview}>
               {recentItems.map((item, index) => (
                 <View 
-                  key={item.id || index} 
+                  key={item.id || `item-${index}`} 
                   style={[
                     styles.previewThumb,
                     { 
@@ -156,68 +201,73 @@ export default function HomeScreen() {
               ))}
             </View>
             <Text style={styles.wardrobeLabel}>
-              {closetCount} {closetCount === 1 ? 'piece' : 'pieces'} in your closet
+              {itemCount} {itemCount === 1 ? 'piece' : 'pieces'} in your closet
             </Text>
           </TouchableOpacity>
         )}
 
         {/* ─────────────────────────────────────────────────────── */}
-        {/* ONE PRIMARY ACTION                                       */}
+        {/* STATE: READY (itemCount >= 5)                           */}
+        {/* Primary CTA: "What should I wear?"                      */}
         {/* ─────────────────────────────────────────────────────── */}
-        
-        {canStyle ? (
-          <TouchableOpacity 
-            style={styles.primaryAction}
-            onPress={() => { triggerHaptic(); openHelpMeDecide(); }}
-            activeOpacity={0.9}
-          >
-            <Text style={styles.primaryText}>What should I wear?</Text>
-            <Text style={styles.primarySubtext}>Based on weather and your closet</Text>
-          </TouchableOpacity>
-        ) : hasItems ? (
+        {isReady && (
+          <>
+            <TouchableOpacity 
+              style={styles.primaryAction}
+              onPress={handlePrimaryCTA}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.primaryText}>What should I wear?</Text>
+              <Text style={styles.primarySubtext}>Based on weather and your closet</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.secondary}>
+              <TouchableOpacity 
+                style={styles.closetLink}
+                onPress={navigateToCloset}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.closetText}>Open closet</Text>
+                <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* STATE: BUILDING (0 < itemCount < 5)                     */}
+        {/* Prompt to add more items                                */}
+        {/* ─────────────────────────────────────────────────────── */}
+        {isBuilding && (
           <View style={styles.buildingState}>
             <Text style={styles.buildingText}>
-              Add {ONBOARDING_CONFIG.MIN_CLOSET_ITEMS - closetCount} more to unlock outfit suggestions
+              Add {itemsNeeded} more to unlock outfit suggestions
             </Text>
             <TouchableOpacity 
               style={styles.addMoreLink}
-              onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
+              onPress={navigateToCloset}
               activeOpacity={0.7}
             >
               <Text style={styles.addMoreText}>Add items</Text>
               <MaterialCommunityIcons name="chevron-right" size={16} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
-        ) : (
+        )}
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* STATE: EMPTY (itemCount === 0)                          */}
+        {/* Fresh start experience                                  */}
+        {/* ─────────────────────────────────────────────────────── */}
+        {isEmpty && (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>
-              Your closet awaits
-            </Text>
+            <Text style={styles.emptyText}>Your closet awaits</Text>
             <TouchableOpacity 
               style={styles.startLink}
-              onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
+              onPress={navigateToCloset}
               activeOpacity={0.7}
             >
               <Text style={styles.startText}>Start building</Text>
               <MaterialCommunityIcons name="chevron-right" size={16} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* SECONDARY CLOSET ACCESS                                 */}
-        {/* Clear affordance - obviously tappable                   */}
-        {/* ─────────────────────────────────────────────────────── */}
-        
-        {hasItems && canStyle && (
-          <View style={styles.secondary}>
-            <TouchableOpacity 
-              style={styles.closetLink}
-              onPress={() => { triggerHaptic(); router.push('/aiwardrobe'); }}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.closetText}>Open closet</Text>
-              <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
             </TouchableOpacity>
           </View>
         )}
@@ -235,14 +285,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   content: {
     paddingHorizontal: SPACING.screenHorizontal,
     flexGrow: 1,
   },
   
-  // ─────────────────────────────────────────────────────────────
   // HEADLINE
-  // ─────────────────────────────────────────────────────────────
   headline: {
     marginBottom: 40,
   },
@@ -260,9 +312,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   
-  // ─────────────────────────────────────────────────────────────
-  // EMOTIONAL ANCHOR - Your wardrobe presence
-  // ─────────────────────────────────────────────────────────────
+  // CLOSET PREVIEW
   wardrobeAnchor: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -292,9 +342,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   
-  // ─────────────────────────────────────────────────────────────
-  // PRIMARY ACTION
-  // ─────────────────────────────────────────────────────────────
+  // PRIMARY ACTION (READY STATE)
   primaryAction: {
     backgroundColor: COLORS.primary,
     borderRadius: 16,
@@ -316,9 +364,24 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
   
-  // ─────────────────────────────────────────────────────────────
+  // SECONDARY LINK
+  secondary: {
+    marginTop: 'auto',
+    paddingTop: 48,
+  },
+  closetLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+  },
+  closetText: {
+    fontSize: 15,
+    color: COLORS.textMuted,
+    marginRight: 4,
+  },
+  
   // BUILDING STATE
-  // ─────────────────────────────────────────────────────────────
   buildingState: {
     paddingVertical: 16,
   },
@@ -338,9 +401,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   
-  // ─────────────────────────────────────────────────────────────
   // EMPTY STATE
-  // ─────────────────────────────────────────────────────────────
   emptyState: {
     paddingVertical: 16,
   },
@@ -357,24 +418,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: COLORS.primary,
-  },
-  
-  // ─────────────────────────────────────────────────────────────
-  // SECONDARY - Clear affordance
-  // ─────────────────────────────────────────────────────────────
-  secondary: {
-    marginTop: 'auto',
-    paddingTop: 48,
-  },
-  closetLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-  },
-  closetText: {
-    fontSize: 15,
-    color: COLORS.textMuted,
-    marginRight: 4,
   },
 });
