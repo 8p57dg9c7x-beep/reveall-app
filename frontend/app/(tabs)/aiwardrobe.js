@@ -429,21 +429,21 @@ export default function MyClosetScreen() {
           {CATEGORIES.map(renderSection)}
         </View>
 
-      </ScrollView>
+        {/* Add Item Button - Inside scroll content, no overlap */}
+        {!editMode && (
+          <View style={styles.addButtonContainer}>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={handleAddItem}
+              activeOpacity={0.9}
+            >
+              <MaterialCommunityIcons name="plus" size={22} color="#FFFFFF" />
+              <Text style={styles.addButtonText}>Add Item</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-      {/* Single Primary CTA */}
-      {!editMode && (
-        <View style={[styles.bottomArea, { paddingBottom: insets.bottom + 16 }]}>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={handleAddItem}
-            activeOpacity={0.9}
-          >
-            <MaterialCommunityIcons name="plus" size={22} color="#FFFFFF" />
-            <Text style={styles.addButtonText}>Add Item</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      </ScrollView>
 
       {/* Category Picker Modal - Step 1 of Add Flow */}
       <Modal
