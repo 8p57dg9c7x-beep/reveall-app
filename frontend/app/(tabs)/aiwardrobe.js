@@ -800,17 +800,11 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   
-  // Bottom CTA - Clean and confident
-  bottomArea: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+  // Add Button - Inside scroll content
+  addButtonContainer: {
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingTop: 20,
-    backgroundColor: 'rgba(11, 8, 18, 0.98)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.03)',
+    paddingTop: 32,
+    paddingBottom: 24,
   },
   addButton: {
     flexDirection: 'row',
