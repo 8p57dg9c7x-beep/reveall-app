@@ -35,38 +35,56 @@ export default function HomeScreen() {
   const [weather, setWeather] = useState(null);
   const [closetCount, setClosetCount] = useState(0);
   const [recentItems, setRecentItems] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { openHelpMeDecide } = useHelpMeDecide();
 
+  // ═══════════════════════════════════════════════════════════════
+  // DETERMINISTIC STATE LOADING
+  // Every time Home gains focus, re-fetch closet data from storage
+  // This ensures: same state → same UI, every single time
+  // ═══════════════════════════════════════════════════════════════
+  
+  const loadClosetData = useCallback(async () => {
+    try {
+      const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
+      if (wardrobeJson) {
+        const items = JSON.parse(wardrobeJson);
+        setClosetCount(items.length);
+        setRecentItems(items.slice(-3).reverse());
+      } else {
+        // Explicit reset if no data
+        setClosetCount(0);
+        setRecentItems([]);
+      }
+    } catch (error) {
+      console.log('Error loading closet data:', error);
+      // On error, reset to safe defaults
+      setClosetCount(0);
+      setRecentItems([]);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // CRITICAL: Reload closet data EVERY time screen gains focus
   useFocusEffect(
     useCallback(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
       loadClosetData();
-    }, [])
+    }, [loadClosetData])
   );
 
+  // Initial weather load (only once)
   useEffect(() => {
-    loadData();
+    const loadWeather = async () => {
+      try {
+        const weatherData = await fetchRealWeather();
+        setWeather(weatherData);
+      } catch (error) {
+        console.log('Error loading weather:', error);
+      }
+    };
+    loadWeather();
   }, []);
-
-  const loadData = async () => {
-    try {
-      const weatherData = await fetchRealWeather();
-      setWeather(weatherData);
-      await loadClosetData();
-    } catch (error) {
-      console.log('Error loading data:', error);
-    }
-  };
-
-  const loadClosetData = async () => {
-    const wardrobeJson = await AsyncStorage.getItem('@reveal_wardrobe');
-    if (wardrobeJson) {
-      const items = JSON.parse(wardrobeJson);
-      setClosetCount(items.length);
-      // Get up to 3 recent items for the emotional anchor
-      setRecentItems(items.slice(-3).reverse());
-    }
-  };
 
   const triggerHaptic = () => {
     if (Platform.OS !== 'web') {
@@ -74,6 +92,7 @@ export default function HomeScreen() {
     }
   };
 
+  // Deterministic state derivation
   const canStyle = closetCount >= ONBOARDING_CONFIG.MIN_CLOSET_ITEMS;
   const hasItems = closetCount > 0;
 
