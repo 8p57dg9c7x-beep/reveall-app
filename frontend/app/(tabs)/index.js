@@ -277,7 +277,7 @@ export default function HomeScreen() {
         )}
 
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
 
