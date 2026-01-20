@@ -128,11 +128,12 @@ export default function ProfileScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView
         ref={scrollViewRef}
+        style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
           { 
             paddingTop: insets.top + 32,
-            paddingBottom: 100  // Tab bar is now properly handled structurally
+            paddingBottom: 100,
           }
         ]}
         showsVerticalScrollIndicator={false}
