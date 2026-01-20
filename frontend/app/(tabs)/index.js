@@ -149,19 +149,17 @@ export default function HomeScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
         ref={scrollViewRef}
+        style={styles.scrollView}
         contentContainerStyle={[
           styles.content, 
           { 
             paddingTop: insets.top + 56, 
             paddingBottom: 100,
-            // CRITICAL: Ensure scroll always bounces, even with short content
-            minHeight: '100%',
           }
         ]}
         showsVerticalScrollIndicator={false}
         alwaysBounceVertical={true}
         bounces={true}
-        overScrollMode="always"
       >
         
         {/* ─────────────────────────────────────────────────────── */}
