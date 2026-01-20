@@ -239,8 +239,20 @@ export default function MyClosetScreen() {
     }
   };
 
+  // Category matching - case-insensitive and handles variations
+  // Normalizes: "top" → "tops", "Top" → "tops", etc.
   const getItemsByCategory = (categoryId) => {
-    return wardrobeItems.filter(item => item.category === categoryId);
+    const normalizedCategoryId = categoryId.toLowerCase();
+    return wardrobeItems.filter(item => {
+      const itemCategory = (item.category || '').toLowerCase();
+      // Exact match
+      if (itemCategory === normalizedCategoryId) return true;
+      // Handle singular/plural variations
+      if (normalizedCategoryId === 'tops' && itemCategory === 'top') return true;
+      if (normalizedCategoryId === 'bottoms' && itemCategory === 'bottom') return true;
+      if (normalizedCategoryId === 'shoes' && itemCategory === 'shoe') return true;
+      return false;
+    });
   };
 
   const hasItems = wardrobeItems.length > 0;
