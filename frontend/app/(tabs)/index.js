@@ -153,12 +153,15 @@ export default function HomeScreen() {
           styles.content, 
           { 
             paddingTop: insets.top + 56, 
-            paddingBottom: 100  // Tab bar is now properly handled structurally
+            paddingBottom: 100,
+            // CRITICAL: Ensure scroll always bounces, even with short content
+            minHeight: '100%',
           }
         ]}
         showsVerticalScrollIndicator={false}
         alwaysBounceVertical={true}
         bounces={true}
+        overScrollMode="always"
       >
         
         {/* ─────────────────────────────────────────────────────── */}
@@ -176,30 +179,33 @@ export default function HomeScreen() {
         </View>
 
         {/* ─────────────────────────────────────────────────────── */}
-        {/* CLOSET PREVIEW - Only when items exist                  */}
+        {/* CLOSET PREVIEW - Shows when user has ANY items          */}
+        {/* This is the visual acknowledgment of their wardrobe     */}
         {/* ─────────────────────────────────────────────────────── */}
-        {!isEmpty && recentItems.length > 0 && (
+        {itemCount > 0 && (
           <TouchableOpacity 
             style={styles.wardrobeAnchor}
             onPress={navigateToCloset}
             activeOpacity={0.9}
           >
-            <View style={styles.wardrobePreview}>
-              {recentItems.map((item, index) => (
-                <View 
-                  key={item.id || `item-${index}`} 
-                  style={[
-                    styles.previewThumb,
-                    { 
-                      marginLeft: index > 0 ? -16 : 0,
-                      zIndex: 3 - index,
-                    }
-                  ]}
-                >
-                  <Image source={{ uri: item.image }} style={styles.thumbImage} />
-                </View>
-              ))}
-            </View>
+            {recentItems.length > 0 && (
+              <View style={styles.wardrobePreview}>
+                {recentItems.map((item, index) => (
+                  <View 
+                    key={item.id || `item-${index}`} 
+                    style={[
+                      styles.previewThumb,
+                      { 
+                        marginLeft: index > 0 ? -16 : 0,
+                        zIndex: 3 - index,
+                      }
+                    ]}
+                  >
+                    <Image source={{ uri: item.image }} style={styles.thumbImage} />
+                  </View>
+                ))}
+              </View>
+            )}
             <Text style={styles.wardrobeLabel}>
               {itemCount} {itemCount === 1 ? 'piece' : 'pieces'} in your closet
             </Text>
