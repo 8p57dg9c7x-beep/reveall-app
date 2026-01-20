@@ -83,12 +83,14 @@ export default function MyClosetScreen() {
   const { openHelpMeDecide } = useHelpMeDecide();
   const { favoriteOutfits } = useFavorites();
 
-  // NAVIGATION: Always reset scroll to top when tab is focused
-  // IMPORTANT: This must run every single time the tab gains focus
+  // NAVIGATION: Always reset scroll AND re-fetch items on focus
+  // CRITICAL: This ensures items added elsewhere are always visible
   useFocusEffect(
     useCallback(() => {
-      // Immediate scroll reset - no animation, no delay
+      // Reset scroll position
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+      // Re-fetch wardrobe items every time tab gains focus
+      loadWardrobe();
     }, [])
   );
 
