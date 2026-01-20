@@ -563,9 +563,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   content: {
-    paddingBottom: 100, // Tab bar is now properly handled structurally
-    minHeight: '100%',
+    paddingBottom: 100,
+    flexGrow: 1,
   },
   
   // Header - Clean and confident
