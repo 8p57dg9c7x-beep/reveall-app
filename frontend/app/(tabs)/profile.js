@@ -132,7 +132,7 @@ export default function ProfileScreen() {
           styles.content,
           { 
             paddingTop: insets.top + 32,
-            paddingBottom: insets.bottom + 180  // Extra generous tab bar clearance
+            paddingBottom: 100  // Tab bar is now properly handled structurally
           }
         ]}
         showsVerticalScrollIndicator={false}
