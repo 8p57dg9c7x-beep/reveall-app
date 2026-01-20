@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 120, // Extra space for tab bar + safe area on all devices
+    paddingBottom: 160, // Extra generous space for tab bar + safe area on all devices
     minHeight: '100%',
   },
   
