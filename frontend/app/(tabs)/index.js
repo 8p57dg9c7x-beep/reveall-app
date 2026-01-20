@@ -153,7 +153,7 @@ export default function HomeScreen() {
           styles.content, 
           { 
             paddingTop: insets.top + 56, 
-            paddingBottom: insets.bottom + 180  // Extra generous for tab bar
+            paddingBottom: 100  // Tab bar is now properly handled structurally
           }
         ]}
         showsVerticalScrollIndicator={false}
