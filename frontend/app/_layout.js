@@ -81,8 +81,8 @@ export default function RootLayout() {
               />
             </Stack>
             
-            {/* Help Me Decide Bottom Sheet */}
-            <HelpMeDecideModal ref={helpMeDecideRef} />
+            {/* DIAGNOSTIC: HelpMeDecide BottomSheet REMOVED from render tree */}
+            {/* <HelpMeDecideModal ref={helpMeDecideRef} /> */}
             
           </HelpMeDecideContext.Provider>
         </GestureHandlerRootView>
