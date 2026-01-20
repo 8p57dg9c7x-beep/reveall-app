@@ -331,8 +331,11 @@ export default function MyClosetScreen() {
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
         ref={scrollViewRef}
+        style={styles.scrollView}
         contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
+        alwaysBounceVertical={true}
+        bounces={true}
       >
         {/* Minimal Header */}
         <View style={styles.header}>
