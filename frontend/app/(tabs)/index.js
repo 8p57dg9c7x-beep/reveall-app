@@ -146,7 +146,7 @@ export default function HomeScreen() {
   // RENDER - Deterministic based on itemCount
   // ═══════════════════════════════════════════════════════════════
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView 
         ref={scrollViewRef}
         style={styles.scrollView}
