@@ -110,11 +110,12 @@ export default function SellStackScreen() {
   return (
     <LinearGradient colors={GRADIENTS.background} style={styles.container}>
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
           { 
             paddingTop: insets.top + 16,
-            paddingBottom: insets.bottom + 100 
+            paddingBottom: 100,
           }
         ]}
         showsVerticalScrollIndicator={false}
