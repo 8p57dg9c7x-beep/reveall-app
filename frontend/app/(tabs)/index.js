@@ -288,6 +288,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#0D0D0D',  // Dark background instead of gradient
   },
   scrollView: {
     flex: 1,
