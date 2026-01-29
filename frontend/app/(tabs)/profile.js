@@ -166,74 +166,10 @@ export default function ProfileScreen() {
         </View>
 
         {/* ─────────────────────────────────────────────────────── */}
-        {/* CORE SETTINGS - Primary hierarchy                       */}
+        {/* V1: SIMPLIFIED PROFILE - Core only                       */}
+        {/* Style Preferences, Body Scanner, Saved Looks, Sell Stack */}
+        {/* are hidden for V1 focus                                  */}
         {/* ─────────────────────────────────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Settings</Text>
-          
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={() => navigateTo('/style-preferences')}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.settingIcon, { backgroundColor: 'rgba(177, 76, 255, 0.15)' }]}>
-              <MaterialCommunityIcons name="palette-outline" size={22} color="#B14CFF" />
-            </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Style Preferences</Text>
-              <Text style={styles.settingSubtitle}>Your color palette</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={COLORS.textMuted} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={() => navigateTo('/bodyscanner')}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.settingIcon, { backgroundColor: 'rgba(149, 225, 211, 0.15)' }]}>
-              <MaterialCommunityIcons name="human" size={22} color="#95E1D3" />
-            </View>
-            <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Body Scanner</Text>
-              <Text style={styles.settingSubtitle}>Your measurements</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={COLORS.textMuted} />
-          </TouchableOpacity>
-        </View>
-
-        {/* ─────────────────────────────────────────────────────── */}
-        {/* COLLECTIONS - Lighter weight                            */}
-        {/* ─────────────────────────────────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Collections</Text>
-          
-          <TouchableOpacity 
-            style={styles.collectionItem}
-            onPress={() => navigateTo('/saved-outfits')}
-            activeOpacity={0.7}
-          >
-            <MaterialCommunityIcons name="heart-outline" size={20} color={COLORS.textSecondary} />
-            <Text style={styles.collectionTitle}>Saved Looks</Text>
-            <Text style={styles.collectionCount}>
-              {favoriteOutfits.length > 0 ? favoriteOutfits.length : '—'}
-            </Text>
-            <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.collectionItem}
-            onPress={() => navigateTo('/sellstack')}
-            activeOpacity={0.7}
-          >
-            <MaterialCommunityIcons name="tag-outline" size={20} color={COLORS.textSecondary} />
-            <Text style={styles.collectionTitle}>Sell Stack</Text>
-            <Text style={styles.collectionCount}>
-              {sellStackCount > 0 ? sellStackCount : '—'}
-            </Text>
-            <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
-          </TouchableOpacity>
-        </View>
 
         {/* ─────────────────────────────────────────────────────── */}
         {/* FOOTER                                                  */}
