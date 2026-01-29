@@ -224,17 +224,6 @@ export default function HomeScreen() {
               <Text style={styles.primaryText}>What should I wear?</Text>
               <Text style={styles.primarySubtext}>Based on weather and your closet</Text>
             </TouchableOpacity>
-            
-            <View style={styles.secondary}>
-              <TouchableOpacity 
-                style={styles.closetLink}
-                onPress={navigateToCloset}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.closetText}>Open closet</Text>
-                <MaterialCommunityIcons name="chevron-right" size={18} color={COLORS.textMuted} />
-              </TouchableOpacity>
-            </View>
           </>
         )}
 
