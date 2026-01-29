@@ -382,16 +382,8 @@ export default function MyClosetScreen() {
         {/* V1: Clean-Out Mode & Saved Looks HIDDEN for simplified launch */}
         {/* These features remain in code but are not visible in V1 */}
 
-        {/* Help me decide - Subtle text link */}
-        {canStyle && !editMode && (
-          <TouchableOpacity 
-            style={styles.subtleLink}
-            onPress={() => { triggerHaptic(); openHelpMeDecide(); }}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.subtleLinkText}>Need outfit inspiration?</Text>
-          </TouchableOpacity>
-        )}
+        {/* V1: "Need outfit inspiration?" link removed for cleaner UI */}
+        {/* Main action "What should I wear?" is on Home screen */}
 
         {/* Your Pieces - Single section header */}
         {hasItems && (
