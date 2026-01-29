@@ -379,51 +379,8 @@ export default function MyClosetScreen() {
           </View>
         )}
 
-        {/* Clean-Out Mode Entry - Only show when items exist */}
-        {hasItems && wardrobeItems.length >= 3 && !editMode && (
-          <TouchableOpacity 
-            style={styles.cleanOutButton}
-            onPress={() => { triggerHaptic(); router.push('/cleanout'); }}
-            activeOpacity={0.9}
-          >
-            <View style={styles.cleanOutIcon}>
-              <MaterialCommunityIcons name="hanger" size={20} color={COLORS.primary} />
-            </View>
-            <View style={styles.cleanOutContent}>
-              <Text style={styles.cleanOutTitle}>Clean-Out Mode</Text>
-              <Text style={styles.cleanOutSubtitle}>Keep, Sell, or Donate</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.textMuted} />
-          </TouchableOpacity>
-        )}
-
-        {/* Saved Looks - Surface inside My Closet */}
-        {favoriteOutfits.length > 0 && (
-          <View style={styles.savedLooksSection}>
-            <View style={styles.savedLooksHeader}>
-              <Text style={styles.savedLooksTitle}>Saved Looks</Text>
-              <TouchableOpacity onPress={() => router.push('/saved-outfits')}>
-                <Text style={styles.savedLooksSeeAll}>See all →</Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.savedLooksScroll}
-            >
-              {favoriteOutfits.slice(0, 5).map((outfit) => (
-                <TouchableOpacity 
-                  key={outfit.id} 
-                  style={styles.savedLookCard}
-                  onPress={() => router.push('/saved-outfits')}
-                  activeOpacity={0.9}
-                >
-                  <Image source={{ uri: outfit.image }} style={styles.savedLookImage} />
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
+        {/* V1: Clean-Out Mode & Saved Looks HIDDEN for simplified launch */}
+        {/* These features remain in code but are not visible in V1 */}
 
         {/* Help me decide - Subtle text link */}
         {canStyle && !editMode && (
